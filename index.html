@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MileTracker">
+<meta name="theme-color" content="#ffffff">
+<title>MileTracker - Smart Mileage Tracking</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --card-shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+  --blue: #007AFF;
+  --blue-light: #e8f2ff;
+  --green: #34C759;
+  --green-light: #e8faf0;
+  --red: #FF3B30;
+  --red-light: #fff0ef;
+  --orange: #FF9500;
+  --orange-light: #fff5e6;
+  --purple: #AF52DE;
+  --purple-light: #f5ecfc;
+  --text: #1c1c1e;
+  --text2: #8e8e93;
+  --text3: #aeaeb2;
+  --border: #e5e5ea;
+  --safe-top: env(safe-area-inset-top, 20px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ========== HEADER ========== */
+.app-header {
+  background: var(--card);
+  padding: calc(var(--safe-top) + 8px) 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-logo {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.header-logo svg { width: 20px; height: 20px; fill: white; }
+.header-title { font-size: 20px; font-weight: 700; color: var(--text); }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 18px;
+}
+
+/* ========== STATUS BAR ========== */
+.status-bar {
+  background: var(--card);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text3);
+  flex-shrink: 0;
+}
+.status-dot.active { background: var(--green); animation: pulse-dot 2s infinite; }
+.status-dot.searching { background: var(--orange); animation: blink 1.2s infinite; }
+.status-dot.error { background: var(--red); }
+.status-text { font-size: 13px; color: var(--text2); }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+
+/* ========== BOTTOM NAV ========== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 6px 0 calc(6px + var(--safe-bottom));
+  z-index: 100;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.nav-item svg { width: 24px; height: 24px; fill: var(--text3); }
+.nav-item span { font-size: 10px; font-weight: 500; color: var(--text3); }
+.nav-item.active svg { fill: var(--blue); }
+.nav-item.active span { color: var(--blue); }
+
+/* ========== PAGES ========== */
+.page { display: none; padding: 0 0 90px; }
+.page.active { display: block; }
+
+/* ========== DRIVE PAGE (MileIQ style) ========== */
+.drive-hero {
+  background: var(--card);
+  padding: 20px;
+  text-align: center;
+}
+.drive-circle {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drive-circle.monitoring {
+  background: var(--green-light);
+  border: 3px solid var(--green);
+}
+.drive-circle.recording {
+  background: var(--red-light);
+  border: 3px solid var(--red);
+  animation: record-pulse 2s infinite;
+}
+.drive-circle.inactive {
+  background: var(--bg);
+  border: 3px solid var(--text3);
+}
+@keyframes record-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,59,48,0.3); }
+  50% { box-shadow: 0 0 0 12px rgba(255,59,48,0); }
+}
+.drive-circle-inner {
+  font-size: 40px;
+  line-height: 1;
+}
+.drive-label {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.drive-sublabel {
+  font-size: 14px;
+  color: var(--text2);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+.drive-speed {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  background: var(--bg);
+  padding: 10px 24px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+.drive-speed .num {
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--text);
+}
+.drive-speed .unit {
+  font-size: 14px;
+  color: var(--text2);
+  font-weight: 500;
+}
+.drive-accuracy {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 6px;
+}
+
+/* Live tracking overlay */
+.live-panel {
+  display: none;
+  background: var(--card);
+  padding: 20px;
+  text-align: center;
+}
+.live-panel.show { display: block; }
+.live-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 10px 0;
+}
+.live-stat .val {
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--text);
+}
+.live-stat .lbl {
+  font-size: 12px;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.live-speed-inline {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--blue);
+  margin-top: 8px;
+}
+
+/* GPS Activate */
+.gps-activate-wrap {
+  display: none;
+  padding: 0 20px 16px;
+  background: var(--card);
+}
+.gps-activate-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 2px solid var(--blue);
+  background: var(--blue-light);
+  color: var(--blue);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Quick Stats Row */
+.quick-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px 16px 0;
+}
+.quick-stat {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--card-shadow);
+}
+.quick-stat .icon { font-size: 20px; margin-bottom: 6px; }
+.quick-stat .val {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.quick-stat .val.biz { color: var(--blue); }
+.quick-stat .val.pers { color: var(--purple); }
+.quick-stat .val.ded { color: var(--green); }
+.quick-stat .val.trips { color: var(--blue); }
+.quick-stat .lbl {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+/* Unclassified banner */
+.uncl-banner {
+  margin: 12px 16px 0;
+  background: var(--orange-light);
+  border: 1px solid rgba(255,149,0,0.3);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: none;
+}
+.uncl-banner.show { display: flex; align-items: center; gap: 10px; }
+.uncl-banner .icon { font-size: 22px; }
+.uncl-banner .info h4 { font-size: 14px; font-weight: 600; color: #cc7700; }
+.uncl-banner .info p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+/* Manual entry button */
+.manual-btn-wrap { padding: 12px 16px 0; }
+.manual-btn {
+  width: 100%;
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text2);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Debug log */
+.debug-log {
+  margin: 12px 16px;
+  font-size: 10px;
+  color: var(--text3);
+  text-align: left;
+  max-height: 80px;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-family: 'SF Mono', monospace;
+  box-shadow: var(--card-shadow);
+}
+
+/* ========== TRIPS PAGE (MileIQ swipe style) ========== */
+.trips-header {
+  background: var(--card);
+  padding: 16px 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+.trips-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.filter-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid transparent;
+}
+.filter-tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text3);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  position: relative;
+}
+.filter-tab.active {
+  color: var(--blue);
+  font-weight: 600;
+}
+.filter-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: var(--blue);
+  border-radius: 2px;
+}
+
+.trips-list { padding: 12px 16px; }
+.trip-date-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  padding: 12px 4px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* MileIQ-style trip card */
+.trip-card {
+  background: var(--card);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  position: relative;
+}
+.trip-card-main {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.trip-cat-indicator {
+  width: 4px;
+  align-self: stretch;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.trip-cat-indicator.business { background: var(--blue); }
+.trip-cat-indicator.personal { background: var(--purple); }
+.trip-cat-indicator.unclassified { background: var(--orange); }
+
+.trip-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.trip-icon.business { background: var(--blue-light); }
+.trip-icon.personal { background: var(--purple-light); }
+.trip-icon.unclassified { background: var(--orange-light); }
+
+.trip-details { flex: 1; min-width: 0; }
+.trip-route-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.trip-time {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+.trip-miles-col {
+  text-align: right;
+  flex-shrink: 0;
+}
+.trip-miles-val {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+.trip-miles-unit {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+/* Swipe-style classify buttons */
+.trip-classify {
+  display: flex;
+  border-top: 1px solid var(--border);
+}
+.classify-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.classify-btn:first-child { border-right: 1px solid var(--border); }
+.classify-btn:active { background: var(--bg); }
+.classify-btn.sel-biz { color: var(--blue); background: var(--blue-light); }
+.classify-btn.sel-pers { color: var(--purple); background: var(--purple-light); }
+.classify-btn .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+}
+.classify-btn.sel-biz .dot,
+.classify-btn.sel-pers .dot { background: currentColor; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text3);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
+.empty-state h3 { font-size: 18px; color: var(--text2); margin-bottom: 6px; }
+.empty-state p { font-size: 14px; }
+
+/* ========== DASHBOARD ========== */
+.dash-header {
+  background: var(--card);
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.dash-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.period-pills {
+  display: flex;
+  gap: 8px;
+}
+.period-pill {
+  padding: 6px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+.period-pill.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+}
+
+.dash-content { padding: 16px; }
+.dash-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 12px;
+  box-shadow: var(--card-shadow);
+}
+.dash-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+.summary-row {
+  display: flex;
+  text-align: center;
+}
+.summary-item { flex: 1; padding: 8px 0; }
+.summary-item:not(:last-child) { border-right: 1px solid var(--border); }
+.summary-item .val { font-size: 32px; font-weight: 700; line-height: 1; }
+.summary-item .val.biz { color: var(--blue); }
+.summary-item .val.pers { color: var(--purple); }
+.summary-item .val.total { color: var(--text); }
+.summary-item .lbl { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+.breakdown-bar {
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 10px;
+  background: var(--bg);
+}
+.breakdown-bar .seg { height: 100%; transition: width 0.5s ease; }
+.breakdown-bar .seg.biz { background: var(--blue); }
+.breakdown-bar .seg.pers { background: var(--purple); }
+.breakdown-bar .seg.uncl { background: var(--orange); }
+.breakdown-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Tax card */
+.tax-card {
+  background: linear-gradient(135deg, #e8faf0, #d4f5e4);
+  border: 1px solid rgba(52,199,89,0.2);
+}
+.tax-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b8a3e;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.tax-amount { font-size: 38px; font-weight: 700; color: #1b8a3e; }
+.tax-detail { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+/* Chart */
+.chart-area {
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 0 4px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.chart-col { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; max-width: 40px; }
+.chart-stack { display: flex; flex-direction: column-reverse; width: 80%; gap: 2px; border-radius: 4px; overflow: hidden; }
+.chart-seg { min-height: 0; transition: height 0.5s ease; }
+.chart-seg.biz { background: var(--blue); }
+.chart-seg.pers { background: var(--purple); }
+.chart-label { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+.export-btns { display: flex; gap: 10px; }
+.btn-exp {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-exp:active { transform: scale(0.97); }
+
+/* ========== NOTIFICATIONS / ALERTS ========== */
+.notif-header {
+  background: var(--card);
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.notif-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+}
+.notif-list { padding: 12px 16px; }
+.notif-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.notif-card.unread { border-left: 3px solid var(--blue); }
+.notif-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.notif-icon.trip { background: var(--green-light); }
+.notif-icon.classify { background: var(--orange-light); }
+.notif-icon.report { background: var(--blue-light); }
+.notif-icon.alert { background: var(--red-light); }
+.notif-body { flex: 1; }
+.notif-body h4 { font-size: 14px; font-weight: 600; color: var(--text); }
+.notif-body p { font-size: 13px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
+.notif-body .time { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.notif-action {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background: var(--blue);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+}
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--red);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* ========== SETTINGS ========== */
+.settings-header {
+  background: var(--card);
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.settings-header h2 { font-size: 28px; font-weight: 700; }
+.settings-back {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--blue);
+  cursor: pointer;
+  padding: 4px;
+}
+.settings-content { padding: 16px; }
+.settings-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text2);
+  padding: 12px 4px 8px;
+}
+.settings-card {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-row .info h4 { font-size: 15px; font-weight: 500; color: var(--text); }
+.setting-row .info p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.toggle {
+  width: 51px; height: 31px;
+  background: #e5e5ea;
+  border-radius: 16px;
+  position: relative;
+  cursor: pointer;
+  border: none;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.toggle.on { background: var(--green); }
+.toggle::after {
+  content: '';
+  width: 27px; height: 27px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px; left: 2px;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on::after { transform: translateX(20px); }
+.setting-input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: center;
+}
+.btn-danger {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--red-light);
+  color: var(--red);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ========== MODALS ========== */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 300;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: 16px 16px 0 0;
+  width: 100%; max-width: 500px;
+  padding: 20px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.show .modal { transform: translateY(0); }
+.modal-handle {
+  width: 36px; height: 5px;
+  background: var(--text3);
+  border-radius: 3px;
+  margin: 0 auto 16px;
+  opacity: 0.4;
+}
+.modal h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.modal-field { margin-bottom: 14px; }
+.modal-field label {
+  display: block;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.modal-field input,
+.modal-field textarea,
+.modal-field select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-appearance: none;
+}
+.modal-field textarea { resize: vertical; min-height: 60px; }
+.modal-btns { display: flex; gap: 8px; margin-top: 18px; }
+.modal-btns button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.mbtn-cancel { background: var(--bg); color: var(--text); }
+.mbtn-delete { background: var(--red-light); color: var(--red); }
+.mbtn-save { background: var(--blue); color: white; }
+
+/* ========== TOAST ========== */
+.toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 60px);
+  left: 50%; transform: translateX(-50%) translateY(-80px);
+  background: var(--text);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 26px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 400;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ========== NOTIFICATION BANNER (in-app) ========== */
+.notif-banner {
+  position: fixed;
+  top: calc(var(--safe-top) + 50px);
+  left: 12px; right: 12px;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(-200px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.notif-banner.show { transform: translateY(0); }
+.notif-banner .n-icon { font-size: 28px; }
+.notif-banner .n-body { flex: 1; }
+.notif-banner .n-body h5 { font-size: 13px; font-weight: 600; color: var(--text); }
+.notif-banner .n-body p { font-size: 12px; color: var(--text2); }
+.notif-banner .n-close {
+  background: none; border: none; color: var(--text3);
+  font-size: 18px; cursor: pointer; padding: 4px;
+}
+
+::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="notif-banner" id="notif-banner">
+  <div class="n-icon" id="nb-icon"></div>
+  <div class="n-body">
+    <h5 id="nb-title"></h5>
+    <p id="nb-msg"></p>
+  </div>
+  <button class="n-close" onclick="hideNotifBanner()">&times;</button>
+</div>
+
+<!-- ====== HEADER ====== -->
+<div class="app-header">
+  <div class="header-left">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+    </div>
+    <div class="header-title">MileTracker</div>
+  </div>
+  <div class="header-right">
+    <button class="header-btn" onclick="openSettings()" title="Settings">&#9881;</button>
+  </div>
+</div>
+
+<!-- ====== STATUS BAR ====== -->
+<div class="status-bar" id="status-bar">
+  <span class="status-dot" id="gps-dot"></span>
+  <span class="status-text" id="gps-text">Starting GPS...</span>
+</div>
+
+<!-- ====== DRIVE PAGE ====== -->
+<div class="page active" id="page-drive">
+  <div class="drive-hero" id="drive-hero">
+    <div class="drive-circle monitoring" id="drive-circle">
+      <div class="drive-circle-inner" id="drive-icon">&#x1F7E2;</div>
+    </div>
+    <div class="drive-label" id="drive-label">Always On</div>
+    <div class="drive-sublabel" id="drive-sublabel">GPS monitoring active. Trips auto-detect when you drive.</div>
+    <div class="drive-speed" id="idle-speed-wrap">
+      <span class="num" id="idle-speed">0</span>
+      <span class="unit">mph</span>
+    </div>
+    <div class="drive-accuracy" id="idle-accuracy">GPS accuracy: --</div>
+  </div>
+
+  <!-- Live tracking panel (hidden until trip starts) -->
+  <div class="live-panel" id="live-panel">
+    <div class="live-stats">
+      <div class="live-stat">
+        <div class="val" id="live-miles">0.0</div>
+        <div class="lbl">Miles</div>
+      </div>
+      <div class="live-stat">
+        <div class="val" id="live-duration">0m</div>
+        <div class="lbl">Duration</div>
+      </div>
+    </div>
+    <div class="live-speed-inline" id="live-speed">0 mph</div>
+  </div>
+
+  <div class="gps-activate-wrap" id="gps-activate">
+    <button class="gps-activate-btn" onclick="activateGPS()">Tap to Activate GPS</button>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center">Some browsers need a tap to start location tracking</div>
+  </div>
+
+  <div class="quick-stats">
+    <div class="quick-stat">
+      <div class="icon">&#128188;</div>
+      <div class="val biz" id="s-biz">0 mi</div>
+      <div class="lbl">Business Miles</div>
+    </div>
+    <div class="quick-stat">
+      <div class="icon">&#128100;</div>
+      <div class="val pers" id="s-pers">0 mi</div>
+      <div class="lbl">Personal Miles</div>
+    </div>
+    <div class="quick-stat">
+      <div class="icon">$</div>
+      <div class="val ded" id="s-ded">$0.00</div>
+      <div class="lbl">Tax Deduction</div>
+    </div>
+    <div class="quick-stat">
+      <div class="icon">&#128663;</div>
+      <div class="val trips" id="s-trips">0</div>
+      <div class="lbl">Total Trips</div>
+    </div>
+  </div>
+
+  <div class="uncl-banner" id="uncl-banner">
+    <div class="icon">&#9888;&#65039;</div>
+    <div class="info">
+      <h4>Unclassified Trips</h4>
+      <p id="uncl-text">Tap to classify your trips</p>
+    </div>
+  </div>
+
+  <div class="manual-btn-wrap">
+    <button class="manual-btn" onclick="openManualTrip()">+ Add Trip Manually</button>
+  </div>
+
+  <div class="debug-log" id="gps-debug"></div>
+</div>
+
+<!-- ====== TRIPS PAGE ====== -->
+<div class="page" id="page-trips">
+  <div class="trips-header">
+    <h2>Your Trips</h2>
+    <div class="filter-row">
+      <button class="filter-tab active" onclick="filterTrips('all', this)">All</button>
+      <button class="filter-tab" onclick="filterTrips('business', this)">Business</button>
+      <button class="filter-tab" onclick="filterTrips('personal', this)">Personal</button>
+      <button class="filter-tab" onclick="filterTrips('unclassified', this)">Unclassified</button>
+    </div>
+  </div>
+  <div class="trips-list" id="trips-list"></div>
+  <div class="empty-state" id="trips-empty">
+    <div class="icon">&#128663;</div>
+    <h3>No trips yet</h3>
+    <p>Start driving to see your trips here</p>
+  </div>
+</div>
+
+<!-- ====== DASHBOARD PAGE ====== -->
+<div class="page" id="page-dashboard">
+  <div class="dash-header">
+    <h2>Dashboard</h2>
+    <div class="period-pills">
+      <button class="period-pill" onclick="setDashPeriod('week', this)">Week</button>
+      <button class="period-pill active" onclick="setDashPeriod('month', this)">Month</button>
+      <button class="period-pill" onclick="setDashPeriod('year', this)">Year</button>
+    </div>
+  </div>
+  <div class="dash-content">
+    <div class="dash-card">
+      <div class="dash-card-title">Mileage Summary</div>
+      <div class="summary-row">
+        <div class="summary-item">
+          <div class="val biz" id="d-biz">0</div>
+          <div class="lbl">Business</div>
+        </div>
+        <div class="summary-item">
+          <div class="val pers" id="d-pers">0</div>
+          <div class="lbl">Personal</div>
+        </div>
+        <div class="summary-item">
+          <div class="val total" id="d-total">0</div>
+          <div class="lbl">Total mi</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-title">Breakdown</div>
+      <div class="breakdown-bar" id="breakdown-bar"></div>
+      <div class="breakdown-legend" id="breakdown-legend"></div>
+    </div>
+
+    <div class="dash-card tax-card">
+      <h4>&#x1F4B0; Estimated Tax Deduction</h4>
+      <div class="tax-amount" id="d-tax">$0.00</div>
+      <div class="tax-detail" id="d-tax-detail">Based on 0 business miles at $0.70/mile (2026 IRS rate)</div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-title" id="chart-title">Last 7 Days</div>
+      <div class="chart-area" id="chart-area"></div>
+      <div style="display:flex;justify-content:space-around;margin-top:4px" id="chart-xlabels"></div>
+      <div style="display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:12px;color:var(--text2)">
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:4px"></span>Business</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--purple);margin-right:4px"></span>Personal</span>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-title">Export Report</div>
+      <div class="export-btns">
+        <button class="btn-exp" onclick="exportCSV()">&#128196; CSV</button>
+        <button class="btn-exp" onclick="exportPDF()">&#128462; PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== NOTIFICATIONS PAGE ====== -->
+<div class="page" id="page-notifs">
+  <div class="notif-header">
+    <h2>Notifications</h2>
+  </div>
+  <div class="notif-list" id="notif-list"></div>
+</div>
+
+<!-- ====== SETTINGS PAGE ====== -->
+<div class="page" id="page-settings">
+  <div class="settings-header">
+    <button class="settings-back" onclick="goBack()">&larr;</button>
+    <h2>Settings</h2>
+  </div>
+  <div class="settings-content">
+    <div class="settings-section-title">Tracking</div>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="info">
+          <h4>Auto-detect trips</h4>
+          <p>Start recording when driving detected</p>
+        </div>
+        <button class="toggle on" id="tog-auto" onclick="toggleSetting('autoDetect')"></button>
+      </div>
+      <div class="setting-row">
+        <div class="info">
+          <h4>Default category</h4>
+          <p>New trips default to this</p>
+        </div>
+        <select class="setting-input" id="set-defcat" onchange="updateSetting('defaultCat')" style="width:120px">
+          <option value="unclassified">Unclassified</option>
+          <option value="business">Business</option>
+          <option value="personal">Personal</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div class="info">
+          <h4>Speed threshold</h4>
+          <p>Min mph to count as driving</p>
+        </div>
+        <input type="number" class="setting-input" id="set-speed" value="5" min="1" max="25" style="width:60px" onchange="updateSetting('speed')">
+      </div>
+    </div>
+
+    <div class="settings-section-title">Notifications</div>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="info">
+          <h4>Trip alerts</h4>
+          <p>Notify when trips are saved</p>
+        </div>
+        <button class="toggle on" id="tog-tripalert" onclick="toggleSetting('tripAlerts')"></button>
+      </div>
+      <div class="setting-row">
+        <div class="info">
+          <h4>Classification reminders</h4>
+          <p>Remind to classify trips</p>
+        </div>
+        <button class="toggle on" id="tog-classify" onclick="toggleSetting('classifyReminders')"></button>
+      </div>
+      <div class="setting-row">
+        <div class="info">
+          <h4>Weekly summary</h4>
+          <p>Show weekly mileage summary</p>
+        </div>
+        <button class="toggle on" id="tog-weekly" onclick="toggleSetting('weeklySummary')"></button>
+      </div>
+    </div>
+
+    <div class="settings-section-title">IRS Rate</div>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="info">
+          <h4>Business rate per mile</h4>
+          <p>2026 IRS standard mileage rate</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span>$</span>
+          <input type="number" class="setting-input" id="set-irs" value="0.70" step="0.01" min="0" style="width:70px" onchange="updateSetting('irs')">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section-title">Data</div>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="info">
+          <h4>Total recorded</h4>
+          <p id="set-count">0 trips</p>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="info">
+          <h4>Clear all data</h4>
+          <p>Remove all trip records</p>
+        </div>
+        <button class="btn-danger" onclick="clearAllData()">Clear</button>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:var(--text3);font-size:12px;padding:20px">
+      MileTracker v3.0<br>GPS-Powered Mileage Tracking
+    </div>
+  </div>
+</div>
+
+<!-- ====== BOTTOM NAV ====== -->
+<div class="bottom-nav">
+  <button class="nav-item active" onclick="switchPage('drive', this)" id="nav-drive">
+    <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+    <span>Drive</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('trips', this)" id="nav-trips">
+    <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+    <span>Trips</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('dashboard', this)" id="nav-dashboard">
+    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+    <span>Dashboard</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('notifs', this)" id="nav-notifs" style="position:relative">
+    <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+    <span>Alerts</span>
+    <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+  </button>
+</div>
+
+<!-- ====== MANUAL TRIP MODAL ====== -->
+<div class="modal-overlay" id="manual-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Add Trip Manually</h3>
+    <div class="modal-field">
+      <label>From</label>
+      <input type="text" id="man-from" placeholder="e.g. Home, Office">
+    </div>
+    <div class="modal-field">
+      <label>To</label>
+      <input type="text" id="man-to" placeholder="e.g. Client Site, Airport">
+    </div>
+    <div class="modal-field">
+      <label>Miles</label>
+      <input type="number" id="man-miles" step="0.1" min="0" placeholder="e.g. 12.5">
+    </div>
+    <div class="modal-field">
+      <label>Category</label>
+      <select id="man-cat">
+        <option value="business">Business</option>
+        <option value="personal">Personal</option>
+        <option value="unclassified">Unclassified</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Date</label>
+      <input type="date" id="man-date">
+    </div>
+    <div class="modal-field">
+      <label>Notes (optional)</label>
+      <textarea id="man-notes" placeholder="Meeting with client..."></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" onclick="closeManualModal()">Cancel</button>
+      <button class="mbtn-save" onclick="saveManualTrip()">Save Trip</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== EDIT TRIP MODAL ====== -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Edit Trip</h3>
+    <div class="modal-field">
+      <label>Trip Name</label>
+      <input type="text" id="ed-name" placeholder="e.g. Home to Downtown Office">
+    </div>
+    <div class="modal-field">
+      <label>Category</label>
+      <select id="ed-cat">
+        <option value="business">Business</option>
+        <option value="personal">Personal</option>
+        <option value="unclassified">Unclassified</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Miles</label>
+      <input type="number" id="ed-miles" step="0.1" min="0">
+    </div>
+    <div class="modal-field">
+      <label>Notes</label>
+      <textarea id="ed-notes" placeholder="Optional notes..."></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="mbtn-delete" onclick="deleteTrip()">Delete</button>
+      <button class="mbtn-save" onclick="saveEditTrip()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== STATE =====================
+const IRS_RATE_2026 = 0.70;
+
+let app = {
+  trips: [],
+  tracking: false,
+  notifications: [],
+  settings: {
+    autoDetect: true,
+    defaultCat: 'unclassified',
+    speedThreshold: 5,
+    irsRate: IRS_RATE_2026,
+    tripAlerts: true,
+    classifyReminders: true,
+    weeklySummary: true
+  },
+  dashPeriod: 'month',
+  tripFilter: 'all',
+  editId: null,
+  lastPage: 'drive'
+};
+
+// GPS state
+let watchId = null, positions = [], trackStart = null, trackTimer = null;
+
+// ===================== STORAGE =====================
+function save() {
+  try { localStorage.setItem('mt3', JSON.stringify({ trips: app.trips, settings: app.settings, notifications: app.notifications })); } catch(e) {}
+}
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem('mt3'));
+    if (d) {
+      app.trips = d.trips || [];
+      app.settings = { ...app.settings, ...d.settings };
+      app.notifications = d.notifications || [];
+    }
+  } catch(e) {}
+}
+
+// ===================== NAV =====================
+function switchPage(p, btn) {
+  if (p !== 'settings') app.lastPage = p;
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    const navBtn = document.getElementById('nav-' + p);
+    if (navBtn) navBtn.classList.add('active');
+  }
+  if (p === 'trips') renderTrips();
+  if (p === 'dashboard') renderDashboard();
+  if (p === 'settings') renderSettings();
+  if (p === 'notifs') { renderNotifs(); updateNotifBadge(); }
+}
+
+function openSettings() {
+  switchPage('settings');
+}
+function goBack() {
+  switchPage(app.lastPage || 'drive');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===================== NOTIFICATIONS =====================
+function addNotification(type, title, message, action) {
+  const notif = {
+    id: Date.now().toString(),
+    type: type,
+    title: title,
+    message: message,
+    action: action || null,
+    time: new Date().toISOString(),
+    read: false
+  };
+  app.notifications.unshift(notif);
+  if (app.notifications.length > 50) app.notifications = app.notifications.slice(0, 50);
+  save();
+  updateNotifBadge();
+
+  // Show in-app banner
+  showNotifBanner(type, title, message);
+}
+
+function showNotifBanner(type, title, message) {
+  const icons = { trip: '&#x1F697;', classify: '&#9888;&#65039;', report: '&#128202;', alert: '&#128276;' };
+  document.getElementById('nb-icon').innerHTML = icons[type] || '&#128276;';
+  document.getElementById('nb-title').textContent = title;
+  document.getElementById('nb-msg').textContent = message;
+  const banner = document.getElementById('notif-banner');
+  banner.classList.add('show');
+  setTimeout(() => banner.classList.remove('show'), 5000);
+}
+function hideNotifBanner() {
+  document.getElementById('notif-banner').classList.remove('show');
+}
+
+function updateNotifBadge() {
+  const unread = app.notifications.filter(n => !n.read).length;
+  const badge = document.getElementById('notif-badge');
+  if (unread > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = unread > 9 ? '9+' : unread;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderNotifs() {
+  // Mark all as read when viewing
+  app.notifications.forEach(n => n.read = true);
+  save();
+
+  const list = document.getElementById('notif-list');
+  if (app.notifications.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128276;</div><h3>No notifications</h3><p>Trip alerts and reminders will appear here</p></div>';
+    return;
+  }
+
+  list.innerHTML = app.notifications.map(n => {
+    const icons = { trip: '&#x1F697;', classify: '&#9888;&#65039;', report: '&#128202;', alert: '&#128276;' };
+    const ago = timeAgo(new Date(n.time));
+    let actionBtn = '';
+    if (n.action === 'classify') {
+      actionBtn = `<button class="notif-action" onclick="switchPage('trips')">Classify Now</button>`;
+    } else if (n.action === 'dashboard') {
+      actionBtn = `<button class="notif-action" onclick="switchPage('dashboard')">View Dashboard</button>`;
+    }
+    return `<div class="notif-card">
+      <div class="notif-icon ${n.type}">${icons[n.type] || '&#128276;'}</div>
+      <div class="notif-body">
+        <h4>${esc(n.title)}</h4>
+        <p>${esc(n.message)}</p>
+        <div class="time">${ago}</div>
+        ${actionBtn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function timeAgo(date) {
+  const s = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (s < 60) return 'Just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+// Classification reminder check
+function checkClassifyReminder() {
+  if (!app.settings.classifyReminders) return;
+  const uncl = app.trips.filter(t => t.category === 'unclassified').length;
+  if (uncl >= 3) {
+    addNotification('classify', 'Classify Your Trips', `You have ${uncl} unclassified trips. Classify them for accurate tax deductions.`, 'classify');
+  }
+}
+
+// Weekly summary
+function checkWeeklySummary() {
+  if (!app.settings.weeklySummary) return;
+  const now = new Date();
+  if (now.getDay() !== 1) return; // Only on Mondays
+  const lastWeek = new Date(now); lastWeek.setDate(lastWeek.getDate() - 7);
+  const weekTrips = app.trips.filter(t => new Date(t.date) >= lastWeek);
+  const totalMiles = weekTrips.reduce((s,t) => s + t.miles, 0);
+  const bizMiles = weekTrips.filter(t => t.category === 'business').reduce((s,t) => s + t.miles, 0);
+  if (weekTrips.length > 0) {
+    addNotification('report', 'Weekly Summary', `Last week: ${weekTrips.length} trips, ${totalMiles.toFixed(1)} total miles, $${(bizMiles * app.settings.irsRate).toFixed(2)} in deductions.`, 'dashboard');
+  }
+}
+
+// ===================== GPS TRACKING =====================
+function onPos(p) {
+  const { latitude, longitude, speed, accuracy } = p.coords;
+  if (accuracy < 150) {
+    positions.push({ lat: latitude, lng: longitude, time: Date.now(), speed, accuracy });
+  }
+  const dist = calcDistance();
+  document.getElementById('live-miles').textContent = dist < 1 ? dist.toFixed(2) : dist.toFixed(1);
+}
+
+function calcDistance() {
+  if (positions.length < 2) return 0;
+  let t = 0;
+  for (let i = 1; i < positions.length; i++)
+    t += haversine(positions[i-1].lat, positions[i-1].lng, positions[i].lat, positions[i].lng);
+  return t;
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 3959, dLat = rad(lat2-lat1), dLon = rad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function rad(d) { return d * Math.PI / 180; }
+
+function updateDuration() {
+  if (!trackStart) return;
+  const e = Date.now() - trackStart;
+  const h = Math.floor(e/3600000), m = Math.floor((e%3600000)/60000);
+  document.getElementById('live-duration').textContent = h > 0 ? `${h}h${m}m` : `${m}m`;
+}
+
+function reverseGeocode(lat, lng, cb) {
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`)
+    .then(r => r.json())
+    .then(d => {
+      const a = d.address || {};
+      cb(a.building || a.amenity || a.shop || a.road || a.neighbourhood || a.suburb || a.city || 'Unknown');
+    })
+    .catch(() => {});
+}
+
+// ===================== HOME STATS =====================
+function updateHomeStats() {
+  const now = new Date();
+  const monthTrips = app.trips.filter(t => {
+    const d = new Date(t.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  const biz = monthTrips.filter(t => t.category === 'business').reduce((s,t) => s + t.miles, 0);
+  const pers = monthTrips.filter(t => t.category === 'personal').reduce((s,t) => s + t.miles, 0);
+  const ded = biz * app.settings.irsRate;
+
+  document.getElementById('s-biz').textContent = biz.toFixed(1) + ' mi';
+  document.getElementById('s-pers').textContent = pers.toFixed(1) + ' mi';
+  document.getElementById('s-ded').textContent = '$' + ded.toFixed(2);
+  document.getElementById('s-trips').textContent = monthTrips.length;
+
+  const uncl = app.trips.filter(t => t.category === 'unclassified').length;
+  const banner = document.getElementById('uncl-banner');
+  if (uncl > 0) {
+    banner.classList.add('show');
+    document.getElementById('uncl-text').textContent = `${uncl} trip${uncl !== 1 ? 's' : ''} to classify. Tap Trips to label them.`;
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+// ===================== TRIPS =====================
+function filterTrips(f, btn) {
+  app.tripFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTrips();
+}
+
+function renderTrips() {
+  let trips = [...app.trips];
+  if (app.tripFilter !== 'all') trips = trips.filter(t => t.category === app.tripFilter);
+
+  const list = document.getElementById('trips-list');
+  const empty = document.getElementById('trips-empty');
+
+  if (trips.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Group by date
+  const groups = {};
+  trips.forEach(t => {
+    const d = new Date(t.date);
+    const key = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(t);
+  });
+
+  let html = '';
+  for (const [date, dayTrips] of Object.entries(groups)) {
+    html += `<div class="trip-date-header">${date}</div>`;
+    dayTrips.forEach(t => {
+      const d = new Date(t.date);
+      const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const dur = t.duration ? Math.round(t.duration / 60000) : 0;
+      const startN = t.startName || 'Start';
+      const endN = t.endName || 'Destination';
+      const routeName = t.name || `${startN} \u2192 ${endN}`;
+
+      const bizSel = t.category === 'business' ? ' sel-biz' : '';
+      const persSel = t.category === 'personal' ? ' sel-pers' : '';
+      const catIcon = t.category === 'business' ? '&#128188;' : t.category === 'personal' ? '&#128100;' : '&#10067;';
+
+      html += `<div class="trip-card" onclick="editTrip('${t.id}')">
+        <div class="trip-card-main">
+          <div class="trip-cat-indicator ${t.category}"></div>
+          <div class="trip-icon ${t.category}">${catIcon}</div>
+          <div class="trip-details">
+            <div class="trip-route-name">${esc(routeName)}</div>
+            <div class="trip-time">${timeStr} &middot; ${dur}min</div>
+          </div>
+          <div class="trip-miles-col">
+            <div class="trip-miles-val">${t.miles.toFixed(1)}</div>
+            <div class="trip-miles-unit">miles</div>
+          </div>
+        </div>
+        <div class="trip-classify" onclick="event.stopPropagation()">
+          <button class="classify-btn${bizSel}" onclick="setCat('${t.id}','business')"><span class="dot"></span> Business</button>
+          <button class="classify-btn${persSel}" onclick="setCat('${t.id}','personal')"><span class="dot"></span> Personal</button>
+        </div>
+      </div>`;
+    });
+  }
+  list.innerHTML = html;
+}
+
+function setCat(id, cat) {
+  const t = app.trips.find(x => x.id === id);
+  if (t) { t.category = cat; save(); renderTrips(); updateHomeStats(); }
+}
+
+function editTrip(id) {
+  const t = app.trips.find(x => x.id === id);
+  if (!t) return;
+  app.editId = id;
+  document.getElementById('ed-name').value = t.name || `${t.startName || 'Start'} \u2192 ${t.endName || 'Destination'}`;
+  document.getElementById('ed-cat').value = t.category;
+  document.getElementById('ed-miles').value = t.miles;
+  document.getElementById('ed-notes').value = t.notes || '';
+  document.getElementById('edit-modal').classList.add('show');
+}
+
+function closeModal() { document.getElementById('edit-modal').classList.remove('show'); }
+
+function openManualTrip() {
+  document.getElementById('man-from').value = '';
+  document.getElementById('man-to').value = '';
+  document.getElementById('man-miles').value = '';
+  document.getElementById('man-cat').value = app.settings.defaultCat || 'business';
+  document.getElementById('man-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('man-notes').value = '';
+  document.getElementById('manual-modal').classList.add('show');
+}
+function closeManualModal() { document.getElementById('manual-modal').classList.remove('show'); }
+function saveManualTrip() {
+  const miles = parseFloat(document.getElementById('man-miles').value);
+  if (!miles || miles <= 0) { showToast('Please enter miles'); return; }
+  const from = document.getElementById('man-from').value || 'Start';
+  const to = document.getElementById('man-to').value || 'Destination';
+  const dateVal = document.getElementById('man-date').value;
+  const d = dateVal ? new Date(dateVal + 'T12:00:00') : new Date();
+  const dur = Math.round(miles * 2.5 * 60000);
+
+  const trip = {
+    id: Date.now().toString(),
+    category: document.getElementById('man-cat').value,
+    miles: miles,
+    date: d.toISOString(),
+    duration: dur,
+    startTime: d.toISOString(),
+    endTime: new Date(d.getTime() + dur).toISOString(),
+    startName: from,
+    endName: to,
+    name: '',
+    notes: document.getElementById('man-notes').value,
+    startCoord: null,
+    endCoord: null
+  };
+  app.trips.unshift(trip);
+  save();
+  closeManualModal();
+  updateHomeStats();
+  showToast(`Trip added: ${miles} miles`);
+
+  if (app.settings.tripAlerts) {
+    addNotification('trip', 'Trip Added', `${from} \u2192 ${to}: ${miles} miles`, null);
+  }
+}
+
+function saveEditTrip() {
+  const t = app.trips.find(x => x.id === app.editId);
+  if (!t) return;
+  t.name = document.getElementById('ed-name').value;
+  t.category = document.getElementById('ed-cat').value;
+  t.miles = parseFloat(document.getElementById('ed-miles').value) || t.miles;
+  t.notes = document.getElementById('ed-notes').value;
+  save(); closeModal(); renderTrips(); updateHomeStats();
+  showToast('Trip updated');
+}
+
+function deleteTrip() {
+  if (!confirm('Delete this trip?')) return;
+  app.trips = app.trips.filter(x => x.id !== app.editId);
+  save(); closeModal(); renderTrips(); updateHomeStats();
+  showToast('Trip deleted');
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ===================== DASHBOARD =====================
+function setDashPeriod(p, btn) {
+  app.dashPeriod = p;
+  document.querySelectorAll('.period-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderDashboard();
+}
+
+function renderDashboard() {
+  const now = new Date();
+  let filtered = [];
+
+  if (app.dashPeriod === 'week') {
+    const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+    filtered = app.trips.filter(t => new Date(t.date) >= weekAgo);
+    document.getElementById('chart-title').textContent = 'Last 7 Days';
+  } else if (app.dashPeriod === 'month') {
+    filtered = app.trips.filter(t => {
+      const d = new Date(t.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    document.getElementById('chart-title').textContent = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } else {
+    filtered = app.trips.filter(t => new Date(t.date).getFullYear() === now.getFullYear());
+    document.getElementById('chart-title').textContent = 'Year ' + now.getFullYear();
+  }
+
+  const biz = filtered.filter(t => t.category === 'business').reduce((s,t) => s + t.miles, 0);
+  const pers = filtered.filter(t => t.category === 'personal').reduce((s,t) => s + t.miles, 0);
+  const uncl = filtered.filter(t => t.category === 'unclassified').reduce((s,t) => s + t.miles, 0);
+  const total = biz + pers + uncl;
+
+  document.getElementById('d-biz').textContent = Math.round(biz);
+  document.getElementById('d-pers').textContent = Math.round(pers);
+  document.getElementById('d-total').textContent = Math.round(total);
+
+  const bar = document.getElementById('breakdown-bar');
+  const legend = document.getElementById('breakdown-legend');
+  if (total > 0) {
+    const bp = ((biz/total)*100).toFixed(0), pp = ((pers/total)*100).toFixed(0), up = ((uncl/total)*100).toFixed(0);
+    bar.innerHTML = `<div class="seg biz" style="width:${bp}%"></div><div class="seg pers" style="width:${pp}%"></div><div class="seg uncl" style="width:${up}%"></div>`;
+    let leg = `<div class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Business ${bp}%</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span>Personal ${pp}%</div>`;
+    if (uncl > 0) leg += `<div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Other ${up}%</div>`;
+    legend.innerHTML = leg;
+  } else {
+    bar.innerHTML = '<div class="seg" style="width:100%;background:var(--bg)"></div>';
+    legend.innerHTML = '<div class="legend-item" style="color:var(--text3)">No data yet</div>';
+  }
+
+  const ded = biz * app.settings.irsRate;
+  document.getElementById('d-tax').textContent = '$' + ded.toFixed(2);
+  document.getElementById('d-tax-detail').textContent = `Based on ${biz.toFixed(1)} business miles at $${app.settings.irsRate.toFixed(2)}/mile (2026 IRS rate)`;
+
+  renderChart(filtered);
+}
+
+function renderChart(trips) {
+  const chart = document.getElementById('chart-area');
+  const labels = document.getElementById('chart-xlabels');
+  let buckets = [];
+
+  if (app.dashPeriod === 'week') {
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const dayTrips = trips.filter(t => new Date(t.date).toDateString() === d.toDateString());
+      buckets.push({
+        label: days[d.getDay()],
+        biz: dayTrips.filter(t => t.category === 'business').reduce((s,t) => s + t.miles, 0),
+        pers: dayTrips.filter(t => t.category !== 'business').reduce((s,t) => s + t.miles, 0)
+      });
+    }
+  } else if (app.dashPeriod === 'month') {
+    const now = new Date();
+    const weeks = Math.ceil(new Date(now.getFullYear(), now.getMonth()+1, 0).getDate() / 7);
+    for (let w = 0; w < weeks; w++) {
+      const wTrips = trips.filter(t => Math.floor((new Date(t.date).getDate()-1)/7) === w);
+      buckets.push({
+        label: 'W' + (w+1),
+        biz: wTrips.filter(t => t.category === 'business').reduce((s,t) => s + t.miles, 0),
+        pers: wTrips.filter(t => t.category !== 'business').reduce((s,t) => s + t.miles, 0)
+      });
+    }
+  } else {
+    const months = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+    for (let m = 0; m < 12; m++) {
+      const mTrips = trips.filter(t => new Date(t.date).getMonth() === m);
+      buckets.push({
+        label: months[m],
+        biz: mTrips.filter(t => t.category === 'business').reduce((s,t) => s + t.miles, 0),
+        pers: mTrips.filter(t => t.category !== 'business').reduce((s,t) => s + t.miles, 0)
+      });
+    }
+  }
+
+  const maxH = 130;
+  const maxVal = Math.max(...buckets.map(b => b.biz + b.pers), 1);
+
+  chart.innerHTML = buckets.map(b => {
+    const bh = (b.biz / maxVal) * maxH;
+    const ph = (b.pers / maxVal) * maxH;
+    return `<div class="chart-col"><div class="chart-stack">
+      <div class="chart-seg pers" style="height:${ph}px"></div>
+      <div class="chart-seg biz" style="height:${bh}px"></div>
+    </div></div>`;
+  }).join('');
+
+  labels.innerHTML = buckets.map(b => `<span style="flex:1;text-align:center;font-size:10px;color:var(--text3)">${b.label}</span>`).join('');
+}
+
+// ===================== EXPORT =====================
+function exportCSV() {
+  if (app.trips.length === 0) { showToast('No trips to export'); return; }
+  const h = 'Date,Start Time,End Time,Category,Miles,Duration (min),Route,Notes';
+  const rows = app.trips.map(t => {
+    const d = new Date(t.date);
+    return [
+      d.toLocaleDateString(),
+      t.startTime ? new Date(t.startTime).toLocaleTimeString() : '',
+      t.endTime ? new Date(t.endTime).toLocaleTimeString() : '',
+      t.category,
+      t.miles.toFixed(2),
+      t.duration ? Math.round(t.duration/60000) : '',
+      `"${(t.name || `${t.startName||'Start'} to ${t.endName||'End'}`).replace(/"/g,'""')}"`,
+      `"${(t.notes||'').replace(/"/g,'""')}"`
+    ].join(',');
+  });
+  dl('MileTracker_Export.csv', h+'\n'+rows.join('\n'), 'text/csv');
+  showToast('CSV exported');
+}
+
+function exportPDF() {
+  if (app.trips.length === 0) { showToast('No trips to export'); return; }
+  const biz = app.trips.filter(t => t.category==='business').reduce((s,t)=>s+t.miles,0);
+  const pers = app.trips.filter(t => t.category==='personal').reduce((s,t)=>s+t.miles,0);
+  const ded = biz * app.settings.irsRate;
+
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MileTracker Report</title>
+<style>body{font-family:-apple-system,Helvetica,sans-serif;padding:40px;color:#1a1a2e;max-width:800px;margin:0 auto}
+h1{color:#007AFF;border-bottom:3px solid #007AFF;padding-bottom:10px;font-size:28px}
+.sum{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin:24px 0;padding:24px;background:#f0f4ff;border-radius:12px}
+.si{text-align:center}.sv{font-size:32px;font-weight:800}.sl{font-size:12px;color:#666;text-transform:uppercase;margin-top:4px}
+.blue{color:#007AFF}.purp{color:#AF52DE}.green{color:#34C759}
+table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#007AFF;color:white;padding:10px;text-align:left;font-size:12px}
+td{padding:8px 10px;border-bottom:1px solid #eee;font-size:13px}tr:nth-child(even){background:#f8f9ff}
+.ft{text-align:center;color:#999;font-size:11px;margin-top:30px}</style></head><body>
+<h1>MileTracker Report</h1>
+<p>Generated: ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</p>
+<div class="sum">
+<div class="si"><div class="sv blue">${biz.toFixed(1)}</div><div class="sl">Business Miles</div></div>
+<div class="si"><div class="sv purp">${pers.toFixed(1)}</div><div class="sl">Personal Miles</div></div>
+<div class="si"><div class="sv green">$${ded.toFixed(2)}</div><div class="sl">Tax Deduction</div></div>
+</div>
+<p><strong>IRS Rate:</strong> $${app.settings.irsRate.toFixed(2)}/mile &bull; <strong>Total Trips:</strong> ${app.trips.length}</p>
+<table><thead><tr><th>Date</th><th>Category</th><th>Route</th><th>Miles</th><th>Duration</th><th>Notes</th></tr></thead><tbody>`;
+
+  app.trips.forEach(t => {
+    const d = new Date(t.date);
+    const route = t.name || `${t.startName||'Start'} \u2192 ${t.endName||'End'}`;
+    const dur = t.duration ? Math.round(t.duration/60000) + 'm' : '--';
+    html += `<tr><td>${d.toLocaleDateString()}</td><td>${t.category}</td><td>${esc(route)}</td><td>${t.miles.toFixed(2)}</td><td>${dur}</td><td>${esc(t.notes||'')}</td></tr>`;
+  });
+
+  html += '</tbody></table><div class="ft">MileTracker &bull; GPS-Powered Mileage Tracking</div></body></html>';
+  const w = window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+  showToast('Print dialog opened');
+}
+
+function dl(name, content, type) {
+  const b = new Blob([content], { type }); const u = URL.createObjectURL(b);
+  const a = document.createElement('a'); a.href = u; a.download = name; a.click(); URL.revokeObjectURL(u);
+}
+
+// ===================== SETTINGS =====================
+function renderSettings() {
+  document.getElementById('tog-auto').className = 'toggle' + (app.settings.autoDetect ? ' on' : '');
+  document.getElementById('tog-tripalert').className = 'toggle' + (app.settings.tripAlerts ? ' on' : '');
+  document.getElementById('tog-classify').className = 'toggle' + (app.settings.classifyReminders ? ' on' : '');
+  document.getElementById('tog-weekly').className = 'toggle' + (app.settings.weeklySummary ? ' on' : '');
+  document.getElementById('set-defcat').value = app.settings.defaultCat;
+  document.getElementById('set-speed').value = app.settings.speedThreshold;
+  document.getElementById('set-irs').value = app.settings.irsRate.toFixed(2);
+  document.getElementById('set-count').textContent = app.trips.length + ' trips';
+}
+
+function toggleSetting(key) {
+  app.settings[key] = !app.settings[key];
+  save(); renderSettings();
+}
+
+function updateSetting(type) {
+  if (type === 'defaultCat') app.settings.defaultCat = document.getElementById('set-defcat').value;
+  if (type === 'speed') app.settings.speedThreshold = parseInt(document.getElementById('set-speed').value) || 5;
+  if (type === 'irs') app.settings.irsRate = parseFloat(document.getElementById('set-irs').value) || IRS_RATE_2026;
+  save();
+}
+
+function clearAllData() {
+  if (!confirm('Delete ALL trip data? This cannot be undone.')) return;
+  app.trips = [];
+  app.notifications = [];
+  save(); updateHomeStats(); renderSettings();
+  showToast('All data cleared');
+}
+
+// ===================== DEMO DATA =====================
+function addDemoData() {
+  if (app.trips.length > 0) return;
+  const routes = [
+    { s: 'Home', e: 'Downtown Office', m: 12.2, c: 'business' },
+    { s: 'Office', e: 'Client - Acme Corp', m: 8.5, c: 'business' },
+    { s: 'Home', e: 'Grocery Store', m: 2.5, c: 'personal' },
+    { s: 'Office', e: 'Airport Terminal', m: 18.7, c: 'business' },
+    { s: 'Home', e: 'Gym', m: 3.2, c: 'personal' },
+    { s: 'Client Site', e: 'Office', m: 15.1, c: 'business' },
+    { s: 'Home', e: 'Restaurant', m: 4.8, c: 'personal' },
+    { s: 'Office', e: 'Warehouse', m: 22.3, c: 'business' },
+    { s: 'Home', e: 'Mall', m: 6.1, c: 'personal' },
+    { s: 'Office', e: 'Client - Beta Inc', m: 11.4, c: 'business' },
+    { s: 'Home', e: 'Dentist', m: 5.6, c: 'personal' },
+    { s: 'Office', e: 'Conference Center', m: 9.8, c: 'business' },
+    { s: 'Home', e: 'Park', m: 1.9, c: 'personal' },
+    { s: 'Client', e: 'Office', m: 14.2, c: 'business' },
+    { s: 'Office', e: 'Training Center', m: 7.3, c: 'business' },
+    { s: 'Home', e: 'School', m: 3.7, c: 'personal' },
+    { s: 'Office', e: 'Supplier', m: 19.5, c: 'business' },
+    { s: 'Home', e: 'Coffee Shop', m: 2.1, c: 'unclassified' },
+    { s: 'Start Location', e: 'Destination', m: 7.5, c: 'unclassified' },
+    { s: 'Office', e: 'Client - Gamma LLC', m: 16.8, c: 'business' },
+    { s: 'Home', e: 'Pharmacy', m: 1.8, c: 'personal' },
+    { s: 'Office', e: 'Bank', m: 4.3, c: 'business' },
+    { s: 'Home', e: 'Library', m: 3.9, c: 'personal' },
+    { s: 'Office', e: 'Lunch Meeting', m: 5.2, c: 'business' },
+    { s: 'Start Location', e: 'Destination', m: 4.8, c: 'unclassified' },
+    { s: 'Office', e: 'Client HQ', m: 13.6, c: 'business' },
+    { s: 'Home', e: 'Vet', m: 7.2, c: 'personal' }
+  ];
+
+  const now = new Date();
+  routes.forEach((r, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - Math.floor(i * 1.1));
+    d.setHours(8 + Math.floor(Math.random() * 10), Math.floor(Math.random() * 60));
+    const dur = Math.round(r.m * 2.5 * 60000);
+    app.trips.push({
+      id: (Date.now() - i * 100000).toString(),
+      category: r.c,
+      miles: r.m,
+      date: d.toISOString(),
+      duration: dur,
+      startTime: d.toISOString(),
+      endTime: new Date(d.getTime() + dur).toISOString(),
+      startName: r.s,
+      endName: r.e,
+      name: '',
+      notes: '',
+      startCoord: null,
+      endCoord: null
+    });
+  });
+  save();
+}
+
+// ===================== ALWAYS-ON GPS MONITOR =====================
+let monitorWatchId = null;
+let pollTimer = null;
+let speedHistory = [];
+let stopCounter = 0;
+let lastMonitorPos = null;
+let lastMonitorTime = null;
+let gpsReady = false;
+let positionCount = 0;
+const DRIVE_DETECT_COUNT = 2;
+const STOP_DETECT_COUNT = 12;
+
+function debugLog(msg) {
+  const el = document.getElementById('gps-debug');
+  if (!el) return;
+  const time = new Date().toLocaleTimeString();
+  el.innerHTML = `[${time}] ${msg}<br>` + el.innerHTML;
+  if (el.children.length > 20) el.innerHTML = el.innerHTML.split('<br>').slice(0, 15).join('<br>');
+}
+
+function calcSpeedBetween(lat1, lon1, time1, lat2, lon2, time2) {
+  const distMiles = haversine(lat1, lon1, lat2, lon2);
+  const timeDiffHours = (time2 - time1) / 3600000;
+  if (timeDiffHours <= 0) return 0;
+  return distMiles / timeDiffHours;
+}
+
+function setGPS(status) {
+  const dot = document.getElementById('gps-dot');
+  const text = document.getElementById('gps-text');
+  dot.className = 'status-dot';
+  dot.style.background = '';
+
+  if (status === 'monitoring' || status === 'default') {
+    dot.classList.add('active');
+    text.textContent = 'GPS Active \u2022 Always On';
+  } else if (status === 'active' || status === 'recording') {
+    dot.style.background = 'var(--red)';
+    text.textContent = 'Recording Trip...';
+  } else if (status === 'searching') {
+    dot.classList.add('searching');
+    text.textContent = 'Acquiring GPS...';
+  } else if (status === 'error') {
+    dot.classList.add('error');
+    text.textContent = 'GPS Error';
+  }
+}
+
+function startAlwaysOnMonitor() {
+  if (!navigator.geolocation) {
+    setGPS('error');
+    debugLog('ERROR: Geolocation API not available');
+    document.getElementById('drive-sublabel').textContent = 'GPS not available on this device';
+    return;
+  }
+
+  debugLog('Starting GPS monitor...');
+  setGPS('searching');
+  document.getElementById('drive-sublabel').textContent = 'Requesting GPS access...';
+
+  // METHOD 1: watchPosition
+  try {
+    monitorWatchId = navigator.geolocation.watchPosition(
+      handlePosition, handleError,
+      { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
+    );
+    debugLog('watchPosition started (ID: ' + monitorWatchId + ')');
+  } catch(e) {
+    debugLog('watchPosition failed: ' + e.message);
+  }
+
+  // METHOD 2: Polling fallback
+  startPolling();
+
+  // METHOD 3: Show activate button after 5s
+  setTimeout(() => {
+    if (!gpsReady) {
+      debugLog('No GPS data after 5s \u2014 showing activate button');
+      document.getElementById('gps-activate').style.display = 'block';
+      document.getElementById('drive-sublabel').textContent = 'GPS may need manual activation. Tap the button below.';
+    }
+  }, 5000);
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+      handlePosition,
+      (err) => { debugLog('Poll error: ' + err.message); },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 8000 }
+    );
+  }, 3000);
+  debugLog('Polling fallback started (every 3s)');
+}
+
+function activateGPS() {
+  debugLog('Manual GPS activation triggered');
+  document.getElementById('gps-activate').style.display = 'none';
+  document.getElementById('drive-sublabel').textContent = 'Activating GPS...';
+
+  if (monitorWatchId !== null) navigator.geolocation.clearWatch(monitorWatchId);
+  if (pollTimer) clearInterval(pollTimer);
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      debugLog('Manual activation SUCCESS! lat=' + pos.coords.latitude.toFixed(4));
+      handlePosition(pos);
+      monitorWatchId = navigator.geolocation.watchPosition(
+        handlePosition, handleError,
+        { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
+      );
+      startPolling();
+    },
+    (err) => {
+      debugLog('Manual activation FAILED: ' + err.message + ' (code ' + err.code + ')');
+      if (err.code === 1) {
+        updateDriveUI('denied');
+      } else {
+        document.getElementById('drive-sublabel').textContent = 'GPS error: ' + err.message + '. Try again.';
+        document.getElementById('gps-activate').style.display = 'block';
+      }
+    },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+  );
+}
+
+function updateDriveUI(state) {
+  const circle = document.getElementById('drive-circle');
+  const icon = document.getElementById('drive-icon');
+  const label = document.getElementById('drive-label');
+  const sub = document.getElementById('drive-sublabel');
+
+  circle.className = 'drive-circle';
+  if (state === 'monitoring') {
+    circle.classList.add('monitoring');
+    icon.innerHTML = '&#x1F7E2;';
+    label.textContent = 'Always On';
+    label.style.color = 'var(--green)';
+    sub.textContent = 'GPS monitoring active. Trips auto-detect when you drive.';
+  } else if (state === 'recording') {
+    circle.classList.add('recording');
+    icon.innerHTML = '&#x1F534;';
+    label.textContent = 'Recording Trip';
+    label.style.color = 'var(--red)';
+    sub.textContent = 'Driving detected. Will auto-save when you stop.';
+  } else if (state === 'saved') {
+    circle.classList.add('monitoring');
+    icon.innerHTML = '&#x2705;';
+    label.textContent = 'Trip Saved!';
+    label.style.color = 'var(--green)';
+  } else if (state === 'denied') {
+    circle.classList.add('inactive');
+    icon.innerHTML = '&#x274C;';
+    label.textContent = 'Location Denied';
+    label.style.color = 'var(--red)';
+    sub.textContent = 'Please allow location in browser settings and refresh.';
+  }
+}
+
+function handlePosition(pos) {
+  const { latitude, longitude, speed, accuracy } = pos.coords;
+  const now = Date.now();
+  positionCount++;
+
+  if (!gpsReady) {
+    gpsReady = true;
+    document.getElementById('gps-activate').style.display = 'none';
+    debugLog('GPS READY! First fix: lat=' + latitude.toFixed(5) + ' acc=' + Math.round(accuracy) + 'm');
+    updateDriveUI('monitoring');
+  }
+
+  let gpsSpeed = (speed !== null && speed >= 0) ? speed * 2.237 : 0;
+  let calcSpeed = 0;
+
+  if (lastMonitorPos && lastMonitorTime && (now - lastMonitorTime) > 500) {
+    calcSpeed = calcSpeedBetween(
+      lastMonitorPos.lat, lastMonitorPos.lng, lastMonitorTime,
+      latitude, longitude, now
+    );
+    if (calcSpeed > 200) calcSpeed = 0;
+  }
+
+  const mph = Math.max(gpsSpeed, calcSpeed);
+
+  if (accuracy > 300) {
+    debugLog('Skipped: accuracy ' + Math.round(accuracy) + 'm too low');
+    return;
+  }
+
+  lastMonitorPos = { lat: latitude, lng: longitude };
+  lastMonitorTime = now;
+
+  document.getElementById('idle-speed').textContent = Math.round(mph);
+  document.getElementById('idle-accuracy').textContent = `GPS: \u00B1${Math.round(accuracy)}m | Readings: ${positionCount}`;
+
+  if (positionCount % 5 === 0) {
+    debugLog(`#${positionCount} spd=${Math.round(mph)}mph (gps=${Math.round(gpsSpeed)}/calc=${Math.round(calcSpeed)}) acc=${Math.round(accuracy)}m`);
+  }
+
+  if (!app.tracking) {
+    setGPS('monitoring');
+
+    if (mph > app.settings.speedThreshold) {
+      speedHistory.push(mph);
+      debugLog('Speed above threshold: ' + Math.round(mph) + 'mph (' + speedHistory.length + '/' + DRIVE_DETECT_COUNT + ')');
+      if (speedHistory.length >= DRIVE_DETECT_COUNT) {
+        speedHistory = [];
+        stopCounter = 0;
+        showToast('Driving detected \u2014 recording!');
+        debugLog('=== TRIP STARTED ===');
+        autoStartTracking(pos);
+      }
+    } else {
+      if (mph < app.settings.speedThreshold * 0.5) speedHistory = [];
+    }
+  } else {
+    onPos(pos);
+    document.getElementById('live-speed').textContent = Math.round(mph) + ' mph';
+
+    if (mph < 3) {
+      stopCounter++;
+      if (stopCounter >= STOP_DETECT_COUNT) {
+        stopCounter = 0;
+        debugLog('=== TRIP ENDED ===');
+        stopTracking();
+      }
+    } else {
+      stopCounter = 0;
+    }
+  }
+}
+
+function handleError(err) {
+  debugLog('GPS Error: code=' + err.code + ' msg=' + err.message);
+  if (err.code === 1) {
+    setGPS('error');
+    updateDriveUI('denied');
+  } else if (err.code === 2) {
+    document.getElementById('drive-sublabel').textContent = 'GPS unavailable. Make sure Location Services is ON.';
+    document.getElementById('gps-activate').style.display = 'block';
+  } else {
+    document.getElementById('drive-sublabel').textContent = 'GPS timeout. Retrying...';
+    document.getElementById('gps-activate').style.display = 'block';
+  }
+}
+
+function autoStartTracking(initialPos) {
+  app.tracking = true;
+  positions = [];
+  trackStart = Date.now();
+
+  const { latitude, longitude, speed, accuracy } = initialPos.coords;
+  if (accuracy < 150) {
+    positions.push({ lat: latitude, lng: longitude, time: Date.now(), speed, accuracy });
+  }
+
+  // Show recording UI
+  updateDriveUI('recording');
+  setGPS('recording');
+  document.getElementById('idle-speed-wrap').style.display = 'none';
+  document.getElementById('idle-accuracy').style.display = 'none';
+  document.getElementById('live-panel').classList.add('show');
+  document.getElementById('live-miles').textContent = '0.0';
+  document.getElementById('live-duration').textContent = '0m';
+
+  trackTimer = setInterval(updateDuration, 1000);
+
+  if (app.settings.tripAlerts) {
+    addNotification('trip', 'Trip Started', 'Driving detected. Auto-recording your trip.', null);
+  }
+}
+
+function stopTracking() {
+  app.tracking = false;
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  if (trackTimer) { clearInterval(trackTimer); trackTimer = null; }
+
+  const miles = calcDistance();
+  const dur = Date.now() - trackStart;
+  const startPt = positions.length > 0 ? positions[0] : null;
+  const endPt = positions.length > 1 ? positions[positions.length - 1] : null;
+  const saveMiles = miles > 0 ? Math.round(miles * 100) / 100 : 0;
+
+  const trip = {
+    id: Date.now().toString(),
+    category: app.settings.defaultCat,
+    miles: saveMiles,
+    date: new Date().toISOString(),
+    duration: dur,
+    startTime: new Date(trackStart).toISOString(),
+    endTime: new Date().toISOString(),
+    startName: 'Start Location',
+    endName: 'Destination',
+    name: '',
+    notes: '',
+    startCoord: startPt ? { lat: startPt.lat, lng: startPt.lng } : null,
+    endCoord: endPt ? { lat: endPt.lat, lng: endPt.lng } : null
+  };
+
+  if (startPt) reverseGeocode(startPt.lat, startPt.lng, name => { trip.startName = name; save(); });
+  if (endPt) reverseGeocode(endPt.lat, endPt.lng, name => { trip.endName = name; save(); });
+
+  app.trips.unshift(trip);
+  save();
+  showToast(`Trip saved: ${saveMiles.toFixed(1)} mi`);
+
+  // Reset UI
+  document.getElementById('live-panel').classList.remove('show');
+  document.getElementById('idle-speed-wrap').style.display = '';
+  document.getElementById('idle-accuracy').style.display = '';
+
+  updateDriveUI('saved');
+  document.getElementById('drive-sublabel').textContent = `${saveMiles.toFixed(1)} miles recorded. Still monitoring.`;
+
+  setTimeout(() => {
+    updateDriveUI('monitoring');
+  }, 3000);
+
+  setGPS('monitoring');
+  updateHomeStats();
+  stopCounter = 0;
+  speedHistory = [];
+
+  // Trip saved notification
+  if (app.settings.tripAlerts) {
+    addNotification('trip', 'Trip Saved', `${saveMiles.toFixed(1)} miles recorded. Classify it in the Trips tab.`, 'classify');
+  }
+
+  // Check if classify reminder needed
+  setTimeout(checkClassifyReminder, 2000);
+}
+
+// ===================== INIT =====================
+function init() {
+  load();
+  addDemoData();
+  updateHomeStats();
+  updateNotifBadge();
+
+  // Close modals on overlay click
+  document.getElementById('edit-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  document.getElementById('manual-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeManualModal();
+  });
+
+  // Start GPS monitoring
+  startAlwaysOnMonitor();
+
+  // Check for weekly summary
+  checkWeeklySummary();
+
+  // Add welcome notification if first time
+  if (app.notifications.length === 0) {
+    addNotification('alert', 'Welcome to MileTracker!', 'Your trips will be auto-detected when you drive. Keep this page open for GPS tracking.', null);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
