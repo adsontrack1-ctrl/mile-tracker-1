@@ -3150,25 +3150,46 @@ function clearAllData(){if(!confirm('Delete ALL data?'))return;app.trips=[];app.
 
 // ===================== DEMO DATA =====================
 function addDemoData(){
+  // If old demo data exists without coordinates, clear it to reload with coordinates
+  if(app.trips.length>0 && app.trips.every(t=>!t.startCoord && !t.endCoord)){
+    app.trips=[];app.notifications=[];app.savedAddresses={};save();
+  }
   if(app.trips.length>0)return;
   const routes=[
-    {s:'Home, 123 Oak St',e:'Downtown Office, 500 Market St',m:12.2,c:'business'},
-    {s:'Office, 500 Market St',e:'Acme Corp, 200 Pine Ave',m:8.5,c:'business'},
-    {s:'Home, 123 Oak St',e:'Safeway, 300 Elm Rd',m:2.5,c:'personal'},
-    {s:'Office, 500 Market St',e:'SFO Airport Terminal 2',m:18.7,c:'business'},
-    {s:'Home, 123 Oak St',e:'24 Hour Fitness, 150 Gym Ln',m:3.2,c:'personal'},
-    {s:'Client Site, 750 Tech Blvd',e:'Office, 500 Market St',m:15.1,c:'business'},
-    {s:'Home, 123 Oak St',e:'Olive Garden, 400 Dine Way',m:4.8,c:'personal'},
-    {s:'Office, 500 Market St',e:'Warehouse, 900 Industrial Dr',m:22.3,c:'business'},
-    {s:'Home, 123 Oak St',e:'Westfield Mall, 250 Shop St',m:6.1,c:'personal'},
-    {s:'Office, 500 Market St',e:'Beta Inc, 600 Innovation Way',m:11.4,c:'business'},
-    {s:'Home, 123 Oak St',e:'Dr. Smith DDS, 180 Health Blvd',m:5.6,c:'personal'},
-    {s:'Office, 500 Market St',e:'Convention Center, 800 Expo Dr',m:9.8,c:'business'},
-    {s:'Home, 123 Oak St',e:'Golden Gate Park',m:1.9,c:'personal'},
-    {s:'Client HQ, 350 Summit Ave',e:'Office, 500 Market St',m:14.2,c:'business'},
-    {s:'Home, 123 Oak St',e:'Coffee Shop, 50 Bean St',m:2.1,c:'unclassified'},
-    {s:'Unknown',e:'Unknown',m:7.5,c:'unclassified'},
-    {s:'Office, 500 Market St',e:'Gamma LLC, 420 Corp Dr',m:16.8,c:'business'},
+    {s:'Home, 123 Oak St',e:'Downtown Office, 500 Market St',m:12.2,c:'business',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7905,lng:-122.3988}},
+    {s:'Office, 500 Market St',e:'Acme Corp, 200 Pine Ave',m:8.5,c:'business',
+     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.7922,lng:-122.4010}},
+    {s:'Home, 123 Oak St',e:'Safeway, 300 Elm Rd',m:2.5,c:'personal',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7648,lng:-122.4525}},
+    {s:'Office, 500 Market St',e:'SFO Airport Terminal 2',m:18.7,c:'business',
+     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.6213,lng:-122.3790}},
+    {s:'Home, 123 Oak St',e:'24 Hour Fitness, 150 Gym Ln',m:3.2,c:'personal',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7752,lng:-122.4375}},
+    {s:'Client Site, 750 Tech Blvd',e:'Office, 500 Market St',m:15.1,c:'business',
+     sc:{lat:37.3861,lng:-122.0839},ec:{lat:37.7905,lng:-122.3988}},
+    {s:'Home, 123 Oak St',e:'Olive Garden, 400 Dine Way',m:4.8,c:'personal',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7580,lng:-122.4140}},
+    {s:'Office, 500 Market St',e:'Warehouse, 900 Industrial Dr',m:22.3,c:'business',
+     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.7350,lng:-122.3820}},
+    {s:'Home, 123 Oak St',e:'Westfield Mall, 250 Shop St',m:6.1,c:'personal',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7844,lng:-122.4068}},
+    {s:'Office, 500 Market St',e:'Beta Inc, 600 Innovation Way',m:11.4,c:'business',
+     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.7560,lng:-122.4480}},
+    {s:'Home, 123 Oak St',e:'Dr. Smith DDS, 180 Health Blvd',m:5.6,c:'personal',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7530,lng:-122.4185}},
+    {s:'Office, 500 Market St',e:'Convention Center, 800 Expo Dr',m:9.8,c:'business',
+     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.7840,lng:-122.4005}},
+    {s:'Home, 123 Oak St',e:'Golden Gate Park',m:1.9,c:'personal',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7694,lng:-122.4862}},
+    {s:'Client HQ, 350 Summit Ave',e:'Office, 500 Market St',m:14.2,c:'business',
+     sc:{lat:37.8044,lng:-122.2712},ec:{lat:37.7905,lng:-122.3988}},
+    {s:'Home, 123 Oak St',e:'Coffee Shop, 50 Bean St',m:2.1,c:'unclassified',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7720,lng:-122.4390}},
+    {s:'Home, 123 Oak St',e:'Grocery Store',m:7.5,c:'unclassified',
+     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7810,lng:-122.4120}},
+    {s:'Office, 500 Market St',e:'Gamma LLC, 420 Corp Dr',m:16.8,c:'business',
+     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.8100,lng:-122.4150}},
   ];
   // Save some addresses
   app.savedAddresses[normalizeAddr('Home, 123 Oak St')]={name:'Home, 123 Oak St',category:'personal',count:5};
@@ -3183,7 +3204,8 @@ function addDemoData(){
     app.trips.push({
       id:(Date.now()-i*100000).toString(),category:r.c,miles:r.m,date:d.toISOString(),
       duration:dur,startTime:d.toISOString(),endTime:new Date(d.getTime()+dur).toISOString(),
-      startName:r.s,endName:r.e,name:'',notes:'',startCoord:null,endCoord:null
+      startName:r.s,endName:r.e,name:'',notes:'',
+      startCoord:r.sc||null,endCoord:r.ec||null
     });
   });
   save();
