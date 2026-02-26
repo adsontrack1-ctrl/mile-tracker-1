@@ -525,6 +525,196 @@ body {
   flex: 1;
 }
 
+/* MAP TRIP COUNT BADGE */
+.map-trip-count {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(79, 142, 247, 0.2);
+  color: var(--blue);
+}
+
+/* MAP DATE FILTER BAR */
+.map-filter-bar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--card-border);
+  z-index: 202;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.map-filter-pill {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+.map-filter-pill.active {
+  background: linear-gradient(135deg, #4F8EF7, #6C63FF);
+  border-color: transparent;
+  color: white;
+}
+
+/* MAP LEGEND */
+.map-legend {
+  display: flex;
+  gap: 14px;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  position: absolute;
+  bottom: 180px;
+  left: 12px;
+  border-radius: 12px;
+  z-index: 203;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.8);
+  font-weight: 500;
+}
+.map-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* MAP TRIPS BOTTOM PANEL */
+.map-trips-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 55vh;
+  background: rgba(10, 10, 26, 0.92);
+  backdrop-filter: blur(30px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px 20px 0 0;
+  z-index: 204;
+  overflow-y: auto;
+  transition: max-height 0.3s ease;
+}
+.map-trips-panel.collapsed {
+  max-height: 70px;
+  overflow: hidden;
+}
+.map-trips-handle {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  cursor: pointer;
+}
+.map-trips-handle-bar {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.25);
+}
+.map-trips-summary {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.map-sum-card {
+  flex: 1;
+  text-align: center;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.map-sum-card .val {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+.map-sum-card .lbl {
+  font-size: 10px;
+  color: var(--text2);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.map-trips-list {
+  padding: 8px 12px 20px;
+}
+.map-trip-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.map-trip-item:active {
+  transform: scale(0.98);
+  background: rgba(255,255,255,0.08);
+}
+.map-trip-item.selected {
+  border-color: var(--blue);
+  background: rgba(79, 142, 247, 0.1);
+}
+.map-trip-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+.map-trip-dot.business { background: #00D4AA; color: #00D4AA; }
+.map-trip-dot.personal { background: #FF6B9D; color: #FF6B9D; }
+.map-trip-dot.unclassified { background: #FFB74D; color: #FFB74D; }
+.map-trip-info { flex: 1; min-width: 0; }
+.map-trip-info .route {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-trip-info .meta {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+.map-trip-miles {
+  text-align: right;
+  flex-shrink: 0;
+}
+.map-trip-miles .mi {
+  font-size: 16px;
+  font-weight: 700;
+}
+.map-trip-miles .unit {
+  font-size: 10px;
+  color: var(--text3);
+}
+.map-no-trips {
+  text-align: center;
+  padding: 20px;
+  color: var(--text3);
+  font-size: 14px;
+}
+
 /* QUICK STATS */
 .quick-stats {
   display: grid;
@@ -1974,10 +2164,32 @@ body {
 <!-- MAP OVERLAY -->
 <div class="map-overlay" id="map-overlay">
   <div class="map-header">
-    <h3>Live Map</h3>
+    <div style="display:flex;align-items:center;gap:10px">
+      <h3>My Trips</h3>
+      <span class="map-trip-count" id="map-trip-count">0 trips</span>
+    </div>
     <button class="map-close" onclick="closeMap()">&times;</button>
   </div>
+  <!-- Map date filter -->
+  <div class="map-filter-bar" id="map-filter-bar">
+    <button class="map-filter-pill active" onclick="setMapFilter('today',this)">Today</button>
+    <button class="map-filter-pill" onclick="setMapFilter('week',this)">This Week</button>
+    <button class="map-filter-pill" onclick="setMapFilter('month',this)">This Month</button>
+    <button class="map-filter-pill" onclick="setMapFilter('all',this)">All</button>
+  </div>
+  <!-- Map legend -->
+  <div class="map-legend">
+    <span class="map-legend-item"><span class="map-legend-dot" style="background:#00D4AA"></span>Business</span>
+    <span class="map-legend-item"><span class="map-legend-dot" style="background:#FF6B9D"></span>Personal</span>
+    <span class="map-legend-item"><span class="map-legend-dot" style="background:#FFB74D"></span>Unclassified</span>
+  </div>
   <div id="map-container"></div>
+  <!-- Trip cards panel at bottom -->
+  <div class="map-trips-panel" id="map-trips-panel">
+    <div class="map-trips-handle" onclick="toggleMapTripsPanel()"><div class="map-trips-handle-bar"></div></div>
+    <div class="map-trips-summary" id="map-trips-summary"></div>
+    <div class="map-trips-list" id="map-trips-list"></div>
+  </div>
 </div>
 
 <!-- DRIVE PAGE -->
@@ -2007,7 +2219,7 @@ body {
   </div>
 
   <div class="map-btn-wrap">
-    <button class="map-btn" onclick="openMap()">&#x1F5FA; Open Live Map</button>
+    <button class="map-btn" onclick="openMap()">&#x1F5FA; View My Trips on Map</button>
   </div>
 
   <div class="quick-stats">
@@ -2233,33 +2445,196 @@ function showToast(msg) {
 }
 
 // ===================== MAP =====================
+let mapFilter = 'today';
+let mapTripMarkers = [];
+let mapTripLines = [];
+let selectedMapTrip = null;
+
 function openMap() {
   document.getElementById('map-overlay').classList.add('show');
   setTimeout(()=>{
     if (!leafletMap) {
-      leafletMap = L.map('map-container').setView([37.7749,-122.4194],13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-        attribution:'&copy; OpenStreetMap', maxZoom:19
+      leafletMap = L.map('map-container', { zoomControl: false }).setView([37.7749,-122.4194],13);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+        attribution:'&copy; OpenStreetMap &copy; CartoDB', maxZoom:19
       }).addTo(leafletMap);
+      L.control.zoom({ position: 'topright' }).addTo(leafletMap);
     }
     leafletMap.invalidateSize();
     if (lastMonitorPos) {
-      leafletMap.setView([lastMonitorPos.lat, lastMonitorPos.lng], 15);
+      leafletMap.setView([lastMonitorPos.lat, lastMonitorPos.lng], 13);
       if (userMarker) userMarker.setLatLng([lastMonitorPos.lat, lastMonitorPos.lng]);
       else userMarker = L.circleMarker([lastMonitorPos.lat, lastMonitorPos.lng],{
         radius:8, fillColor:'#4F8EF7', fillOpacity:1, color:'white', weight:3
       }).addTo(leafletMap);
     }
-  },100);
+    renderMapTrips();
+  },150);
 }
-function closeMap() { document.getElementById('map-overlay').classList.remove('show'); }
+
+function closeMap() {
+  document.getElementById('map-overlay').classList.remove('show');
+  clearMapTripMarkers();
+}
+
+function setMapFilter(filter, btn) {
+  mapFilter = filter;
+  document.querySelectorAll('.map-filter-pill').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderMapTrips();
+}
+
+function getMapFilteredTrips() {
+  const now = new Date();
+  if (mapFilter === 'today') {
+    return app.trips.filter(t => new Date(t.date).toDateString() === now.toDateString());
+  } else if (mapFilter === 'week') {
+    const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+    return app.trips.filter(t => new Date(t.date) >= weekAgo);
+  } else if (mapFilter === 'month') {
+    return app.trips.filter(t => { const d=new Date(t.date); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); });
+  }
+  return [...app.trips];
+}
+
+function clearMapTripMarkers() {
+  mapTripMarkers.forEach(m => { if(leafletMap) leafletMap.removeLayer(m); });
+  mapTripLines.forEach(l => { if(leafletMap) leafletMap.removeLayer(l); });
+  mapTripMarkers = [];
+  mapTripLines = [];
+  selectedMapTrip = null;
+}
+
+function getCatColor(cat) {
+  if (cat === 'business') return '#00D4AA';
+  if (cat === 'personal') return '#FF6B9D';
+  return '#FFB74D';
+}
+
+function renderMapTrips() {
+  clearMapTripMarkers();
+  const trips = getMapFilteredTrips();
+  const bizMiles = trips.filter(t=>t.category==='business').reduce((s,t)=>s+t.miles,0);
+  const persMiles = trips.filter(t=>t.category==='personal').reduce((s,t)=>s+t.miles,0);
+  const totalMiles = trips.reduce((s,t)=>s+t.miles,0);
+
+  // Update trip count badge
+  document.getElementById('map-trip-count').textContent = trips.length + ' trip' + (trips.length!==1?'s':'');
+
+  // Render summary cards
+  document.getElementById('map-trips-summary').innerHTML = `
+    <div class="map-sum-card"><div class="val" style="color:#00D4AA">${bizMiles.toFixed(1)}</div><div class="lbl">Business mi</div></div>
+    <div class="map-sum-card"><div class="val" style="color:#FF6B9D">${persMiles.toFixed(1)}</div><div class="lbl">Personal mi</div></div>
+    <div class="map-sum-card"><div class="val" style="color:var(--text)">${totalMiles.toFixed(1)}</div><div class="lbl">Total mi</div></div>
+    <div class="map-sum-card"><div class="val" style="color:var(--blue)">${trips.length}</div><div class="lbl">Trips</div></div>
+  `;
+
+  // Render trip list
+  const listEl = document.getElementById('map-trips-list');
+  if (!trips.length) {
+    listEl.innerHTML = '<div class="map-no-trips">No trips for this period</div>';
+    return;
+  }
+
+  listEl.innerHTML = trips.map((t, i) => {
+    const time = new Date(t.date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const from = t.startName || 'Start';
+    const to = t.endName || 'Destination';
+    const dur = t.duration ? Math.round(t.duration/60000) : 0;
+    return `<div class="map-trip-item" id="map-trip-${i}" onclick="focusMapTrip(${i})">
+      <div class="map-trip-dot ${t.category}"></div>
+      <div class="map-trip-info">
+        <div class="route">${esc(from)} &rarr; ${esc(to)}</div>
+        <div class="meta">${time} &middot; ${t.category} &middot; ${dur}min</div>
+      </div>
+      <div class="map-trip-miles"><div class="mi">${t.miles.toFixed(1)}</div><div class="unit">mi</div></div>
+    </div>`;
+  }).join('');
+
+  // Add markers for trips that have coordinates
+  const bounds = [];
+  trips.forEach((t, i) => {
+    const color = getCatColor(t.category);
+    const catLabel = t.category === 'business' ? 'B' : t.category === 'personal' ? 'P' : '?';
+
+    if (t.startCoord) {
+      const marker = L.circleMarker([t.startCoord.lat, t.startCoord.lng], {
+        radius: 6, fillColor: color, fillOpacity: 0.8, color: 'white', weight: 2
+      }).addTo(leafletMap);
+      marker.bindPopup(`<b>Start:</b> ${esc(t.startName||'Unknown')}<br><b>${t.category}</b> - ${t.miles.toFixed(1)} mi`);
+      mapTripMarkers.push(marker);
+      bounds.push([t.startCoord.lat, t.startCoord.lng]);
+    }
+
+    if (t.endCoord) {
+      // End marker is slightly larger with category label
+      const marker = L.circleMarker([t.endCoord.lat, t.endCoord.lng], {
+        radius: 9, fillColor: color, fillOpacity: 1, color: 'white', weight: 3
+      }).addTo(leafletMap);
+      marker.bindPopup(`<b>Destination:</b> ${esc(t.endName||'Unknown')}<br><b>${t.category}</b> - ${t.miles.toFixed(1)} mi`);
+      mapTripMarkers.push(marker);
+      bounds.push([t.endCoord.lat, t.endCoord.lng]);
+    }
+
+    // Draw line between start and end if both have coords
+    if (t.startCoord && t.endCoord) {
+      const line = L.polyline(
+        [[t.startCoord.lat, t.startCoord.lng], [t.endCoord.lat, t.endCoord.lng]],
+        { color: color, weight: 3, opacity: 0.6, dashArray: '8, 6' }
+      ).addTo(leafletMap);
+      line.bindPopup(`${esc(t.startName||'Start')} &rarr; ${esc(t.endName||'Dest')}<br><b>${t.miles.toFixed(1)} mi</b> (${t.category})`);
+      mapTripLines.push(line);
+    }
+  });
+
+  // Fit map to show all trip markers
+  if (bounds.length > 1) {
+    leafletMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+  } else if (bounds.length === 1) {
+    leafletMap.setView(bounds[0], 14);
+  }
+}
+
+function focusMapTrip(index) {
+  const trips = getMapFilteredTrips();
+  const t = trips[index];
+  if (!t) return;
+
+  // Highlight the selected trip card
+  document.querySelectorAll('.map-trip-item').forEach(el => el.classList.remove('selected'));
+  const card = document.getElementById('map-trip-' + index);
+  if (card) card.classList.add('selected');
+
+  // If trip has end coordinates, fly to it
+  if (t.endCoord) {
+    leafletMap.flyTo([t.endCoord.lat, t.endCoord.lng], 15, { duration: 0.8 });
+  } else if (t.startCoord) {
+    leafletMap.flyTo([t.startCoord.lat, t.startCoord.lng], 15, { duration: 0.8 });
+  }
+
+  // Flash the corresponding markers
+  mapTripMarkers.forEach(m => m.setStyle({ weight: 2 }));
+  // Open popup for matching marker
+  mapTripMarkers.forEach(m => {
+    const ll = m.getLatLng();
+    if (t.endCoord && Math.abs(ll.lat - t.endCoord.lat) < 0.0001 && Math.abs(ll.lng - t.endCoord.lng) < 0.0001) {
+      m.setStyle({ weight: 5, radius: 12 });
+      m.openPopup();
+    }
+  });
+}
+
+function toggleMapTripsPanel() {
+  document.getElementById('map-trips-panel').classList.toggle('collapsed');
+}
+
 function updateMapPosition(lat, lng) {
   if (!leafletMap) return;
   if (userMarker) userMarker.setLatLng([lat,lng]);
   else userMarker = L.circleMarker([lat,lng],{
     radius:8, fillColor:'#4F8EF7', fillOpacity:1, color:'white', weight:3
   }).addTo(leafletMap);
-  if (document.getElementById('map-overlay').classList.contains('show')) {
+  if (document.getElementById('map-overlay').classList.contains('show') && !getMapFilteredTrips().length) {
     leafletMap.panTo([lat,lng]);
   }
   if (app.tracking && trackPolyline) {
