@@ -921,7 +921,7 @@ body {
   backdrop-filter: blur(20px);
   border: 1px solid var(--card-border);
   border-radius: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   transition: all 0.3s ease;
@@ -934,6 +934,121 @@ body {
 
 .trip-card:active {
   transform: scale(0.98);
+}
+
+/* MINI MAP on trip card */
+.trip-mini-map {
+  width: 100%;
+  height: 120px;
+  background: #1a1a2e;
+  position: relative;
+  overflow: hidden;
+}
+.trip-mini-map img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+}
+.trip-mini-map .map-category-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+}
+.map-category-badge.business { background: rgba(0, 212, 170, 0.25); color: #00D4AA; border: 1px solid rgba(0, 212, 170, 0.3); }
+.map-category-badge.personal { background: rgba(255, 107, 157, 0.25); color: #FF6B9D; border: 1px solid rgba(255, 107, 157, 0.3); }
+.map-category-badge.unclassified { background: rgba(255, 183, 77, 0.25); color: #FFB74D; border: 1px solid rgba(255, 183, 77, 0.3); }
+
+/* Route info section */
+.trip-route-section {
+  padding: 14px 16px 10px;
+}
+.trip-route-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+}
+.trip-route-dots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+.route-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.route-dot.start { background: #00E676; border: 2px solid rgba(0, 230, 118, 0.3); }
+.route-dot.end { background: #FF5252; border: 2px solid rgba(255, 82, 82, 0.3); }
+.route-line {
+  width: 2px;
+  height: 20px;
+  background: rgba(255,255,255,0.15);
+  margin: 3px 0;
+}
+.trip-route-addrs {
+  flex: 1;
+  min-width: 0;
+}
+.trip-addr {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.trip-addr.from { color: var(--text); }
+.trip-addr.to { color: var(--text); margin-top: 16px; }
+.trip-miles-badge {
+  flex-shrink: 0;
+  text-align: right;
+  padding-top: 8px;
+}
+.trip-miles-badge .mi-val {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+.trip-miles-badge .mi-unit {
+  font-size: 11px;
+  color: var(--text3);
+  font-weight: 500;
+}
+
+/* Trip meta row */
+.trip-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 12px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.trip-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.trip-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.trip-deduction {
+  font-weight: 700;
+  color: var(--teal);
 }
 
 .trip-card-main {
@@ -951,7 +1066,7 @@ body {
 }
 
 .trip-cat-indicator.business {
-  background: var(--blue);
+  background: var(--teal);
 }
 
 .trip-cat-indicator.personal {
@@ -2219,7 +2334,8 @@ body {
   </div>
 
   <div class="map-btn-wrap">
-    <button class="map-btn" onclick="openMap()">&#x1F5FA; View My Trips on Map</button>
+    <button class="map-btn" onclick="switchPage('trips',document.getElementById('nav-trips'))">&#x1F5FA; View My Trips</button>
+    <button class="map-btn" onclick="openMap()" style="margin-top:8px">&#127760; Open Full Map</button>
   </div>
 
   <div class="quick-stats">
@@ -2805,6 +2921,37 @@ function filterTrips(f,btn) {
   if(btn)btn.classList.add('active');
   renderTrips();
 }
+function getTripMapUrl(t) {
+  // Generate a static map image URL showing the route
+  if (t.startCoord && t.endCoord) {
+    const sLat=t.startCoord.lat, sLng=t.startCoord.lng;
+    const eLat=t.endCoord.lat, eLng=t.endCoord.lng;
+    const midLat=(sLat+eLat)/2, midLng=(sLng+eLng)/2;
+    // Calculate zoom based on distance
+    const dist=haversine(sLat,sLng,eLat,eLng);
+    let zoom=13;
+    if(dist>20)zoom=10; else if(dist>10)zoom=11; else if(dist>5)zoom=12;
+    // Use a dark-themed static map
+    return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+00e676(${sLng},${sLat}),pin-s+ff5252(${eLng},${eLat})/${midLng},${midLat},${zoom},0/400x150@2x?access_token=pk.placeholder&logo=false`;
+  }
+  return null;
+}
+
+function getStaticMapUrl(t) {
+  // Use OpenStreetMap static image via a free service
+  if (t.startCoord && t.endCoord) {
+    const sLat=t.startCoord.lat, sLng=t.startCoord.lng;
+    const eLat=t.endCoord.lat, eLng=t.endCoord.lng;
+    const midLat=(sLat+eLat)/2, midLng=(sLng+eLng)/2;
+    const dist=haversine(sLat,sLng,eLat,eLng);
+    let zoom=13;
+    if(dist>20)zoom=10; else if(dist>10)zoom=11; else if(dist>5)zoom=12;
+    // Use CartoDB dark tiles via static image
+    return `https://maps.geoapify.com/v1/staticmap?style=dark-matter-brown&width=400&height=150&center=lonlat:${midLng},${midLat}&zoom=${zoom}&marker=lonlat:${sLng},${sLat};color:%2300e676;size:small|lonlat:${eLng},${eLat};color:%23ff5252;size:small&apiKey=DEMO`;
+  }
+  return null;
+}
+
 function renderTrips() {
   let trips=[...app.trips];
   if(app.tripFilter!=='all')trips=trips.filter(t=>t.category===app.tripFilter);
@@ -2816,24 +2963,74 @@ function renderTrips() {
   trips.forEach(t=>{const d=new Date(t.date);const key=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});if(!groups[key])groups[key]=[];groups[key].push(t);});
   let html='';
   for(const[date,dayTrips]of Object.entries(groups)){
-    html+=`<div class="trip-date-header">${date}</div>`;
+    // Day summary
+    const dayBiz=dayTrips.filter(x=>x.category==='business').reduce((s,x)=>s+x.miles,0);
+    const dayPers=dayTrips.filter(x=>x.category==='personal').reduce((s,x)=>s+x.miles,0);
+    const dayTotal=dayTrips.reduce((s,x)=>s+x.miles,0);
+    html+=`<div class="trip-date-header">${date} <span style="float:right;color:var(--text3);font-weight:400">${dayTrips.length} trip${dayTrips.length!==1?'s':''} &middot; ${dayTotal.toFixed(1)} mi</span></div>`;
     dayTrips.forEach(t=>{
       const d=new Date(t.date);
       const timeStr=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       const dur=t.duration?Math.round(t.duration/60000):0;
-      const routeName=t.name||`${t.startName||'Start'} \u2192 ${t.endName||'Destination'}`;
+      const fromAddr=t.startName||'Start';
+      const toAddr=t.endName||'Destination';
+      const deduction=t.category==='business'?(t.miles*app.settings.irsRate).toFixed(2):'0.00';
       const bizSel=t.category==='business'?' sel-biz':'';
       const persSel=t.category==='personal'?' sel-pers':'';
-      const catIcon=t.category==='business'?'&#128188;':t.category==='personal'?'&#128100;':'&#10067;';
-      html+=`<div class="trip-card" onclick="editTrip('${t.id}')">
-        <div class="trip-card-main">
-          <div class="trip-cat-indicator ${t.category}"></div>
-          <div class="trip-icon ${t.category}">${catIcon}</div>
-          <div class="trip-details">
-            <div class="trip-route-name">${esc(routeName)}</div>
-            <div class="trip-time">${timeStr} &middot; ${dur}min</div>
+      const catLabel=t.category==='business'?'Business':t.category==='personal'?'Personal':'Classify';
+
+      // Mini map section - use Leaflet static preview with colored line
+      let miniMapHtml='';
+      if(t.startCoord && t.endCoord){
+        const sLat=t.startCoord.lat,sLng=t.startCoord.lng,eLat=t.endCoord.lat,eLng=t.endCoord.lng;
+        const midLat=(sLat+eLat)/2,midLng=(sLng+eLng)/2;
+        const dist=haversine(sLat,sLng,eLat,eLng);
+        let zoom=13; if(dist>20)zoom=10; else if(dist>10)zoom=11; else if(dist>5)zoom=12;
+        const catColor=t.category==='business'?'%2300D4AA':t.category==='personal'?'%23FF6B9D':'%23FFB74D';
+        miniMapHtml=`<div class="trip-mini-map">
+          <img src="https://static-maps.yandex.ru/v1?ll=${midLng},${midLat}&z=${zoom}&size=400,150&l=map&theme=dark&pt=${sLng},${sLat},pm2gnm~${eLng},${eLat},pm2rdm"
+               onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;background:linear-gradient(135deg,rgba(79,142,247,0.1),rgba(108,99,255,0.1));display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px\\'>Route: ${esc(fromAddr).substring(0,15)} to ${esc(toAddr).substring(0,15)}</div>'"
+               alt="Trip route" loading="lazy">
+          <div class="map-category-badge ${t.category}">${catLabel}</div>
+        </div>`;
+      } else {
+        // Gradient placeholder with route visualization
+        const catGrad=t.category==='business'?'rgba(0,212,170,0.08),rgba(0,212,170,0.02)':t.category==='personal'?'rgba(255,107,157,0.08),rgba(255,107,157,0.02)':'rgba(255,183,77,0.08),rgba(255,183,77,0.02)';
+        miniMapHtml=`<div class="trip-mini-map" style="background:linear-gradient(135deg,${catGrad});display:flex;align-items:center;justify-content:center">
+          <div style="display:flex;align-items:center;gap:8px;color:var(--text3);font-size:12px">
+            <span style="color:#00E676">&#9679;</span>
+            <span style="color:var(--text3);letter-spacing:3px">- - - - - - -</span>
+            <span style="color:#FF5252">&#9679;</span>
           </div>
-          <div class="trip-miles-col"><div class="trip-miles-val">${t.miles.toFixed(1)}</div><div class="trip-miles-unit">miles</div></div>
+          <div class="map-category-badge ${t.category}">${catLabel}</div>
+        </div>`;
+      }
+
+      html+=`<div class="trip-card" onclick="editTrip('${t.id}')">
+        ${miniMapHtml}
+        <div class="trip-route-section">
+          <div class="trip-route-row">
+            <div class="trip-route-dots">
+              <div class="route-dot start"></div>
+              <div class="route-line"></div>
+              <div class="route-dot end"></div>
+            </div>
+            <div class="trip-route-addrs">
+              <div class="trip-addr from">${esc(fromAddr)}</div>
+              <div class="trip-addr to">${esc(toAddr)}</div>
+            </div>
+            <div class="trip-miles-badge">
+              <div class="mi-val">${t.miles.toFixed(1)}</div>
+              <div class="mi-unit">miles</div>
+            </div>
+          </div>
+        </div>
+        <div class="trip-meta-row">
+          <div class="trip-meta-left">
+            <span class="trip-meta-item">${timeStr}</span>
+            <span class="trip-meta-item">${dur}min</span>
+            ${t.category==='business'?`<span class="trip-deduction">+$${deduction}</span>`:''}
+          </div>
         </div>
         <div class="trip-classify" onclick="event.stopPropagation()">
           <button class="classify-btn${bizSel}" onclick="setCat('${t.id}','business')"><span class="dot"></span> Business</button>
