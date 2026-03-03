@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>MyMilesAI</title>
+<title>MyMilesAI Rel 1.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -27,7 +27,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 /* HEADER */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 10px;position:sticky;top:0;z-index:100;background:rgba(246,247,249,0.85);backdrop-filter:blur(24px) saturate(2);}
 .hdr-l{display:flex;align-items:center;gap:12px;}
-.hdr-av{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,var(--mag),var(--vi));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;box-shadow:0 3px 12px rgba(214,0,110,0.2);}
+.hdr-av{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,var(--mag),var(--vi));display:flex;align-items:center;justify-content:center;font-family:var(--f);font-size:15px;font-weight:700;color:#fff;box-shadow:0 3px 12px rgba(214,0,110,0.2);}
 .hdr-greet{font-size:12px;color:var(--ink4);font-weight:500;}
 .hdr-name{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--ink);line-height:1.2;letter-spacing:-0.3px;}
 .hdr-r{display:flex;gap:8px;}
@@ -40,7 +40,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .tab.active{display:block;}
 @keyframes tabIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
-/* HERO */
+/* HERO CARD */
 .hero{margin:10px 16px 0;border-radius:var(--r3);overflow:hidden;position:relative;padding:26px 22px 22px;color:#fff;background:#0C0C1D;box-shadow:0 12px 48px rgba(12,12,29,0.35),0 2px 8px rgba(0,0,0,0.15);}
 .hero-mesh{position:absolute;inset:0;overflow:hidden;z-index:0;}
 .hero-mesh .m1{position:absolute;width:260px;height:260px;border-radius:50%;filter:blur(60px);opacity:0.5;background:radial-gradient(circle,rgba(214,0,110,0.4),transparent);top:-30%;right:-10%;animation:ms1 12s ease-in-out infinite;}
@@ -56,19 +56,16 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .hero-dot{width:6px;height:6px;border-radius:50%;background:#6EE7B7;box-shadow:0 0 8px rgba(110,231,183,0.4);animation:gp 2.5s ease-in-out infinite;}
 @keyframes gp{0%,100%{opacity:1}50%{opacity:0.5}}
 .hero-brand{font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;opacity:0.3;}
-
-/* SPEEDOMETER */
 .speedo{display:flex;justify-content:center;margin:12px 0 28px;position:relative;}
 .speedo-wrap{position:relative;width:200px;height:110px;}
 .speedo-svg{width:200px;height:110px;overflow:visible;}
 .sp-track{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:10;stroke-linecap:round;}
 .sp-fill{fill:none;stroke:url(#spGrad);stroke-width:10;stroke-linecap:round;stroke-dasharray:267;stroke-dashoffset:267;transition:stroke-dashoffset 2s cubic-bezier(0.22,1,0.36,1);}
 .sp-glow{fill:none;stroke:url(#spGrad);stroke-width:18;stroke-linecap:round;filter:blur(12px);opacity:0.35;stroke-dasharray:267;stroke-dashoffset:267;transition:stroke-dashoffset 2s cubic-bezier(0.22,1,0.36,1);}
+.sp-tick{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:1;}
 .speedo-center{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center;}
 .sp-num{font-family:var(--fd);font-size:60px;font-weight:800;letter-spacing:-3px;line-height:1;background:linear-gradient(180deg,#fff 30%,rgba(255,255,255,0.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .sp-unit{font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
-
-/* HERO STATS */
 .hero-stats{display:flex;gap:3px;}
 .hs{flex:1;padding:14px 8px;text-align:center;background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.04);}
 .hs:first-child{border-radius:var(--r) 4px 4px var(--r);}.hs:last-child{border-radius:4px var(--r) var(--r) 4px;}.hs:nth-child(2){border-radius:4px;}
@@ -81,605 +78,555 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .qa-btn{display:flex;align-items:center;gap:8px;padding:11px 18px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:var(--f);font-size:13px;font-weight:600;color:var(--ink);transition:all 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:var(--s1);}
 .qa-btn:hover{border-color:var(--ink5);transform:translateY(-3px);box-shadow:var(--s3);}.qa-btn:active{transform:translateY(0) scale(0.97);}
 .qa-btn .i{font-size:17px;}
-.qa-btn.pri{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:var(--s2);}
-.qa-btn.pri:hover{background:#22223a;box-shadow:var(--s3);}
-.qa-btn.pri.recording{background:linear-gradient(135deg,var(--mint),#34D399);border-color:transparent;box-shadow:0 4px 20px rgba(0,168,112,0.3),inset 0 1px 0 rgba(255,255,255,0.15);animation:pulse-rec 2s ease-in-out infinite;}
+.qa-btn.pri{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:var(--s2);}.qa-btn.pri:hover{background:#22223a;box-shadow:var(--s3);}
+/* Auto Start active state */
+.qa-btn.pri.recording{
+  background:linear-gradient(135deg,var(--mint),#34D399);border-color:transparent;
+  box-shadow:0 4px 20px rgba(0,168,112,0.3),inset 0 1px 0 rgba(255,255,255,0.15);
+  animation:pulse-rec 2s ease-in-out infinite;
+}
 @keyframes pulse-rec{0%,100%{box-shadow:0 4px 20px rgba(0,168,112,0.3)}50%{box-shadow:0 4px 28px rgba(0,168,112,0.5),0 0 0 6px rgba(0,168,112,0.08)}}
 
-/* SECTIONS */
+/* SECTION */
 .sh{display:flex;align-items:center;justify-content:space-between;padding:26px 20px 12px;}
 .sh-t{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.3px;}
 .sh-pill{font-size:11px;font-weight:700;color:var(--mag);background:var(--mag-s);padding:4px 11px;border-radius:var(--rpill);}
 .sh-link{font-size:13px;font-weight:600;color:var(--mag);cursor:pointer;}
 
-/* UNCLASSIFIED BANNER */
-.uncl{margin:4px 16px 0;padding:14px 18px;display:flex;align-items:center;gap:12px;background:var(--amber-s);border:1.5px solid var(--amber-s2);border-radius:var(--rpill);cursor:pointer;transition:all 0.3s;box-shadow:var(--s1);}
+/* UNCL */
+.uncl{margin:4px 16px 0;padding:14px 18px;display:flex;align-items:center;gap:12px;background:var(--amber-s);border:1.5px solid var(--amber-s2);border-radius:var(--rpill);cursor:pointer;transition:all 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:var(--s1);}
 .uncl:hover{border-color:rgba(224,141,0,0.3);transform:translateY(-2px);box-shadow:var(--s2);}
-.uncl-i{font-size:22px;}.uncl-t{font-size:13px;font-weight:700;color:var(--amber);}.uncl-d{font-size:11px;color:var(--ink2);margin-top:1px;font-weight:500;}.uncl-a{margin-left:auto;color:var(--ink5);font-size:18px;}
-
-/* TRIP CARDS */
-.trip{background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);padding:16px;margin:0 16px 10px;box-shadow:var(--s1);transition:all 0.25s;}
-.trip:hover{box-shadow:var(--s2);transform:translateY(-2px);}
-.trip-top{display:flex;justify-content:space-between;align-items:flex-start;}
-.trip-route{flex:1;}
-.trip-from,.trip-to{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink);}
-.trip-dot{width:10px;height:10px;border-radius:50%;}
-.trip-dot.o{background:transparent;border:2px solid;}
-.trip-line{width:1px;height:16px;background:var(--ink5);margin-left:4.5px;}
-.trip-badge{padding:4px 11px;border-radius:var(--rpill);font-size:11px;font-weight:700;height:fit-content;}
-.trip-badge.b{background:var(--vi-s2);color:var(--vi);}
-.trip-badge.p{background:var(--mag-s2);color:var(--mag);}
-.trip-badge.u{background:var(--amber-s2);color:var(--amber);}
-.trip-meta{display:flex;gap:6px;align-items:center;margin-top:12px;font-size:12px;color:var(--ink3);font-weight:500;}
-.trip-meta .ded{color:var(--mint);font-weight:700;}
-.trip-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--ink7);}
-.ta-btn{padding:6px 12px;border-radius:var(--rpill);background:var(--ink7);font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--f);transition:all 0.2s;}
-.ta-btn.edit:hover{background:var(--vi-s2);color:var(--vi);}
-.ta-btn.del:hover{background:var(--coral-s);color:var(--coral);}
-.ta-btn.biz{background:var(--vi-s);color:var(--vi);}
-.ta-btn.per{background:var(--mag-s);color:var(--mag);}
+.uncl-i{font-size:22px;flex-shrink:0;}.uncl-t{font-size:13px;font-weight:700;color:var(--amber);}.uncl-d{font-size:11px;color:var(--ink2);margin-top:1px;font-weight:500;}.uncl-a{margin-left:auto;color:var(--ink5);font-size:18px;}
 
 /* FILTER PILLS */
-.filters{display:flex;gap:8px;padding:0 16px 8px;overflow-x:auto;scrollbar-width:none;}.filters::-webkit-scrollbar{display:none;}
-.fpill{padding:8px 16px;border-radius:var(--rpill);background:var(--white);border:1px solid var(--ink6);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;white-space:nowrap;font-family:var(--f);transition:all 0.2s;box-shadow:var(--s1);}
-.fpill.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.tf-row{display:flex;gap:8px;padding:0 16px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}.tf-row::-webkit-scrollbar{display:none;}
+.tf{padding:10px 20px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);color:var(--ink3);font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);box-shadow:var(--s1);}
+.tf:hover:not(.a){border-color:var(--ink5);color:var(--ink2);background:var(--ink7);}.tf:active{transform:scale(0.96);}
+.tf.a{color:#fff;background:linear-gradient(135deg,var(--mag),var(--vi));border-color:transparent;box-shadow:0 4px 18px rgba(214,0,110,0.2),inset 0 1px 0 rgba(255,255,255,0.15);font-weight:800;}
 
-/* STATS CARDS */
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;}
-.stat-card{background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);padding:16px;box-shadow:var(--s1);}
-.stat-label{font-size:12px;font-weight:600;color:var(--ink4);margin-bottom:6px;}
-.stat-val{font-family:var(--fd);font-size:28px;font-weight:800;letter-spacing:-1px;color:var(--ink);}
-.stat-sub{font-size:11px;color:var(--ink4);margin-top:4px;}
-
-/* TAX CARD */
-.tax{margin:10px 16px 0;background:var(--mint-s);border:1.5px solid var(--mint-s2);border-radius:var(--r2);padding:20px;}
-.tax-label{font-size:12px;font-weight:600;color:var(--mint2);}
-.tax-val{font-family:var(--fd);font-size:36px;font-weight:800;color:var(--mint);letter-spacing:-1px;margin-top:4px;}
-.tax-calc{font-size:12px;color:var(--ink3);margin-top:4px;}
-.tax-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:16px;gap:2px;}
-.tax-biz{background:var(--vi);border-radius:4px;}.tax-per{background:var(--mag);border-radius:4px;}
-.tax-labels{display:flex;justify-content:space-between;margin-top:6px;}
-.tax-labels span{font-size:11px;color:var(--ink3);font-weight:500;}
-
-/* EXPORT */
-.export-row{display:flex;gap:10px;padding:0 16px;}
-.export-btn{flex:1;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);padding:16px;text-align:center;cursor:pointer;box-shadow:var(--s1);transition:all 0.2s;font-family:var(--f);}
-.export-btn:hover{transform:translateY(-2px);box-shadow:var(--s2);}
-.export-btn .ei{font-size:24px;margin-bottom:6px;}
-.export-btn .et{font-size:13px;font-weight:600;color:var(--ink);}
-
-/* SETTINGS */
-.settings{margin:0 16px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);box-shadow:var(--s1);overflow:hidden;}
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--ink7);}
-.set-row:last-child{border-bottom:none;}
-.set-label{font-size:14px;font-weight:600;color:var(--ink);}
-.set-val{font-size:14px;font-weight:600;color:var(--vi);}
-.toggle{width:44px;height:26px;border-radius:13px;background:var(--ink5);position:relative;cursor:pointer;transition:background 0.3s;}
-.toggle.on{background:var(--mint);}
-.toggle-knob{width:22px;height:22px;border-radius:11px;background:#fff;position:absolute;top:2px;left:2px;transition:transform 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.15);}
-.toggle.on .toggle-knob{transform:translateX(18px);}
-
-/* TEMPLATES */
-.tmpl-row{display:flex;gap:10px;padding:0 16px;}
-.tmpl{flex:1;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);padding:16px;text-align:center;cursor:pointer;box-shadow:var(--s1);transition:all 0.2s;font-family:var(--f);}
-.tmpl:hover{transform:translateY(-2px);box-shadow:var(--s2);}
-.tmpl-emoji{font-size:28px;margin-bottom:8px;}
-.tmpl-name{font-size:13px;font-weight:700;color:var(--ink);}
-.tmpl-dist{font-size:11px;color:var(--ink4);margin-top:2px;}
-
-/* ADD TRIP FORM */
-.add-form{padding:0 16px;}
-.add-label{font-size:13px;font-weight:600;color:var(--ink3);margin:12px 0 6px;}
-.add-input{width:100%;padding:14px 16px;border-radius:var(--r);background:var(--white);border:1px solid var(--ink6);font-size:15px;color:var(--ink);font-family:var(--f);box-shadow:var(--s1);outline:none;transition:border 0.2s;}
-.add-input:focus{border-color:var(--mag);}
-.cat-row{display:flex;gap:10px;}
-.cat-pill{flex:1;padding:12px;text-align:center;border-radius:var(--rpill);background:var(--white);border:1.5px solid var(--ink6);font-size:14px;font-weight:600;color:var(--ink3);cursor:pointer;font-family:var(--f);transition:all 0.2s;}
-.cat-pill.biz-active{background:var(--vi-s);border-color:var(--vi);color:var(--vi);}
-.cat-pill.per-active{background:var(--mag-s);border-color:var(--mag);color:var(--mag);}
-.save-btn{width:100%;padding:16px;border-radius:var(--rpill);background:var(--mag);color:#fff;font-size:16px;font-weight:700;border:none;cursor:pointer;font-family:var(--f);margin-top:24px;box-shadow:var(--s3);transition:all 0.2s;}
-.save-btn:hover{background:var(--mag2);transform:translateY(-2px);}
-.ded-preview{display:flex;justify-content:space-between;align-items:center;background:var(--mint-s);border-radius:var(--r);padding:16px;margin-top:16px;}
-.ded-preview .dl{font-size:13px;font-weight:600;color:var(--mint2);}
-.ded-preview .dv{font-size:20px;font-weight:800;color:var(--mint);}
-
-/* NOTIFICATIONS */
-.notif{display:flex;align-items:flex-start;gap:12px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);padding:16px;margin:0 16px 10px;box-shadow:var(--s1);position:relative;}
-.notif.unread{border-left:3px solid var(--mag);}
-.notif-dot{position:absolute;top:16px;right:16px;width:8px;height:8px;border-radius:4px;background:var(--mag);}
-.notif-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.notif-title{font-size:14px;font-weight:700;color:var(--ink);}
-.notif-body{font-size:12px;color:var(--ink3);margin-top:2px;}
-.notif-time{font-size:11px;color:var(--ink4);margin-top:6px;}
+/* TRIPS — horizontal scroll */
+.trips{display:flex;gap:14px;padding:0 16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;}.trips::-webkit-scrollbar{display:none;}
+.trip{min-width:310px;max-width:82vw;flex-shrink:0;scroll-snap-align:start;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);overflow:hidden;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);cursor:pointer;box-shadow:var(--s2);}
+.trip:hover{border-color:var(--ink5);box-shadow:var(--s3);transform:translateY(-4px);}
+/* Vertical trip list */
+.trip-list{padding:0 16px;display:flex;flex-direction:column;gap:12px;}
+.trip-list .trip{min-width:auto;max-width:none;flex-shrink:unset;}
+.trip-map{height:90px;position:relative;overflow:hidden;}
+.trip-map-bg{position:absolute;inset:0;}
+.trip-map-bg.biz{background:linear-gradient(135deg,#F0ECFF,#E8E0FF,#F5F0FF);}
+.trip-map-bg.pers{background:linear-gradient(135deg,#FFF0F5,#FFE0EB,#FFF5F8);}
+.trip-map-bg.uncl{background:linear-gradient(135deg,#FFF8EC,#FFEFCF,#FFF9F0);}
+.trip-map-grid{position:absolute;inset:0;opacity:0.15;background-image:linear-gradient(rgba(0,0,0,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.05) 1px,transparent 1px);background-size:24px 24px;}
+.trip-map svg{position:relative;z-index:1;width:100%;height:100%;}
+.trip-map-badge{position:absolute;top:10px;right:10px;padding:5px 13px;border-radius:var(--rpill);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;z-index:2;backdrop-filter:blur(12px);box-shadow:var(--s1);}
+.trip-map-badge.biz{background:rgba(108,60,224,0.12);color:var(--vi);border:1px solid rgba(108,60,224,0.15);}
+.trip-map-badge.pers{background:rgba(214,0,110,0.1);color:var(--mag);border:1px solid rgba(214,0,110,0.12);}
+.trip-map-badge.uncl{background:rgba(224,141,0,0.12);color:var(--amber);border:1px solid rgba(224,141,0,0.15);}
+.trip-map-time{position:absolute;top:10px;left:10px;padding:5px 12px;border-radius:var(--rpill);font-size:10px;font-weight:700;background:rgba(255,255,255,0.88);color:var(--ink2);z-index:2;backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.05);box-shadow:var(--s1);}
+.trip-body{padding:14px 16px 8px;}
+.trip-route{display:flex;gap:12px;margin-bottom:4px;}
+.trip-dots{display:flex;flex-direction:column;align-items:center;padding-top:4px;flex-shrink:0;}
+.td{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.td.s{border:3px solid var(--ink);background:var(--white);}
+.td.eb{background:var(--vi);box-shadow:0 0 0 3px var(--vi-s2);}.td.ep{background:var(--mag);box-shadow:0 0 0 3px var(--mag-s2);}.td.eu{background:var(--amber);box-shadow:0 0 0 3px var(--amber-s2);}
+.tl{width:2px;flex:1;min-height:18px;margin:3px 0;border-radius:2px;}
+.tl.biz{background:linear-gradient(var(--ink),var(--vi));}.tl.pers{background:linear-gradient(var(--ink),var(--mag));}.tl.uncl{background:repeating-linear-gradient(180deg,var(--amber) 0,var(--amber) 4px,transparent 4px,transparent 8px);}
+.trip-addrs{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.ta-lbl{font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:0.8px;}
+.ta-name{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-mi{text-align:right;flex-shrink:0;padding-right:2px;}
+.trip-mi-v{font-family:var(--fd);font-size:34px;font-weight:800;letter-spacing:-2px;line-height:1;}
+.trip-mi-v.biz{color:var(--vi)}.trip-mi-v.pers{color:var(--mag)}.trip-mi-v.uncl{color:var(--amber)}
+.trip-mi-u{font-size:10px;font-weight:600;color:var(--ink4);}
+.trip-foot{display:flex;align-items:center;padding:6px 16px 12px;font-size:12px;color:var(--ink3);}
+.trip-foot-l{display:flex;gap:6px;font-weight:600;}
+.trip-foot-l span{padding:4px 12px;border-radius:var(--rpill);background:var(--ink7);font-size:11px;font-weight:600;color:var(--ink3);}
+.trip-ded{color:var(--mint)!important;font-weight:700!important;background:var(--mint-s)!important;}
+.trip-cls{display:flex;gap:8px;padding:10px 16px 6px;}
+/* TRIP ACTIONS — Edit / Delete row */
+.trip-actions{display:flex;gap:8px;padding:4px 16px 14px;}
+.ta-btn{
+  flex:1;padding:10px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);
+  background:var(--white);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:var(--s1);color:var(--ink3);
+}
+.ta-btn:hover{border-color:var(--ink5);background:var(--ink7);transform:translateY(-2px);box-shadow:var(--s2);}
+.ta-btn:active{transform:scale(0.96);}
+.ta-btn.edit{color:var(--vi);}
+.ta-btn.edit:hover{border-color:var(--vi-s2);background:var(--vi-s);}
+.ta-btn.del{color:var(--coral);}
+.ta-btn.del:hover{border-color:rgba(239,61,88,0.2);background:var(--coral-s);}
 
 /* EDIT MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(12,12,29,0.5);backdrop-filter:blur(6px);z-index:200;align-items:flex-end;justify-content:center;}
-.modal-overlay.show{display:flex;}
-.modal{width:393px;max-width:100vw;background:var(--white);border-radius:var(--r3) var(--r3) 0 0;padding:20px;animation:slideUp 0.35s ease;}
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(12,12,29,0.5);backdrop-filter:blur(8px);
+  align-items:flex-end;justify-content:center;
+}
+.modal-overlay.show{display:flex;animation:fadeIn 0.25s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  width:393px;max-width:100vw;background:var(--white);
+  border-radius:var(--r3) var(--r3) 0 0;
+  padding:24px 20px calc(24px + env(safe-area-inset-bottom,0));
+  box-shadow:0 -12px 48px rgba(12,12,29,0.15);
+  animation:slideUp 0.35s cubic-bezier(0.22,1,0.36,1);
+}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--ink5);margin:0 auto 20px;}
-.modal-title{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--ink);margin-bottom:16px;}
-.modal-btns{display:flex;gap:10px;margin-top:20px;}
-.modal-btn{flex:1;padding:14px;border-radius:var(--rpill);text-align:center;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:var(--f);}
-.modal-btn.cancel{background:var(--ink7);color:var(--ink2);}
-.modal-btn.save{background:var(--mag);color:#fff;}
-.modal-btn.delete{background:var(--coral);color:#fff;}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:var(--ink6);margin:0 auto 20px;}
+.modal-title{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--ink);margin-bottom:20px;}
+.modal .iw{padding:0;margin-bottom:12px;}
+.modal .inp{border-radius:var(--r);}
+.modal-row{display:flex;gap:10px;margin-top:8px;}
+.modal-row .cta{flex:1;}
+.modal-cancel{
+  flex:1;padding:17px 24px;border-radius:var(--rpill);border:1.5px solid var(--ink6);
+  background:var(--white);color:var(--ink);font-family:var(--f);font-size:16px;font-weight:700;
+  cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;
+}
+.modal-cancel:hover{background:var(--ink7);}
+
+/* DELETE CONFIRM */
+.del-modal .modal-title{color:var(--coral);}
+.del-msg{font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:20px;}
+.del-route{padding:14px 16px;background:var(--ink7);border-radius:var(--r);margin-bottom:20px;font-size:13px;font-weight:600;color:var(--ink);}
+.btn-del-confirm{
+  flex:1;padding:17px 24px;border-radius:var(--rpill);border:none;
+  background:linear-gradient(135deg,var(--coral),#FF6B8A);color:#fff;
+  font-family:var(--f);font-size:16px;font-weight:700;cursor:pointer;
+  transition:all 0.3s;box-shadow:0 6px 20px rgba(239,61,88,0.2);
+  display:flex;align-items:center;justify-content:center;
+}
+.btn-del-confirm:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(239,61,88,0.25);}
+.cls{flex:1;padding:11px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:var(--ink4);display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);box-shadow:var(--s1);}
+.cls:hover:not(.ob):not(.op){background:var(--ink7);border-color:var(--ink5);color:var(--ink3);}.cls:active{transform:scale(0.96);}
+.cls-d{width:8px;height:8px;border-radius:50%;border:2.5px solid currentColor;transition:all 0.3s;}
+.cls.ob{color:#fff;background:linear-gradient(135deg,var(--vi),#8B5CF6);border-color:transparent;box-shadow:0 4px 16px rgba(108,60,224,0.25),inset 0 1px 0 rgba(255,255,255,0.15);}
+.cls.ob .cls-d{background:#fff;border-color:#fff;}
+.cls.op{color:#fff;background:linear-gradient(135deg,var(--mag),#E8369A);border-color:transparent;box-shadow:0 4px 16px rgba(214,0,110,0.25),inset 0 1px 0 rgba(255,255,255,0.15);}
+.cls.op .cls-d{background:#fff;border-color:#fff;}
+
+/* INSIGHTS */
+.ins-grid{padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:4px;}
+.ins-row{display:flex;gap:10px;}
+.ins{flex:1;padding:18px 14px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);transition:all 0.35s cubic-bezier(0.22,1,0.36,1);box-shadow:var(--s1);overflow:hidden;position:relative;}
+.ins:hover{transform:translateY(-4px);box-shadow:var(--s3);border-color:var(--ink5);}
+.ins::before{content:'';position:absolute;top:-20px;right:-20px;width:60px;height:60px;border-radius:50%;filter:blur(20px);opacity:0.5;pointer-events:none;}
+.ins.c1::before{background:var(--vi)}.ins.c2::before{background:var(--mag)}.ins.c3::before{background:var(--mint)}.ins.c4::before{background:var(--ink4)}
+.ins-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;position:relative;z-index:1;}
+.ins-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.ins-icon.c1{background:var(--vi-s2)}.ins-icon.c2{background:var(--mag-s2)}.ins-icon.c3{background:var(--mint-s2)}.ins-icon.c4{background:rgba(0,0,0,0.04)}
+.ins-trend{font-size:10px;font-weight:800;padding:4px 10px;border-radius:var(--rpill);}
+.ins-trend.up{color:var(--mint);background:var(--mint-s);border:1px solid var(--mint-s2);}
+.ins-trend.dn{color:var(--coral);background:var(--coral-s);border:1px solid rgba(239,61,88,0.12);}
+.ins-v{font-family:var(--fd);font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;position:relative;z-index:1;}
+.ins-v.c1{color:var(--vi)}.ins-v.c2{color:var(--mag)}.ins-v.c3{color:var(--mint)}.ins-v.c4{color:var(--ink)}
+.ins-l{font-size:11px;color:var(--ink3);font-weight:500;margin-top:4px;}
+.ins-chart{display:flex;align-items:flex-end;gap:3px;height:24px;margin-top:10px;}
+.ins-bar{flex:1;border-radius:2px;min-height:3px;}
+.ins-bar.c1{background:linear-gradient(180deg,var(--vi),rgba(108,60,224,0.3));}.ins-bar.c2{background:linear-gradient(180deg,var(--mag),rgba(214,0,110,0.3));}
+.ins-prog{height:4px;background:var(--ink7);border-radius:2px;margin-top:10px;overflow:hidden;}
+.ins-prog-fill{height:100%;border-radius:2px;}
+.ins-prog-fill.c1{background:linear-gradient(90deg,var(--vi),#A78BFA);width:0;transition:width 1.5s cubic-bezier(0.22,1,0.36,1) 0.3s;}
+.ins-prog-fill.c2{background:linear-gradient(90deg,var(--mag),#F472B6);width:0;transition:width 1.5s cubic-bezier(0.22,1,0.36,1) 0.3s;}
+
+/* TAX */
+.tax{margin:8px 16px 0;padding:26px 22px;background:linear-gradient(145deg,#ECFDF5,#D1FAE5,#A7F3D0);border:1px solid rgba(0,168,112,0.12);border-radius:var(--r3);position:relative;overflow:hidden;box-shadow:var(--s2);}
+.tax::before{content:'';position:absolute;top:-30px;right:-30px;width:140px;height:140px;background:radial-gradient(circle,rgba(0,168,112,0.12),transparent);pointer-events:none;}
+.tax-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;background:rgba(0,168,112,0.1);border-radius:var(--rpill);font-size:10px;font-weight:700;color:var(--mint2);margin-bottom:12px;}
+.tax-amt{font-family:var(--fd);font-size:52px;font-weight:800;color:var(--ink);letter-spacing:-3px;line-height:1;position:relative;z-index:1;}
+.tax-det{font-size:13px;color:var(--ink2);margin-top:8px;font-weight:500;}
+.tax-split{display:flex;gap:3px;margin-top:16px;height:6px;}.tax-seg{border-radius:3px;}.tax-seg.b{background:var(--vi);flex:7;}.tax-seg.p{background:var(--mag);flex:3;}
+.tax-legend{display:flex;gap:16px;margin-top:10px;}.tax-legend span{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--ink3);}.tax-lg-dot{width:8px;height:8px;border-radius:50%;}
+
+/* TEMPLATES */
+.tmpl-r{display:flex;gap:10px;padding:0 16px;overflow-x:auto;scrollbar-width:none;}.tmpl-r::-webkit-scrollbar{display:none;}
+.tmpl{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:var(--s1);}
+.tmpl:hover{border-color:var(--vi-s2);transform:translateY(-3px);box-shadow:var(--s3);}
+.tmpl-e{font-size:16px;}.tmpl-n{font-size:12px;font-weight:700;color:var(--ink);}.tmpl-m{font-size:10px;color:var(--ink4);font-weight:500;}
+.tmpl-add{display:flex;align-items:center;gap:6px;padding:11px 16px;background:none;border:2px dashed var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;color:var(--ink4);font-family:var(--f);font-size:12px;font-weight:600;flex-shrink:0;transition:all 0.25s;}.tmpl-add:hover{border-color:var(--mag);color:var(--mag);}
+
+/* EXPORT */
+.exp-r{display:flex;gap:10px;padding:0 16px;margin-bottom:4px;}
+.exp{flex:1;padding:13px;border-radius:var(--rpill);border:1px solid var(--ink6);background:var(--white);color:var(--ink);font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:var(--s1);}
+.exp:hover{border-color:var(--ink5);transform:translateY(-3px);box-shadow:var(--s3);}
+.exp.ac{border-color:var(--mag-s2);color:var(--mag);}.exp.ac:hover{border-color:var(--mag);background:var(--mag-s);}
+
+/* SETTINGS */
+.set{margin:0 16px 12px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);overflow:hidden;box-shadow:var(--s1);}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:15px 16px;border-bottom:1px solid var(--ink6);transition:background 0.15s;}.sr:last-child{border-bottom:none;}.sr:hover{background:var(--ink7);}
+.sr h4{font-size:14px;font-weight:700;color:var(--ink);}.sr p{font-size:11px;color:var(--ink3);margin-top:1px;font-weight:500;}
+.tgl{width:48px;height:28px;border-radius:14px;background:var(--ink6);position:relative;cursor:pointer;flex-shrink:0;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);}
+.tgl::after{content:'';width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.tgl.on{background:linear-gradient(135deg,var(--mag),var(--vi));}.tgl.on::after{transform:translateX(20px);}
+.sr-sel{padding:7px 12px;border-radius:var(--rpill);border:1px solid var(--ink6);background:var(--white);color:var(--ink);font-family:var(--f);font-size:12px;font-weight:600;cursor:pointer;}
+.sr-n{padding:6px 10px;border-radius:var(--rpill);border:1px solid var(--ink6);background:var(--white);color:var(--ink);font-family:var(--f);font-size:13px;font-weight:700;text-align:center;width:52px;}
+.btn-rd{padding:7px 16px;border-radius:var(--rpill);border:1px solid rgba(239,61,88,0.15);background:var(--coral-s);color:var(--coral);font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;}.btn-rd:hover{border-color:var(--coral);}
+
+/* INPUTS */
+.iw{padding:0 16px;margin-bottom:10px;}
+.inp{width:100%;padding:14px 20px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);color:var(--ink);font-family:var(--f);font-size:14px;font-weight:500;transition:all 0.25s;box-shadow:var(--s1);}
+.inp::placeholder{color:var(--ink4);}.inp:focus{outline:none;border-color:var(--mag);box-shadow:0 0 0 4px var(--mag-s);}
+
+/* CTA */
+.cta-w{padding:8px 16px;}
+.cta{width:100%;padding:17px 24px;border-radius:var(--rpill);border:none;background:linear-gradient(135deg,var(--mag),var(--vi));color:#fff;font-family:var(--f);font-size:16px;font-weight:700;cursor:pointer;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);box-shadow:0 8px 28px rgba(214,0,110,0.2),0 2px 8px rgba(108,60,224,0.12);display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;}
+.cta::before{content:'';position:absolute;top:0;left:-100%;width:200%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);transition:left 0.6s;}
+.cta:hover::before{left:100%;}.cta:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(214,0,110,0.25);}.cta:active{transform:scale(0.97);}
+
+/* ALERTS */
+.al-list{padding:0 16px;display:flex;flex-direction:column;gap:10px;}
+.al{display:flex;gap:14px;padding:16px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);transition:all 0.25s;box-shadow:var(--s1);position:relative;}
+.al:hover{border-color:var(--ink5);box-shadow:var(--s2);}
+.al.new{border-left:3px solid var(--mag);}
+.al-new-dot{position:absolute;top:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--mag);box-shadow:0 0 8px rgba(214,0,110,0.3);}
+.al-ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.al-body{flex:1;min-width:0;}
+.al-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.al-desc{font-size:12px;color:var(--ink3);font-weight:500;line-height:1.4;}
+.al-time{font-size:11px;color:var(--ink4);font-weight:600;margin-top:6px;}
+
+.div{height:8px;background:var(--bg);}
 
 /* BOTTOM NAV */
-.nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:360px;max-width:calc(100vw - 32px);background:var(--white);border-radius:var(--rpill);display:flex;padding:10px 8px;box-shadow:0 10px 40px rgba(12,12,29,0.12),0 2px 8px rgba(12,12,29,0.06);z-index:150;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;border-radius:var(--rpill);transition:all 0.25s;}
-.nav-item:hover{background:var(--ink7);}
-.nav-item.active .nav-label{color:var(--mag);font-weight:700;}
-.nav-icon{font-size:22px;line-height:1;}
-.nav-label{font-size:10px;font-weight:600;color:var(--ink4);transition:color 0.25s;}
-.nav-badge{position:absolute;top:-2px;right:calc(50% - 18px);min-width:16px;height:16px;border-radius:8px;background:var(--mag);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px;}
-
-/* PERIOD PILLS */
-.period-row{display:flex;gap:8px;padding:16px 16px 8px;}
-.period-pill{flex:1;padding:10px;text-align:center;border-radius:var(--rpill);background:var(--white);border:1px solid var(--ink6);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:var(--f);box-shadow:var(--s1);transition:all 0.2s;}
-.period-pill.active{background:var(--ink);color:#fff;border-color:var(--ink);}
-
-.mark-read{padding:6px 14px;border-radius:var(--rpill);background:var(--vi-s);font-size:12px;font-weight:600;color:var(--vi);cursor:pointer;border:none;font-family:var(--f);}
-
-/* FAB */
-.fab{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--mag);padding:14px 28px;border-radius:var(--rpill);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:var(--s3);z-index:140;font-family:var(--f);border:none;display:none;transition:all 0.2s;}
-.fab:hover{transform:translateX(-50%) translateY(-2px);box-shadow:var(--s4);}
-
-.empty{text-align:center;padding:60px 40px;}
-.empty-emoji{font-size:48px;margin-bottom:12px;}
-.empty-text{font-size:18px;font-weight:700;color:var(--ink);}
-.empty-sub{font-size:14px;color:var(--ink3);margin-top:4px;}
+.bnav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(12,12,29,0.94);backdrop-filter:blur(28px) saturate(2);border:1px solid rgba(255,255,255,0.08);border-radius:var(--rpill);z-index:100;box-shadow:0 20px 60px rgba(12,12,29,0.45),0 4px 16px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.04);}
+.ni{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 18px;min-width:72px;border-radius:var(--rpill);border:none;background:transparent;cursor:pointer;font-family:var(--f);position:relative;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);}
+.ni svg{width:21px;height:21px;fill:rgba(255,255,255,0.3);transition:all 0.35s ease;flex-shrink:0;}
+.ni span{font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:0.3px;transition:all 0.35s ease;}
+.ni:hover:not(.a){background:rgba(255,255,255,0.05);}.ni:hover:not(.a) svg{fill:rgba(255,255,255,0.5);}.ni:hover:not(.a) span{color:rgba(255,255,255,0.5);}
+.ni.a{background:linear-gradient(135deg,var(--mag),var(--vi));box-shadow:0 4px 20px rgba(214,0,110,0.3),inset 0 1px 0 rgba(255,255,255,0.15);}
+.ni.a svg{fill:#fff;}.ni.a span{color:#fff;font-weight:800;}
+.ni-b{position:absolute;top:2px;right:8px;min-width:17px;height:17px;border-radius:9px;background:linear-gradient(135deg,#FF4D6A,#FF6B8A);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 8px rgba(255,77,106,0.4);border:2px solid rgba(12,12,29,0.94);}
 </style>
 </head>
 <body>
-<div class="phone">
+<div class="phone"><div class="scroll">
+
+  <!-- HEADER -->
   <div class="hdr">
-    <div class="hdr-l">
-      <div class="hdr-av">SS</div>
-      <div><div class="hdr-greet" id="greet">Good morning</div><div class="hdr-name">SS</div></div>
-    </div>
-    <div class="hdr-r">
-      <div class="hdr-btn" onclick="switchTab('alerts')">🔔<div class="hdr-dot" id="hdrDot"></div></div>
-    </div>
+    <div class="hdr-l"><div class="hdr-av">S</div><div><div class="hdr-greet">Good afternoon</div><div class="hdr-name">Welcome back</div></div></div>
+    <div class="hdr-r"><div class="hdr-btn" style="position:relative">🔔<div class="hdr-dot"></div></div><div class="hdr-btn">⚙</div></div>
   </div>
 
-  <div class="scroll">
-    <!-- ════════ DRIVE TAB ════════ -->
-    <div class="tab active" id="tab-drive">
-      <div class="hero">
-        <div class="hero-mesh"><div class="m1"></div><div class="m2"></div><div class="m3"></div></div>
-        <div class="hero-noise"></div>
-        <div class="hero-content">
-          <div class="hero-top">
-            <div class="hero-status"><div class="hero-dot"></div><span id="trackStatus">GPS Active</span></div>
-            <div class="hero-brand">MYMILESAI</div>
-          </div>
-          <div class="speedo">
-            <div class="speedo-wrap">
-              <svg class="speedo-svg" viewBox="0 0 200 110">
-                <defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#C084FC"/><stop offset="50%" stop-color="#D6006E"/><stop offset="100%" stop-color="#6EE7B7"/></linearGradient></defs>
-                <path class="sp-track" d="M 15 100 A 85 85 0 0 1 185 100"/>
-                <path class="sp-glow" id="spGlow" d="M 15 100 A 85 85 0 0 1 185 100"/>
-                <path class="sp-fill" id="spFill" d="M 15 100 A 85 85 0 0 1 185 100"/>
-              </svg>
-              <div class="speedo-center"><div class="sp-num" id="speedNum">0</div><div class="sp-unit">MPH</div></div>
-            </div>
-          </div>
-          <div class="hero-stats">
-            <div class="hs"><div class="hs-v c1" id="bizMi">42.8</div><div class="hs-l">Business mi</div></div>
-            <div class="hs"><div class="hs-v c2" id="perMi">18.3</div><div class="hs-l">Personal mi</div></div>
-            <div class="hs"><div class="hs-v c3" id="dedAmt">$29.96</div><div class="hs-l">Deduction</div></div>
-          </div>
+  <!-- ══════════ TAB 1: DRIVE ══════════ -->
+  <div class="tab active" id="tab-drive">
+    <div class="hero">
+      <div class="hero-mesh"><div class="m1"></div><div class="m2"></div><div class="m3"></div></div><div class="hero-noise"></div>
+      <div class="hero-content">
+        <div class="hero-top"><div class="hero-status"><span class="hero-dot"></span>GPS Active</div><div class="hero-brand">MyMilesAI</div></div>
+        <div class="speedo"><div class="speedo-wrap">
+          <svg class="speedo-svg" viewBox="0 0 200 110"><defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="40%" stop-color="#C084FC"/><stop offset="70%" stop-color="#FB7185"/><stop offset="100%" stop-color="#FCA5A5"/></linearGradient></defs>
+            <line x1="25" y1="95" x2="25" y2="88" class="sp-tick"/><line x1="48" y1="65" x2="53" y2="70" class="sp-tick"/><line x1="80" y1="42" x2="82" y2="48" class="sp-tick"/><line x1="120" y1="42" x2="118" y2="48" class="sp-tick"/><line x1="152" y1="65" x2="147" y2="70" class="sp-tick"/><line x1="175" y1="95" x2="175" y2="88" class="sp-tick"/>
+            <path d="M22,97 A78,78 0 0,1 178,97" class="sp-track"/><path d="M22,97 A78,78 0 0,1 178,97" class="sp-glow"/><path d="M22,97 A78,78 0 0,1 178,97" class="sp-fill"/>
+          </svg>
+          <div class="speedo-center"><div class="sp-num">0</div><div class="sp-unit">mph</div></div>
+        </div></div>
+        <div class="hero-stats">
+          <div class="hs"><div class="hs-v c1" data-count="42.8">0</div><div class="hs-l">Business mi</div></div>
+          <div class="hs"><div class="hs-v c2" data-count="18.3">0</div><div class="hs-l">Personal mi</div></div>
+          <div class="hs"><div class="hs-v c3" data-count="29.96" data-prefix="$">$0</div><div class="hs-l">Deduction</div></div>
         </div>
       </div>
-
-      <div class="qa">
-        <button class="qa-btn pri" id="autoBtn" onclick="toggleAutoStart(this)"><span class="i">🔴</span> Auto Start</button>
-        <button class="qa-btn" onclick="switchTab('addtrip')"><span class="i">✏️</span> Add Manual</button>
-        <button class="qa-btn"><span class="i">🗺️</span> Map</button>
-        <button class="qa-btn" onclick="switchTab('stats')"><span class="i">📊</span> Reports</button>
-      </div>
-
-      <div class="uncl" onclick="switchTab('trips')" id="unclBanner">
-        <span class="uncl-i">⚡</span>
-        <div><div class="uncl-t" id="unclCount">3 unclassified trips</div><div class="uncl-d">Tap to classify for deductions</div></div>
-        <span class="uncl-a">→</span>
-      </div>
-
-      <div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTab('trips')">See all →</span></div>
-      <div id="recentTrips"></div>
-
-      <div class="sh"><span class="sh-t">Quick Templates</span></div>
-      <div class="tmpl-row">
-        <div class="tmpl" onclick="useTemplate('Office')"><div class="tmpl-emoji">🏢</div><div class="tmpl-name">Office</div><div class="tmpl-dist">8.4 mi</div></div>
-        <div class="tmpl" onclick="useTemplate('Client')"><div class="tmpl-emoji">🤝</div><div class="tmpl-name">Client</div><div class="tmpl-dist">6.7 mi</div></div>
-        <div class="tmpl" onclick="useTemplate('Airport')"><div class="tmpl-emoji">✈️</div><div class="tmpl-name">Airport</div><div class="tmpl-dist">14.1 mi</div></div>
-      </div>
     </div>
-
-    <!-- ════════ TRIPS TAB ════════ -->
-    <div class="tab" id="tab-trips">
-      <div class="sh"><span class="sh-t">Trips</span><span class="sh-pill" id="tripCountPill">0 trips</span></div>
-      <div class="filters">
-        <button class="fpill active" onclick="filterTrips('ALL',this)">All</button>
-        <button class="fpill" onclick="filterTrips('BUSINESS',this)">Business</button>
-        <button class="fpill" onclick="filterTrips('PERSONAL',this)">Personal</button>
-        <button class="fpill" onclick="filterTrips('UNCLASSIFIED',this)">Unclassified</button>
-      </div>
-      <div id="tripList"></div>
-      <button class="fab" id="tripFab" onclick="switchTab('addtrip')">+ Add Trip</button>
+    <div class="qa">
+      <button class="qa-btn pri" id="autoStartBtn" onclick="toggleAutoStart(this)"><span class="i" id="autoIcon">🔴</span>Auto Start</button>
+      <button class="qa-btn"><span class="i">📝</span>Add Manual</button>
+      <button class="qa-btn"><span class="i">🗺</span>Map</button>
+      <button class="qa-btn"><span class="i">📊</span>Reports</button>
     </div>
-
-    <!-- ════════ STATS TAB ════════ -->
-    <div class="tab" id="tab-stats">
-      <div class="sh"><span class="sh-t">Stats</span></div>
-      <div class="period-row">
-        <button class="period-pill" onclick="setPeriod('day',this)">Day</button>
-        <button class="period-pill" onclick="setPeriod('week',this)">Week</button>
-        <button class="period-pill active" onclick="setPeriod('month',this)">Month</button>
-        <button class="period-pill" onclick="setPeriod('year',this)">Year</button>
-      </div>
-      <div class="stat-grid" id="statGrid"></div>
-      <div class="tax" id="taxCard"></div>
-      <div class="sh"><span class="sh-t">Export</span></div>
-      <div class="export-row">
-        <div class="export-btn" onclick="alert('CSV export generated!')"><div class="ei">📄</div><div class="et">CSV</div></div>
-        <div class="export-btn" onclick="alert('PDF report generated!')"><div class="ei">📋</div><div class="et">PDF</div></div>
-        <div class="export-btn" onclick="alert('Report emailed!')"><div class="ei">📧</div><div class="et">Email</div></div>
-      </div>
-      <div class="sh"><span class="sh-t">Settings</span></div>
-      <div class="settings">
-        <div class="set-row"><span class="set-label">Auto-detect trips</span><div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
-        <div class="set-row"><span class="set-label">Default category</span><span class="set-val">Auto</span></div>
-        <div class="set-row"><span class="set-label">Speed threshold</span><span class="set-val">5 mph</span></div>
-        <div class="set-row"><span class="set-label">Trip alerts</span><div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
-        <div class="set-row"><span class="set-label">Weekly summary</span><div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
-        <div class="set-row"><span class="set-label">IRS mileage rate</span><span class="set-val">$0.70/mi</span></div>
-      </div>
+    <div class="uncl"><span class="uncl-i">⚠️</span><div><div class="uncl-t">3 Unclassified Trips</div><div class="uncl-d">Swipe to classify →</div></div><span class="uncl-a">›</span></div>
+    <div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link">See all →</span></div>
+    <div class="trips">
+      <div class="trip"><div class="trip-map"><div class="trip-map-bg biz"></div><div class="trip-map-grid"></div><svg viewBox="0 0 310 90" preserveAspectRatio="none"><path d="M20,70 C60,20 120,80 160,40 S250,60 290,25" fill="none" stroke="rgba(108,60,224,0.3)" stroke-width="2.5" stroke-linecap="round"/><circle cx="20" cy="70" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="290" cy="25" r="5" fill="#6C3CE0" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge biz">Business</div><div class="trip-map-time">2:30 PM · 18 min</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl biz"></div><div class="td eb"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">123 Main St, Downtown</div></div><div><div class="ta-lbl">To</div><div class="ta-name">456 Oak Ave, Westside</div></div></div><div class="trip-mi"><div class="trip-mi-v biz">8.4</div><div class="trip-mi-u">miles</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>Today</span><span class="trip-ded">+$5.88</span></div></div><div class="trip-actions"><button class="ta-btn edit" onclick="openEdit(this)">✏️ Edit</button><button class="ta-btn del" onclick="openDelete(this)">🗑️ Delete</button></div><div class="trip-cls"><button class="cls ob"><span class="cls-d"></span>Business</button><button class="cls"><span class="cls-d"></span>Personal</button></div></div>
+      <div class="trip"><div class="trip-map"><div class="trip-map-bg pers"></div><div class="trip-map-grid"></div><svg viewBox="0 0 310 90" preserveAspectRatio="none"><path d="M25,25 C80,75 150,20 200,65 S270,30 285,60" fill="none" stroke="rgba(214,0,110,0.25)" stroke-width="2.5" stroke-linecap="round"/><circle cx="25" cy="25" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="285" cy="60" r="5" fill="#D6006E" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge pers">Personal</div><div class="trip-map-time">5:15 PM · 9 min</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl pers"></div><div class="td ep"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">Home, Maple Drive</div></div><div><div class="ta-lbl">To</div><div class="ta-name">Costco, Regent Ave</div></div></div><div class="trip-mi"><div class="trip-mi-v pers">3.2</div><div class="trip-mi-u">miles</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>Today</span></div></div><div class="trip-actions"><button class="ta-btn edit" onclick="openEdit(this)">✏️ Edit</button><button class="ta-btn del" onclick="openDelete(this)">🗑️ Delete</button></div><div class="trip-cls"><button class="cls"><span class="cls-d"></span>Business</button><button class="cls op"><span class="cls-d"></span>Personal</button></div></div>
     </div>
-
-    <!-- ════════ ALERTS TAB ════════ -->
-    <div class="tab" id="tab-alerts">
-      <div class="sh"><span class="sh-t">Alerts</span><button class="mark-read" onclick="markAllRead()">Mark all read</button></div>
-      <div id="notifList"></div>
-    </div>
-
-    <!-- ════════ ADD TRIP TAB ════════ -->
-    <div class="tab" id="tab-addtrip">
-      <div class="sh"><span class="sh-link" onclick="switchTab('drive')">← Back</span><span class="sh-t">Add Trip</span><span class="sh-link" onclick="saveTrip()">Save</span></div>
-      <div class="add-form">
-        <div class="add-label">From</div>
-        <input class="add-input" id="addFrom" placeholder="Start address">
-        <div class="add-label">To</div>
-        <input class="add-input" id="addTo" placeholder="End address">
-        <div class="add-label">Distance (miles)</div>
-        <input class="add-input" id="addMiles" placeholder="0.0" type="number" step="0.1" oninput="updateDedPreview()">
-        <div class="add-label">Category</div>
-        <div class="cat-row">
-          <div class="cat-pill biz-active" id="catBiz" onclick="setAddCat('BUSINESS')">🟣 Business</div>
-          <div class="cat-pill" id="catPer" onclick="setAddCat('PERSONAL')">🔴 Personal</div>
-        </div>
-        <div class="ded-preview" id="dedPreview" style="display:none"><span class="dl">Estimated deduction</span><span class="dv" id="dedPreviewVal">+$0.00</span></div>
-        <button class="save-btn" onclick="saveTrip()">Save Trip</button>
-      </div>
+    <div class="sh"><span class="sh-t">Quick Templates</span></div>
+    <div class="tmpl-r">
+      <div class="tmpl"><span class="tmpl-e">🏢</span><div><div class="tmpl-n">Office</div><div class="tmpl-m">8.2 mi</div></div></div>
+      <div class="tmpl"><span class="tmpl-e">👤</span><div><div class="tmpl-n">Client</div><div class="tmpl-m">14.5 mi</div></div></div>
+      <div class="tmpl"><span class="tmpl-e">✈️</span><div><div class="tmpl-n">Airport</div><div class="tmpl-m">22.1 mi</div></div></div>
+      <button class="tmpl-add">+ New</button>
     </div>
   </div>
 
-  <!-- EDIT MODAL -->
-  <div class="modal-overlay" id="editOverlay" onclick="if(event.target===this)closeEdit()">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Edit Trip</div>
-      <div class="add-label">From</div><input class="add-input" id="editFrom">
-      <div class="add-label">To</div><input class="add-input" id="editTo">
-      <div class="add-label">Miles</div><input class="add-input" id="editMiles" type="number" step="0.1">
-      <div class="add-label">Category</div>
-      <div class="cat-row">
-        <div class="cat-pill" id="eCatBiz" onclick="setEditCat('BUSINESS')">🟣 Business</div>
-        <div class="cat-pill" id="eCatPer" onclick="setEditCat('PERSONAL')">🔴 Personal</div>
+  <!-- ══════════ TAB 2: TRIPS ══════════ -->
+  <div class="tab" id="tab-trips">
+    <div class="sh"><span class="sh-t">Your Trips</span><span class="sh-pill">12 trips</span></div>
+    <div class="tf-row">
+      <button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclassified</button>
+    </div>
+    <div class="trip-list">
+      <div class="trip"><div class="trip-map"><div class="trip-map-bg biz"></div><div class="trip-map-grid"></div><svg viewBox="0 0 360 90" preserveAspectRatio="none"><path d="M20,60 C80,15 160,70 220,30 S310,55 340,20" fill="none" stroke="rgba(108,60,224,0.3)" stroke-width="2.5" stroke-linecap="round"/><circle cx="20" cy="60" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="340" cy="20" r="5" fill="#6C3CE0" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge biz">Business</div><div class="trip-map-time">2:30 PM · 18 min</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl biz"></div><div class="td eb"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">123 Main St, Downtown</div></div><div><div class="ta-lbl">To</div><div class="ta-name">456 Oak Ave, Westside</div></div></div><div class="trip-mi"><div class="trip-mi-v biz">8.4</div><div class="trip-mi-u">miles</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>Today</span><span class="trip-ded">+$5.88</span></div></div><div class="trip-actions"><button class="ta-btn edit" onclick="openEdit(this)">✏️ Edit</button><button class="ta-btn del" onclick="openDelete(this)">🗑️ Delete</button></div><div class="trip-cls"><button class="cls ob"><span class="cls-d"></span>Business</button><button class="cls"><span class="cls-d"></span>Personal</button></div></div>
+      <div class="trip"><div class="trip-map"><div class="trip-map-bg pers"></div><div class="trip-map-grid"></div><svg viewBox="0 0 360 90" preserveAspectRatio="none"><path d="M25,20 C90,70 170,15 230,55 S300,25 340,50" fill="none" stroke="rgba(214,0,110,0.25)" stroke-width="2.5" stroke-linecap="round"/><circle cx="25" cy="20" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="340" cy="50" r="5" fill="#D6006E" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge pers">Personal</div><div class="trip-map-time">5:15 PM · 9 min</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl pers"></div><div class="td ep"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">Home, Maple Drive</div></div><div><div class="ta-lbl">To</div><div class="ta-name">Costco, Regent Ave</div></div></div><div class="trip-mi"><div class="trip-mi-v pers">3.2</div><div class="trip-mi-u">miles</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>Today</span></div></div><div class="trip-actions"><button class="ta-btn edit" onclick="openEdit(this)">✏️ Edit</button><button class="ta-btn del" onclick="openDelete(this)">🗑️ Delete</button></div><div class="trip-cls"><button class="cls"><span class="cls-d"></span>Business</button><button class="cls op"><span class="cls-d"></span>Personal</button></div></div>
+      <div class="trip"><div class="trip-map"><div class="trip-map-bg uncl"></div><div class="trip-map-grid"></div><svg viewBox="0 0 360 90" preserveAspectRatio="none"><path d="M20,45 C70,10 150,70 210,25 S290,60 340,35" fill="none" stroke="rgba(224,141,0,0.25)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="8 5"/><circle cx="20" cy="45" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="340" cy="35" r="6" fill="#E08D00" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge uncl">Classify</div><div class="trip-map-time">11:20 AM · 14 min</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl uncl"></div><div class="td eu"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">789 Elm St</div></div><div><div class="ta-lbl">To</div><div class="ta-name">FedEx, Industrial Park</div></div></div><div class="trip-mi"><div class="trip-mi-v uncl">5.1</div><div class="trip-mi-u">miles</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>Today</span></div></div><div class="trip-actions"><button class="ta-btn edit" onclick="openEdit(this)">✏️ Edit</button><button class="ta-btn del" onclick="openDelete(this)">🗑️ Delete</button></div><div class="trip-cls"><button class="cls"><span class="cls-d"></span>Business</button><button class="cls"><span class="cls-d"></span>Personal</button></div></div>
+      <div class="trip"><div class="trip-map"><div class="trip-map-bg biz"></div><div class="trip-map-grid"></div><svg viewBox="0 0 360 90" preserveAspectRatio="none"><path d="M20,30 C100,65 180,10 260,55 S330,25 340,45" fill="none" stroke="rgba(108,60,224,0.3)" stroke-width="2.5" stroke-linecap="round"/><circle cx="20" cy="30" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="340" cy="45" r="5" fill="#6C3CE0" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge biz">Business</div><div class="trip-map-time">Yesterday · 22 min</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl biz"></div><div class="td eb"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">Home, Maple Drive</div></div><div><div class="ta-lbl">To</div><div class="ta-name">WeWork, 5th & Main</div></div></div><div class="trip-mi"><div class="trip-mi-v biz">12.3</div><div class="trip-mi-u">miles</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>Yesterday</span><span class="trip-ded">+$8.61</span></div></div><div class="trip-actions"><button class="ta-btn edit" onclick="openEdit(this)">✏️ Edit</button><button class="ta-btn del" onclick="openDelete(this)">🗑️ Delete</button></div><div class="trip-cls"><button class="cls ob"><span class="cls-d"></span>Business</button><button class="cls"><span class="cls-d"></span>Personal</button></div></div>
+    </div>
+    <div class="sh"><span class="sh-t">Add Trip</span></div>
+    <div class="iw"><input type="text" class="inp" placeholder="📍 From address..."></div>
+    <div class="iw"><input type="text" class="inp" placeholder="📍 To address..."></div>
+    <div style="height:6px"></div>
+    <div class="cta-w"><button class="cta">Save Trip</button></div>
+  </div>
+
+  <!-- ══════════ TAB 3: STATS ══════════ -->
+  <div class="tab" id="tab-stats">
+    <div class="sh"><span class="sh-t">Statistics</span><span class="sh-pill">Mar 2026</span></div>
+    <div class="tf-row">
+      <button class="tf pp a" onclick="switchPeriod(this)">Day</button><button class="tf pp" onclick="switchPeriod(this)">Week</button><button class="tf pp" onclick="switchPeriod(this)">Month</button><button class="tf pp" onclick="switchPeriod(this)">Year</button>
+    </div>
+    <div class="ins-grid">
+      <div class="ins-row">
+        <div class="ins c1"><div class="ins-top"><div class="ins-icon c1">💼</div><span class="ins-trend up">+12%</span></div><div class="ins-v c1">42.8 mi</div><div class="ins-l">Business Miles</div><div class="ins-chart"><div class="ins-bar c1" style="height:40%"></div><div class="ins-bar c1" style="height:55%"></div><div class="ins-bar c1" style="height:35%"></div><div class="ins-bar c1" style="height:70%"></div><div class="ins-bar c1" style="height:90%"></div><div class="ins-bar c1" style="height:60%"></div><div class="ins-bar c1" style="height:80%"></div></div></div>
+        <div class="ins c2"><div class="ins-top"><div class="ins-icon c2">👤</div><span class="ins-trend dn">-5%</span></div><div class="ins-v c2">18.3 mi</div><div class="ins-l">Personal Miles</div><div class="ins-chart"><div class="ins-bar c2" style="height:60%"></div><div class="ins-bar c2" style="height:45%"></div><div class="ins-bar c2" style="height:70%"></div><div class="ins-bar c2" style="height:30%"></div><div class="ins-bar c2" style="height:25%"></div><div class="ins-bar c2" style="height:40%"></div><div class="ins-bar c2" style="height:35%"></div></div></div>
       </div>
-      <div class="modal-btns"><button class="modal-btn cancel" onclick="closeEdit()">Cancel</button><button class="modal-btn save" onclick="saveEdit()">Save Changes</button></div>
+      <div class="ins-row">
+        <div class="ins c3"><div class="ins-top"><div class="ins-icon c3">💰</div><span class="ins-trend up">+$4.20</span></div><div class="ins-v c3">$29.96</div><div class="ins-l">Tax Deduction</div><div class="ins-prog"><div class="ins-prog-fill c1" data-width="70%"></div></div></div>
+        <div class="ins c4"><div class="ins-top"><div class="ins-icon c4">🚗</div></div><div class="ins-v c4">12</div><div class="ins-l">Total Trips</div><div class="ins-prog"><div class="ins-prog-fill c2" data-width="30%"></div></div></div>
+      </div>
+    </div>
+    <div class="tax"><div class="tax-badge">💰 IRS 2026 Rate</div><div class="tax-amt">$29.96</div><div class="tax-det">42.8 business miles × $0.70/mile</div><div class="tax-split"><div class="tax-seg b"></div><div class="tax-seg p"></div></div><div class="tax-legend"><span><span class="tax-lg-dot" style="background:var(--vi)"></span>Business 70%</span><span><span class="tax-lg-dot" style="background:var(--mag)"></span>Personal 30%</span></div></div>
+    <div class="sh"><span class="sh-t">Export Reports</span></div>
+    <div class="exp-r"><button class="exp">📄 CSV</button><button class="exp">📋 PDF</button><button class="exp ac">📧 Email</button></div>
+    <div class="div"></div>
+    <div class="sh"><span class="sh-t">Settings</span></div>
+    <div class="set">
+      <div class="sr"><div><h4>Auto-detect trips</h4><p>Start recording when driving</p></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel"><option>Unclassified</option><option>Business</option><option>Personal</option></select></div>
+      <div class="sr"><div><h4>Speed threshold</h4><p>Min mph to detect</p></div><input type="number" class="sr-n" value="5"></div>
+      <div class="sr"><div><h4>Trip alerts</h4><p>Notify on save</p></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="sr"><div><h4>Weekly summary</h4><p>Sunday recap</p></div><div class="tgl" onclick="this.classList.toggle('on')"></div></div>
+      <div class="sr"><div><h4>IRS rate</h4><p>Per mile</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px"></div></div>
+      <div class="sr"><div><h4>Clear all data</h4><p>Remove records</p></div><button class="btn-rd">Clear</button></div>
     </div>
   </div>
 
-  <!-- DELETE MODAL -->
-  <div class="modal-overlay" id="delOverlay" onclick="if(event.target===this)closeDel()">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title" style="color:var(--coral)">Delete Trip?</div>
-      <p id="delInfo" style="font-size:14px;color:var(--ink2);margin-bottom:10px;"></p>
-      <div class="modal-btns"><button class="modal-btn cancel" onclick="closeDel()">Cancel</button><button class="modal-btn delete" onclick="confirmDel()">Delete Trip</button></div>
+  <!-- ══════════ TAB 4: ALERTS ══════════ -->
+  <div class="tab" id="tab-alerts">
+    <div class="sh"><span class="sh-t">Notifications</span><span class="sh-pill">3 new</span></div>
+    <div class="al-list">
+      <div class="al new"><div class="al-new-dot"></div><div class="al-ic" style="background:var(--mint-s)">✅</div><div class="al-body"><div class="al-title">Trip saved: 8.4 miles</div><div class="al-desc">123 Main St → 456 Oak Ave · +$5.88 deduction</div><div class="al-time">2 min ago</div></div></div>
+      <div class="al new"><div class="al-new-dot"></div><div class="al-ic" style="background:var(--amber-s)">⚠️</div><div class="al-body"><div class="al-title">3 trips need classification</div><div class="al-desc">Classify as business or personal to maximize deductions</div><div class="al-time">1 hour ago</div></div></div>
+      <div class="al new"><div class="al-new-dot"></div><div class="al-ic" style="background:var(--vi-s)">📊</div><div class="al-body"><div class="al-title">Weekly summary ready</div><div class="al-desc">61.1 miles this week — Business: 42.8 mi · Personal: 18.3 mi</div><div class="al-time">Sunday 6:00 PM</div></div></div>
+      <div class="al"><div class="al-ic" style="background:var(--mint-s)">✅</div><div class="al-body"><div class="al-title">Trip saved: 3.2 miles</div><div class="al-desc">Home → Costco, Regent Ave</div><div class="al-time">Yesterday</div></div></div>
+      <div class="al"><div class="al-ic" style="background:var(--mint-s)">✅</div><div class="al-body"><div class="al-title">Trip saved: 12.3 miles</div><div class="al-desc">Home → WeWork, 5th & Main · +$8.61 deduction</div><div class="al-time">Yesterday</div></div></div>
+      <div class="al"><div class="al-ic" style="background:rgba(0,0,0,0.04)">🎉</div><div class="al-body"><div class="al-title">Milestone: $25 deductions reached!</div><div class="al-desc">You've saved $29.96 in tax deductions this month</div><div class="al-time">2 days ago</div></div></div>
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
-  <div class="nav">
-    <div class="nav-item active" data-tab="drive" onclick="switchTab('drive')"><span class="nav-icon">🚗</span><span class="nav-label">Drive</span></div>
-    <div class="nav-item" data-tab="trips" onclick="switchTab('trips')"><span class="nav-icon">📋</span><span class="nav-label">Trips</span></div>
-    <div class="nav-item" data-tab="stats" onclick="switchTab('stats')"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></div>
-    <div class="nav-item" data-tab="alerts" onclick="switchTab('alerts')"><span class="nav-icon">🔔</span><span class="nav-label">Alerts</span><div class="nav-badge" id="navBadge">3</div></div>
+</div></div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Trip</div>
+    <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px;">From</label><input type="text" class="inp" id="editFrom" placeholder="📍 From address..."></div>
+    <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px;">To</label><input type="text" class="inp" id="editTo" placeholder="📍 To address..."></div>
+    <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px;">Miles</label><input type="number" class="inp" id="editMiles" placeholder="Distance in miles" step="0.1"></div>
+    <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px;">Category</label>
+      <div style="display:flex;gap:8px;">
+        <button class="cls ob" id="editBiz" onclick="setEditCat('biz')" style="flex:1"><span class="cls-d"></span>Business</button>
+        <button class="cls" id="editPers" onclick="setEditCat('pers')" style="flex:1"><span class="cls-d"></span>Personal</button>
+      </div>
+    </div>
+    <div class="modal-row">
+      <button class="modal-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="cta" onclick="saveEdit()" style="flex:1">Save Changes</button>
+    </div>
   </div>
 </div>
 
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal del-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🗑️ Delete Trip</div>
+    <div class="del-msg">Are you sure you want to delete this trip? This action cannot be undone.</div>
+    <div class="del-route" id="delRoute">123 Main St → 456 Oak Ave · 8.4 miles</div>
+    <div class="modal-row">
+      <button class="modal-cancel" onclick="closeDelete()">Cancel</button>
+      <button class="btn-del-confirm" onclick="confirmDelete()">Delete Trip</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="ni a" data-tab="tab-drive" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg><span>Drive</span></button>
+  <button class="ni" data-tab="tab-trips" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg><span>Trips</span></button>
+  <button class="ni" data-tab="tab-stats" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg><span>Stats</span></button>
+  <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b">3</div></button>
+</div>
+
 <script>
-// ═══════════════════════════════════════
-//  MyMilesAI — Complete Functional App
-// ═══════════════════════════════════════
-
-const IRS_RATE = 0.70;
-let currentFilter = 'ALL';
-let addCategory = 'BUSINESS';
-let editId = null;
-let editCat = 'BUSINESS';
-let delId = null;
-
-// ═══ DATA STORE ═══
-let trips = [
-  { id:'t1', from:'123 Home St', to:'456 Office Blvd', miles:8.4, dur:22, cat:'BUSINESS', ded:5.88, time:Date.now()-3600000, src:'AUTO' },
-  { id:'t2', from:'456 Office Blvd', to:'789 Grocery Ln', miles:3.2, dur:11, cat:'PERSONAL', ded:0, time:Date.now()-7200000, src:'AUTO' },
-  { id:'t3', from:'321 Main Ave', to:'SFO Airport Terminal 2', miles:14.1, dur:35, cat:'BUSINESS', ded:9.87, time:Date.now()-86400000, src:'MANUAL' },
-  { id:'t4', from:'555 Park Dr', to:'100 Client Tower', miles:6.7, dur:18, cat:'UNCLASSIFIED', ded:0, time:Date.now()-172800000, src:'AUTO' },
-  { id:'t5', from:'100 Client Tower', to:'123 Home St', miles:7.3, dur:20, cat:'BUSINESS', ded:5.11, time:Date.now()-259200000, src:'AUTO' },
-  { id:'t6', from:'Home', to:'Gym', miles:2.1, dur:8, cat:'PERSONAL', ded:0, time:Date.now()-345600000, src:'MANUAL' },
-  { id:'t7', from:'Office', to:'Downtown Meeting', miles:4.5, dur:15, cat:'UNCLASSIFIED', ded:0, time:Date.now()-432000000, src:'AUTO' },
-  { id:'t8', from:'Home', to:'Doctor', miles:5.8, dur:16, cat:'UNCLASSIFIED', ded:0, time:Date.now()-518400000, src:'AUTO' },
-];
-
-let notifications = [
-  { id:'n1', type:'TRIP_SAVED', icon:'✅', color:'var(--mint)', title:'Trip saved: 8.4 miles', body:'Home → Office · +$5.88 deduction', read:false, time:Date.now()-3600000 },
-  { id:'n2', type:'TRIP_CLASSIFY', icon:'⚡', color:'var(--amber)', title:'Classify your trip', body:'Park Dr → Client Tower · 6.7 mi', read:false, time:Date.now()-7200000 },
-  { id:'n3', type:'WEEKLY', icon:'📊', color:'var(--vi)', title:'Weekly Summary', body:'42.8 business miles · $29.96 deduction', read:false, time:Date.now()-86400000 },
-  { id:'n4', type:'MILESTONE', icon:'🎉', color:'var(--mag)', title:'100 trips tracked!', body:'Over $210 in deductions', read:true, time:Date.now()-172800000 },
-  { id:'n5', type:'TRIP_SAVED', icon:'✅', color:'var(--mint)', title:'Trip saved: 14.1 miles', body:'Main Ave → SFO · +$9.87 deduction', read:true, time:Date.now()-259200000 },
-];
-
-// ═══ PERSISTENCE ═══
-function saveData(){ try{ localStorage.setItem('mmai_trips',JSON.stringify(trips)); localStorage.setItem('mmai_notifs',JSON.stringify(notifications)); }catch(e){} }
-function loadData(){ try{
-  const t=localStorage.getItem('mmai_trips'); if(t) trips=JSON.parse(t);
-  const n=localStorage.getItem('mmai_notifs'); if(n) notifications=JSON.parse(n);
-}catch(e){} }
-
-// ═══ TAB SWITCHING ═══
-function switchTab(tab){
+function switchTab(el){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('a'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const navItem=document.querySelector(`.nav-item[data-tab="${tab}"]`);
-  if(navItem) navItem.classList.add('active');
-  document.getElementById('tripFab').style.display = tab==='trips'?'block':'none';
+  el.classList.add('a');
+  document.getElementById(el.dataset.tab).classList.add('active');
   document.querySelector('.scroll').scrollTop=0;
-  if(tab==='trips') renderTrips();
-  if(tab==='stats') renderStats();
-  if(tab==='alerts') renderNotifs();
-  if(tab==='drive') renderDrive();
+  if(el.dataset.tab==='tab-stats') setTimeout(animateBars,200);
 }
+function switchFilter(el){
+  el.closest('.tf-row').querySelectorAll('.tf').forEach(f=>f.classList.remove('a'));
+  el.classList.add('a');
+}
+function switchPeriod(el){
+  el.closest('.tf-row').querySelectorAll('.tf').forEach(f=>f.classList.remove('a'));
+  el.classList.add('a');
+}
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const t=parseFloat(el.dataset.count),p=el.dataset.prefix||'',dur=1800,st=performance.now();
+    function tick(now){const pr=Math.min((now-st)/dur,1),e=1-Math.pow(1-pr,4);el.textContent=p+(t*e).toFixed(t%1===0?0:t>=10?1:2);if(pr<1)requestAnimationFrame(tick);}
+    requestAnimationFrame(tick);
+  });
+}
+function animateBars(){
+  document.querySelectorAll('.ins-prog-fill[data-width]').forEach(el=>{el.style.width=el.dataset.width;});
+}
+document.querySelectorAll('.cls').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const row=btn.closest('.trip-cls');
+    row.querySelectorAll('.cls').forEach(b=>b.classList.remove('ob','op'));
+    if(btn.textContent.includes('Business'))btn.classList.add('ob');else btn.classList.add('op');
+  });
+});
+setTimeout(()=>{animateCounters();},600);
 
-// ═══ TIME FORMAT ═══
-function timeAgo(ts){
-  const d=Date.now()-ts, h=d/3600000;
-  if(h<1) return 'Just now';
-  if(h<24) return Math.floor(h)+'h ago';
-  if(h<48) return 'Yesterday';
-  return new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-}
-
-// ═══ RENDER TRIP CARD ═══
-function tripCard(t, showActions=true){
-  const catCfg={BUSINESS:{cls:'b',label:'Business',color:'var(--vi)'},PERSONAL:{cls:'p',label:'Personal',color:'var(--mag)'},UNCLASSIFIED:{cls:'u',label:'Unclassified',color:'var(--amber)'}};
-  const c=catCfg[t.cat];
-  const ded=t.cat==='BUSINESS'&&t.ded>0?`<span>·</span><span class="ded">+$${t.ded.toFixed(2)}</span>`:'';
-  const classifyBtns=t.cat==='UNCLASSIFIED'?`<button class="ta-btn biz" onclick="classify('${t.id}','BUSINESS')">🟣 Business</button><button class="ta-btn per" onclick="classify('${t.id}','PERSONAL')">🔴 Personal</button>`:'';
-  const actions=showActions?`<div class="trip-actions">${classifyBtns}<button class="ta-btn edit" onclick="openEdit('${t.id}')">✏️ Edit</button><button class="ta-btn del" onclick="openDel('${t.id}')">🗑️ Delete</button></div>`:'';
-  return `<div class="trip" id="trip-${t.id}">
-    <div class="trip-top"><div class="trip-route">
-      <div class="trip-from"><div class="trip-dot" style="background:${c.color}"></div>${t.from}</div>
-      <div class="trip-line"></div>
-      <div class="trip-to"><div class="trip-dot o" style="border-color:${c.color}"></div>${t.to}</div>
-    </div><div class="trip-badge ${c.cls}">${c.label}</div></div>
-    <div class="trip-meta"><span>🛣️ ${t.miles.toFixed(1)} mi</span><span>·</span><span>${timeAgo(t.time)}</span>${ded}</div>
-    ${actions}</div>`;
-}
-
-// ═══ RENDER DRIVE ═══
-function renderDrive(){
-  const biz=trips.filter(t=>t.cat==='BUSINESS');
-  const per=trips.filter(t=>t.cat==='PERSONAL');
-  const uncl=trips.filter(t=>t.cat==='UNCLASSIFIED');
-  const bizMi=biz.reduce((a,t)=>a+t.miles,0);
-  const perMi=per.reduce((a,t)=>a+t.miles,0);
-  const ded=biz.reduce((a,t)=>a+(t.ded||0),0);
-  document.getElementById('bizMi').textContent=bizMi.toFixed(1);
-  document.getElementById('perMi').textContent=perMi.toFixed(1);
-  document.getElementById('dedAmt').textContent='$'+ded.toFixed(2);
-  document.getElementById('unclCount').textContent=uncl.length+' unclassified trips';
-  document.getElementById('unclBanner').style.display=uncl.length>0?'flex':'none';
-  const recent=trips.slice(0,3);
-  document.getElementById('recentTrips').innerHTML=recent.map(t=>tripCard(t,false)).join('');
-  updateBadge();
-  // Greeting
-  const h=new Date().getHours();
-  document.getElementById('greet').textContent='Good '+(h<12?'morning':h<17?'afternoon':'evening');
-}
-
-// ═══ RENDER TRIPS ═══
-function renderTrips(){
-  const filtered=currentFilter==='ALL'?trips:trips.filter(t=>t.cat===currentFilter);
-  document.getElementById('tripCountPill').textContent=trips.length+' trips';
-  document.getElementById('tripList').innerHTML=filtered.length?filtered.map(t=>tripCard(t)).join(''):'<div class="empty"><div class="empty-emoji">🛣️</div><div class="empty-text">No trips</div></div>';
-}
-
-function filterTrips(cat,el){
-  currentFilter=cat;
-  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  renderTrips();
-}
-
-// ═══ RENDER STATS ═══
-function renderStats(period='month'){
-  const now=Date.now();
-  let from;
-  switch(period){
-    case 'day': from=new Date().setHours(0,0,0,0); break;
-    case 'week': from=now-7*86400000; break;
-    case 'year': from=new Date(new Date().getFullYear(),0,1).getTime(); break;
-    default: from=new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime();
-  }
-  const ft=trips.filter(t=>t.time>=from);
-  const biz=ft.filter(t=>t.cat==='BUSINESS');
-  const per=ft.filter(t=>t.cat==='PERSONAL');
-  const uncl=ft.filter(t=>t.cat==='UNCLASSIFIED');
-  const bizMi=biz.reduce((a,t)=>a+t.miles,0);
-  const perMi=per.reduce((a,t)=>a+t.miles,0);
-  const totalMi=ft.reduce((a,t)=>a+t.miles,0);
-  const totalDed=biz.reduce((a,t)=>a+(t.ded||0),0);
-  const bizPct=totalMi>0?Math.round(bizMi/totalMi*100):0;
-
-  document.getElementById('statGrid').innerHTML=`
-    <div class="stat-card"><div class="stat-label">Total Miles</div><div class="stat-val">${totalMi.toFixed(1)}</div><div class="stat-sub">miles driven</div></div>
-    <div class="stat-card"><div class="stat-label">Trips</div><div class="stat-val" style="color:var(--vi)">${ft.length}</div><div class="stat-sub">${biz.length} biz · ${per.length} per</div></div>
-    <div class="stat-card"><div class="stat-label">Business</div><div class="stat-val" style="color:var(--vi)">${bizMi.toFixed(1)}</div><div class="stat-sub">business miles</div></div>
-    <div class="stat-card"><div class="stat-label">Unclassified</div><div class="stat-val" style="color:var(--amber)">${uncl.length}</div><div class="stat-sub">need category</div></div>`;
-
-  document.getElementById('taxCard').innerHTML=`
-    <div class="tax-label">Tax Deduction</div>
-    <div class="tax-val">$${totalDed.toFixed(2)}</div>
-    <div class="tax-calc">${bizMi.toFixed(1)} mi × $${IRS_RATE.toFixed(2)}/mile</div>
-    <div class="tax-bar"><div class="tax-biz" style="flex:${bizPct||1}"></div><div class="tax-per" style="flex:${100-bizPct||1}"></div></div>
-    <div class="tax-labels"><span>Business ${bizPct}%</span><span>Personal ${100-bizPct}%</span></div>`;
-}
-
-function setPeriod(p,el){
-  document.querySelectorAll('.period-pill').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  renderStats(p);
-}
-
-// ═══ RENDER NOTIFICATIONS ═══
-function renderNotifs(){
-  document.getElementById('notifList').innerHTML=notifications.map(n=>`
-    <div class="notif ${n.read?'':'unread'}">
-      ${n.read?'':'<div class="notif-dot"></div>'}
-      <div class="notif-icon" style="background:${n.color}15">${n.icon}</div>
-      <div><div class="notif-title">${n.title}</div><div class="notif-body">${n.body}</div><div class="notif-time">${timeAgo(n.time)}</div></div>
-    </div>`).join('');
-}
-
-function markAllRead(){
-  notifications.forEach(n=>n.read=true);
-  renderNotifs(); updateBadge(); saveData();
-}
-
-function updateBadge(){
-  const c=notifications.filter(n=>!n.read).length;
-  const badge=document.getElementById('navBadge');
-  const dot=document.getElementById('hdrDot');
-  badge.textContent=c; badge.style.display=c>0?'flex':'none';
-  dot.style.display=c>0?'block':'none';
-}
-
-// ═══ CLASSIFY ═══
-function classify(id,cat){
-  const t=trips.find(x=>x.id===id);
-  if(!t) return;
-  t.cat=cat;
-  t.ded=cat==='BUSINESS'?t.miles*IRS_RATE:0;
-  renderTrips(); renderDrive(); saveData();
-}
-
-// ═══ ADD TRIP ═══
-let addCat='BUSINESS';
-function setAddCat(c){
-  addCat=c;
-  document.getElementById('catBiz').className='cat-pill'+(c==='BUSINESS'?' biz-active':'');
-  document.getElementById('catPer').className='cat-pill'+(c==='PERSONAL'?' per-active':'');
-  updateDedPreview();
-}
-function updateDedPreview(){
-  const mi=parseFloat(document.getElementById('addMiles').value)||0;
-  const show=addCat==='BUSINESS'&&mi>0;
-  document.getElementById('dedPreview').style.display=show?'flex':'none';
-  document.getElementById('dedPreviewVal').textContent='+$'+(mi*IRS_RATE).toFixed(2);
-}
-function saveTrip(){
-  const from=document.getElementById('addFrom').value.trim();
-  const to=document.getElementById('addTo').value.trim();
-  const mi=parseFloat(document.getElementById('addMiles').value);
-  if(!from||!to||!mi||mi<=0){ alert('Please fill in all fields.'); return; }
-  const ded=addCat==='BUSINESS'?mi*IRS_RATE:0;
-  trips.unshift({ id:'t'+Date.now(), from, to, miles:mi, dur:0, cat:addCat, ded, time:Date.now(), src:'MANUAL' });
-  // Add notification
-  notifications.unshift({ id:'n'+Date.now(), type:'TRIP_SAVED', icon:'✅', color:'var(--mint)', title:`Trip saved: ${mi.toFixed(1)} miles`, body:`${from} → ${to}${ded>0?' · +$'+ded.toFixed(2)+' deduction':''}`, read:false, time:Date.now() });
-  document.getElementById('addFrom').value=''; document.getElementById('addTo').value=''; document.getElementById('addMiles').value='';
-  document.getElementById('dedPreview').style.display='none';
-  saveData(); switchTab('drive');
-}
-
-// ═══ EDIT ═══
-function openEdit(id){
-  const t=trips.find(x=>x.id===id); if(!t) return;
-  editId=id; editCat=t.cat==='UNCLASSIFIED'?'BUSINESS':t.cat;
-  document.getElementById('editFrom').value=t.from;
-  document.getElementById('editTo').value=t.to;
-  document.getElementById('editMiles').value=t.miles;
-  setEditCat(editCat);
-  document.getElementById('editOverlay').classList.add('show');
-}
-function closeEdit(){ document.getElementById('editOverlay').classList.remove('show'); }
-function setEditCat(c){
-  editCat=c;
-  document.getElementById('eCatBiz').className='cat-pill'+(c==='BUSINESS'?' biz-active':'');
-  document.getElementById('eCatPer').className='cat-pill'+(c==='PERSONAL'?' per-active':'');
-}
-function saveEdit(){
-  const t=trips.find(x=>x.id===editId); if(!t) return;
-  t.from=document.getElementById('editFrom').value.trim()||t.from;
-  t.to=document.getElementById('editTo').value.trim()||t.to;
-  t.miles=parseFloat(document.getElementById('editMiles').value)||t.miles;
-  t.cat=editCat;
-  t.ded=editCat==='BUSINESS'?t.miles*IRS_RATE:0;
-  closeEdit(); renderTrips(); renderDrive(); saveData();
-}
-
-// ═══ DELETE ═══
-function openDel(id){
-  const t=trips.find(x=>x.id===id); if(!t) return;
-  delId=id;
-  document.getElementById('delInfo').textContent=`${t.from} → ${t.to} · ${t.miles.toFixed(1)} mi`;
-  document.getElementById('delOverlay').classList.add('show');
-}
-function closeDel(){ document.getElementById('delOverlay').classList.remove('show'); }
-function confirmDel(){
-  const el=document.getElementById('trip-'+delId);
-  if(el){ el.style.transition='all 0.4s'; el.style.opacity='0'; el.style.transform='translateX(-100%)'; setTimeout(()=>{ el.style.maxHeight='0'; el.style.padding='0'; el.style.margin='0'; el.style.overflow='hidden'; },300); setTimeout(()=>el.remove(),600); }
-  trips=trips.filter(t=>t.id!==delId);
-  closeDel(); setTimeout(()=>{ renderDrive(); renderStats(); },650); saveData();
-}
-
-// ═══ TEMPLATES ═══
-function useTemplate(name){
-  const tmpl={Office:{from:'123 Home St',to:'456 Office Blvd',miles:8.4},Client:{from:'456 Office Blvd',to:'100 Client Tower',miles:6.7},Airport:{from:'123 Home St',to:'SFO Airport',miles:14.1}};
-  const t=tmpl[name]; if(!t) return;
-  const ded=t.miles*IRS_RATE;
-  trips.unshift({ id:'t'+Date.now(), from:t.from, to:t.to, miles:t.miles, dur:0, cat:'BUSINESS', ded, time:Date.now(), src:'TEMPLATE' });
-  notifications.unshift({ id:'n'+Date.now(), type:'TRIP_SAVED', icon:'✅', color:'var(--mint)', title:`Trip saved: ${t.miles} miles`, body:`${t.from} → ${t.to} · +$${ded.toFixed(2)} deduction`, read:false, time:Date.now() });
-  saveData(); renderDrive(); alert(`✅ ${name} trip logged!`);
-}
-
-// ═══ AUTO START ═══
+// Auto Start toggle
 function toggleAutoStart(btn){
-  btn.classList.toggle('recording');
-  const on=btn.classList.contains('recording');
-  btn.innerHTML=on?'<span class="i">🟢</span> Auto On':'<span class="i">🔴</span> Auto Start';
-  document.getElementById('trackStatus').textContent=on?'Tracking':'GPS Active';
+  const icon = document.getElementById('autoIcon');
+  const isOn = btn.classList.toggle('recording');
+  if(isOn){
+    icon.textContent = '🟢';
+    btn.innerHTML = '<span class="i" id="autoIcon">🟢</span>Auto On';
+  } else {
+    icon.textContent = '🔴';
+    btn.innerHTML = '<span class="i" id="autoIcon">🔴</span>Auto Start';
+  }
 }
 
-// ═══ INIT ═══
-loadData();
-renderDrive();
-renderStats();
-renderNotifs();
-updateBadge();
+// Edit/Delete functionality
+let currentTrip = null;
+
+function openEdit(btn){
+  currentTrip = btn.closest('.trip');
+  const from = currentTrip.querySelector('.ta-name')?.textContent || '';
+  const toEl = currentTrip.querySelectorAll('.ta-name');
+  const to = toEl.length > 1 ? toEl[1].textContent : '';
+  const miles = currentTrip.querySelector('.trip-mi-v')?.textContent || '';
+  const isBiz = currentTrip.querySelector('.cls.ob') !== null;
+
+  document.getElementById('editFrom').value = from;
+  document.getElementById('editTo').value = to;
+  document.getElementById('editMiles').value = miles;
+  setEditCat(isBiz ? 'biz' : 'pers');
+  document.getElementById('editModal').classList.add('show');
+}
+
+function closeEdit(){
+  document.getElementById('editModal').classList.remove('show');
+  currentTrip = null;
+}
+
+function setEditCat(cat){
+  const biz = document.getElementById('editBiz');
+  const pers = document.getElementById('editPers');
+  biz.classList.remove('ob'); pers.classList.remove('op');
+  if(cat === 'biz') biz.classList.add('ob');
+  else pers.classList.add('op');
+}
+
+function saveEdit(){
+  if(!currentTrip) return;
+  const from = document.getElementById('editFrom').value;
+  const to = document.getElementById('editTo').value;
+  const miles = document.getElementById('editMiles').value;
+  const isBiz = document.getElementById('editBiz').classList.contains('ob');
+
+  const names = currentTrip.querySelectorAll('.ta-name');
+  if(names[0]) names[0].textContent = from;
+  if(names[1]) names[1].textContent = to;
+
+  const miV = currentTrip.querySelector('.trip-mi-v');
+  if(miV){
+    miV.textContent = miles;
+    miV.className = 'trip-mi-v ' + (isBiz ? 'biz' : 'pers');
+  }
+
+  // Update classify buttons
+  const clsBtns = currentTrip.querySelectorAll('.cls');
+  clsBtns.forEach(b => b.classList.remove('ob','op'));
+  if(isBiz && clsBtns[0]) clsBtns[0].classList.add('ob');
+  else if(clsBtns[1]) clsBtns[1].classList.add('op');
+
+  // Update badge
+  const badge = currentTrip.querySelector('.trip-map-badge');
+  if(badge){
+    badge.className = 'trip-map-badge ' + (isBiz ? 'biz' : 'pers');
+    badge.textContent = isBiz ? 'Business' : 'Personal';
+  }
+
+  // Update route line + dots
+  const line = currentTrip.querySelector('.tl');
+  if(line) line.className = 'tl ' + (isBiz ? 'biz' : 'pers');
+  const endDot = currentTrip.querySelectorAll('.td')[1];
+  if(endDot) endDot.className = 'td ' + (isBiz ? 'eb' : 'ep');
+
+  // Update map bg
+  const mapBg = currentTrip.querySelector('.trip-map-bg');
+  if(mapBg) mapBg.className = 'trip-map-bg ' + (isBiz ? 'biz' : 'pers');
+
+  // Update deduction
+  const ded = currentTrip.querySelector('.trip-ded');
+  if(ded && isBiz) ded.textContent = '+$' + (parseFloat(miles) * 0.70).toFixed(2);
+
+  closeEdit();
+}
+
+function openDelete(btn){
+  currentTrip = btn.closest('.trip');
+  const names = currentTrip.querySelectorAll('.ta-name');
+  const miles = currentTrip.querySelector('.trip-mi-v')?.textContent || '';
+  const from = names[0]?.textContent || '';
+  const to = names[1]?.textContent || '';
+  document.getElementById('delRoute').textContent = from + ' → ' + to + ' · ' + miles + ' miles';
+  document.getElementById('deleteModal').classList.add('show');
+}
+
+function closeDelete(){
+  document.getElementById('deleteModal').classList.remove('show');
+  currentTrip = null;
+}
+
+function confirmDelete(){
+  if(!currentTrip){closeDelete();return;}
+  currentTrip.style.transition = 'all 0.4s cubic-bezier(0.22,1,0.36,1)';
+  currentTrip.style.opacity = '0';
+  currentTrip.style.transform = 'translateX(-100px) scale(0.9)';
+  currentTrip.style.maxHeight = currentTrip.offsetHeight + 'px';
+  setTimeout(() => {
+    currentTrip.style.maxHeight = '0';
+    currentTrip.style.padding = '0';
+    currentTrip.style.margin = '0';
+    currentTrip.style.border = 'none';
+    currentTrip.style.overflow = 'hidden';
+  }, 300);
+  setTimeout(() => {
+    currentTrip.remove();
+    currentTrip = null;
+  }, 600);
+  closeDelete();
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', (e) => {
+    if(e.target === m){ closeEdit(); closeDelete(); }
+  });
+});
 </script>
 </body>
 </html>
