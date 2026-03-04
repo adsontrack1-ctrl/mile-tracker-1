@@ -60,8 +60,10 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
 .hero-status{display:flex;align-items:center;gap:7px;padding:5px 13px 5px 9px;background:rgba(0,168,112,.12);border:1px solid rgba(0,168,112,.18);border-radius:var(--rpill);font-size:11px;font-weight:600;color:#6EE7B7;transition:all .3s;}
 .hero-status.rec{background:rgba(239,61,88,.15);border-color:rgba(239,61,88,.25);color:#FCA5A5;}
+.hero-status.mon{background:rgba(108,60,224,.12);border-color:rgba(108,60,224,.18);color:#C4B5FD;}
 .hero-dot{width:6px;height:6px;border-radius:50%;background:#6EE7B7;box-shadow:0 0 8px rgba(110,231,183,.4);animation:gp 2.5s ease-in-out infinite;}
 .hero-status.rec .hero-dot{background:#FCA5A5;box-shadow:0 0 12px rgba(252,165,165,.6);animation:gp 1s ease-in-out infinite;}
+.hero-status.mon .hero-dot{background:#C4B5FD;box-shadow:0 0 10px rgba(196,181,253,.5);animation:gp 3s ease-in-out infinite;}
 .hero-brand{font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.5px;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s ease-in-out infinite;}
 .speedo{display:flex;justify-content:center;margin:12px 0 28px;position:relative;}
 .speedo-wrap{position:relative;width:200px;height:110px;}
@@ -188,7 +190,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .qa-btn:active{transform:translateY(0) scale(.97);}
 .qa-btn .i{font-size:17px;}
 .qa-btn.pri{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 4px 16px rgba(12,12,29,.15);}.qa-btn.pri:hover{background:#22223a;box-shadow:var(--s3);}
-.qa-btn.pri.recording{background:linear-gradient(135deg,var(--mint),#34D399);border-color:transparent;box-shadow:0 4px 20px rgba(0,168,112,.3),inset 0 1px 0 rgba(255,255,255,.15);animation:pulse-rec 2s ease-in-out infinite;}
+.qa-btn.pri.recording{background:linear-gradient(135deg,#EF3D58,#FF6B6B);border-color:transparent;box-shadow:0 4px 20px rgba(239,61,88,.35),inset 0 1px 0 rgba(255,255,255,.15);animation:pulse-rec 2s ease-in-out infinite;}
 
 /* SECTIONS */
 .sh{display:flex;align-items:center;justify-content:space-between;padding:26px 20px 12px;}
@@ -249,7 +251,6 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .ta-btn:active{transform:scale(.96);}
 .ta-btn.edit{color:var(--vi);}.ta-btn.edit:hover{border-color:var(--vi-s2);background:var(--vi-s);}
 .ta-btn.del{color:var(--coral);flex:.6;}.ta-btn.del:hover{border-color:rgba(239,61,88,.2);background:var(--coral-s);}
-.ta-btn.nav{color:var(--mint);background:var(--mint-s);border-color:var(--mint-s2);}.ta-btn.nav:hover{border-color:var(--mint);background:rgba(0,168,112,.1);transform:translateY(-2px);box-shadow:var(--s2);}
 .cls{flex:1;padding:11px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:var(--ink4);display:flex;align-items:center;justify-content:center;gap:7px;transition:all .35s;box-shadow:var(--s1);}
 .cls-d{width:8px;height:8px;border-radius:50%;border:2.5px solid currentColor;transition:all .3s;}
 .cls.ob{color:#fff;background:linear-gradient(135deg,var(--vi),#8B5CF6);border-color:transparent;box-shadow:0 4px 16px rgba(108,60,224,.25);}
@@ -487,12 +488,12 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     </div>
 
     <div class="qa">
-      <button class="qa-btn pri" id="autoBtn" onclick="toggleTracking()"><span class="i">🔴</span><span id="autoText">Auto Start</span></button>
+      <button class="qa-btn pri" id="autoBtn" onclick="toggleTracking()"><span class="i">📡</span><span id="autoText">Auto On</span></button>
       <button class="qa-btn" onclick="openAddTrip()"><span class="i">📝</span>Add Manual</button>
       <button class="qa-btn" onclick="openMapSheet()"><span class="i">🗺</span>Map</button>
       <button class="qa-btn" onclick="switchTabId('tab-stats')"><span class="i">📊</span>Reports</button>
     </div>
-    <div class="uncl" id="unclBanner" onclick="switchTabId('tab-trips')"><span class="uncl-i">⚠️</span><div><div class="uncl-t" id="unclText">1 Unclassified Trip</div><div class="uncl-d">Tap to classify →</div></div><span class="uncl-a">›</span></div>
+    <div class="uncl" id="unclBanner" style="display:none" onclick="switchTabId('tab-trips')"><span class="uncl-i">⚠️</span><div><div class="uncl-t" id="unclText"></div><div class="uncl-d">Tap to classify →</div></div><span class="uncl-a">›</span></div>
     <div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div>
     <div class="trips" id="recentTrips"></div>
     <div class="sh"><span class="sh-t">Quick Templates</span></div>
@@ -553,12 +554,12 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     </div>
     <div class="set-hdr">Tracking</div>
     <div class="set">
-      <div class="sr"><div><h4>Auto-detect trips</h4><p>Start recording when driving</p></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
       <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value)"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option></select></div>
-      <div class="sr"><div><h4>Map provider</h4><p>Navigation app</p></div><select class="sr-sel" id="mapProv"><option>Apple Maps</option><option>Google Maps</option></select></div>
-      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="5" id="threshVal"></div>
-      <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel"><option>Unclassified</option><option>Business</option><option>Personal</option></select></div>
-      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px" id="rateVal"></div></div>
+      <div class="sr"><div><h4>Map provider</h4><p>Navigation app</p></div><select class="sr-sel" id="mapProv" onchange="saveSettings()"><option>Apple Maps</option><option>Google Maps</option></select></div>
+      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="5" id="threshVal" onchange="saveSettings()"></div>
+      <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
+      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px" id="rateVal" onchange="updateRate()"></div></div>
     </div>
     <div class="set-hdr">Odometer</div>
     <div class="set">
@@ -596,7 +597,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects when you\'re driving using GPS speed. When your speed exceeds the threshold (set in Settings), it automatically starts recording.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile for 2026)<br>Canada: CRA rate ($0.72/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
-    <button class="signout-btn" onclick="showToast('👋','Signed out successfully')">Sign Out</button>
+    <button class="signout-btn" onclick="signOut()">Sign Out</button>
     <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with ❤️</div>
   </div>
 
@@ -695,6 +696,9 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
         <div class="add-cat-desc">Not deductible</div>
       </div>
     </div>
+
+    <label class="add-label">Purpose</label>
+    <select class="add-input" id="addPurpose" style="appearance:auto;padding:10px 12px;border:2px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white)"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select>
 
     <label class="add-label">Notes (optional)</label>
     <textarea class="add-note-input" id="addNote" placeholder="Client meeting, airport run, etc..." rows="2"></textarea>
@@ -797,11 +801,6 @@ function applyLocale(){
   document.querySelectorAll('.trip-mi-u').forEach(e=>e.textContent=LOC.label);
   document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers/,LOC.country==='CA'?'Kilometers':'Miles'));
   document.querySelectorAll('.tmpl-dist').forEach(e=>{const v=parseFloat(e.textContent);if(!isNaN(v)){const nv=LOC.country==='CA'?(v*1.60934).toFixed(1):v.toFixed(1);e.textContent=nv+' '+u;}});
-  if(LOC.country==='CA'){
-    const bk=(42.8*1.60934).toFixed(1),pk=(18.3*1.60934).toFixed(1),ded=(parseFloat(bk)*LOC.rate).toFixed(2);
-    document.getElementById('sBiz').textContent=bk;document.getElementById('sPer').textContent=pk;
-    document.getElementById('taxAmt').textContent='$'+ded;document.getElementById('taxDet').textContent=bk+' business km × $'+LOC.rate+'/km';
-  }
   renderTrips();
   renderAlerts();
 }
@@ -852,7 +851,7 @@ function tripCard(t,wide){
   const dotFill={biz:'#6C3CE0',pers:'#D6006E',uncl:'#E08D00'}[t.type];
   const vb=wide?'0 0 360 90':'0 0 310 90';
   const purposeTag=t.purpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${t.purpose}</span>`:'';
-  var card = `<div class="trip" data-id="${t.id}"><div class="trip-map"><div class="trip-map-bg ${t.type}"></div><div class="trip-map-grid"></div><svg viewBox="${vb}" preserveAspectRatio="none"><path d="${t.path}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round"${dash}/><circle cx="20" cy="${t.path.match(/M\d+,(\d+)/)[1]}" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="${wide?340:290}" cy="${t.path.match(/(\d+)$/)[1]}" r="5" fill="${dotFill}" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge ${t.type}">${badge}</div><div class="trip-map-time">${t.time}</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${t.from}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${t.to}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${t.day}</span>${purposeTag}${ded}</div></div><div class="trip-actions"><button class="ta-btn edit" onclick="openEdit(${t.id})">✏️ Edit</button><button class="ta-btn nav" onclick="navTrip('${t.to}')">🗺️ Navigate</button><button class="ta-btn del" onclick="openDel(${t.id})">🗑️</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var card = `<div class="trip" data-id="${t.id}"><div class="trip-map"><div class="trip-map-bg ${t.type}"></div><div class="trip-map-grid"></div><svg viewBox="${vb}" preserveAspectRatio="none"><path d="${t.path}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round"${dash}/><circle cx="20" cy="${t.path.match(/M\d+,(\d+)/)[1]}" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="${wide?340:290}" cy="${t.path.match(/(\d+)$/)[1]}" r="5" fill="${dotFill}" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge ${t.type}">${badge}</div><div class="trip-map-time">${t.time}</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${t.from}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${t.to}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${t.day}</span>${purposeTag}${ded}</div></div><div class="trip-actions"><button class="ta-btn edit" onclick="openEdit(${t.id})">✏️ Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">🗑️</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz">💼 Business</div><div class="swipe-bg per">👤 Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -1367,12 +1366,12 @@ function checkEmptyState(){
 /* ===== EXPORT FUNCTIONS ===== */
 function exportCSV(){
   var unit=LOC.label;
-  var rows=[['Date','Time','From','To','Distance ('+unit+')','Category','Tax Deductible','Deduction ('+LOC.currency+')']];
+  var rows=[['Date','Time','From','To','Distance ('+unit+')','Category','Purpose','Notes','Tax Deductible','Deduction ('+LOC.currency+')']];
   for(var i=0;i<TRIPS.length;i++){
     var t=TRIPS[i];
     var d=tripDist(t.mi);
     var ded=t.ded?(parseFloat(d)*LOC.rate).toFixed(2):'0.00';
-    rows.push([t.date||t.day,t.time,'"'+t.from+'"','"'+t.to+'"',d,t.type==='biz'?'Business':'Personal',t.ded?'Yes':'No',LOC.currency+ded]);
+    rows.push([t.date||t.day,t.time,'"'+t.from+'"','"'+t.to+'"',d,t.type==='biz'?'Business':'Personal','"'+(t.purpose||'')+'"','"'+(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
   }
   // Add summary row
   var totalBiz=0,totalPer=0;
@@ -1388,7 +1387,7 @@ function exportCSV(){
   rows.push(['Total '+unit,(totalBiz+totalPer).toFixed(1)]);
   rows.push(['Total Deduction',LOC.currency+(totalBiz*LOC.rate).toFixed(2)]);
   rows.push(['Rate',LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit]);
-  rows.push(['Generated','MyMilesAI Rel 2.0 — '+new Date().toLocaleDateString()]);
+  rows.push(['Generated','MyMilesAI Rel 3.0 — '+new Date().toLocaleDateString()]);
 
   var csv=rows.map(function(r){return r.join(',');}).join('\n');
   var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
@@ -1423,7 +1422,7 @@ function exportPDF(){
     tripRows+='<div style="padding:12px 0;border-bottom:1px solid #eee;display:flex;gap:10px;align-items:flex-start">'+
       '<div style="min-width:50px;font-size:10px;color:#888;padding-top:2px">'+dateStr.split(',')[0]+'<br>'+((dateStr.split(',')[1]||'').trim())+'</div>'+
       '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.from+'</div>'+
-      '<div style="font-size:11px;color:#888;margin:2px 0">→ '+t.to+'</div></div>'+
+      '<div style="font-size:11px;color:#888;margin:2px 0">→ '+t.to+'</div>'+(t.purpose?'<div style="font-size:10px;color:'+catClr+';margin-top:2px">'+t.purpose+'</div>':'')+'</div>'+
       '<div style="text-align:right;flex-shrink:0"><div style="font-size:13px;font-weight:700">'+d+' '+LOC.unit+'</div>'+
       '<div style="font-size:10px;color:'+catClr+';font-weight:600">'+cat+'</div>'+
       (t.ded?'<div style="font-size:11px;color:#00A870;font-weight:700">'+ded+'</div>':'')+'</div></div>';
@@ -1437,7 +1436,7 @@ function exportPDF(){
     '</div>'+
     '<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f5f5f7;text-align:left"><th style="padding:10px 8px;font-weight:700">Date</th><th style="padding:10px 8px;font-weight:700">Route</th><th style="padding:10px 8px;font-weight:700">Dist</th><th style="padding:10px 8px;font-weight:700">Cat</th><th style="padding:10px 8px;font-weight:700">Ded</th></tr></thead></table>'+
     '<div style="max-height:300px;overflow-y:auto">'+tripRows+'</div>'+
-    '<div style="margin-top:20px;padding:12px;background:#f5f5f7;border-radius:8px;font-size:11px;color:#888;text-align:center">'+LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' · '+TRIPS.length+' total trips · MyMilesAI Rel 2.0</div></div>';
+    '<div style="margin-top:20px;padding:12px;background:#f5f5f7;border-radius:8px;font-size:11px;color:#888;text-align:center">'+LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' · '+TRIPS.length+' total trips · MyMilesAI Rel 3.0</div></div>';
   openInfoModal('PDF Report Preview',html+'<br><br><i style="color:#888">To save as PDF: Take a screenshot or use Print → Save as PDF from your browser.</i>');
 }
 
@@ -1455,7 +1454,7 @@ function exportEmail(){
     'Personal: '+totalPer.toFixed(1)+' '+unit+'\n'+
     'Tax Deductions: '+LOC.currency+(totalBiz*LOC.rate).toFixed(2)+'\n'+
     'Rate: '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' ('+LOC.taxLabel+')\n\n'+
-    'Generated by MyMilesAI Rel 2.0';
+    'Generated by MyMilesAI Rel 3.0';
   var mailto='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
   window.open(mailto);
   openInfoModal('Email Report','Your email app should have opened with a trip summary.<br><br><b>Summary included:</b><br>• '+totalTrips+' trips<br>• '+totalBiz.toFixed(1)+' business '+unit+'<br>• '+totalPer.toFixed(1)+' personal '+unit+'<br>• '+LOC.currency+(totalBiz*LOC.rate).toFixed(2)+' deductions<br><br><i>Tip: Export a CSV first and attach it to the email for full trip details.</i>');
@@ -1500,27 +1499,93 @@ function switchStatsPeriod(el,period){
   var now=new Date();
   var labels={day:'Today',week:'This Week',month:now.toLocaleString('default',{month:'short'})+' '+now.getFullYear(),year:now.getFullYear().toString()};
   document.getElementById('statsPeriod').textContent=labels[period]||'';
+  recalcStatsForPeriod(period);
+}
+function recalcStatsForPeriod(period){
+  var now=new Date();
+  var startDate=new Date(now);
+  if(period==='day'){startDate.setHours(0,0,0,0);}
+  else if(period==='week'){startDate.setDate(now.getDate()-now.getDay());startDate.setHours(0,0,0,0);}
+  else if(period==='month'){startDate.setDate(1);startDate.setHours(0,0,0,0);}
+  else{startDate=new Date(now.getFullYear(),0,1);}
+  // Filter trips by date
+  var totalBiz=0,totalPer=0,count=0;
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];
+    // Parse trip date
+    var td=t.date?new Date(t.date):null;
+    if(!td||isNaN(td)){
+      // Try relative days like "Today", "Yesterday"
+      if(t.day==='Today')td=new Date();
+      else if(t.day==='Yesterday'){td=new Date();td.setDate(td.getDate()-1);}
+      else{
+        var daysAgo=parseInt(t.day);
+        if(!isNaN(daysAgo)){td=new Date();td.setDate(td.getDate()-daysAgo);}
+        else td=new Date(0);
+      }
+    }
+    if(td>=startDate){
+      count++;
+      var mi=convMi(t.mi);
+      if(t.type==='biz')totalBiz+=mi;
+      else if(t.type==='pers')totalPer+=mi;
+    }
+  }
+  var ded=totalBiz*LOC.rate;
+  var totalAll=totalBiz+totalPer;
+  var bizPct=totalAll>0?Math.round(totalBiz/totalAll*100):0;
+  var perPct=totalAll>0?100-bizPct:0;
+  // Update stat cards
+  document.getElementById('sBiz').textContent=totalBiz.toFixed(1);
+  document.getElementById('sPer').textContent=totalPer.toFixed(1);
+  document.getElementById('sDedVal').textContent=LOC.currency+ded.toFixed(2);
+  document.getElementById('sTripCount').textContent=count;
+  // Trends
+  var bizTrend=document.getElementById('sBizTrend');
+  if(bizTrend){bizTrend.textContent=bizPct+'%';bizTrend.className='ins-trend '+(bizPct>=50?'up':'dn');}
+  var perTrend=document.getElementById('sPerTrend');
+  if(perTrend){perTrend.textContent=perPct+'%';perTrend.className='ins-trend '+(perPct>=50?'up':'dn');}
+  var dedTrend=document.getElementById('sDedTrend');
+  if(dedTrend){dedTrend.textContent='+'+LOC.currency+ded.toFixed(2);dedTrend.className='ins-trend up';}
+  // Progress bars
+  var dedProg=document.getElementById('sDedProg');
+  if(dedProg){dedProg.style.width=bizPct+'%';}
+  var tripProg=document.getElementById('sTripProg');
+  if(tripProg){tripProg.style.width=Math.min(count/20*100,100)+'%';}
 }
 
 /* ===== GPS TRACKING — REAL ===== */
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDist=0;
-function toggleTracking(){if(tracking)stopTracking();else startTracking();}
+let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
+
+function toggleTracking(){
+  if(tracking){
+    stopTracking();
+  } else {
+    startTracking();
+  }
+}
+
 function startTracking(){
   if(!navigator.geolocation){showToast('📍','GPS not available on this device');return;}
-  navigator.geolocation.getCurrentPosition(()=>{},()=>{});
+  // If auto-detect is watching, stop monitoring (we're now recording)
+  if(autoWatchId){navigator.geolocation.clearWatch(autoWatchId);autoWatchId=null;}
+  clearTimeout(autoStopTimer);
   watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
-  tracking=true;trackStart=Date.now();totalDist=0;positions=[];
+  tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
   clearRoute();
   document.getElementById('trackLive').classList.add('show');
+  document.getElementById('heroStatus').classList.remove('mon');
   document.getElementById('heroStatus').classList.add('rec');
   document.getElementById('statusText').textContent='Recording...';
   document.getElementById('autoBtn').classList.add('recording');
-  document.getElementById('autoBtn').querySelector('.i').textContent='🟢';
-  document.getElementById('autoText').textContent='Auto On';
+  document.getElementById('autoBtn').querySelector('.i').textContent='⏺';
+  document.getElementById('autoText').textContent='Recording';
   if(mapSheetOpen){document.getElementById('mapLiveBadge').classList.add('show');}
   updateMapTrackBtn();
   timerInt=setInterval(updateTimer,1000);
 }
+
 function onPos(p){
   const spd=p.coords.speed||0;
   const spdVal=LOC.country==='CA'?(spd*3.6).toFixed(0):(spd*2.237).toFixed(0);
@@ -1545,26 +1610,173 @@ function onPos(p){
     const avgDist=LOC.country==='CA'?totalDist*1.60934:totalDist;
     document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
   }
+  // Auto-stop detection: if speed is 0, start countdown
+  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  var spdRaw=LOC.country==='CA'?spd*3.6:spd*2.237;
+  if(spdRaw>=thresh)lastMoving=Date.now();
+  if(autoDetect && tracking && (Date.now()-lastMoving)>120000){
+    // Stopped for 2 minutes → auto-stop
+    stopTracking();
+    showToast('🅿️','Auto-stopped: no movement for 2 min',4000);
+  }
 }
+
 function onPosErr(e){console.log('GPS error:',e.message);}
+
+/* ===== AUTO-DETECT DRIVING ===== */
+function toggleAutoDetect(el){
+  el.classList.toggle('on');
+  autoDetect=el.classList.contains('on');
+  try{localStorage.setItem('mymilesai_autodetect',autoDetect?'1':'0');}catch(e){}
+  if(autoDetect){
+    startAutoMonitoring();
+    showToast('📍','Auto-detect ON — will start recording when driving');
+  } else {
+    stopAutoMonitoring();
+    showToast('⏹','Auto-detect OFF — tap Auto Start to record');
+  }
+  updateAutoBtn();
+}
+
+function startAutoMonitoring(){
+  if(!navigator.geolocation||tracking)return;
+  if(autoWatchId)navigator.geolocation.clearWatch(autoWatchId);
+  autoWatchId=navigator.geolocation.watchPosition(onAutoPos,function(){},{enableHighAccuracy:false,maximumAge:5000,timeout:15000});
+  document.getElementById('heroStatus').classList.add('mon');
+  document.getElementById('statusText').textContent='Monitoring...';
+  updateAutoBtn();
+}
+
+function stopAutoMonitoring(){
+  if(autoWatchId){navigator.geolocation.clearWatch(autoWatchId);autoWatchId=null;}
+  if(!tracking){
+    document.getElementById('heroStatus').classList.remove('mon');
+    document.getElementById('statusText').textContent='GPS Active';
+  }
+  updateAutoBtn();
+}
+
+function onAutoPos(p){
+  // While monitoring (not recording), check if driving
+  if(tracking)return;
+  var spd=p.coords.speed||0;
+  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  var spdVal=LOC.country==='CA'?spd*3.6:spd*2.237;
+  // Update speedo even while monitoring
+  var spdDisplay=spdVal.toFixed(0);
+  document.getElementById('speedNum').textContent=spdDisplay;
+  var maxSpd=LOC.country==='CA'?160:100;
+  var pct=Math.min(spdVal/maxSpd,1);
+  var off=267-(267*pct);
+  document.getElementById('spFill').style.strokeDashoffset=off;
+  document.getElementById('spGlow').style.strokeDashoffset=off;
+  // Update GPS coords for templates
+  lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
+  if(spdVal>=thresh){
+    // Driving detected! Auto-start recording
+    showToast('🚗','Driving detected! Auto-recording started',3000);
+    if(navigator.vibrate)try{navigator.vibrate([50,50,50]);}catch(e){}
+    startTracking();
+  }
+}
+
+function updateAutoBtn(){
+  if(tracking)return; // Don't change button while recording
+  var btn=document.getElementById('autoBtn');
+  var icon=btn.querySelector('.i');
+  var text=document.getElementById('autoText');
+  if(autoDetect){
+    btn.classList.remove('recording');
+    icon.textContent='📡';
+    text.textContent='Auto On';
+  } else {
+    btn.classList.remove('recording');
+    icon.textContent='🔴';
+    text.textContent='Auto Start';
+  }
+}
 function stopTracking(){
-  if(watchId)navigator.geolocation.clearWatch(watchId);
+  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}
   clearInterval(timerInt);tracking=false;
   document.getElementById('trackLive').classList.remove('show');
   document.getElementById('heroStatus').classList.remove('rec');
-  document.getElementById('statusText').textContent='GPS Active';
   document.getElementById('autoBtn').classList.remove('recording');
-  document.getElementById('autoBtn').querySelector('.i').textContent='🔴';
-  document.getElementById('autoText').textContent='Auto Start';
   document.getElementById('speedNum').textContent='0';
   document.getElementById('spFill').style.strokeDashoffset=267;
   document.getElementById('spGlow').style.strokeDashoffset=267;
   document.getElementById('mapLiveBadge').classList.remove('show');
   updateMapTrackBtn();
-  if(totalDist>0.05){
-    const dist=LOC.country==='CA'?(totalDist*1.60934):totalDist;
-    showToast('✅','Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
+  // Resume auto-monitoring if enabled
+  if(autoDetect){
+    setTimeout(function(){startAutoMonitoring();},2000);
+  } else {
+    document.getElementById('heroStatus').classList.remove('mon');
+    document.getElementById('statusText').textContent='GPS Active';
+    updateAutoBtn();
   }
+  if(totalDist>0.05){
+    var mi=totalDist;
+    var dist=LOC.country==='CA'?(mi*1.60934):mi;
+    var elapsed=Math.floor((Date.now()-trackStart)/60000);
+    var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
+    // Build from/to from GPS positions
+    var fromAddr='GPS Start';
+    var toAddr='GPS End';
+    if(positions.length>0){
+      fromAddr='GPS ('+positions[0].lat.toFixed(4)+', '+positions[0].lng.toFixed(4)+')';
+      var last=positions[positions.length-1];
+      toAddr='GPS ('+last.lat.toFixed(4)+', '+last.lng.toFixed(4)+')';
+    }
+    // Try reverse geocode for readable addresses
+    reverseGeocode(positions,function(startAddr,endAddr){
+      if(startAddr)fromAddr=startAddr;
+      if(endAddr)toAddr=endAddr;
+      finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+    });
+    // Fallback if geocode takes too long
+    setTimeout(function(){
+      if(!_gpsTrioSaved)finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+    },3000);
+  }
+}
+var _gpsTrioSaved=false;
+function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
+  if(_gpsTrioSaved)return;
+  _gpsTrioSaved=true;
+  var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
+  var type='uncl';
+  var freq=getFreqRouteType(fromAddr,toAddr);
+  if(freq)type=freq;
+  else if(isWorkHours())type='biz';
+  TRIPS.unshift({id:newId,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ded:type==='biz',purpose:'',notes:'',path:'M20,50 C80,20 160,70 240,30 S320,55 340,40'});
+  if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
+  renderTrips();renderAlerts();saveTripsToStorage();
+  showToast('✅','Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
+  _gpsTrioSaved=false;
+}
+function reverseGeocode(pos,cb){
+  if(!pos||pos.length<2){cb(null,null);return;}
+  var start=pos[0],end=pos[pos.length-1];
+  var done=0,startAddr=null,endAddr=null;
+  function check(){done++;if(done>=2)cb(startAddr,endAddr);}
+  function fetchAddr(lat,lng,setter){
+    try{
+      fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&addressdetails=1')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d&&d.address){
+          var a=d.address;
+          var parts=[];
+          if(a.road)parts.push(a.road);
+          if(a.city||a.town||a.village)parts.push(a.city||a.town||a.village);
+          setter(parts.join(', ')||d.display_name.split(',').slice(0,2).join(','));
+        }
+        check();
+      }).catch(function(){check();});
+    }catch(e){check();}
+  }
+  fetchAddr(start.lat,start.lng,function(a){startAddr=a;});
+  fetchAddr(end.lat,end.lng,function(a){endAddr=a;});
 }
 function updateTimer(){
   const s=Math.floor((Date.now()-trackStart)/1000),m=Math.floor(s/60),sec=s%60;
@@ -1581,12 +1793,6 @@ function openInMaps(){
   const prov=document.getElementById('mapProv').value;
   if(prov==='Google Maps')window.open('https://maps.google.com','_blank');
   else window.open('https://maps.apple.com','_blank');
-}
-function navTrip(addr){
-  const prov=document.getElementById('mapProv').value;
-  const q=encodeURIComponent(addr);
-  if(prov==='Google Maps')window.open('https://www.google.com/maps/dir/?api=1&destination='+q,'_blank');
-  else window.open('https://maps.apple.com/?daddr='+q,'_blank');
 }
 
 /* ===== ADD TRIP BOTTOM SHEET (Self-contained) ===== */
@@ -1813,54 +2019,6 @@ function trackGpsBackground(){
 }
 trackGpsBackground();
 
-function useTemplate(destAddr,cat,destLat,destLng){
-  openAddTrip();
-  // Pre-fill destination
-  setTimeout(function(){
-    document.getElementById('addTo').value=destAddr;
-    toCoords={lat:destLat,lng:destLng};
-    setAddCat(cat);
-    
-    // Try to get current GPS for From
-    if(navigator.geolocation){
-      document.getElementById('addFrom').value='📡 Getting your location...';
-      document.getElementById('addDistStatus').textContent='⏳ Locating you...';
-      navigator.geolocation.getCurrentPosition(function(p){
-        lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
-        fromCoords={lat:p.coords.latitude,lng:p.coords.longitude};
-        // Reverse geocode via Nominatim
-        fetch('https://nominatim.openstreetmap.org/reverse?lat='+p.coords.latitude+'&lon='+p.coords.longitude+'&format=json')
-        .then(function(r){return r.json();})
-        .then(function(data){
-          if(data && data.display_name){
-            var parts=data.display_name.split(',');
-            var short=parts.slice(0,3).join(',').trim();
-            document.getElementById('addFrom').value=short;
-          }else{
-            document.getElementById('addFrom').value='Current Location';
-          }
-          calcDistance();
-        })
-        .catch(function(){
-          document.getElementById('addFrom').value='Current Location';
-          calcDistance();
-        });
-      },function(){
-        // GPS denied — use last known or leave empty
-        if(lastGpsLat){
-          fromCoords={lat:lastGpsLat,lng:lastGpsLng};
-          document.getElementById('addFrom').value='Current Location';
-          calcDistance();
-        }else{
-          document.getElementById('addFrom').value='';
-          document.getElementById('addDistStatus').textContent='Enter starting address';
-        }
-      },{enableHighAccuracy:true,timeout:5000});
-    }else{
-      document.getElementById('addFrom').value='';
-    }
-  },300);
-}
 /* --- Nearest location databases --- */
 var AIRPORTS=[
   {n:'Winnipeg Richardson Airport (YWG)',lat:49.910,lng:-97.240},
@@ -1978,6 +2136,7 @@ function openAddTrip(){
   document.getElementById('addFrom').value='';
   document.getElementById('addTo').value='';
   document.getElementById('addNote').value='';
+  document.getElementById('addPurpose').value='';
   document.getElementById('addDistInput').value='';
   document.getElementById('addDistInput').classList.remove('filled');
   document.getElementById('addDistBadge').classList.remove('active');
@@ -1988,7 +2147,8 @@ function openAddTrip(){
   document.getElementById('fromDD').classList.remove('show');
   document.getElementById('toDD').classList.remove('show');
   fromCoords=null;toCoords=null;
-  setAddCat('biz');
+  var defCat=getDefaultCat();
+  setAddCat(defCat==='uncl'?'biz':defCat);
   addDistVal=0;
   setTimeout(function(){document.getElementById('addFrom').focus();},400);
 }
@@ -2022,7 +2182,9 @@ function saveManual(){
     if(freq){autoType=freq;showToast('🔁','Auto-classified as '+(freq==='biz'?'Business':'Personal')+' (frequent route)');}
     else if(isWorkHours()){autoType='biz';showToast('⏰','Auto-classified as Business (work hours)');}
   }
-  TRIPS.unshift({id:newId,from:f,to:t,mi:mi||5,type:autoType,time:'Just now',day:'Today',date:_fmt(new Date()),ded:autoType==='biz',purpose:'',notes:'',path:'M20,50 C80,20 160,70 240,30 S320,55 340,40'});
+  var purpose=document.getElementById('addPurpose').value;
+  var notes=document.getElementById('addNote').value.trim();
+  TRIPS.unshift({id:newId,from:f,to:t,mi:mi||5,type:autoType,time:'Just now',day:'Today',date:_fmt(new Date()),ded:autoType==='biz',purpose:purpose,notes:notes,path:'M20,50 C80,20 160,70 240,30 S320,55 340,40'});
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
   renderAlerts();
@@ -2194,7 +2356,12 @@ function loadTripsFromStorage(){
       var parsed=JSON.parse(stored);
       if(parsed&&parsed.length>0){
         TRIPS.length=0;
-        for(var i=0;i<parsed.length;i++)TRIPS.push(parsed[i]);
+        for(var i=0;i<parsed.length;i++){
+          // Normalize: ensure purpose & notes exist (backward compat)
+          if(!parsed[i].purpose)parsed[i].purpose='';
+          if(!parsed[i].notes)parsed[i].notes='';
+          TRIPS.push(parsed[i]);
+        }
       }
     }
   }catch(e){}
@@ -2280,6 +2447,62 @@ function isWorkHours(){
 }
 loadWorkHours();
 
+/* ===== SETTINGS PERSISTENCE ===== */
+function saveSettings(){
+  var settings={
+    threshold:parseInt(document.getElementById('threshVal').value)||5,
+    mapProvider:document.getElementById('mapProv').value,
+    defaultCat:document.getElementById('defaultCatSel').value,
+    rate:parseFloat(document.getElementById('rateVal').value)||LOC.rate
+  };
+  try{localStorage.setItem('mymilesai_settings',JSON.stringify(settings));}catch(e){}
+}
+function loadSettings(){
+  try{
+    var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'null');
+    if(s){
+      if(s.threshold)document.getElementById('threshVal').value=s.threshold;
+      if(s.mapProvider){
+        var mp=document.getElementById('mapProv');
+        for(var i=0;i<mp.options.length;i++){if(mp.options[i].text===s.mapProvider)mp.selectedIndex=i;}
+      }
+      if(s.defaultCat)document.getElementById('defaultCatSel').value=s.defaultCat;
+      if(s.rate){document.getElementById('rateVal').value=s.rate;LOC.rate=s.rate;}
+    }
+  }catch(e){}
+}
+loadSettings();
+
+function updateRate(){
+  var newRate=parseFloat(document.getElementById('rateVal').value);
+  if(isNaN(newRate)||newRate<=0)return;
+  LOC.rate=newRate;
+  recalcStats();
+  saveSettings();
+  showToast('💰','Rate updated to '+LOC.currency+newRate.toFixed(2)+'/'+LOC.unit);
+}
+
+function getDefaultCat(){
+  try{return document.getElementById('defaultCatSel').value||'uncl';}catch(e){return 'uncl';}
+}
+
+function signOut(){
+  if(!confirm('Sign out and clear all data? This cannot be undone.'))return;
+  try{
+    localStorage.removeItem('mymilesai_trips');
+    localStorage.removeItem('mymilesai_name');
+    localStorage.removeItem('mymilesai_onboarded');
+    localStorage.removeItem('mymilesai_settings');
+    localStorage.removeItem('mymilesai_odometer');
+    localStorage.removeItem('mymilesai_workhours');
+    localStorage.removeItem('mymilesai_freq_routes');
+    localStorage.removeItem('mymilesai_dismissed_alerts');
+    localStorage.removeItem('mymilesai_autodetect');
+  }catch(e){}
+  showToast('👋','Signed out — data cleared');
+  setTimeout(function(){location.reload();},1500);
+}
+
 /* ===== FEATURE 6: ONBOARDING ===== */
 function showOnboarding(){
   document.getElementById('onboardOverlay').classList.add('show');
@@ -2342,6 +2565,17 @@ function setObUnit(btn,unit){
 try{
   if(!localStorage.getItem('mymilesai_onboarded'))setTimeout(showOnboarding,800);
 }catch(e){}
+
+/* ===== AUTO-DETECT INIT ===== */
+try{
+  var adPref=localStorage.getItem('mymilesai_autodetect');
+  if(adPref==='0'){autoDetect=false;document.getElementById('autoDetectTgl').classList.remove('on');}
+  else{autoDetect=true;}
+}catch(e){}
+if(autoDetect){
+  setTimeout(function(){startAutoMonitoring();},1200);
+}
+updateAutoBtn();
 </script>
 </body>
 </html>
