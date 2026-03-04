@@ -507,6 +507,11 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <!-- TAB 2: TRIPS -->
   <div class="tab" id="tab-trips">
     <div class="sh"><span class="sh-t">Your Trips</span><span class="sh-pill" id="tripPill">0 trips</span></div>
+    <div id="swipeSection" style="display:none">
+      <div style="padding:4px 4px 2px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:700;color:var(--amber)">⚡ Swipe to Classify</span><span style="font-size:11px;color:var(--ink4)" id="swipeCount"></span></div>
+      <div id="swipeQueue"></div>
+      <div style="height:8px"></div>
+    </div>
     <div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclassified</button></div>
     <div class="trip-list" id="tripList"></div>
   </div>
@@ -855,6 +860,18 @@ function tripCard(t,wide){
 }
 function renderTrips(){
   document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,2).map(t=>tripCard(t,false)).join('');
+  // Swipe queue — unclassified at top
+  var uncl=TRIPS.filter(function(t){return t.type==='uncl';});
+  var swipeSec=document.getElementById('swipeSection');
+  var swipeQ=document.getElementById('swipeQueue');
+  if(uncl.length>0){
+    swipeSec.style.display='';
+    document.getElementById('swipeCount').textContent=uncl.length+' remaining';
+    swipeQ.innerHTML=uncl.map(function(t){return tripCard(t,true);}).join('');
+  } else {
+    swipeSec.style.display='none';
+    swipeQ.innerHTML='';
+  }
   // Group trips by day
   var html='',lastDay='';
   for(var i=0;i<TRIPS.length;i++){
