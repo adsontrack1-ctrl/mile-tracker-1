@@ -557,8 +557,9 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
       <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value)"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option></select></div>
       <div class="sr"><div><h4>Map provider</h4><p>Navigation app</p></div><select class="sr-sel" id="mapProv" onchange="saveSettings()"><option>Apple Maps</option><option>Google Maps</option></select></div>
-      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="5" id="threshVal" onchange="saveSettings()"></div>
+      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="3" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
+      <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
       <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px" id="rateVal" onchange="updateRate()"></div></div>
     </div>
     <div class="set-hdr">Odometer</div>
@@ -595,7 +596,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set">
       <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 4.0</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">4.0.0</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
-      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects when you\'re driving using GPS speed. When your speed exceeds the threshold (set in Settings), it automatically starts recording.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile for 2026)<br>Canada: CRA rate ($0.72/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
+      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 3 mph), recording starts. Smart Pause keeps your trip alive through red lights and short stops — trips only end after 5 min of no movement.<br><br><b>What about short trips?</b><br>The low 3 mph threshold catches short drives. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile for 2026)<br>Canada: CRA rate ($0.72/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
     <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
@@ -1599,9 +1600,15 @@ function recalcStatsForPeriod(period){
   if(tripProg){tripProg.style.width=Math.min(count/20*100,100)+'%';}
 }
 
-/* ===== GPS TRACKING — REAL ===== */
+/* ===== GPS TRACKING — SMART ENGINE ===== */
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDist=0;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
+// Smart pause system (#3 fix)
+let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
+var SMART_STOP_MS=300000; // 5 min — stops only split after this
+// Missed trip detection (#1 fix)
+var _lastTripEnd=0,_missedTripChecked=false;
+try{_lastTripEnd=parseInt(localStorage.getItem('mymilesai_last_trip_end'))||0;}catch(e){}
 
 function toggleTracking(){
   if(tracking){
@@ -1613,11 +1620,11 @@ function toggleTracking(){
 
 function startTracking(){
   if(!navigator.geolocation){showToast(_i('pin'),'GPS not available on this device');return;}
-  // If auto-detect is watching, stop monitoring (we're now recording)
   if(autoWatchId){navigator.geolocation.clearWatch(autoWatchId);autoWatchId=null;}
-  clearTimeout(autoStopTimer);
+  clearTimeout(autoStopTimer);clearTimeout(_pauseTimeout);
   watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
   tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
+  _paused=false;_pauseStart=0;_totalPauseMs=0;
   clearRoute();
   document.getElementById('trackLive').classList.add('show');
   document.getElementById('heroStatus').classList.remove('mon');
@@ -1651,22 +1658,61 @@ function onPos(p){
   const dist=LOC.country==='CA'?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
   document.getElementById('trackDist').textContent=dist;
   if(positions.length>1){
-    const elapsed=(Date.now()-trackStart)/3600000;
+    const elapsed=(Date.now()-trackStart-_totalPauseMs)/3600000;
     const avgDist=LOC.country==='CA'?totalDist*1.60934:totalDist;
     document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
   }
-  // Auto-stop detection: if speed is 0, start countdown
-  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  // === SMART PAUSE DETECTION (#3 fix) ===
+  var thresh=parseInt(document.getElementById('threshVal').value)||3;
   var spdRaw=LOC.country==='CA'?spd*3.6:spd*2.237;
-  if(spdRaw>=thresh)lastMoving=Date.now();
-  if(autoDetect && tracking && (Date.now()-lastMoving)>120000){
-    // Stopped for 2 minutes → auto-stop
-    stopTracking();
-    showToast(_i('park'),'Auto-stopped: no movement for 2 min',4000);
+  if(spdRaw>=thresh){
+    lastMoving=Date.now();
+    // If we were paused, RESUME the trip (don't split!)
+    if(_paused){
+      _totalPauseMs+=(Date.now()-_pauseStart);
+      _paused=false;
+      clearTimeout(_pauseTimeout);
+      document.getElementById('statusText').textContent='Recording...';
+      showToast(_i('ccheck'),'Trip resumed after pause',2000);
+    }
+  }
+  if(autoDetect && tracking && !_paused && (Date.now()-lastMoving)>30000){
+    // No movement for 30 seconds → enter PAUSE state
+    _paused=true;
+    _pauseStart=Date.now();
+    document.getElementById('statusText').textContent='Paused...';
+    // Set hard stop at 5 min of pause
+    _pauseTimeout=setTimeout(function(){
+      if(tracking && _paused){
+        _totalPauseMs+=(Date.now()-_pauseStart);
+        stopTracking();
+        showToast(_i('park'),'Trip ended — stopped for 5 min',4000);
+      }
+    },SMART_STOP_MS);
   }
 }
 
 function onPosErr(e){console.log('GPS error:',e.message);}
+
+/* ===== MISSED TRIP DETECTOR (#1 fix) ===== */
+function checkMissedTrips(){
+  if(!_lastTripEnd||_missedTripChecked)return;
+  var gap=Date.now()-_lastTripEnd;
+  var hoursSince=gap/(1000*60*60);
+  // If it's been 2-48 hours since last trip, and we're opening the app during work hours, prompt
+  if(hoursSince>=2 && hoursSince<=48 && isWorkHours()){
+    var hrs=Math.floor(hoursSince);
+    // Don't nag — just show a gentle alert
+    setTimeout(function(){
+      showToast(_i('warn'),'No trips logged in '+hrs+'h — did you drive?',5000);
+    },3000);
+  }
+  _missedTripChecked=true;
+}
+function recordTripEnd(){
+  _lastTripEnd=Date.now();
+  try{localStorage.setItem('mymilesai_last_trip_end',String(_lastTripEnd));}catch(e){}
+}
 
 /* ===== AUTO-DETECT DRIVING ===== */
 function toggleAutoDetect(el){
@@ -1705,7 +1751,7 @@ function onAutoPos(p){
   // While monitoring (not recording), check if driving
   if(tracking)return;
   var spd=p.coords.speed||0;
-  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  var thresh=parseInt(document.getElementById('threshVal').value)||3;
   var spdVal=LOC.country==='CA'?spd*3.6:spd*2.237;
   // Update speedo even while monitoring
   var spdDisplay=spdVal.toFixed(0);
@@ -1742,7 +1788,8 @@ function updateAutoBtn(){
 }
 function stopTracking(){
   if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}
-  clearInterval(timerInt);tracking=false;
+  clearInterval(timerInt);clearTimeout(_pauseTimeout);
+  tracking=false;_paused=false;
   document.getElementById('trackLive').classList.remove('show');
   document.getElementById('heroStatus').classList.remove('rec');
   document.getElementById('autoBtn').classList.remove('recording');
@@ -1798,6 +1845,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();renderAlerts();saveTripsToStorage();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
+  recordTripEnd();
   _gpsTrioSaved=false;
 }
 function reverseGeocode(pos,cb){
@@ -2263,6 +2311,7 @@ function saveManual(){
   renderAlerts();
   var dist=LOC.country==='CA'?(mi*1.60934).toFixed(1):mi.toFixed(1);
   showToast(_i('ccheck'),'Trip saved · '+dist+' '+LOC.unit);
+  recordTripEnd();
   saveTripsToStorage();
   closeAddTrip();
 }
@@ -2403,6 +2452,7 @@ setLocale(detected);
 updateGreeting();
 initProfile();
 setTimeout(animateCounters,600);
+setTimeout(checkMissedTrips,2000); // Check for missed trips on load
 
 /* Fix #9 — Update template distances from GPS */
 function updateTemplateDists(){
@@ -2543,6 +2593,11 @@ function isWorkHours(){
 }
 loadWorkHours();
 
+function updatePauseTimeout(){
+  SMART_STOP_MS=parseInt(document.getElementById('pauseTimeoutSel').value)||300000;
+  saveSettings();
+}
+
 /* ===== NOTIFICATION SETTINGS ===== */
 var _notifSettings={trip:true,weekly:false,milestone:true};
 function toggleNotifSetting(el,key){
@@ -2560,10 +2615,11 @@ function loadNotifSettings(){
 /* ===== SETTINGS PERSISTENCE ===== */
 function saveSettings(){
   var settings={
-    threshold:parseInt(document.getElementById('threshVal').value)||5,
+    threshold:parseInt(document.getElementById('threshVal').value)||3,
     mapProvider:document.getElementById('mapProv').value,
     defaultCat:document.getElementById('defaultCatSel').value,
-    rate:parseFloat(document.getElementById('rateVal').value)||LOC.rate
+    rate:parseFloat(document.getElementById('rateVal').value)||LOC.rate,
+    pauseTimeout:parseInt(document.getElementById('pauseTimeoutSel').value)||300000
   };
   try{localStorage.setItem('mymilesai_settings',JSON.stringify(settings));}catch(e){}
 }
@@ -2578,6 +2634,10 @@ function loadSettings(){
       }
       if(s.defaultCat)document.getElementById('defaultCatSel').value=s.defaultCat;
       if(s.rate){document.getElementById('rateVal').value=s.rate;LOC.rate=s.rate;}
+      if(s.pauseTimeout){
+        document.getElementById('pauseTimeoutSel').value=s.pauseTimeout;
+        SMART_STOP_MS=s.pauseTimeout;
+      }
     }
   }catch(e){}
 }
