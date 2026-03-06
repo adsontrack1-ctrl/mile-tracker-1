@@ -35,7 +35,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 @keyframes ms3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-30px) scale(1.15)}}
 @keyframes avGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(100%)}to{transform:translateX(-50%) translateY(0)}}
+@keyframes slideUpModal{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes pulse-rec{0%,100%{box-shadow:0 4px 20px rgba(0,168,112,.3)}50%{box-shadow:0 4px 28px rgba(0,168,112,.5),0 0 0 6px rgba(0,168,112,.08)}}
 
 /* HEADER */
@@ -394,7 +395,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(12,12,29,.5);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;}
 .modal-overlay.show{display:flex;animation:fadeIn .25s ease;}
-.modal{width:393px;max-width:100vw;background:var(--white);border-radius:var(--r3) var(--r3) 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0));box-shadow:0 -12px 48px rgba(12,12,29,.15);animation:slideUp .35s cubic-bezier(.22,1,.36,1);}
+.modal{width:393px;max-width:100vw;background:var(--white);border-radius:var(--r3) var(--r3) 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0));box-shadow:0 -12px 48px rgba(12,12,29,.15);animation:slideUpModal .35s cubic-bezier(.22,1,.36,1);}
 .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--ink6);margin:0 auto 20px;}
 .modal-title{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--ink);margin-bottom:20px;}
 .modal .iw{padding:0;margin-bottom:12px;}.modal .inp{border-radius:var(--r);}
@@ -493,14 +494,15 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <button class="qa-btn" onclick="openMapSheet()"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>Map</button>
       <button class="qa-btn" onclick="switchTabId('tab-stats')"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Reports</button>
     </div>
+    <div class="uncl" id="demoBanner" style="display:none;background:var(--vi-s);border-color:var(--vi-s2)" onclick="signOut()"><span class="uncl-i" style="display:inline-flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="uncl-t" style="color:var(--vi)">Demo Mode — Sample Data</div><div class="uncl-d">Add a trip or tap here to reset →</div></div><span class="uncl-a">›</span></div>
     <div class="uncl" id="unclBanner" style="display:none" onclick="switchTabId('tab-trips')"><span class="uncl-i" style="display:inline-flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg></span><div><div class="uncl-t" id="unclText"></div><div class="uncl-d">Tap to classify →</div></div><span class="uncl-a">›</span></div>
     <div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div>
     <div class="trips" id="recentTrips"></div>
     <div class="sh"><span class="sh-t">Quick Templates</span></div>
     <div class="tmpl-r">
-      <div class="tmpl" onclick="useTemplate('office')"><span class="tmpl-e" style="display:inline-flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22V12h6v10M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01"/></svg></span><div><div class="tmpl-n">Office</div><div class="tmpl-m" id="tmplOffDist">— mi</div></div></div>
-      <div class="tmpl" onclick="useTemplate('client')"><span class="tmpl-e" style="display:inline-flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div><div class="tmpl-n">Client</div><div class="tmpl-m" id="tmplCliDist">— mi</div></div></div>
-      <div class="tmpl" onclick="useTemplate('airport')"><span class="tmpl-e" style="display:inline-flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span><div><div class="tmpl-n">Airport</div><div class="tmpl-m" id="tmplAirDist">— mi</div></div></div>
+      <div class="tmpl" onclick="useTemplate('office')"><span class="tmpl-e" style="display:inline-flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22V12h6v10M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01"/></svg></span><div><div class="tmpl-n">Office</div><div class="tmpl-m" id="tmplOffDist">—</div></div></div>
+      <div class="tmpl" onclick="useTemplate('client')"><span class="tmpl-e" style="display:inline-flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div><div class="tmpl-n">Client</div><div class="tmpl-m" id="tmplCliDist">—</div></div></div>
+      <div class="tmpl" onclick="useTemplate('airport')"><span class="tmpl-e" style="display:inline-flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span><div><div class="tmpl-n">Airport</div><div class="tmpl-m" id="tmplAirDist">—</div></div></div>
       <button class="tmpl-add" onclick="openAddTrip()">+ New</button>
     </div>
   </div>
@@ -555,7 +557,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set-hdr">Tracking</div>
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
-      <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value)"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option></select></div>
+      <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option></select></div>
       <div class="sr"><div><h4>Map provider</h4><p>Navigation app</p></div><select class="sr-sel" id="mapProv" onchange="saveSettings()"><option>Apple Maps</option><option>Google Maps</option></select></div>
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="3" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
@@ -721,6 +723,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Category</label><div style="display:flex;gap:8px"><button class="cls ob" id="eBiz" onclick="setEC('biz')" style="flex:1"><span class="cls-d"></span>Business</button><button class="cls" id="ePer" onclick="setEC('pers')" style="flex:1"><span class="cls-d"></span>Personal</button></div></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Purpose</label><select class="inp" id="editPurpose" style="appearance:auto;padding-right:8px"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Notes <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><input type="text" class="inp" id="editNotes" placeholder="Add a note..." maxlength="100"></div>
+  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Date</label><input type="date" class="inp" id="editDate" style="padding:10px 16px"></div>
   <div class="modal-row"><button class="modal-cancel" onclick="closeEdit()">Cancel</button><button class="cta" onclick="saveEdit()" style="flex:1">Save</button></div>
 </div></div>
 <div class="modal-overlay" id="delModal"><div class="modal del-modal"><div class="modal-handle"></div><div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Delete Trip</div><div class="del-msg">Are you sure? This can't be undone.</div><div class="del-route" id="delRoute"></div><div class="modal-row"><button class="modal-cancel" onclick="closeDel()">Cancel</button><button class="btn-del-confirm" onclick="confirmDel()">Delete</button></div></div></div>
@@ -808,6 +811,7 @@ ccheck:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="curr
 x:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
 note:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
 undo:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>',
+refresh:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
 rec:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>',
 stop:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
 clock:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
@@ -845,6 +849,15 @@ function applyLocale(){
   document.querySelectorAll('.trip-mi-u').forEach(e=>e.textContent=LOC.label);
   document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers/,LOC.country==='CA'?'Kilometers':'Miles'));
   document.querySelectorAll('.tmpl-dist').forEach(e=>{const v=parseFloat(e.textContent);if(!isNaN(v)){const nv=LOC.country==='CA'?(v*1.60934).toFixed(1):v.toFixed(1);e.textContent=nv+' '+u;}});
+  // Update template default text with correct unit
+  var tmplOff=document.getElementById('tmplOffDist');
+  var tmplCli=document.getElementById('tmplCliDist');
+  var tmplAir=document.getElementById('tmplAirDist');
+  if(tmplOff&&tmplOff.textContent==='—')tmplOff.textContent='— '+u;
+  if(tmplCli&&tmplCli.textContent==='—')tmplCli.textContent='— '+u;
+  if(tmplAir&&tmplAir.textContent==='—')tmplAir.textContent='— '+u;
+  // If distances were already calculated, just update the unit
+  if(tmplOff&&tmplOff.textContent!=='— '+u){var tv=parseFloat(tmplOff.textContent);if(!isNaN(tv)){updateTemplateDists();}}
   renderTrips();
   renderAlerts();
 }
@@ -886,6 +899,11 @@ var _DEMO_TRIPS=[
 // Start empty — loadTripsFromStorage will populate from localStorage or demo
 const TRIPS=[];
 var _usingDemoData=false;
+function randomPath(){
+  var y1=20+Math.floor(Math.random()*50),y2=15+Math.floor(Math.random()*55),y3=10+Math.floor(Math.random()*60),y4=20+Math.floor(Math.random()*45),y5=15+Math.floor(Math.random()*55);
+  var x1=60+Math.floor(Math.random()*40),x2=120+Math.floor(Math.random()*40),x3=200+Math.floor(Math.random()*40),x4=280+Math.floor(Math.random()*40);
+  return 'M20,'+y1+' C'+x1+','+y2+' '+x2+','+y3+' '+x3+','+y4+' S'+x4+','+y5+' 340,'+(20+Math.floor(Math.random()*50));
+}
 function tripDist(mi){return LOC.country==='CA'?(mi*1.60934).toFixed(1):mi.toFixed(1);}
 function convMi(mi){return LOC.country==='CA'?mi*1.60934:mi;}
 function tripCard(t,wide){
@@ -932,6 +950,7 @@ function renderTrips(){
   recalcStats();
   checkEmptyState();
   bindSwipeCards();
+  if(_activeFilter!=='all')applyFilter();
 }
 
 /* ===== SWIPE TO CLASSIFY ===== */
@@ -1057,7 +1076,8 @@ function renderAlerts(){
   var allAlerts=[];
 
   // New: Trip saved
-  allAlerts.push({id:'trip_saved_'+lt.id,isNew:true,ic:IC.trip,bg:BG.trip,
+  // New: Trip saved (controlled by notif setting)
+  if(_notifSettings.trip) allAlerts.push({id:'trip_saved_'+lt.id,isNew:true,ic:IC.trip,bg:BG.trip,
     title:'Trip saved · <span class="al-dist">'+ld+' '+u+'</span>',
     desc:lt.from+' → '+lt.to+(lded?' · +'+c+lded+' deduction':''),time:ago(12)});
 
@@ -1076,14 +1096,16 @@ function renderAlerts(){
     action:'<button class="al-action add" onclick="openAddTrip()">+ Add trip</button>'});
 
   // New: Weekly summary
-  allAlerts.push({id:'weekly_current',isNew:true,ic:IC.chart,bg:BG.chart,
+  // New: Weekly summary (controlled by notif setting)
+  if(_notifSettings.weekly) allAlerts.push({id:'weekly_current',isNew:true,ic:IC.chart,bg:BG.chart,
     title:'Weekly mileage summary',
     desc:totalBiz.toFixed(1)+' '+u+' business · '+totalPer.toFixed(1)+' '+u+' personal · '+c+(totalBiz*r).toFixed(2)+' earned',
     time:'Last Sunday'});
 
   // New: Tax reminder (Jan-May only)
   var mo=now.getMonth();
-  if(mo>=0&&mo<=4) allAlerts.push({id:'tax_'+now.getFullYear(),isNew:true,ic:IC.tax,bg:BG.tax,
+  // New: Tax reminder (Jan-May, controlled by milestone notif setting)
+  if(mo>=0&&mo<=4&&_notifSettings.milestone) allAlerts.push({id:'tax_'+now.getFullYear(),isNew:true,ic:IC.tax,bg:BG.tax,
     title:'Tax filing deadline approaching',
     desc:'Export your mileage report before '+(LOC.country==='CA'?'April 30':'April 15')+'. You\'ve earned '+c+(totalBiz*r).toFixed(2)+' in deductions so far.',
     time:ago(1440*2)});
@@ -1378,6 +1400,10 @@ function recalcStats(){
     legends[1].innerHTML='<span class="tax-lg-dot" style="background:var(--mag)"></span>Personal '+perPct+'%';
   }
 
+  // Demo banner
+  var demoBanner=document.getElementById('demoBanner');
+  if(demoBanner)demoBanner.style.display=_usingDemoData?'flex':'none';
+
   // Unclassified banner
   var banner=document.getElementById('unclBanner');
   if(banner){
@@ -1508,10 +1534,15 @@ function exportEmail(){
   window.open(mailto);
   openInfoModal('Email Report','Your email app should have opened with a trip summary.<br><br><b>Summary included:</b><br>• '+totalTrips+' trips<br>• '+totalBiz.toFixed(1)+' business '+unit+'<br>• '+totalPer.toFixed(1)+' personal '+unit+'<br>• '+LOC.currency+(totalBiz*LOC.rate).toFixed(2)+' deductions<br><br><i>Tip: Export a CSV first and attach it to the email for full trip details.</i>');
 }
+var _activeFilter='all';
 function switchFilter(el){
   el.closest('.tf-row').querySelectorAll('.tf').forEach(f=>f.classList.remove('a'));
   el.classList.add('a');
-  var val=el.textContent.trim().toLowerCase();
+  _activeFilter=el.textContent.trim().toLowerCase();
+  applyFilter();
+}
+function applyFilter(){
+  var val=_activeFilter;
   var list=document.getElementById('tripList');
   if(!list)return;
   var children=list.children;
@@ -1731,6 +1762,10 @@ function toggleAutoDetect(el){
 
 function startAutoMonitoring(){
   if(!navigator.geolocation||tracking)return;
+  if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){
+    document.getElementById('statusText').textContent='HTTPS required for GPS';
+    return;
+  }
   if(autoWatchId)navigator.geolocation.clearWatch(autoWatchId);
   autoWatchId=navigator.geolocation.watchPosition(onAutoPos,function(){},{enableHighAccuracy:false,maximumAge:5000,timeout:15000});
   document.getElementById('heroStatus').classList.add('mon');
@@ -1841,7 +1876,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   var freq=getFreqRouteType(fromAddr,toAddr);
   if(freq)type=freq;
   else if(isWorkHours())type='biz';
-  TRIPS.unshift({id:newId,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:type==='biz',purpose:'',notes:'',path:'M20,50 C80,20 160,70 240,30 S320,55 340,40'});
+  TRIPS.unshift({id:newId,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:type==='biz',purpose:'',notes:'',path:randomPath()});
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();renderAlerts();saveTripsToStorage();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
@@ -1873,7 +1908,8 @@ function reverseGeocode(pos,cb){
   fetchAddr(end.lat,end.lng,function(a){endAddr=a;});
 }
 function updateTimer(){
-  const s=Math.floor((Date.now()-trackStart)/1000),m=Math.floor(s/60),sec=s%60;
+  var pauseMs=_totalPauseMs+(_paused?(Date.now()-_pauseStart):0);
+  const s=Math.floor((Date.now()-trackStart-pauseMs)/1000),m=Math.floor(s/60),sec=s%60;
   document.getElementById('trackTimer').textContent=String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
 }
 function haversine(lat1,lon1,lat2,lon2){
@@ -1997,12 +2033,12 @@ function searchAddr(query){
 }
 
 /* --- Dropdown rendering --- */
+var _geoTimer=null;
 function onAddrType(inpId,ddId){
   var inp=document.getElementById(inpId);
   var dd=document.getElementById(ddId);
   var v=inp.value.trim();
   
-  // Always calc distance
   calcDistance();
   
   if(v.length<2){dd.classList.remove('show');dd.innerHTML='';return;}
@@ -2015,13 +2051,82 @@ function onAddrType(inpId,ddId){
     html+='<div class="add-dd-item" onmousedown="pickPlace(event,\''+inpId+'\',\''+ddId+'\','+i+')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+p.n+'</div><div class="adi-sub">'+p.c+'</div></div></div>';
   }
   
-  // Always show "use as typed" for any input
   if(v.length>=3){
     html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="adi-main">'+v+'</div><div class="adi-sub">Use this address</div></div></div>';
   }
   
+  // Always show a "searching..." hint when we'll geocode
+  if(v.length>=4){
+    html+='<div class="add-dd-item" style="pointer-events:none;opacity:.5"><div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" style="animation:gp 1.5s ease-in-out infinite"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg></div><div><div class="adi-main" style="color:var(--ink4)">Searching live addresses...</div></div></div>';
+  }
+  
   if(html){dd.innerHTML=html;dd.classList.add('show');}
   else{dd.classList.remove('show');}
+  
+  // Always trigger live geocoding for 4+ chars (removed the local results < 3 restriction)
+  if(v.length>=4){
+    clearTimeout(_geoTimer);
+    _geoTimer=setTimeout(function(){
+      geocodeAddr(v,inpId,ddId);
+    },400);
+  }
+}
+
+function geocodeAddr(query,inpId,ddId){
+  var dd=document.getElementById(ddId);
+  // Photon geocoder — fuzzy matching (handles typos like "manle" → "Manley")
+  var biasLat=lastGpsLat||49.89,biasLng=lastGpsLng||-97.14;
+  if(!lastGpsLat){try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';var tzG={'America/Winnipeg':[49.89,-97.14],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/Edmonton':[53.54,-113.49],'America/Montreal':[45.50,-73.57],'America/New_York':[40.71,-74.00],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24]};if(tzG[tz]){biasLat=tzG[tz][0];biasLng=tzG[tz][1];}}catch(e){}}
+  fetch('https://photon.komoot.io/api/?q='+encodeURIComponent(query)+'&lat='+biasLat+'&lon='+biasLng+'&limit=5&lang=en')
+  .then(function(r){if(!r.ok)throw new Error('Network');return r.json();})
+  .then(function(data){
+    var inp=document.getElementById(inpId);
+    if(!inp||inp.value.trim().length<3)return;
+    var localResults=searchAddr(inp.value.trim());
+    var html='';
+    for(var i=0;i<localResults.length;i++){
+      var p=localResults[i].place;
+      html+='<div class="add-dd-item" onmousedown="pickPlace(event,\''+inpId+'\',\''+ddId+'\','+i+')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+p.n+'</div><div class="adi-sub">'+p.c+'</div></div></div>';
+    }
+    _liveGeoResults=[];
+    var provMap={'Manitoba':'MB','Ontario':'ON','Quebec':'QC','British Columbia':'BC','Alberta':'AB','Saskatchewan':'SK','Nova Scotia':'NS','New Brunswick':'NB','Newfoundland and Labrador':'NL','Prince Edward Island':'PE','Northwest Territories':'NT','Nunavut':'NU','Yukon':'YT','California':'CA','New York':'NY','Texas':'TX','Florida':'FL','Illinois':'IL','Pennsylvania':'PA','Ohio':'OH','Georgia':'GA','Michigan':'MI','North Carolina':'NC','New Jersey':'NJ','Virginia':'VA','Washington':'WA','Arizona':'AZ','Massachusetts':'MA','Tennessee':'TN','Indiana':'IN','Missouri':'MO','Maryland':'MD','Wisconsin':'WI','Colorado':'CO','Minnesota':'MN','South Carolina':'SC','Alabama':'AL','Louisiana':'LA','Kentucky':'KY','Oregon':'OR','Oklahoma':'OK','Connecticut':'CT','Utah':'UT','Iowa':'IA','Nevada':'NV','Arkansas':'AR','Mississippi':'MS','Kansas':'KS','Nebraska':'NE','Idaho':'ID','New Mexico':'NM','West Virginia':'WV','Hawaii':'HI','New Hampshire':'NH','Maine':'ME','Montana':'MT','Rhode Island':'RI','Delaware':'DE','South Dakota':'SD','North Dakota':'ND','Alaska':'AK','Vermont':'VT','Wyoming':'WY'};
+    if(data&&data.features&&data.features.length){
+      for(var j=0;j<data.features.length;j++){
+        var f=data.features[j];
+        var props=f.properties||{};
+        var coords=f.geometry?f.geometry.coordinates:null;
+        if(!coords)continue;
+        var street=(props.housenumber?props.housenumber+' ':'')+(props.street||props.name||'');
+        var cityName=props.city||props.town||props.village||props.district||'';
+        var stateName=props.state||'';
+        var stateAbbr=provMap[stateName]||stateName;
+        var city=cityName+(stateAbbr?', '+stateAbbr:'');
+        if(!street&&props.name)street=props.name;
+        _liveGeoResults.push({n:street,c:city,lat:coords[1],lng:coords[0]});
+        html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" style="border-left:3px solid var(--mint)"><div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+street+'</div><div class="adi-sub" style="color:var(--mint)">'+city+'</div></div></div>';
+      }
+    } else {
+      html+='<div class="add-dd-item" style="pointer-events:none;opacity:.5"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div><div class="adi-main" style="color:var(--ink4)">No results found</div></div></div>';
+    }
+    var v=inp.value.trim();
+    html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="adi-main">'+v+'</div><div class="adi-sub">Use as typed</div></div></div>';
+    if(html){dd.innerHTML=html;dd.classList.add('show');}
+  }).catch(function(err){
+    var loading=dd.querySelector('[style*="pointer-events:none"]');
+    if(loading)loading.remove();
+  });
+}
+var _liveGeoResults=[];
+function pickGeo(e,inpId,ddId,idx){
+  e.preventDefault();
+  if(_liveGeoResults[idx]){
+    var p=_liveGeoResults[idx];
+    document.getElementById(inpId).value=p.n+', '+p.c;
+    if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
+    else toCoords={lat:p.lat,lng:p.lng};
+  }
+  document.getElementById(ddId).classList.remove('show');
+  calcDistance();
 }
 
 var lastSearchResults=[];
@@ -2063,42 +2168,69 @@ function calcDistance(){
     return;
   }
   
-  // If we have real coordinates for both, use Haversine
   if(fromCoords && toCoords){
-    var R=6371; // km
+    // Show quick Haversine estimate while OSRM loads
+    var R=6371;
     var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
     var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
     var a=Math.sin(dLat/2)*Math.sin(dLat/2)+
           Math.cos(fromCoords.lat*Math.PI/180)*Math.cos(toCoords.lat*Math.PI/180)*
           Math.sin(dLng/2)*Math.sin(dLng/2);
     var c2=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-    var distKm=R*c2*1.35; // 1.35x factor for driving vs straight-line
-    
-    if(LOC.country==='CA'){
-      addDistVal=parseFloat(distKm.toFixed(1));
-      distInp.value=distKm.toFixed(1);
-    }else{
-      var distMi=distKm/1.60934;
-      addDistVal=parseFloat(distMi.toFixed(1));
-      distInp.value=distMi.toFixed(1);
-    }
+    var quickKm=R*c2;
+    // Show quick estimate while fetching real route
+    var quickDisplay=LOC.country==='CA'?quickKm.toFixed(1):(quickKm/1.60934).toFixed(1);
+    distInp.value=quickDisplay;
     distInp.classList.add('filled');
     badge.classList.add('active');badge.textContent=LOC.unit;
-    status.textContent='Calculated driving distance';
-    status.classList.add('calculated');
+    status.textContent='Calculating route...';
+    status.classList.remove('calculated');
+    
+    // Fetch real driving distance from OSRM (free, no API key)
+    fetch('https://router.project-osrm.org/route/v1/driving/'+fromCoords.lng+','+fromCoords.lat+';'+toCoords.lng+','+toCoords.lat+'?overview=false')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data&&data.routes&&data.routes[0]){
+        var distM=data.routes[0].distance; // meters
+        var distKm=distM/1000;
+        if(LOC.country==='CA'){
+          addDistVal=parseFloat(distKm.toFixed(1));
+          distInp.value=distKm.toFixed(1);
+        }else{
+          var distMi=distKm/1.60934;
+          addDistVal=parseFloat(distMi.toFixed(1));
+          distInp.value=distMi.toFixed(1);
+        }
+        distInp.classList.add('filled');
+        badge.classList.add('active');badge.textContent=LOC.unit;
+        status.textContent='Route distance (driving)';
+        status.classList.add('calculated');
+      }
+    }).catch(function(){
+      // Fallback to Haversine × 1.2 if OSRM fails
+      var fallbackKm=quickKm*1.2;
+      if(LOC.country==='CA'){
+        addDistVal=parseFloat(fallbackKm.toFixed(1));
+        distInp.value=fallbackKm.toFixed(1);
+      }else{
+        addDistVal=parseFloat((fallbackKm/1.60934).toFixed(1));
+        distInp.value=(fallbackKm/1.60934).toFixed(1);
+      }
+      distInp.classList.add('filled');
+      badge.classList.add('active');badge.textContent=LOC.unit;
+      status.textContent='Estimated distance';
+      status.classList.add('calculated');
+    });
     return;
   }
   
-  // Hash fallback for custom-typed addresses
-  var hash=0;var s=f+'>>>'+t;
-  for(var i=0;i<s.length;i++){hash=((hash<<5)-hash)+s.charCodeAt(i);hash=hash&hash;}
-  hash=Math.abs(hash);
-  var baseMiles=1.5+((hash%250)/10);
-  if(LOC.country==='CA'){var km=(baseMiles*1.60934).toFixed(1);addDistVal=parseFloat(km);distInp.value=km;}
-  else{addDistVal=parseFloat(baseMiles.toFixed(1));distInp.value=baseMiles.toFixed(1);}
-  distInp.classList.add('filled');
-  badge.classList.add('active');badge.textContent=LOC.unit;
-  status.textContent='Estimated distance';status.classList.add('calculated');
+  // No coordinates — show placeholder, user can type manually
+  distInp.value='';
+  distInp.classList.remove('filled');
+  badge.classList.remove('active');
+  addDistVal=0;
+  status.textContent='Pick an address from suggestions for auto-distance';
+  status.classList.remove('calculated');
 }
 
 /* --- Sheet open/close --- */
@@ -2305,7 +2437,7 @@ function saveManual(){
   }
   var purpose=document.getElementById('addPurpose').value;
   var notes=document.getElementById('addNote').value.trim();
-  TRIPS.unshift({id:newId,from:f,to:t,mi:mi||5,type:autoType,time:'Just now',day:tripDay,date:tripDateStr,ts:tripTs,ded:autoType==='biz',purpose:purpose,notes:notes,path:'M20,50 C80,20 160,70 240,30 S320,55 340,40'});
+  TRIPS.unshift({id:newId,from:f,to:t,mi:mi||5,type:autoType,time:'Just now',day:tripDay,date:tripDateStr,ts:tripTs,ded:autoType==='biz',purpose:purpose,notes:notes,path:randomPath()});
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
   renderAlerts();
@@ -2330,16 +2462,16 @@ function returnTrip(id){
   if(!orig)return;
   if(_usingDemoData){TRIPS.length=0;_usingDemoData=false;}
   var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
-  TRIPS.unshift({id:newId,from:orig.to,to:orig.from,mi:orig.mi,type:orig.type,time:'Just now',day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:orig.ded,purpose:orig.purpose,notes:'Return trip',path:'M20,50 C80,20 160,70 240,30 S320,55 340,40'});
+  TRIPS.unshift({id:newId,from:orig.to,to:orig.from,mi:orig.mi,type:orig.type,time:'Just now',day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:orig.ded,purpose:orig.purpose,notes:'Return trip',path:randomPath()});
   if(orig.type!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();renderAlerts();saveTripsToStorage();
   var dist=tripDist(orig.mi);
   showToast(_i('undo'),'Return trip saved · '+dist+' '+LOC.unit);
 }
-function openEdit(id){curTrip=TRIPS.find(t=>t.id===id);if(!curTrip)return;document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';document.getElementById('editModal').classList.add('show');}
+function openEdit(id){curTrip=TRIPS.find(t=>t.id===id);if(!curTrip)return;document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');}
 function closeEdit(){document.getElementById('editModal').classList.remove('show');curTrip=null;}
 function setEC(c){document.getElementById('eBiz').classList.remove('ob');document.getElementById('ePer').classList.remove('op');if(c==='biz')document.getElementById('eBiz').classList.add('ob');else document.getElementById('ePer').classList.add('op');}
-function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('editFrom').value;curTrip.to=document.getElementById('editTo').value;const v=parseFloat(document.getElementById('editMi').value);curTrip.mi=LOC.country==='CA'?v/1.60934:v;curTrip.type=document.getElementById('eBiz').classList.contains('ob')?'biz':'pers';curTrip.ded=curTrip.type==='biz';curTrip.purpose=document.getElementById('editPurpose').value;curTrip.notes=document.getElementById('editNotes').value;checkFrequentRoute(curTrip);renderTrips();renderAlerts();saveTripsToStorage();closeEdit();showToast(_i('edit'),'Trip updated');}
+function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('editFrom').value;curTrip.to=document.getElementById('editTo').value;const v=parseFloat(document.getElementById('editMi').value);curTrip.mi=LOC.country==='CA'?v/1.60934:v;curTrip.type=document.getElementById('eBiz').classList.contains('ob')?'biz':'pers';curTrip.ded=curTrip.type==='biz';curTrip.purpose=document.getElementById('editPurpose').value;curTrip.notes=document.getElementById('editNotes').value;var edv=document.getElementById('editDate').value;if(edv){var nd=new Date(edv+'T12:00:00');curTrip.date=_fmt(nd);curTrip.day=_rel(nd);curTrip.ts=nd.getTime();}checkFrequentRoute(curTrip);renderTrips();renderAlerts();saveTripsToStorage();closeEdit();showToast(_i('edit'),'Trip updated');}
 function openDel(id){curTrip=TRIPS.find(t=>t.id===id);if(!curTrip)return;document.getElementById('delRoute').textContent=curTrip.from+' → '+curTrip.to+' · '+tripDist(curTrip.mi)+' '+LOC.label;document.getElementById('delModal').classList.add('show');}
 function closeDel(){document.getElementById('delModal').classList.remove('show');curTrip=null;}
 var _lastDeleted=null,_lastDeletedIdx=-1,_undoTimer=null;
@@ -2394,11 +2526,14 @@ function closeMapSheet(){
 }
 function initMap(){
   try{
-    map=L.map('liveMap',{zoomControl:false,attributionControl:false}).setView([40.7128,-74.006],15);
+    var defLat=lastGpsLat||40.7128,defLng=lastGpsLng||-74.006;
+    // Try timezone guess if no GPS
+    if(!lastGpsLat){var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}var tzG={'America/Winnipeg':[49.89,-97.14],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/New_York':[40.71,-74.00],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24]};if(tzG[tz]){defLat=tzG[tz][0];defLng=tzG[tz][1];}}
+    map=L.map('liveMap',{zoomControl:false,attributionControl:false}).setView([defLat,defLng],15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
     L.control.zoom({position:'topright'}).addTo(map);
     const pulseIcon=L.divIcon({className:'',html:'<div style="position:relative;width:18px;height:18px;"><div style="position:absolute;inset:-8px;background:rgba(108,60,224,.1);border-radius:50%;animation:gp 2s ease-in-out infinite;"></div><div style="width:18px;height:18px;background:#6C3CE0;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(108,60,224,.4);position:relative;z-index:1;"></div></div>',iconSize:[18,18],iconAnchor:[9,9]});
-    userMarker=L.marker([40.7128,-74.006],{icon:pulseIcon}).addTo(map);
+    userMarker=L.marker([defLat,defLng],{icon:pulseIcon}).addTo(map);
     routeLine=L.polyline([],{color:'#6C3CE0',weight:4,opacity:.8,smoothFactor:1,lineCap:'round',lineJoin:'round'}).addTo(map);
     mapReady=true;
     document.getElementById('mapLoading').classList.add('hidden');
@@ -2460,18 +2595,29 @@ function updateTemplateDists(){
   var ofc=findNearest(OFFICES,lastGpsLat,lastGpsLng);
   var cli=findNearest(CLIENTS,lastGpsLat,lastGpsLng);
   var air=findNearest(AIRPORTS,lastGpsLat,lastGpsLng);
-  function distTo(dest){
-    if(!dest)return'—';
-    var R=LOC.country==='CA'?6371:3958.8;
-    var dLat=(dest.lat-lastGpsLat)*Math.PI/180,dLng=(dest.lng-lastGpsLng)*Math.PI/180;
-    var a=Math.sin(dLat/2)**2+Math.cos(lastGpsLat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-    var d=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.35;
-    return d.toFixed(1);
-  }
   var u=LOC.unit;
-  document.getElementById('tmplOffDist').textContent=distTo(ofc)+' '+u;
-  document.getElementById('tmplCliDist').textContent=distTo(cli)+' '+u;
-  document.getElementById('tmplAirDist').textContent=distTo(air)+' '+u;
+  function fetchDist(dest,elId){
+    if(!dest){document.getElementById(elId).textContent='— '+u;return;}
+    fetch('https://router.project-osrm.org/route/v1/driving/'+lastGpsLng+','+lastGpsLat+';'+dest.lng+','+dest.lat+'?overview=false')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data&&data.routes&&data.routes[0]){
+        var km=data.routes[0].distance/1000;
+        var val=LOC.country==='CA'?km.toFixed(1):(km/1.60934).toFixed(1);
+        document.getElementById(elId).textContent=val+' '+u;
+      }
+    }).catch(function(){
+      // Fallback to Haversine
+      var R=LOC.country==='CA'?6371:3958.8;
+      var dLat=(dest.lat-lastGpsLat)*Math.PI/180,dLng=(dest.lng-lastGpsLng)*Math.PI/180;
+      var a=Math.sin(dLat/2)**2+Math.cos(lastGpsLat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+      var d=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+      document.getElementById(elId).textContent=d.toFixed(1)+' '+u;
+    });
+  }
+  fetchDist(ofc,'tmplOffDist');
+  fetchDist(cli,'tmplCliDist');
+  fetchDist(air,'tmplAirDist');
 }
 // Try to get GPS for template distances
 if(navigator.geolocation){
@@ -2619,7 +2765,8 @@ function saveSettings(){
     mapProvider:document.getElementById('mapProv').value,
     defaultCat:document.getElementById('defaultCatSel').value,
     rate:parseFloat(document.getElementById('rateVal').value)||LOC.rate,
-    pauseTimeout:parseInt(document.getElementById('pauseTimeoutSel').value)||300000
+    pauseTimeout:parseInt(document.getElementById('pauseTimeoutSel').value)||300000,
+    locale:LOC.country
   };
   try{localStorage.setItem('mymilesai_settings',JSON.stringify(settings));}catch(e){}
 }
@@ -2633,6 +2780,8 @@ function loadSettings(){
         for(var i=0;i<mp.options.length;i++){if(mp.options[i].text===s.mapProvider)mp.selectedIndex=i;}
       }
       if(s.defaultCat)document.getElementById('defaultCatSel').value=s.defaultCat;
+      // Restore locale FIRST, then rate (rate overrides locale default)
+      if(s.locale)setLocale(s.locale);
       if(s.rate){document.getElementById('rateVal').value=s.rate;LOC.rate=s.rate;}
       if(s.pauseTimeout){
         document.getElementById('pauseTimeoutSel').value=s.pauseTimeout;
@@ -2721,6 +2870,7 @@ function signOut(){
     localStorage.removeItem('mymilesai_dismissed_alerts');
     localStorage.removeItem('mymilesai_autodetect');
     localStorage.removeItem('mymilesai_notif_settings');
+    localStorage.removeItem('mymilesai_last_trip_end');
   }catch(e){}
   showToast(_i('wave'),'Signed out — data cleared');
   setTimeout(function(){location.reload();},1500);
@@ -2748,7 +2898,7 @@ function obNext(step){
   // Step 2: Unit
   if(step===2){
     var sel=document.querySelector('.ob-unit-btn.active');
-    if(sel)setLocale(sel.dataset.unit);
+    if(sel){setLocale(sel.dataset.unit);saveSettings();}
   }
   // Step 3: GPS permission
   if(step===3){
@@ -2786,7 +2936,7 @@ function setObUnit(btn,unit){
 }
 // Check onboarding
 try{
-  if(!localStorage.getItem('mymilesai_onboarded'))setTimeout(showOnboarding,800);
+  if(!localStorage.getItem('mymilesai_onboarded')||_usingDemoData)setTimeout(showOnboarding,800);
 }catch(e){}
 
 /* ===== AUTO-DETECT INIT ===== */
