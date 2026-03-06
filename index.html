@@ -1661,9 +1661,16 @@ function startTracking(){
   document.getElementById('heroStatus').classList.remove('mon');
   document.getElementById('heroStatus').classList.add('rec');
   document.getElementById('statusText').textContent='Recording...';
+  showToast(_i('rec',16,'#EF3D58'),'Trip recording started',2000);
   document.getElementById('autoBtn').classList.add('recording');
   document.getElementById('autoBtn').querySelector('.i').innerHTML=_i('rec',17,'#fff');
   document.getElementById('autoText').textContent='Recording';
+  // Switch hero stats to current trip mode
+  document.getElementById('hsBiz').textContent='0.0';
+  document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
+  document.getElementById('hsPer').textContent='0';
+  document.getElementById('hsPerL').textContent='Minutes';
+  document.getElementById('hsDed').textContent=LOC.currency+'0.00';
   if(mapSheetOpen){document.getElementById('mapLiveBadge').classList.add('show');}
   updateMapTrackBtn();
   timerInt=setInterval(updateTimer,1000);
@@ -1688,6 +1695,25 @@ function onPos(p){
   updateMapPos(p.coords.latitude,p.coords.longitude);
   const dist=LOC.country==='CA'?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
   document.getElementById('trackDist').textContent=dist;
+  // Update hero stats with CURRENT TRIP data while tracking
+  var liveDist=LOC.country==='CA'?totalDist*1.60934:totalDist;
+  var liveDed=liveDist*LOC.rate;
+  document.getElementById('hsBiz').textContent=liveDist.toFixed(1);
+  document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
+  document.getElementById('hsPer').textContent=((Date.now()-trackStart-_totalPauseMs-(_paused?(Date.now()-_pauseStart):0))/60000).toFixed(0);
+  document.getElementById('hsPerL').textContent='Minutes';
+  document.getElementById('hsDed').textContent=LOC.currency+liveDed.toFixed(2);
+  // Distance milestone alerts
+  var milestoneKm=[1,5,10,25,50,100];
+  var milestoneMi=[1,5,10,25,50,100];
+  var milestones=LOC.country==='CA'?milestoneKm:milestoneMi;
+  for(var mi=0;mi<milestones.length;mi++){
+    var m=milestones[mi];
+    if(liveDist>=m && liveDist<m+0.2 && !window['_ms'+m]){
+      window['_ms'+m]=true;
+      showToast(_i('ccheck'),m+' '+LOC.unit+' reached!',2000);
+    }
+  }
   if(positions.length>1){
     const elapsed=(Date.now()-trackStart-_totalPauseMs)/3600000;
     const avgDist=LOC.country==='CA'?totalDist*1.60934:totalDist;
@@ -1712,6 +1738,7 @@ function onPos(p){
     _paused=true;
     _pauseStart=Date.now();
     document.getElementById('statusText').textContent='Paused...';
+    showToast(_i('clock'),'Paused — will resume when you start moving',3000);
     // Set hard stop at 5 min of pause
     _pauseTimeout=setTimeout(function(){
       if(tracking && _paused){
@@ -1770,6 +1797,7 @@ function startAutoMonitoring(){
   autoWatchId=navigator.geolocation.watchPosition(onAutoPos,function(){},{enableHighAccuracy:false,maximumAge:5000,timeout:15000});
   document.getElementById('heroStatus').classList.add('mon');
   document.getElementById('statusText').textContent='Monitoring...';
+  showToast(_i('sat'),'Auto-detect active — tracking will start when you drive',3000);
   updateAutoBtn();
 }
 
@@ -1833,6 +1861,10 @@ function stopTracking(){
   document.getElementById('spGlow').style.strokeDashoffset=267;
   document.getElementById('mapLiveBadge').classList.remove('show');
   updateMapTrackBtn();
+  // Restore hero stats to lifetime totals
+  document.getElementById('hsBizL').textContent='Business '+LOC.unit;
+  document.getElementById('hsPerL').textContent='Personal '+LOC.unit;
+  recalcStats();
   // Resume auto-monitoring if enabled
   if(autoDetect){
     setTimeout(function(){startAutoMonitoring();},2000);
@@ -2135,19 +2167,39 @@ function pickPlace(e,inpId,ddId,idx){
   var results=searchAddr(document.getElementById(inpId).value.trim());
   if(results[idx]){
     var p=results[idx].place;
-    document.getElementById(inpId).value=p.n+', '+p.c;
+    var fullAddr=p.n+', '+p.c;
+    document.getElementById(inpId).value=fullAddr;
+    // Set local coords as initial estimate
     if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
     else toCoords={lat:p.lat,lng:p.lng};
+    // Re-geocode via Photon for accurate coordinates
+    refineCoords(fullAddr,inpId);
   }
   document.getElementById(ddId).classList.remove('show');
   calcDistance();
 }
+function refineCoords(addr,inpId){
+  var biasLat=lastGpsLat||49.89,biasLng=lastGpsLng||-97.14;
+  fetch('https://photon.komoot.io/api/?q='+encodeURIComponent(addr)+'&lat='+biasLat+'&lon='+biasLng+'&limit=1&lang=en')
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data&&data.features&&data.features[0]){
+      var coords=data.features[0].geometry.coordinates;
+      console.log('[MyMilesAI] Refined '+inpId+': '+addr+' → ['+coords[1]+','+coords[0]+']');
+      if(inpId==='addFrom') fromCoords={lat:coords[1],lng:coords[0]};
+      else toCoords={lat:coords[1],lng:coords[0]};
+      calcDistance();
+    }
+  }).catch(function(){});
+}
 function pickCustom(e,inpId,ddId){
   e.preventDefault();
-  // Keep typed text, clear coords so we use hash fallback
+  var typed=document.getElementById(inpId).value.trim();
   if(inpId==='addFrom') fromCoords=null;
   else toCoords=null;
   document.getElementById(ddId).classList.remove('show');
+  // Geocode the typed address for coordinates
+  if(typed.length>=4) refineCoords(typed,inpId);
   calcDistance();
 }
 
@@ -2187,12 +2239,17 @@ function calcDistance(){
     status.classList.remove('calculated');
     
     // Fetch real driving distance from OSRM (free, no API key)
-    fetch('https://router.project-osrm.org/route/v1/driving/'+fromCoords.lng+','+fromCoords.lat+';'+toCoords.lng+','+toCoords.lat+'?overview=false')
-    .then(function(r){return r.json();})
+    var osrmUrl='https://router.project-osrm.org/route/v1/driving/'+fromCoords.lng+','+fromCoords.lat+';'+toCoords.lng+','+toCoords.lat+'?overview=false';
+    console.log('[MyMilesAI] OSRM request:',osrmUrl);
+    console.log('[MyMilesAI] From:',fromCoords,'To:',toCoords);
+    fetch(osrmUrl)
+    .then(function(r){console.log('[MyMilesAI] OSRM status:',r.status);return r.json();})
     .then(function(data){
+      console.log('[MyMilesAI] OSRM response:',data&&data.routes?'routes found':'no routes',data);
       if(data&&data.routes&&data.routes[0]){
         var distM=data.routes[0].distance; // meters
         var distKm=distM/1000;
+        console.log('[MyMilesAI] OSRM distance:',distKm.toFixed(1),'km /',( distKm/1.60934).toFixed(1),'mi');
         if(LOC.country==='CA'){
           addDistVal=parseFloat(distKm.toFixed(1));
           distInp.value=distKm.toFixed(1);
@@ -2206,7 +2263,8 @@ function calcDistance(){
         status.textContent='Route distance (driving)';
         status.classList.add('calculated');
       }
-    }).catch(function(){
+    }).catch(function(err){
+      console.log('[MyMilesAI] OSRM FAILED:',err);
       // Fallback to Haversine × 1.2 if OSRM fails
       var fallbackKm=quickKm*1.2;
       if(LOC.country==='CA'){
@@ -2606,7 +2664,8 @@ function updateTemplateDists(){
         var val=LOC.country==='CA'?km.toFixed(1):(km/1.60934).toFixed(1);
         document.getElementById(elId).textContent=val+' '+u;
       }
-    }).catch(function(){
+    }).catch(function(err){
+      console.log('[MyMilesAI] OSRM FAILED:',err);
       // Fallback to Haversine
       var R=LOC.country==='CA'?6371:3958.8;
       var dLat=(dest.lat-lastGpsLat)*Math.PI/180,dLng=(dest.lng-lastGpsLng)*Math.PI/180;
@@ -2936,7 +2995,9 @@ function setObUnit(btn,unit){
 }
 // Check onboarding
 try{
-  if(!localStorage.getItem('mymilesai_onboarded')||_usingDemoData)setTimeout(showOnboarding,800);
+  var _hasName=false;
+  try{_hasName=!!localStorage.getItem('mymilesai_name');}catch(e){}
+  if(!localStorage.getItem('mymilesai_onboarded')||_usingDemoData||!_hasName)setTimeout(showOnboarding,800);
 }catch(e){}
 
 /* ===== AUTO-DETECT INIT ===== */
