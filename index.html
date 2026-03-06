@@ -728,6 +728,21 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 </div></div>
 <div class="modal-overlay" id="delModal"><div class="modal del-modal"><div class="modal-handle"></div><div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Delete Trip</div><div class="del-msg">Are you sure? This can't be undone.</div><div class="del-route" id="delRoute"></div><div class="modal-row"><button class="modal-cancel" onclick="closeDel()">Cancel</button><button class="btn-del-confirm" onclick="confirmDel()">Delete</button></div></div></div>
 
+<!-- CLASSIFY PROMPT -->
+<div class="modal-overlay" id="classifyModal"><div class="modal" style="text-align:center">
+  <div class="modal-handle"></div>
+  <div style="font-size:36px;margin-bottom:8px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+  <div class="modal-title" style="text-align:center;margin-bottom:4px">Trip Complete!</div>
+  <div id="clsRoute" style="font-size:13px;color:var(--ink3);margin-bottom:4px"></div>
+  <div id="clsDist" style="font-family:var(--fd);font-size:28px;font-weight:800;color:var(--vi);margin-bottom:16px"></div>
+  <div style="font-size:13px;color:var(--ink3);margin-bottom:14px">How would you like to classify this trip?</div>
+  <div style="display:flex;gap:10px;margin-bottom:12px">
+    <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('biz')"><span class="cls-d" style="border-color:var(--vi)"></span><span style="font-size:14px">Business</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div></button>
+    <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('pers')"><span class="cls-d" style="border-color:var(--mag)"></span><span style="font-size:14px">Personal</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div></button>
+  </div>
+  <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
+</div></div>
+
 <!-- ONBOARDING -->
 <div class="modal-overlay" id="onboardOverlay" style="z-index:9999"><div class="ob-sheet" id="onboardSheet">
   <div class="ob-slide" style="display:flex">
@@ -1655,7 +1670,7 @@ function startTracking(){
   clearTimeout(autoStopTimer);clearTimeout(_pauseTimeout);
   watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
   tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
-  _paused=false;_pauseStart=0;_totalPauseMs=0;
+  _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   clearRoute();
   document.getElementById('trackLive').classList.add('show');
   document.getElementById('heroStatus').classList.remove('mon');
@@ -1873,7 +1888,7 @@ function stopTracking(){
     document.getElementById('statusText').textContent='GPS Active';
     updateAutoBtn();
   }
-  if(totalDist>0.05){
+  if(totalDist>0.01){
     var mi=totalDist;
     var dist=LOC.country==='CA'?(mi*1.60934):mi;
     var elapsed=Math.floor((Date.now()-trackStart)/60000);
@@ -1896,7 +1911,12 @@ function stopTracking(){
     setTimeout(function(){
       if(!_gpsTrioSaved)finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
     },3000);
+  } else {
+    // No significant movement — show a toast letting user know
+    showToast(_i('warn'),'No distance recorded — trip not saved',3000);
   }
+  // Reset milestone flags
+  for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
 }
 var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
@@ -1913,7 +1933,26 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   renderTrips();renderAlerts();saveTripsToStorage();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
   recordTripEnd();
+  // Show classify prompt if trip wasn't auto-classified
+  if(type==='uncl'){
+    setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist);},800);
+  }
   _gpsTrioSaved=false;
+}
+function showClassifyPrompt(tripId,from,to,dist){
+  document.getElementById('clsRoute').textContent=from.split(',')[0]+' → '+to.split(',')[0];
+  document.getElementById('clsDist').textContent=dist.toFixed(1)+' '+LOC.label;
+  document.getElementById('classifyModal').classList.add('show');
+  window._classifyTripId=tripId;
+}
+function classifyLastTrip(type){
+  var id=window._classifyTripId;
+  if(id){clsTrip(id,type);}
+  closeClassifyPrompt();
+}
+function closeClassifyPrompt(){
+  document.getElementById('classifyModal').classList.remove('show');
+  window._classifyTripId=null;
 }
 function reverseGeocode(pos,cb){
   if(!pos||pos.length<2){cb(null,null);return;}
