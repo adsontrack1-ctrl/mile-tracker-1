@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0C0C1D">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src https://photon.komoot.io https://nominatim.openstreetmap.org https://router.project-osrm.org; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
@@ -12,9 +15,9 @@
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
-<title>MyMilesAI Rel 4.0</title>
+<title>MyMilesAI Rel 4.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb" crossorigin="anonymous"/>
 <style>
 :root{
   --bg:#F6F7F9;--white:#FFF;
@@ -436,8 +439,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .swipe-card{position:relative;z-index:1;touch-action:pan-y;transition:transform .3s cubic-bezier(.22,1,.36,1);cursor:grab;}
 .swipe-card.dragging{transition:none;cursor:grabbing;}
 .swipe-hint{text-align:center;padding:6px 0 2px;font-size:10px;font-weight:600;color:var(--ink4);letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:6px;}
-.swipe-hint::before{content:'← Business';color:var(--vi);font-weight:700;}
-.swipe-hint::after{content:'Personal →';color:var(--mag);font-weight:700;}
+.swipe-hint::before{content:var(--swipe-left,'← Business');color:var(--vi);font-weight:700;}
+.swipe-hint::after{content:var(--swipe-right,'Personal →');color:var(--mag);font-weight:700;}
 /* WORK DAY BUTTONS */
 .wd-btn{width:30px;height:30px;border-radius:50%;border:none;font-size:11px;font-weight:700;background:var(--ink6);color:var(--ink3);cursor:pointer;transition:all .2s;}
 .wd-btn.a{background:var(--vi);color:#fff;}
@@ -796,10 +799,32 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge">3</div></button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 <script>
 /* ===== SVG ICON SYSTEM ===== */
-function _i(n,s){s=s||16;var m={
+/* ===== SECURITY: HTML escape — MUST use for all user data in innerHTML ===== */
+function _esc(str){
+  if(str===null||str===undefined)return'';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#x27;')
+    .replace(/\//g,'&#x2F;');
+}
+/* Sanitize path for SVG d= attribute — allow only valid SVG path chars */
+function _safePath(p){
+  if(!p||typeof p!=='string')return'M0,45 L310,45';
+  return p.replace(/[^MmLlHhVvCcSsQqTtAaZz\d\s,.\-]/g,'');
+}
+/* Sanitize CSV cell — prevent formula injection */
+function _csvCell(v){
+  var s=String(v||'');
+  if(s.match(/^[=+\-@\t\r]/))s="'"+s; // prefix with ' to neutralize formula
+  return s.replace(/"/g,'""');
+}
+function _i(n,s,c){s=s||16;var m={
 bell:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
 gear:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg>',
 sat:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7L9 11l6.5 6.5a2.12 2.12 0 003-3L12 8"/><path d="M10 11L7.5 8.5a2.12 2.12 0 00-3 3L11 18"/><circle cx="18" cy="4" r="2"/></svg>',
@@ -837,7 +862,7 @@ stop:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="currentColor"><rect 
 clock:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
 hglass:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.17a2 2 0 00-.59-1.41L12 12l-4.41 4.41A2 2 0 007 17.83V22M7 2v4.17a2 2 0 00.59 1.41L12 12l4.41-4.42A2 2 0 0017 6.17V2"/></svg>',
 park:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 17V7h4a3 3 0 010 6H9"/></svg>'
-};return(m[n]||'').replace(/SZ/g,s);}
+};var svg=(m[n]||'').replace(/SZ/g,s);if(c)svg=svg.replace(/currentColor/g,c);return svg;}
 
 /* ===== LOCALE ENGINE ===== */
 let LOC={unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate'};
@@ -878,6 +903,9 @@ function applyLocale(){
   if(tmplAir&&tmplAir.textContent==='—')tmplAir.textContent='— '+u;
   // If distances were already calculated, just update the unit
   if(tmplOff&&tmplOff.textContent!=='— '+u){var tv=parseFloat(tmplOff.textContent);if(!isNaN(tv)){updateTemplateDists();}}
+  // Update swipe hint labels to match locale category names
+  document.documentElement.style.setProperty('--swipe-left',"'← Business'");
+  document.documentElement.style.setProperty('--swipe-right',"'Personal →'");
   renderTrips();
   renderAlerts();
 }
@@ -928,15 +956,24 @@ function tripDist(mi){return LOC.country==='CA'?(mi*1.60934).toFixed(1):mi.toFix
 function convMi(mi){return LOC.country==='CA'?mi*1.60934:mi;}
 function tripCard(t,wide){
   const d=tripDist(t.mi),ded=t.ded?`<span class="trip-ded">+$${(parseFloat(d)*LOC.rate).toFixed(2)}</span>`:'';
-  const clr={biz:'vi',pers:'mag',uncl:'amber'}[t.type];
-  const badge={biz:'Business',pers:'Personal',uncl:'Classify'}[t.type];
-  const dotCls={biz:'eb',pers:'ep',uncl:'eu'}[t.type];
-  const stroke={biz:'rgba(108,60,224,.3)',pers:'rgba(214,0,110,.25)',uncl:'rgba(224,141,0,.25)'}[t.type];
+  const clr={biz:'vi',pers:'mag',uncl:'amber'}[t.type]||'amber';
+  const badge={biz:'Business',pers:'Personal',uncl:'Classify'}[t.type]||'Classify';
+  const dotCls={biz:'eb',pers:'ep',uncl:'eu'}[t.type]||'eu';
+  const stroke={biz:'rgba(108,60,224,.3)',pers:'rgba(214,0,110,.25)',uncl:'rgba(224,141,0,.25)'}[t.type]||'rgba(224,141,0,.25)';
   const dash=t.type==='uncl'?' stroke-dasharray="8 5"':'';
-  const dotFill={biz:'#6C3CE0',pers:'#D6006E',uncl:'#E08D00'}[t.type];
+  const dotFill={biz:'#6C3CE0',pers:'#D6006E',uncl:'#E08D00'}[t.type]||'#E08D00';
   const vb=wide?'0 0 360 90':'0 0 310 90';
-  const purposeTag=t.purpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${t.purpose}</span>`:'';
-  var card = `<div class="trip" data-id="${t.id}"><div class="trip-map"><div class="trip-map-bg ${t.type}"></div><div class="trip-map-grid"></div><svg viewBox="${vb}" preserveAspectRatio="none"><path d="${t.path}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round"${dash}/><circle cx="20" cy="${t.path.match(/M\d+,(\d+)/)[1]}" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="${wide?340:290}" cy="${t.path.match(/(\d+)$/)[1]}" r="5" fill="${dotFill}" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge ${t.type}">${badge}</div><div class="trip-map-time">${t.time}</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${t.from}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${t.to}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${t.day}</span>${purposeTag}${ded}</div></div><div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  // SECURITY: escape all user-supplied fields before innerHTML injection
+  const safePath=_safePath(t.path);
+  const safeFrom=_esc(t.from);
+  const safeTo=_esc(t.to);
+  const safeDay=_esc(t.day);
+  const safeTime=_esc(t.time);
+  const safePurpose=_esc(t.purpose);
+  const pathStartY=safePath.match(/M\d+,(\d+)/)?safePath.match(/M\d+,(\d+)/)[1]:'45';
+  const pathEndXY=safePath.match(/(\d+)$/)?safePath.match(/(\d+)$/)[1]:'45';
+  const purposeTag=safePurpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${safePurpose}</span>`:'';
+  var card = `<div class="trip" data-id="${t.id}"><div class="trip-map"><div class="trip-map-bg ${t.type}"></div><div class="trip-map-grid"></div><svg viewBox="${vb}" preserveAspectRatio="none"><path d="${safePath}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round"${dash}/><circle cx="20" cy="${pathStartY}" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="${wide?340:290}" cy="${pathEndXY}" r="5" fill="${dotFill}" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge ${t.type}">${badge}</div><div class="trip-map-time">${safeTime}</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div><div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -962,7 +999,7 @@ function renderTrips(){
     var t=TRIPS[i];
     if(t.day!==lastDay){
       lastDay=t.day;
-      html+='<div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:var(--ink4);letter-spacing:.3px'+(i>0?';margin-top:8px':'')+'">'+t.day+'</div>';
+      html+='<div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:var(--ink4);letter-spacing:.3px'+(i>0?';margin-top:8px':'')+'">'+_esc(t.day)+'</div>';
     }
     html+=tripCard(t,true);
   }
@@ -1089,6 +1126,7 @@ function renderAlerts(){
     trend:'linear-gradient(135deg,rgba(0,168,112,.06),rgba(0,168,112,.02))'
   };
 
+  if(!TRIPS.length){document.getElementById('alertsList').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--ink3)">'+_i('car',40,'var(--ink4)')+'<div style="margin-top:12px;font-size:15px">No trips yet</div><div style="font-size:13px;margin-top:4px">Start tracking to see your insights here</div></div>';return;}
   var lt=TRIPS[0];var ld=tripDist(lt.mi);
   var lded=lt.ded?(parseFloat(ld)*r).toFixed(2):null;
 
@@ -1299,9 +1337,22 @@ function updateGreeting(){
 function editProfileName(){
   var current='';
   try{current=localStorage.getItem('mymilesai_name')||'';}catch(e){}
-  var name=prompt('Enter your name:',current);
-  if(name!==null){
-    name=name.trim();
+  // Custom in-app modal instead of native prompt()
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML='<div style="background:var(--white);border-radius:var(--r2);padding:28px 24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25)">'
+    +'<div style="font-size:17px;font-weight:700;margin-bottom:16px;font-family:var(--fd)">Edit Your Name</div>'
+    +'<input id="_nameInput" type="text" value="'+current.replace(/"/g,'&quot;')+'" placeholder="Your name" style="width:100%;padding:12px 14px;border:1.5px solid var(--ink5);border-radius:var(--r);font-size:16px;font-family:var(--f);outline:none;box-sizing:border-box;transition:border .2s" onfocus="this.style.borderColor=\'var(--vi)\'" onblur="this.style.borderColor=\'var(--ink5)\'">'
+    +'<div style="display:flex;gap:10px;margin-top:16px">'
+    +'<button onclick="this.closest(\'div[style*=z-index\\:9000]\').remove()" style="flex:1;padding:12px;border:1.5px solid var(--ink5);border-radius:var(--r);background:none;font-size:15px;font-family:var(--f);cursor:pointer;font-weight:600">Cancel</button>'
+    +'<button id="_nameSave" style="flex:1;padding:12px;border:none;border-radius:var(--r);background:var(--vi);color:#fff;font-size:15px;font-family:var(--f);cursor:pointer;font-weight:700">Save</button>'
+    +'</div></div>';
+  document.body.appendChild(overlay);
+  var inp=document.getElementById('_nameInput');
+  inp.focus();inp.select();
+  function saveName(){
+    var name=inp.value.trim();
+    overlay.remove();
     try{localStorage.setItem('mymilesai_name',name);}catch(e){}
     updateGreeting();
     if(name){
@@ -1315,6 +1366,9 @@ function editProfileName(){
     }
     showToast(_i('user'),name?'Name updated to '+name:'Name cleared');
   }
+  document.getElementById('_nameSave').onclick=saveName;
+  inp.onkeydown=function(e){if(e.key==='Enter')saveName();if(e.key==='Escape')overlay.remove();};
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
 }
 function initProfile(){
   var name='';
@@ -1472,7 +1526,7 @@ function exportCSV(){
     var t=TRIPS[i];
     var d=tripDist(t.mi);
     var ded=t.ded?(parseFloat(d)*LOC.rate).toFixed(2):'0.00';
-    rows.push([t.date||t.day,t.time,'"'+t.from+'"','"'+t.to+'"',d,t.type==='biz'?'Business':'Personal','"'+(t.purpose||'')+'"','"'+(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
+    rows.push([t.date||t.day,t.time,'"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,t.type==='biz'?'Business':'Personal','"'+_csvCell(t.purpose||'')+'"','"'+_csvCell(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
   }
   // Add summary row
   var totalBiz=0,totalPer=0;
@@ -1523,13 +1577,32 @@ function exportPDF(){
     tripRows+='<tr><td>'+dateStr+'</td><td>'+t.from+' → '+t.to+(t.purpose?' <small style="color:'+catClr+'">'+t.purpose+'</small>':'')+'</td><td style="text-align:right;font-weight:700">'+d+'</td><td style="color:'+catClr+';font-weight:600">'+cat+'</td><td style="color:#00A870;font-weight:700">'+ded+'</td></tr>';
   }
   var w=window.open('','_blank','width=800,height=600');
+  if(!w){
+    // Popup blocked — fallback to blob download of print-ready HTML
+    var htmlContent='<!DOCTYPE html><html><head><title>MyMilesAI Trip Report</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,system-ui,sans-serif;padding:40px;color:#1a1a2e;font-size:13px}h1{font-size:22px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee}th{background:#f5f5f7;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.summary{display:flex;gap:16px;margin:24px 0}.summary div{flex:1;padding:20px;border-radius:12px;text-align:center}.summary .v{font-size:28px;font-weight:800}.footer{margin-top:24px;padding:12px;background:#f5f5f7;border-radius:8px;font-size:11px;color:#888;text-align:center}@media print{body{padding:20px}}</style></head><body>'
+      +'<h1>MyMilesAI Trip Report</h1><p style="color:#888;margin-bottom:8px">Generated '+new Date().toLocaleDateString()+'</p>'
+      +'<div class="summary"><div style="background:#f0e6ff"><div class="v" style="color:#6C3CE0">'+totalBiz.toFixed(1)+'</div><div>Business '+unit+'</div></div>'
+      +'<div style="background:#ffe6f0"><div class="v" style="color:#D6006E">'+totalPer.toFixed(1)+'</div><div>Personal '+unit+'</div></div>'
+      +'<div style="background:#e6fff2"><div class="v" style="color:#00A870">'+LOC.currency+(totalBiz*LOC.rate).toFixed(2)+'</div><div>Deductions</div></div></div>'
+      +'<table><thead><tr><th>Date</th><th>Route</th><th style="text-align:right">Dist ('+LOC.unit+')</th><th>Category</th><th>Deduction</th></tr></thead><tbody>'+tripRows+'</tbody></table>'
+      +'<div class="footer">'+LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' · '+TRIPS.length+' total trips · MyMilesAI Rel 4.1</div>'
+      +'<script>window.onload=function(){window.print();}<\/script></body></html>';
+    var blob=new Blob([htmlContent],{type:'text/html'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download='MyMilesAI-Report-'+new Date().toISOString().slice(0,10)+'.html';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},5000);
+    showToast(_i('clip'),'Report downloaded — open file and print to PDF');
+    return;
+  }
   w.document.write('<!DOCTYPE html><html><head><title>MyMilesAI Trip Report</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,system-ui,sans-serif;padding:40px;color:#1a1a2e;font-size:13px}h1{font-size:22px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee}th{background:#f5f5f7;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.summary{display:flex;gap:16px;margin:24px 0}.summary div{flex:1;padding:20px;border-radius:12px;text-align:center}.summary .v{font-size:28px;font-weight:800}.footer{margin-top:24px;padding:12px;background:#f5f5f7;border-radius:8px;font-size:11px;color:#888;text-align:center}@media print{body{padding:20px}}</style></head><body>'+
     '<h1>MyMilesAI Trip Report</h1><p style="color:#888;margin-bottom:8px">Generated '+new Date().toLocaleDateString()+'</p>'+
     '<div class="summary"><div style="background:#f0e6ff"><div class="v" style="color:#6C3CE0">'+totalBiz.toFixed(1)+'</div><div>Business '+unit+'</div></div>'+
     '<div style="background:#ffe6f0"><div class="v" style="color:#D6006E">'+totalPer.toFixed(1)+'</div><div>Personal '+unit+'</div></div>'+
     '<div style="background:#e6fff2"><div class="v" style="color:#00A870">'+LOC.currency+(totalBiz*LOC.rate).toFixed(2)+'</div><div>Deductions</div></div></div>'+
     '<table><thead><tr><th>Date</th><th>Route</th><th style="text-align:right">Dist ('+LOC.unit+')</th><th>Category</th><th>Deduction</th></tr></thead><tbody>'+tripRows+'</tbody></table>'+
-    '<div class="footer">'+LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' · '+TRIPS.length+' total trips · MyMilesAI Rel 4.0</div>'+
+    '<div class="footer">'+LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' · '+TRIPS.length+' total trips · MyMilesAI Rel 4.1</div>'+
     '<script>setTimeout(function(){window.print();},500)<\/script></body></html>');
   w.document.close();
   showToast(_i('clip'),'PDF report opened — use Save as PDF in the print dialog');
@@ -1770,7 +1843,21 @@ function onPos(p){
   }
 }
 
-function onPosErr(e){console.log('GPS error:',e.message);}
+function onPosErr(e){
+  console.log('GPS error:',e.message);
+  var msg='GPS unavailable';
+  if(e.code===1)msg='GPS permission denied — enable in browser settings';
+  else if(e.code===2)msg='GPS signal lost — check your connection';
+  else if(e.code===3)msg='GPS timed out — try again';
+  showToast(_i('warn'),'⚠️ '+msg);
+  // If tracking was active and GPS died, pause tracking
+  if(_tracking){
+    _tracking=false;
+    var autoBtn=document.getElementById('autoBtn');
+    if(autoBtn){autoBtn.classList.remove('recording');autoBtn.querySelector('.i').innerHTML=_i('sat',17);autoBtn.querySelector('.lbl').textContent='Auto-detect';}
+    document.getElementById('recDot').style.display='none';
+  }
+}
 
 /* ===== MISSED TRIP DETECTOR (#1 fix) ===== */
 function checkMissedTrips(){
@@ -2120,11 +2207,11 @@ function onAddrType(inpId,ddId){
   
   for(var i=0;i<results.length;i++){
     var p=results[i].place;
-    html+='<div class="add-dd-item" onmousedown="pickPlace(event,\''+inpId+'\',\''+ddId+'\','+i+')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+p.n+'</div><div class="adi-sub">'+p.c+'</div></div></div>';
+    html+='<div class="add-dd-item" onmousedown="pickPlace(event,\''+inpId+'\',\''+ddId+'\','+i+')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+_esc(p.n)+'</div><div class="adi-sub">'+_esc(p.c)+'</div></div></div>';
   }
   
   if(v.length>=3){
-    html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="adi-main">'+v+'</div><div class="adi-sub">Use this address</div></div></div>';
+    html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="adi-main">'+_esc(v)+'</div><div class="adi-sub">Use this address</div></div></div>';
   }
   
   // Always show a "searching..." hint when we'll geocode
@@ -2174,14 +2261,17 @@ function geocodeAddr(query,inpId,ddId){
         var stateAbbr=provMap[stateName]||stateName;
         var city=cityName+(stateAbbr?', '+stateAbbr:'');
         if(!street&&props.name)street=props.name;
+        // SECURITY: escape geocoder-returned names before innerHTML injection
+        var safeStreet=_esc(street);
+        var safeCity=_esc(city);
         _liveGeoResults.push({n:street,c:city,lat:coords[1],lng:coords[0]});
-        html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" style="border-left:3px solid var(--mint)"><div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+street+'</div><div class="adi-sub" style="color:var(--mint)">'+city+'</div></div></div>';
+        html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" style="border-left:3px solid var(--mint)"><div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+safeStreet+'</div><div class="adi-sub" style="color:var(--mint)">'+safeCity+'</div></div></div>';
       }
     } else {
       html+='<div class="add-dd-item" style="pointer-events:none;opacity:.5"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div><div class="adi-main" style="color:var(--ink4)">No results found</div></div></div>';
     }
     var v=inp.value.trim();
-    html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="adi-main">'+v+'</div><div class="adi-sub">Use as typed</div></div></div>';
+    html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="adi-main">'+_esc(v)+'</div><div class="adi-sub">Use as typed</div></div></div>';
     if(html){dd.innerHTML=html;dd.classList.add('show');}
   }).catch(function(err){
     var loading=dd.querySelector('[style*="pointer-events:none"]');
@@ -2752,6 +2842,8 @@ function loadTripsFromStorage(){
           }
           TRIPS.push(parsed[i]);
         }
+        // Sort newest-first by timestamp
+        TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
         _usingDemoData=false;
         return;
       }
@@ -2927,52 +3019,97 @@ function exportJSON(){
   URL.revokeObjectURL(url);
   showToast(_i('box'),'Backup downloaded');
 }
+/* ===== CUSTOM CONFIRM DIALOG (replaces native confirm()) ===== */
+function _showConfirm(title,message,confirmLabel,confirmColor,onConfirm){
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0) 0';
+  overlay.innerHTML='<div style="background:var(--white);border-radius:var(--r2) var(--r2) 0 0;padding:28px 24px 32px;width:100%;max-width:480px;box-shadow:0 -8px 40px rgba(0,0,0,.18)">'
+    +'<div style="width:36px;height:4px;background:var(--ink5);border-radius:4px;margin:0 auto 20px"></div>'
+    +'<div style="font-size:18px;font-weight:700;margin-bottom:10px;font-family:var(--fd)">'+title+'</div>'
+    +'<div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:24px">'+message+'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:10px">'
+    +'<button id="_confirmOk" style="width:100%;padding:15px;border:none;border-radius:var(--r);background:'+(confirmColor||'var(--coral)')+';color:#fff;font-size:16px;font-family:var(--f);cursor:pointer;font-weight:700">'+confirmLabel+'</button>'
+    +'<button id="_confirmCancel" style="width:100%;padding:15px;border:1.5px solid var(--ink5);border-radius:var(--r);background:none;font-size:15px;font-family:var(--f);cursor:pointer;font-weight:600;color:var(--ink2)">Cancel</button>'
+    +'</div></div>';
+  document.body.appendChild(overlay);
+  document.getElementById('_confirmOk').onclick=function(){overlay.remove();onConfirm();};
+  document.getElementById('_confirmCancel').onclick=function(){overlay.remove();};
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+}
+
 function restoreJSON(input){
   if(!input.files||!input.files[0])return;
   var reader=new FileReader();
   reader.onload=function(e){
     try{
       var data=JSON.parse(e.target.result);
+      if(!data||typeof data!=='object'||Array.isArray(data)){showToast(_i('warn'),'Invalid backup file');return;}
       if(!data.trips||!Array.isArray(data.trips)){showToast(_i('warn'),'Invalid backup file');return;}
-      if(!confirm('Restore '+data.trips.length+' trips from backup? This will replace your current data.'))return;
-      TRIPS.length=0;
-      for(var i=0;i<data.trips.length;i++){
-        if(!data.trips[i].purpose)data.trips[i].purpose='';
-        if(!data.trips[i].notes)data.trips[i].notes='';
-        TRIPS.push(data.trips[i]);
-      }
-      _usingDemoData=false;
-      saveTripsToStorage();
-      if(data.name)try{localStorage.setItem('mymilesai_name',data.name);}catch(ex){}
-      if(data.settings)try{localStorage.setItem('mymilesai_settings',JSON.stringify(data.settings));}catch(ex){}
-      if(data.odometer)try{localStorage.setItem('mymilesai_odometer',JSON.stringify(data.odometer));}catch(ex){}
-      if(data.workhours){_workHours=data.workhours;try{localStorage.setItem('mymilesai_workhours',JSON.stringify(data.workhours));}catch(ex){}}
-      if(data.freqRoutes){_freqRoutes=data.freqRoutes;try{localStorage.setItem('mymilesai_freq_routes',JSON.stringify(data.freqRoutes));}catch(ex){}}
-      renderTrips();renderAlerts();loadSettings();loadNotifSettings();loadOdometer();loadWorkHours();updateGreeting();initProfile();
-      closeInfoModal();
-      showToast(_i('ccheck'),'Restored '+data.trips.length+' trips from backup');
+      // SECURITY: validate backup size to prevent DoS
+      if(data.trips.length>50000){showToast(_i('warn'),'Backup too large — max 50,000 trips');return;}
+      var tripCount=data.trips.length;
+      _showConfirm('Restore Backup','Restore '+tripCount+' trips from this backup? Your current trip data will be replaced.','Restore '+tripCount+' trips','var(--vi)',function(){
+        // SECURITY: whitelist-sanitize each trip to prevent prototype pollution
+        var ALLOWED_TRIP_KEYS=['id','from','to','mi','type','time','day','date','ts','ded','purpose','notes','path'];
+        TRIPS.length=0;
+        for(var i=0;i<data.trips.length;i++){
+          var raw=data.trips[i];
+          if(!raw||typeof raw!=='object')continue;
+          var safe=Object.create(null); // no prototype
+          for(var k=0;k<ALLOWED_TRIP_KEYS.length;k++){
+            var key=ALLOWED_TRIP_KEYS[k];
+            if(key in raw)safe[key]=raw[key];
+          }
+          if(!safe.purpose)safe.purpose='';
+          if(!safe.notes)safe.notes='';
+          if(!safe.path)safe.path='';
+          // Validate numeric fields
+          safe.mi=parseFloat(safe.mi)||0;
+          safe.ts=parseInt(safe.ts)||0;
+          // Validate type enum
+          if(!['biz','pers','uncl'].includes(safe.type))safe.type='uncl';
+          // Validate id is numeric
+          safe.id=parseInt(safe.id)||0;
+          TRIPS.push(safe);
+        }
+        _usingDemoData=false;
+        saveTripsToStorage();
+        // SECURITY: sanitize name — strip all HTML, limit to 100 chars
+        if(data.name&&typeof data.name==='string'){
+          var safeName=data.name.replace(/<[^>]*>/g,'').trim().slice(0,100);
+          try{localStorage.setItem('mymilesai_name',safeName);}catch(ex){}
+        }
+        if(data.settings)try{localStorage.setItem('mymilesai_settings',JSON.stringify(data.settings));}catch(ex){}
+        if(data.odometer)try{localStorage.setItem('mymilesai_odometer',JSON.stringify(data.odometer));}catch(ex){}
+        if(data.workhours){_workHours=data.workhours;try{localStorage.setItem('mymilesai_workhours',JSON.stringify(data.workhours));}catch(ex){}}
+        if(data.freqRoutes){_freqRoutes=data.freqRoutes;try{localStorage.setItem('mymilesai_freq_routes',JSON.stringify(data.freqRoutes));}catch(ex){}}
+        renderTrips();renderAlerts();loadSettings();loadNotifSettings();loadOdometer();loadWorkHours();updateGreeting();initProfile();
+        closeInfoModal();
+        showToast(_i('ccheck'),'Restored '+tripCount+' trips from backup');
+      });
     }catch(ex){showToast(_i('warn'),'Error reading backup file');}
   };
   reader.readAsText(input.files[0]);
 }
 
 function signOut(){
-  if(!confirm('Sign out and clear all data? This cannot be undone.'))return;
-  try{
-    localStorage.removeItem('mymilesai_trips');
-    localStorage.removeItem('mymilesai_name');
-    localStorage.removeItem('mymilesai_onboarded');
-    localStorage.removeItem('mymilesai_settings');
-    localStorage.removeItem('mymilesai_odometer');
-    localStorage.removeItem('mymilesai_workhours');
-    localStorage.removeItem('mymilesai_freq_routes');
-    localStorage.removeItem('mymilesai_dismissed_alerts');
-    localStorage.removeItem('mymilesai_autodetect');
-    localStorage.removeItem('mymilesai_notif_settings');
-    localStorage.removeItem('mymilesai_last_trip_end');
-  }catch(e){}
-  showToast(_i('wave'),'Signed out — data cleared');
-  setTimeout(function(){location.reload();},1500);
+  _showConfirm('Sign Out & Clear Data','This will permanently delete all your trips, settings, and profile data. This cannot be undone.','Sign Out & Clear All','var(--coral)',function(){
+    try{
+      localStorage.removeItem('mymilesai_trips');
+      localStorage.removeItem('mymilesai_name');
+      localStorage.removeItem('mymilesai_onboarded');
+      localStorage.removeItem('mymilesai_settings');
+      localStorage.removeItem('mymilesai_odometer');
+      localStorage.removeItem('mymilesai_workhours');
+      localStorage.removeItem('mymilesai_freq_routes');
+      localStorage.removeItem('mymilesai_dismissed_alerts');
+      localStorage.removeItem('mymilesai_autodetect');
+      localStorage.removeItem('mymilesai_notif_settings');
+      localStorage.removeItem('mymilesai_last_trip_end');
+    }catch(e){}
+    showToast(_i('wave'),'Signed out — data cleared');
+    setTimeout(function(){location.reload();},1500);
+  });
 }
 
 /* ===== FEATURE 6: ONBOARDING ===== */
@@ -3050,6 +3187,37 @@ if(autoDetect){
   setTimeout(function(){startAutoMonitoring();},1200);
 }
 updateAutoBtn();
+
+/* ===== SERVICE WORKER (offline support) ===== */
+if('serviceWorker' in navigator){
+  var swCode=[
+    'var CACHE="mymilesai-v4.1";',
+    'self.addEventListener("install",function(e){',
+    '  e.waitUntil(caches.open(CACHE).then(function(c){return c.add(self.location.href.split("?")[0]);}));',
+    '  self.skipWaiting();',
+    '});',
+    'self.addEventListener("activate",function(e){',
+    '  e.waitUntil(caches.keys().then(function(keys){',
+    '    return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));',
+    '  }));self.clients.claim();',
+    '});',
+    'self.addEventListener("fetch",function(e){',
+    '  if(e.request.method!=="GET")return;',
+    '  e.respondWith(caches.match(e.request).then(function(cached){',
+    '    var net=fetch(e.request).then(function(res){',
+    '      if(res&&res.ok){var cl=res.clone();caches.open(CACHE).then(function(c){c.put(e.request,cl);});}',
+    '      return res;',
+    '    }).catch(function(){return cached;});',
+    '    return cached||net;',
+    '  }));',
+    '});'
+  ].join('\n');
+  var swBlob=new Blob([swCode],{type:'application/javascript'});
+  var swUrl=URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl).then(function(reg){
+    console.log('[MyMilesAI] SW registered:',reg.scope);
+  }).catch(function(e){console.log('[MyMilesAI] SW failed:',e.message);});
+}
 </script>
 </body>
 </html>
