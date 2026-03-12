@@ -881,18 +881,21 @@ function setLocale(c){
 }
 function applyLocale(){
   const u=LOC.unit,s=LOC.speed;
-  document.getElementById('speedUnit').textContent=s;
-  document.getElementById('hsBizL').textContent='Business '+u;
-  document.getElementById('hsPerL').textContent='Personal '+u;
-  document.getElementById('trackDistU').textContent=LOC.label;
-  document.getElementById('trackSpeedU').textContent=s;
-  document.getElementById('trackAvgU').textContent='avg '+s;
-  document.getElementById('threshLbl').textContent='Min '+s+' to detect';
-  document.getElementById('taxLabel').textContent=LOC.taxLabel;
-  document.getElementById('rateLabel').textContent=LOC.country==='CA'?'CRA rate':'IRS rate';
-  document.getElementById('rateDesc').textContent='Per '+LOC.unit+' deduction';
-  document.getElementById('rateVal').value=LOC.rate.toFixed(2);
-  document.getElementById('editDistLabel').textContent=LOC.country==='CA'?'Kilometers':'Miles';
+  var _gel=function(id){return document.getElementById(id);};
+  var _set=function(id,val){var e=_gel(id);if(e)e.textContent=val;};
+  var _setv=function(id,val){var e=_gel(id);if(e)e.value=val;};
+  _set('speedUnit',s);
+  _set('hsBizL','Business '+u);
+  _set('hsPerL','Personal '+u);
+  _set('trackDistU',LOC.label);
+  _set('trackSpeedU',s);
+  _set('trackAvgU','avg '+s);
+  _set('threshLbl','Min '+s+' to detect');
+  _set('taxLabel',LOC.taxLabel);
+  _set('rateLabel',LOC.country==='CA'?'CRA rate':'IRS rate');
+  _set('rateDesc','Per '+LOC.unit+' deduction');
+  _setv('rateVal',LOC.rate.toFixed(2));
+  _set('editDistLabel',LOC.country==='CA'?'Kilometers':'Miles');
   document.querySelectorAll('.trip-mi-u').forEach(e=>e.textContent=LOC.label);
   document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers/,LOC.country==='CA'?'Kilometers':'Miles'));
   document.querySelectorAll('.tmpl-dist').forEach(e=>{const v=parseFloat(e.textContent);if(!isNaN(v)){const nv=LOC.country==='CA'?(v*1.60934).toFixed(1):v.toFixed(1);e.textContent=nv+' '+u;}});
@@ -1084,6 +1087,8 @@ function dismissAlert(alertId){
 }
 
 function renderAlerts(){
+  // Guard: alert containers only exist when Alerts tab is in DOM
+  if(!document.getElementById('alertListNew')&&!document.getElementById('alertListOld'))return;
   var u=LOC.unit,r=LOC.rate,c=LOC.currency;
   var now=new Date();
   var ago=function(mins){
@@ -1118,7 +1123,14 @@ function renderAlerts(){
     trend:'linear-gradient(135deg,rgba(0,168,112,.06),rgba(0,168,112,.02))'
   };
 
-  if(!TRIPS.length){document.getElementById('alertsList').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--ink3)">'+_i('car',40,'var(--ink4)')+'<div style="margin-top:12px;font-size:15px">No trips yet</div><div style="font-size:13px;margin-top:4px">Start tracking to see your insights here</div></div>';return;}
+  if(!TRIPS.length){
+    var _emptyAlerts='<div style="text-align:center;padding:60px 20px;color:var(--ink3)">'+_i('car',40,'var(--ink4)')+'<div style="margin-top:12px;font-size:15px">No trips yet</div><div style="font-size:13px;margin-top:4px">Start tracking to see your insights here</div></div>';
+    var _an=document.getElementById('alertListNew');
+    var _ao=document.getElementById('alertListOld');
+    if(_an)_an.innerHTML=_emptyAlerts;
+    if(_ao)_ao.innerHTML='';
+    return;
+  }
   var lt=TRIPS[0];var ld=tripDist(lt.mi);
   var lded=lt.ded?(parseFloat(ld)*r).toFixed(2):null;
 
@@ -1203,8 +1215,8 @@ function renderAlerts(){
   }
 
   // Update badges
-  document.getElementById('alertBadge').textContent=newAlerts.length+' new';
-  document.getElementById('alertBadge').style.display=newAlerts.length>0?'inline-flex':'none';
+  var _ab=document.getElementById('alertBadge');
+  if(_ab){_ab.textContent=newAlerts.length+' new';_ab.style.display=newAlerts.length>0?'inline-flex':'none';}
   var navBadge=document.getElementById('navAlertBadge');
   if(navBadge){navBadge.textContent=newAlerts.length;navBadge.style.display=newAlerts.length>0?'flex':'none';}
   // Also update header bell dot
@@ -1235,13 +1247,15 @@ function renderAlerts(){
   if(newAlerts.length===0&&newSection)newSection.style.display='none';
   else if(newSection)newSection.style.display='';
 
-  document.getElementById('alertListNew').innerHTML=newAlerts.length>0?renderList(newAlerts,true):'';
-  document.getElementById('alertListOld').innerHTML=oldAlerts.length>0?renderList(oldAlerts,false):
+  var _eln=document.getElementById('alertListNew');
+  var _elo=document.getElementById('alertListOld');
+  if(_eln)_eln.innerHTML=newAlerts.length>0?renderList(newAlerts,true):'';
+  if(_elo)_elo.innerHTML=oldAlerts.length>0?renderList(oldAlerts,false):
     '<div class="al-empty"><div class="al-empty-text">No older notifications</div></div>';
 
   // If no alerts at all
   if(newAlerts.length===0&&oldAlerts.length===0){
-    document.getElementById('alertListNew').innerHTML='<div class="al-empty" style="padding:60px 20px"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ink5)" stroke-width="1.5" style="opacity:.3;margin-bottom:12px"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><div class="al-empty-text">All caught up!</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">No new notifications</div></div>';
+    if(_eln)_eln.innerHTML='<div class="al-empty" style="padding:60px 20px"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ink5)" stroke-width="1.5" style="opacity:.3;margin-bottom:12px"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><div class="al-empty-text">All caught up!</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">No new notifications</div></div>';
   }
 }
 function markAllRead(){
@@ -1388,15 +1402,17 @@ function recalcStats(){
   var perPct=totalAll>0?100-bizPct:0;
 
   // Hero stats
-  document.getElementById('hsBiz').textContent=totalBiz.toFixed(1);
-  document.getElementById('hsPer').textContent=totalPer.toFixed(1);
-  document.getElementById('hsDed').textContent=LOC.currency+ded.toFixed(2);
+  var _hb=document.getElementById('hsBiz'),_hp=document.getElementById('hsPer'),_hd=document.getElementById('hsDed');
+  if(_hb)_hb.textContent=totalBiz.toFixed(1);
+  if(_hp)_hp.textContent=totalPer.toFixed(1);
+  if(_hd)_hd.textContent=LOC.currency+ded.toFixed(2);
 
   // Statistics card values
-  document.getElementById('sBiz').textContent=totalBiz.toFixed(1);
-  document.getElementById('sPer').textContent=totalPer.toFixed(1);
-  document.getElementById('sDedVal').textContent=LOC.currency+ded.toFixed(2);
-  document.getElementById('sTripCount').textContent=totalTrips;
+  var _sb=document.getElementById('sBiz'),_sp=document.getElementById('sPer'),_sd=document.getElementById('sDedVal'),_st=document.getElementById('sTripCount');
+  if(_sb)_sb.textContent=totalBiz.toFixed(1);
+  if(_sp)_sp.textContent=totalPer.toFixed(1);
+  if(_sd)_sd.textContent=LOC.currency+ded.toFixed(2);
+  if(_st)_st.textContent=totalTrips;
 
   // Trend badges (compare biz vs personal ratio)
   var bizTrend=document.getElementById('sBizTrend');
@@ -1450,8 +1466,9 @@ function recalcStats(){
   if(perChart)perChart.innerHTML=buildBars(perByDay,'c2');
 
   // Tax deduction card
-  document.getElementById('taxAmt').textContent=LOC.currency+ded.toFixed(2);
-  document.getElementById('taxDet').textContent=totalBiz.toFixed(1)+' business '+LOC.unit+' × '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit;
+  var _ta=document.getElementById('taxAmt'),_td=document.getElementById('taxDet');
+  if(_ta)_ta.textContent=LOC.currency+ded.toFixed(2);
+  if(_td)_td.textContent=totalBiz.toFixed(1)+' business '+LOC.unit+' × '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit;
 
   // Tax split bars
   var segB=document.querySelector('.tax-seg.b');
@@ -1845,7 +1862,7 @@ function onPosErr(e){
     _tracking=false;
     var autoBtn=document.getElementById('autoBtn');
     if(autoBtn){autoBtn.classList.remove('recording');autoBtn.querySelector('.i').innerHTML=_i('sat',17);autoBtn.querySelector('.lbl').textContent='Auto-detect';}
-    document.getElementById('recDot').style.display='none';
+    var _rd=document.getElementById('recDot');if(_rd)_rd.style.display='none';
   }
 }
 
