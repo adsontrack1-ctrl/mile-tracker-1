@@ -462,7 +462,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 <div class="phone"><div class="scroll">
 
   <div class="hdr">
-    <div class="hdr-l"><div class="hdr-av" id="hdrAv">S</div><div><div class="hdr-greet" id="hdrGreet">Good evening</div>
+    <div class="hdr-l"><div class="hdr-av" id="hdrAv">S</div><div><div class="hdr-greet" id="hdrGreet"><script>document.write((function(){var h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening';})())</script></div><div class="hdr-name" id="hdrName">Welcome back</div></div></div>
     <div class="hdr-r"><div class="hdr-btn" style="position:relative" onclick="switchTabId('tab-alerts')" style="display:inline-flex;align-items:center;justify-content:center" id="hdrBellIco"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="hdr-dot"></div></div><div class="hdr-btn" onclick="goToSettings()" style="display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg></div></div>
   </div>
 
@@ -743,7 +743,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <div class="modal-title" style="text-align:center;margin-bottom:4px">Trip Complete!</div>
   <div id="clsRoute" style="font-size:13px;color:var(--ink3);margin-bottom:4px"></div>
   <div id="clsDist" style="font-family:var(--fd);font-size:28px;font-weight:800;color:var(--vi);margin-bottom:16px"></div>
-  <div style="font-size:13px;color:var(--ink3);margin-bottom:14px">How would you like to classify this trip?</div>
+  <div id="clsAutoHint" style="font-size:13px;color:var(--ink3);margin-bottom:14px">How would you like to classify this trip?</div>
   <div style="display:flex;gap:10px;margin-bottom:12px">
     <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('biz')"><span class="cls-d" style="border-color:var(--vi)"></span><span style="font-size:14px">Business</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div></button>
     <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('pers')"><span class="cls-d" style="border-color:var(--mag)"></span><span style="font-size:14px">Personal</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div></button>
@@ -1729,7 +1729,7 @@ let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDis
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
 // Smart pause system (#3 fix)
 let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
-var SMART_STOP_MS=300000; // 5 min — stops only split after this
+var SMART_STOP_MS=480000; // 8 min — stops only end trip after this (traffic jam safe)
 // Missed trip detection (#1 fix)
 var _lastTripEnd=0,_missedTripChecked=false;
 try{_lastTripEnd=parseInt(localStorage.getItem('mymilesai_last_trip_end'))||0;}catch(e){}
@@ -1826,8 +1826,8 @@ function onPos(p){
       showToast(_i('ccheck'),'Trip resumed after pause',2000);
     }
   }
-  if(autoDetect && tracking && !_paused && (Date.now()-lastMoving)>30000){
-    // No movement for 30 seconds → enter PAUSE state
+  if(autoDetect && tracking && !_paused && (Date.now()-lastMoving)>120000){
+    // No movement for 2 min → enter PAUSE state (handles traffic lights, train crossings, drive-throughs)
     _paused=true;
     _pauseStart=Date.now();
     document.getElementById('statusText').textContent='Paused...';
@@ -2025,15 +2025,21 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   renderTrips();renderAlerts();saveTripsToStorage();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
   recordTripEnd();
-  // Show classify prompt if trip wasn't auto-classified
-  if(type==='uncl'){
-    setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist);},800);
-  }
+  // Always ask user to confirm trip type after every trip
+  setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
   _gpsTrioSaved=false;
 }
-function showClassifyPrompt(tripId,from,to,dist){
+function showClassifyPrompt(tripId,from,to,dist,autoType){
   document.getElementById('clsRoute').textContent=from.split(',')[0]+' → '+to.split(',')[0];
   document.getElementById('clsDist').textContent=dist.toFixed(1)+' '+LOC.label;
+  // Show auto-classified hint if applicable
+  var hint=document.getElementById('clsAutoHint');
+  if(autoType&&autoType!=='uncl'){
+    var label=autoType==='biz'?'Business (work hours)':'Personal';
+    if(hint)hint.textContent='Auto-classified as '+label+' — confirm or change:';
+  } else {
+    if(hint)hint.textContent='How would you like to classify this trip?';
+  }
   document.getElementById('classifyModal').classList.add('show');
   window._classifyTripId=tripId;
 }
