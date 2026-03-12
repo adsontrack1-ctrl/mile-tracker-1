@@ -1321,7 +1321,7 @@ function showUndoToast(icon,text,undoFn){
 /* ===== DYNAMIC GREETING ===== */
 function updateGreeting(){
   var h=new Date().getHours();
-  var greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  var greet=h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   document.getElementById('hdrGreet').textContent=greet;
   // Load user name
   var name='';
