@@ -2047,14 +2047,15 @@ function showClassifyPrompt(tripId,from,to,dist,autoType){
 function classifyLastTrip(type){
   var id=window._classifyTripId;
   if(id){clsTrip(id,type);}
-  closeClassifyPrompt();
-  // Switch to Drive tab and scroll down to show updated Recent Trips
+  document.getElementById('classifyModal').classList.remove('show');
+  window._classifyTripId=null;
+  // Switch to Drive tab FIRST, then render so user sees updated list
   switchTabId('tab-drive');
   setTimeout(function(){
+    renderTrips();renderAlerts();
     var recentSection=document.getElementById('recentTrips');
     if(recentSection){
       recentSection.scrollIntoView({behavior:'smooth',block:'start'});
-      // Flash the first card to draw attention
       var firstCard=recentSection.querySelector('.trip-card,.tc');
       if(firstCard){
         firstCard.style.transition='box-shadow 0.3s ease';
@@ -2062,13 +2063,13 @@ function classifyLastTrip(type){
         setTimeout(function(){firstCard.style.boxShadow='';},1500);
       }
     }
-  },200);
+  },150);
 }
 function closeClassifyPrompt(){
   document.getElementById('classifyModal').classList.remove('show');
   window._classifyTripId=null;
-  // Always return to Drive tab so user sees Recent Trips updated
   switchTabId('tab-drive');
+  setTimeout(function(){renderTrips();renderAlerts();},150);
 }
 function reverseGeocode(pos,cb){
   if(!pos||pos.length<2){cb(null,null);return;}
@@ -3295,7 +3296,23 @@ try{
   else{autoDetect=true;}
 }catch(e){}
 if(autoDetect){
-  setTimeout(function(){startAutoMonitoring();},1200);
+  // Check if we already have geolocation permission
+  if(navigator.permissions){
+    navigator.permissions.query({name:'geolocation'}).then(function(result){
+      if(result.state==='granted'){
+        setTimeout(function(){startAutoMonitoring();},1200);
+      } else {
+        // Show tap-to-start banner
+        setTimeout(function(){
+          showToast(_i('sat'),'Tap "Auto On" to enable GPS tracking',5000);
+        },800);
+      }
+    }).catch(function(){
+      setTimeout(function(){startAutoMonitoring();},1200);
+    });
+  } else {
+    setTimeout(function(){startAutoMonitoring();},1200);
+  }
 }
 updateAutoBtn();
 
