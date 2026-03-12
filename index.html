@@ -188,6 +188,9 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .add-note-input::placeholder{color:var(--ink4);}
 .add-note-input:focus{outline:none;border-color:var(--vi);box-shadow:0 0 0 4px var(--vi-s);}
 
+.add-time-row{display:flex;gap:10px;margin-bottom:0}
+.add-time-col{flex:1}
+.add-time-inp{width:100%;box-sizing:border-box;font-size:14px}
 .add-save-row{padding:8px 0 0;position:sticky;bottom:0;background:var(--white);}
 .add-save{width:100%;padding:17px 24px;border-radius:var(--rpill);border:none;background:linear-gradient(135deg,var(--mag),var(--vi),#00A870);background-size:200% 100%;animation:ctaGrad 4s ease-in-out infinite;color:#fff;font-family:var(--f);font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 28px rgba(214,0,110,.2),inset 0 1px 0 rgba(255,255,255,.12);transition:all .35s;display:flex;align-items:center;justify-content:center;gap:10px;}
 .add-save:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(214,0,110,.25);}
@@ -715,6 +718,17 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 
     <label class="add-label">Date</label>
     <input type="date" class="add-input" id="addDate" style="padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white);font-family:var(--f)">
+
+    <div class="add-time-row">
+      <div class="add-time-col">
+        <label class="add-label">Start Time</label>
+        <input type="time" class="add-input add-time-inp" id="addStartTime">
+      </div>
+      <div class="add-time-col">
+        <label class="add-label">End Time</label>
+        <input type="time" class="add-input add-time-inp" id="addEndTime">
+      </div>
+    </div>
 
     <label class="add-label">Notes (optional)</label>
     <textarea class="add-note-input" id="addNote" placeholder="Client meeting, airport run, etc..." rows="2"></textarea>
@@ -2597,6 +2611,15 @@ function openAddTrip(){
   // Set date to today
   var today=new Date();
   document.getElementById('addDate').value=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  // Set default times (current time for start, +30min for end)
+  var _now=new Date();
+  var _hh=String(_now.getHours()).padStart(2,'0');
+  var _mm=String(_now.getMinutes()).padStart(2,'0');
+  var _eh=new Date(_now.getTime()+30*60000);
+  var _ehh=String(_eh.getHours()).padStart(2,'0');
+  var _emm=String(_eh.getMinutes()).padStart(2,'0');
+  document.getElementById('addStartTime').value=_hh+':'+_mm;
+  document.getElementById('addEndTime').value=_ehh+':'+_emm;
   fromCoords=null;toCoords=null;
   var defCat=getDefaultCat();
   setAddCat(defCat==='uncl'?'biz':defCat);
@@ -2655,7 +2678,10 @@ function saveManual(){
   }
   var purpose=document.getElementById('addPurpose').value;
   var notes=document.getElementById('addNote').value.trim();
-  TRIPS.unshift({id:newId,from:f,to:t,mi:mi||5,type:autoType,time:'Just now',day:tripDay,date:tripDateStr,ts:tripTs,ded:autoType==='biz',purpose:purpose,notes:notes,path:randomPath()});
+    var startT=document.getElementById('addStartTime').value||'';
+  var endT=document.getElementById('addEndTime').value||'';
+  var timeLabel=startT?(startT+(endT?' – '+endT:'')):'Just now';
+  TRIPS.unshift({id:newId,from:f,to:t,mi:mi||5,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:autoType==='biz',purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT});
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
   renderAlerts();
