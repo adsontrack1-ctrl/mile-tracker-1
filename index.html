@@ -505,7 +505,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <button class="qa-btn" onclick="openMapSheet()"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>Map</button>
       <button class="qa-btn" onclick="switchTabId('tab-stats')"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Reports</button>
     </div>
-    <div class="uncl" id="demoBanner" style="display:none;background:var(--vi-s);border-color:var(--vi-s2)" onclick="signOut()"><span class="uncl-i" style="display:inline-flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="uncl-t" style="color:var(--vi)">Demo Mode — Sample Data</div><div class="uncl-d">Add a trip or tap here to reset →</div></div><span class="uncl-a">›</span></div>
+
     <div class="uncl" id="unclBanner" style="display:none" onclick="switchTabId('tab-trips')"><span class="uncl-i" style="display:inline-flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg></span><div><div class="uncl-t" id="unclText"></div><div class="uncl-d">Tap to classify →</div></div><span class="uncl-a">›</span></div>
     <div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div>
     <div class="trips" id="recentTrips"></div>
@@ -931,23 +931,9 @@ var _d7=new Date(_today);_d7.setDate(_d7.getDate()-10);
 var _d9=new Date(_today);_d9.setDate(_d9.getDate()-14);
 var _d11=new Date(_today);_d11.setDate(_d11.getDate()-18);
 
-var _DEMO_TRIPS=[
-  {id:1,from:'123 Main St, Downtown',to:'456 Oak Ave, Westside',mi:8.4,type:'biz',time:'2:30 PM · 18 min',day:_rel(_d0),date:_fmt(_d0),ts:_d0.getTime(),ded:true,purpose:'Client Meeting',notes:'',path:'M20,70 C60,20 120,80 160,40 S250,60 290,25'},
-  {id:2,from:'Home, Maple Drive',to:'Costco, Regent Ave',mi:3.2,type:'pers',time:'5:15 PM · 9 min',day:_rel(_d0),date:_fmt(_d0),ts:_d0.getTime(),ded:false,purpose:'Shopping',notes:'',path:'M25,25 C80,75 150,20 200,65 S270,30 285,60'},
-  {id:3,from:'789 Elm St',to:'FedEx, Industrial Park',mi:5.1,type:'uncl',time:'11:20 AM · 14 min',day:_rel(_d0),date:_fmt(_d0),ts:_d0.getTime(),ded:false,purpose:'',notes:'',path:'M20,45 C70,10 150,70 210,25 S290,60 340,35'},
-  {id:4,from:'Home, Maple Drive',to:'WeWork, 5th & Main',mi:12.3,type:'biz',time:'8:45 AM · 22 min',day:_rel(_d1),date:_fmt(_d1),ts:_d1.getTime(),ded:true,purpose:'Office Commute',notes:'',path:'M20,30 C100,65 180,10 260,55 S330,25 340,45'},
-  {id:5,from:'Airport Terminal 1',to:'Client, Bay St',mi:18.7,type:'biz',time:'10:00 AM · 35 min',day:_rel(_d2),date:_fmt(_d2),ts:_d2.getTime(),ded:true,purpose:'Airport Run',notes:'Client pickup',path:'M20,55 C70,25 140,70 200,30 S280,55 340,40'},
-  {id:6,from:'Home, Maple Drive',to:'Gym, Fitness Center',mi:2.8,type:'pers',time:'6:30 AM · 8 min',day:_rel(_d3),date:_fmt(_d3),ts:_d3.getTime(),ded:false,purpose:'Gym',notes:'',path:'M20,40 C60,65 120,30 180,55 S250,35 290,50'},
-  {id:7,from:'Office, Commerce Blvd',to:'Client, 201 Portage Ave',mi:6.5,type:'biz',time:'1:15 PM · 15 min',day:_rel(_d4),date:_fmt(_d4),ts:_d4.getTime(),ded:true,purpose:'Client Meeting',notes:'Quarterly review',path:'M20,60 C80,30 150,65 220,20 S300,50 340,30'},
-  {id:8,from:'Home, Maple Drive',to:'Tim Hortons, Bloor St',mi:4.1,type:'pers',time:'3:45 PM · 11 min',day:_rel(_d5),date:_fmt(_d5),ts:_d5.getTime(),ded:false,purpose:'Errands',notes:'',path:'M20,35 C70,60 140,25 200,50 S270,30 290,55'},
-  {id:9,from:'Doctor, Medical Arts',to:'Home, Maple Drive',mi:7.2,type:'pers',time:'11:00 AM · 16 min',day:_rel(_d6),date:_fmt(_d6),ts:_d6.getTime(),ded:false,purpose:'Medical',notes:'',path:'M20,50 C80,20 160,70 240,35 S310,55 340,40'},
-  {id:10,from:'WeWork, 5th & Main',to:'Walmart, Highway 7',mi:9.3,type:'biz',time:'4:30 PM · 20 min',day:_rel(_d7),date:_fmt(_d7),ts:_d7.getTime(),ded:true,purpose:'Supplies',notes:'Office supplies run',path:'M20,25 C90,60 170,15 250,50 S320,30 340,55'},
-  {id:11,from:'Home, Maple Drive',to:'School, Lawrence Ave',mi:3.6,type:'pers',time:'7:50 AM · 10 min',day:_rel(_d9),date:_fmt(_d9),ts:_d9.getTime(),ded:false,purpose:'School Drop-off',notes:'',path:'M20,45 C70,70 140,20 210,55 S280,35 290,50'},
-  {id:12,from:'Office, Commerce Blvd',to:'Airport Terminal 1',mi:15.8,type:'biz',time:'6:00 AM · 28 min',day:_rel(_d11),date:_fmt(_d11),ts:_d11.getTime(),ded:true,purpose:'Airport Run',notes:'Flight to Toronto',path:'M20,65 C80,25 160,60 240,20 S310,45 340,30'}
-];
-// Start empty — loadTripsFromStorage will populate from localStorage or demo
+// Start empty — trips load from localStorage or cloud
 const TRIPS=[];
-var _usingDemoData=false;
+var 
 function randomPath(){
   var y1=20+Math.floor(Math.random()*50),y2=15+Math.floor(Math.random()*55),y3=10+Math.floor(Math.random()*60),y4=20+Math.floor(Math.random()*45),y5=15+Math.floor(Math.random()*55);
   var x1=60+Math.floor(Math.random()*40),x2=120+Math.floor(Math.random()*40),x3=200+Math.floor(Math.random()*40),x4=280+Math.floor(Math.random()*40);
@@ -981,7 +967,11 @@ function tripCard(t,wide){
   return card;
 }
 function renderTrips(){
-  document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,3).map(t=>tripCard(t,false)).join('');
+  if(TRIPS.length===0){
+    document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--ink3)">'+_i('car',36,'var(--ink4)')+'<div style="margin-top:12px;font-size:15px;font-weight:500">No trips yet</div><div style="font-size:13px;margin-top:4px;color:var(--ink4)">Tap Auto On to start tracking</div></div>';
+  } else {
+    document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,3).map(t=>tripCard(t,false)).join('');
+  }
   // Swipe queue — unclassified at top
   var uncl=TRIPS.filter(function(t){return t.type==='uncl';});
   var swipeSec=document.getElementById('swipeSection');
@@ -1476,8 +1466,6 @@ function recalcStats(){
   }
 
   // Demo banner
-  var demoBanner=document.getElementById('demoBanner');
-  if(demoBanner)demoBanner.style.display=_usingDemoData?'flex':'none';
 
   // Unclassified banner
   var banner=document.getElementById('unclBanner');
@@ -2015,7 +2003,7 @@ var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   if(_gpsTrioSaved)return;
   _gpsTrioSaved=true;
-  if(_usingDemoData){TRIPS.length=0;_usingDemoData=false;}
+  
   var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
   var type='uncl';
   var freq=getFreqRouteType(fromAddr,toAddr);
@@ -2637,10 +2625,6 @@ function saveManual(){
   var tripDateStr=_fmt(tripDate);
   var tripTs=tripDate.getTime();
   // Clear demo data on first real trip
-  if(_usingDemoData){
-    TRIPS.length=0;
-    _usingDemoData=false;
-  }
   var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
   var autoType=addCat;
   if(autoType==='uncl'){
@@ -2673,7 +2657,7 @@ let curTrip=null;
 function returnTrip(id){
   var orig=TRIPS.find(function(t){return t.id===id;});
   if(!orig)return;
-  if(_usingDemoData){TRIPS.length=0;_usingDemoData=false;}
+  
   var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
   TRIPS.unshift({id:newId,from:orig.to,to:orig.from,mi:orig.mi,type:orig.type,time:'Just now',day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:orig.ded,purpose:orig.purpose,notes:'Return trip',path:randomPath()});
   if(orig.type!=='uncl')checkFrequentRoute(TRIPS[0]);
@@ -2869,7 +2853,7 @@ function _showSyncStatus(msg,ok){
 }
 
 function saveTripsToStorage(){
-  if(_usingDemoData)return;
+  
   try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
   // Debounce cloud sync — wait 2s after last change
   if(_syncTimer)clearTimeout(_syncTimer);
@@ -2920,7 +2904,7 @@ function loadTripsFromStorage(){
           TRIPS.push(parsed[i]);
         }
         TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-        _usingDemoData=false;
+        
         loadedFromLocal=true;
         renderTrips();renderAlerts();
       }
@@ -2949,7 +2933,7 @@ function loadTripsFromStorage(){
             TRIPS.push(cloud[i]);
           }
           TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-          _usingDemoData=false;
+          
           try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
           renderTrips();renderAlerts();renderDash();
           _showSyncStatus('Synced from cloud ✓',true);
@@ -2959,10 +2943,8 @@ function loadTripsFromStorage(){
       }
     }).catch(function(){_showSyncStatus('Offline — using local data',false);});
   } else if(!loadedFromLocal){
-    // No local, no cloud — show demo
-    TRIPS.length=0;
-    for(var j=0;j<_DEMO_TRIPS.length;j++)TRIPS.push(Object.assign({},_DEMO_TRIPS[j]));
-    _usingDemoData=true;
+    // No local, no cloud — show empty state
+    renderTrips();renderAlerts();
   }
   if(!binId&&!loadedFromLocal){renderTrips();renderAlerts();}
 }
@@ -3184,7 +3166,7 @@ function restoreJSON(input){
           safe.id=parseInt(safe.id)||0;
           TRIPS.push(safe);
         }
-        _usingDemoData=false;
+        
         saveTripsToStorage();
         // SECURITY: sanitize name — strip all HTML, limit to 100 chars
         if(data.name&&typeof data.name==='string'){
@@ -3286,7 +3268,7 @@ function setObUnit(btn,unit){
 try{
   var _hasName=false;
   try{_hasName=!!localStorage.getItem('mymilesai_name');}catch(e){}
-  if(!localStorage.getItem('mymilesai_onboarded')||_usingDemoData||!_hasName)setTimeout(showOnboarding,800);
+  if(!localStorage.getItem('mymilesai_onboarded')||!_hasName)setTimeout(showOnboarding,800);
 }catch(e){}
 
 /* ===== AUTO-DETECT INIT ===== */
