@@ -571,6 +571,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option></select></div>
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="3" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
+      <div class="sr"><div><h4>Navigation app</h4><p>Opens when you tap Map</p></div><select class="sr-sel" id="mapAppSel" onchange="saveMapAppPref()"><option value="inapp">In-app map</option><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div>
       <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
       <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px" id="rateVal" onchange="updateRate()"></div></div>
     </div>
@@ -2703,7 +2704,38 @@ document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('clic
 
 /* ===== MAP BOTTOM SHEET ===== */
 let map=null,userMarker=null,routeLine=null,mapReady=false,mapSheetOpen=false;
+function saveMapAppPref(){
+  var v=document.getElementById('mapAppSel').value;
+  try{localStorage.setItem('mymilesai_map_app',v);}catch(e){}
+}
+function loadMapAppPref(){
+  try{
+    var v=localStorage.getItem('mymilesai_map_app')||'inapp';
+    var sel=document.getElementById('mapAppSel');
+    if(sel)sel.value=v;
+  }catch(e){}
+}
 function openMapSheet(){
+  var pref='inapp';
+  try{pref=localStorage.getItem('mymilesai_map_app')||'inapp';}catch(e){}
+  var lat=lastGpsLat||0, lng=lastGpsLng||0;
+  if(pref==='apple'){
+    // Apple Maps — works on iOS, falls back to maps.apple.com on other platforms
+    var url=lat?'maps://maps.apple.com/?ll='+lat+','+lng+'&z=15':'maps://maps.apple.com/';
+    window.open(lat?'https://maps.apple.com/?ll='+lat+','+lng+'&z=15':'https://maps.apple.com/','_blank');
+    return;
+  }
+  if(pref==='google'){
+    var url=lat?'https://www.google.com/maps/@'+lat+','+lng+',15z':'https://maps.google.com/';
+    window.open(url,'_blank');
+    return;
+  }
+  if(pref==='waze'){
+    var url=lat?'https://waze.com/ul?ll='+lat+','+lng+'&navigate=yes':'https://waze.com/';
+    window.open(url,'_blank');
+    return;
+  }
+  // Default: in-app map
   document.getElementById('mapOverlay').classList.add('show');
   const sheet=document.getElementById('mapSheet');
   sheet.style.display='flex';
@@ -3074,6 +3106,7 @@ function loadSettings(){
       }
     }
   }catch(e){}
+  loadMapAppPref();
 }
 loadSettings();
 loadNotifSettings();
