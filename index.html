@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src https://photon.komoot.io https://nominatim.openstreetmap.org https://router.project-osrm.org; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src https://photon.komoot.io https://nominatim.openstreetmap.org https://router.project-osrm.org https://api.jsonbin.io; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -462,7 +462,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 <div class="phone"><div class="scroll">
 
   <div class="hdr">
-    <div class="hdr-l"><div class="hdr-av" id="hdrAv">S</div><div><div class="hdr-greet" id="hdrGreet"><script>document.write((function(){var h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening';})())</script></div><div class="hdr-name" id="hdrName">Welcome back</div></div></div>
+    <div class="hdr-l"><div class="hdr-av" id="hdrAv">S</div><div><div class="hdr-greet" id="hdrGreet"><script>document.write((function(){var h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening';})())</script></div><div class="hdr-name" id="hdrName">Welcome back</div></div></div><div style="display:flex;align-items:center;gap:6px"><span id="syncStatusDot" title="Sync status" style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block;transition:background 0.5s;cursor:help"></span></div>
     <div class="hdr-r"><div class="hdr-btn" style="position:relative" onclick="switchTabId('tab-alerts')" style="display:inline-flex;align-items:center;justify-content:center" id="hdrBellIco"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="hdr-dot"></div></div><div class="hdr-btn" onclick="goToSettings()" style="display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg></div></div>
   </div>
 
@@ -980,7 +980,7 @@ function tripCard(t,wide){
   return card;
 }
 function renderTrips(){
-  document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,2).map(t=>tripCard(t,false)).join('');
+  document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,3).map(t=>tripCard(t,false)).join('');
   // Swipe queue — unclassified at top
   var uncl=TRIPS.filter(function(t){return t.type==='uncl';});
   var swipeSec=document.getElementById('swipeSection');
@@ -2844,11 +2844,67 @@ if(navigator.geolocation){
 }
 
 /* Fix #19 — Persist trips to localStorage */
-function saveTripsToStorage(){
-  if(_usingDemoData)return; // Don't persist demo data
-  try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
+/* ===== CLOUD SYNC (JSONBin.io) ===== */
+var _JSONBIN_KEY='$2a$10$MyMilesAI_PLACEHOLDER_KEY'; // set via setupCloudSync()
+var _JSONBIN_BIN=''; // bin ID stored in localStorage per user
+var _syncPending=false;
+var _syncTimer=null;
+
+function _getSyncId(){
+  // Use device-unique ID derived from localStorage — same user = same bin
+  try{
+    var sid=localStorage.getItem('mymilesai_syncid');
+    if(!sid){sid='mmai_'+(Date.now().toString(36))+(Math.random().toString(36).slice(2));localStorage.setItem('mymilesai_syncid',sid);}
+    return sid;
+  }catch(e){return 'mmai_default';}
 }
+
+function _showSyncStatus(msg,ok){
+  var el=document.getElementById('syncStatusDot');
+  if(!el)return;
+  el.title=msg;
+  el.style.background=ok?'#22c55e':'#f59e0b';
+}
+
+function saveTripsToStorage(){
+  if(_usingDemoData)return;
+  try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
+  // Debounce cloud sync — wait 2s after last change
+  if(_syncTimer)clearTimeout(_syncTimer);
+  _syncTimer=setTimeout(function(){_pushToCloud();},2000);
+}
+
+function _pushToCloud(){
+  var binId=localStorage.getItem('mymilesai_bin_id');
+  var payload={trips:TRIPS,updated:Date.now(),version:'4.2'};
+  var apiKey='$2a$10$8QxhDcU6bLmNJvKpXwYrZeWqA9nF3dTsE7gHmP2jRcVuB4kL6oNy';
+  if(!binId){
+    // Create new bin
+    fetch('https://api.jsonbin.io/v3/b',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Master-Key':apiKey,'X-Bin-Name':_getSyncId(),'X-Bin-Private':'true'},
+      body:JSON.stringify(payload)
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.metadata&&d.metadata.id){
+        localStorage.setItem('mymilesai_bin_id',d.metadata.id);
+        _showSyncStatus('Synced to cloud ✓',true);
+      }
+    }).catch(function(){_showSyncStatus('Sync failed — saved locally',false);});
+  } else {
+    // Update existing bin
+    fetch('https://api.jsonbin.io/v3/b/'+binId,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':apiKey},
+      body:JSON.stringify(payload)
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.metadata)_showSyncStatus('Synced ✓ '+new Date().toLocaleTimeString(),true);
+    }).catch(function(){_showSyncStatus('Sync failed — saved locally',false);});
+  }
+}
+
 function loadTripsFromStorage(){
+  // First load from localStorage immediately (fast)
+  var loadedFromLocal=false;
   try{
     var stored=localStorage.getItem('mymilesai_trips');
     if(stored){
@@ -2858,24 +2914,55 @@ function loadTripsFromStorage(){
         for(var i=0;i<parsed.length;i++){
           if(!parsed[i].purpose)parsed[i].purpose='';
           if(!parsed[i].notes)parsed[i].notes='';
-          // Migrate: add ts if missing
-          if(!parsed[i].ts){
-            var d=parsed[i].date?new Date(parsed[i].date):new Date();
-            parsed[i].ts=isNaN(d.getTime())?Date.now():d.getTime();
-          }
+          if(!parsed[i].ts){var d=parsed[i].date?new Date(parsed[i].date):new Date();parsed[i].ts=isNaN(d.getTime())?Date.now():d.getTime();}
           TRIPS.push(parsed[i]);
         }
-        // Sort newest-first by timestamp
         TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
         _usingDemoData=false;
-        return;
+        loadedFromLocal=true;
+        renderTrips();renderAlerts();
       }
     }
   }catch(e){}
-  // No saved trips — load demo data for preview
-  TRIPS.length=0;
-  for(var j=0;j<_DEMO_TRIPS.length;j++)TRIPS.push(Object.assign({},_DEMO_TRIPS[j]));
-  _usingDemoData=true;
+
+  // Then try to pull fresher data from cloud
+  var binId=localStorage.getItem('mymilesai_bin_id');
+  var apiKey='$2a$10$8QxhDcU6bLmNJvKpXwYrZeWqA9nF3dTsE7gHmP2jRcVuB4kL6oNy';
+  if(binId){
+    _showSyncStatus('Syncing...',true);
+    fetch('https://api.jsonbin.io/v3/b/'+binId+'/latest',{
+      headers:{'X-Master-Key':apiKey}
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.record&&d.record.trips&&d.record.trips.length>0){
+        var cloud=d.record.trips;
+        // Merge: use cloud if newer
+        var cloudTs=d.record.updated||0;
+        var localTs=parseInt(localStorage.getItem('mymilesai_last_save')||'0');
+        if(cloudTs>=localTs){
+          TRIPS.length=0;
+          for(var i=0;i<cloud.length;i++){
+            if(!cloud[i].purpose)cloud[i].purpose='';
+            if(!cloud[i].notes)cloud[i].notes='';
+            if(!cloud[i].ts){var d2=cloud[i].date?new Date(cloud[i].date):new Date();cloud[i].ts=isNaN(d2.getTime())?Date.now():d2.getTime();}
+            TRIPS.push(cloud[i]);
+          }
+          TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+          _usingDemoData=false;
+          try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
+          renderTrips();renderAlerts();renderDash();
+          _showSyncStatus('Synced from cloud ✓',true);
+        } else {
+          _showSyncStatus('Local data is newer ✓',true);
+        }
+      }
+    }).catch(function(){_showSyncStatus('Offline — using local data',false);});
+  } else if(!loadedFromLocal){
+    // No local, no cloud — show demo
+    TRIPS.length=0;
+    for(var j=0;j<_DEMO_TRIPS.length;j++)TRIPS.push(Object.assign({},_DEMO_TRIPS[j]));
+    _usingDemoData=true;
+  }
+  if(!binId&&!loadedFromLocal){renderTrips();renderAlerts();}
 }
 
 /* Fix #24 — Haptic feedback on buttons */
