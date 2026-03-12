@@ -1134,12 +1134,15 @@ function renderAlerts(){
   var lt=TRIPS[0];var ld=tripDist(lt.mi);
   var lded=lt.ded?(parseFloat(ld)*r).toFixed(2):null;
 
+  // Safe fallback if _notifSettings not yet initialized
+  var _ns=typeof _notifSettings!=='undefined'?_notifSettings:{trip:true,weekly:false,milestone:true};
+
   // Build ALL alerts with unique IDs
   var allAlerts=[];
 
   // New: Trip saved
   // New: Trip saved (controlled by notif setting)
-  if(_notifSettings.trip) allAlerts.push({id:'trip_saved_'+lt.id,isNew:true,ic:IC.trip,bg:BG.trip,
+  if(_ns.trip) allAlerts.push({id:'trip_saved_'+lt.id,isNew:true,ic:IC.trip,bg:BG.trip,
     title:'Trip saved · <span class="al-dist">'+ld+' '+u+'</span>',
     desc:lt.from+' → '+lt.to+(lded?' · +'+c+lded+' deduction':''),time:ago(12)});
 
@@ -1159,7 +1162,7 @@ function renderAlerts(){
 
   // New: Weekly summary
   // New: Weekly summary (controlled by notif setting)
-  if(_notifSettings.weekly) allAlerts.push({id:'weekly_current',isNew:true,ic:IC.chart,bg:BG.chart,
+  if(_ns.weekly) allAlerts.push({id:'weekly_current',isNew:true,ic:IC.chart,bg:BG.chart,
     title:'Weekly mileage summary',
     desc:totalBiz.toFixed(1)+' '+u+' business · '+totalPer.toFixed(1)+' '+u+' personal · '+c+(totalBiz*r).toFixed(2)+' earned',
     time:'Last Sunday'});
@@ -1167,7 +1170,7 @@ function renderAlerts(){
   // New: Tax reminder (Jan-May only)
   var mo=now.getMonth();
   // New: Tax reminder (Jan-May, controlled by milestone notif setting)
-  if(mo>=0&&mo<=4&&_notifSettings.milestone) allAlerts.push({id:'tax_'+now.getFullYear(),isNew:true,ic:IC.tax,bg:BG.tax,
+  if(mo>=0&&mo<=4&&_ns.milestone) allAlerts.push({id:'tax_'+now.getFullYear(),isNew:true,ic:IC.tax,bg:BG.tax,
     title:'Tax filing deadline approaching',
     desc:'Export your mileage report before '+(LOC.country==='CA'?'April 30':'April 15')+'. You\'ve earned '+c+(totalBiz*r).toFixed(2)+' in deductions so far.',
     time:ago(1440*2)});
