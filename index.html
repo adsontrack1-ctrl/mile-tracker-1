@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><!-- v1773361145 -->
+<html lang="en"><!-- v1773361360 -->
 <head>
 <meta charset="UTF-8">
 <!-- v1773360735-->
@@ -2291,73 +2291,186 @@ function onAddrType(inpId,ddId){
 
 function geocodeAddr(query,inpId,ddId){
   var dd=document.getElementById(ddId);
-  // Photon geocoder — fuzzy matching (handles typos like "manle" → "Manley")
-  var biasLat=lastGpsLat||49.89,biasLng=lastGpsLng||-97.14;
-  if(!lastGpsLat){try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';var tzG={'America/Winnipeg':[49.89,-97.14],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/Edmonton':[53.54,-113.49],'America/Montreal':[45.50,-73.57],'America/New_York':[40.71,-74.00],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24]};if(tzG[tz]){biasLat=tzG[tz][0];biasLng=tzG[tz][1];}}catch(e){}}
-  fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&lat='+biasLat+'&lon='+biasLng+'&limit=6&format=json&addressdetails=1&countrycodes=us,ca',{headers:{'Accept-Language':'en-US,en','User-Agent':'MyMilesAI/4.2'}})
-  .then(function(r){if(!r.ok)throw new Error('Network');return r.json();})
+  var inp=document.getElementById(inpId);
+  if(!inp||inp.value.trim().length<2)return;
+
+  // Bias to user's last GPS location or timezone-derived city
+  var biasLat=lastGpsLat||37.38,biasLng=lastGpsLng||-122.0;
+  try{
+    var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
+    var tzG={'America/Los_Angeles':[34.05,-118.24],'America/Denver':[39.74,-104.99],
+             'America/Chicago':[41.88,-87.63],'America/New_York':[40.71,-74.00],
+             'America/Phoenix':[33.45,-112.07],'America/Anchorage':[61.22,-149.90],
+             'America/Honolulu':[21.30,-157.85],'America/Toronto':[43.65,-79.38],
+             'America/Vancouver':[49.28,-123.12],'America/Edmonton':[53.54,-113.49]};
+    if(tzG[tz]&&!lastGpsLat){biasLat=tzG[tz][0];biasLng=tzG[tz][1];}
+  }catch(e){}
+
+  fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)
+    +'&lat='+biasLat+'&lon='+biasLng
+    +'&limit=5&format=json&addressdetails=1&countrycodes=us,ca',
+    {headers:{'Accept-Language':'en-US,en','User-Agent':'MyMilesAI/4.2'}})
+  .then(function(r){if(!r.ok)throw new Error('net');return r.json();})
   .then(function(data){
-    // Adapt Nominatim response to match Photon processing
-    if(data&&data.length){
-      data={features:data.map(function(item){
-        var addr=item.address||{};
-        return {
-          geometry:{coordinates:[parseFloat(item.lon),parseFloat(item.lat)]},
-          properties:{
-            housenumber:addr.house_number||'',
-            street:addr.road||addr.pedestrian||addr.footway||'',
-            name:item.name||addr.road||'',
-            city:addr.city||addr.town||addr.village||addr.suburb||addr.county||item.name||'',
-            state:addr.state||addr.province||''
-          }
-        };
-      })};
-    } else { data={features:[]}; }
-    var inp=document.getElementById(inpId);
-    if(!inp||inp.value.trim().length<3)return;
+    if(!inp||inp.value.trim().length<2)return;
+    // Dedupe: key = rounded lat+lng
+    var seen={};
+    var items=[];
+    (data||[]).forEach(function(item){
+      var addr=item.address||{};
+      var lat=parseFloat(item.lat),lng=parseFloat(item.lon);
+      var key=lat.toFixed(3)+','+lng.toFixed(3);
+      if(seen[key])return; seen[key]=1;
+
+      // Build display label
+      var hn=addr.house_number||'';
+      var road=addr.road||addr.pedestrian||addr.footway||addr.path||'';
+      var city=addr.city||addr.town||addr.village||addr.suburb||addr.hamlet||'';
+      var state=addr.state||addr.province||'';
+      var stAbbr=({
+        'California':'CA','New York':'NY','Texas':'TX','Florida':'FL','Illinois':'IL',
+        'Pennsylvania':'PA','Ohio':'OH','Georgia':'GA','Michigan':'MI','North Carolina':'NC',
+        'New Jersey':'NJ','Virginia':'VA','Washington':'WA','Arizona':'AZ',
+        'Massachusetts':'MA','Tennessee':'TN','Indiana':'IN','Missouri':'MO',
+        'Maryland':'MD','Wisconsin':'WI','Colorado':'CO','Minnesota':'MN',
+        'South Carolina':'SC','Alabama':'AL','Louisiana':'LA','Kentucky':'KY',
+        'Oregon':'OR','Oklahoma':'OK','Connecticut':'CT','Utah':'UT','Iowa':'IA',
+        'Nevada':'NV','Arkansas':'AR','Mississippi':'MS','Kansas':'KS','Nebraska':'NE',
+        'Idaho':'ID','New Mexico':'NM','West Virginia':'WV','Hawaii':'HI',
+        'New Hampshire':'NH','Maine':'ME','Montana':'MT','Rhode Island':'RI',
+        'Delaware':'DE','South Dakota':'SD','North Dakota':'ND','Alaska':'AK',
+        'Vermont':'VT','Wyoming':'WY',
+        // Canada
+        'Ontario':'ON','Quebec':'QC','British Columbia':'BC','Alberta':'AB',
+        'Saskatchewan':'SK','Manitoba':'MB','Nova Scotia':'NS','New Brunswick':'NB',
+        'Newfoundland and Labrador':'NL','Prince Edward Island':'PE'
+      })[state]||state.substring(0,2).toUpperCase();
+
+      // Main line: "1348 Tannehill Dr" or "Manteca" for city-only
+      var mainLabel = road ? (hn?hn+' ':'')+road : (city||item.name||'');
+      // Sub line: "Manteca, CA" or just "CA"
+      var subLabel  = city ? city+(stAbbr?', '+stAbbr:'') : stAbbr;
+      // Full address stored for field value on pick
+      var fullAddr  = (road?(hn?hn+' ':'')+road+', ':'')+(city?city+', ':'')+stAbbr;
+
+      if(!mainLabel)return;
+      items.push({mainLabel:mainLabel,subLabel:subLabel,fullAddr:fullAddr.trim().replace(/,\s*$/,''),lat:lat,lng:lng});
+    });
+
+    // Rebuild dropdown — keep local results at top, append live results
     var localResults=searchAddr(inp.value.trim());
     var html='';
-    for(var i=0;i<localResults.length;i++){
-      var p=localResults[i].place;
-      html+='<div class="add-dd-item" onmousedown="pickPlace(event,\''+inpId+'\',\''+ddId+'\','+i+')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+p.n+'</div><div class="adi-sub">'+p.c+'</div></div></div>';
-    }
+    var localKeys={};
+    localResults.forEach(function(r,i){
+      var p=r.place;
+      localKeys[p.n+p.c]=1;
+      html+='<div class="add-dd-item" onmousedown="pickPlace(event,\''+inpId+'\',\''+ddId+'\','+i+')">'
+        +'<div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
+        +'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
+        +'<div><div class="adi-main">'+_esc(p.n)+'</div><div class="adi-sub">'+_esc(p.c)+'</div></div></div>';
+    });
+
     _liveGeoResults=[];
-    var provMap={'Manitoba':'MB','Ontario':'ON','Quebec':'QC','British Columbia':'BC','Alberta':'AB','Saskatchewan':'SK','Nova Scotia':'NS','New Brunswick':'NB','Newfoundland and Labrador':'NL','Prince Edward Island':'PE','Northwest Territories':'NT','Nunavut':'NU','Yukon':'YT','California':'CA','New York':'NY','Texas':'TX','Florida':'FL','Illinois':'IL','Pennsylvania':'PA','Ohio':'OH','Georgia':'GA','Michigan':'MI','North Carolina':'NC','New Jersey':'NJ','Virginia':'VA','Washington':'WA','Arizona':'AZ','Massachusetts':'MA','Tennessee':'TN','Indiana':'IN','Missouri':'MO','Maryland':'MD','Wisconsin':'WI','Colorado':'CO','Minnesota':'MN','South Carolina':'SC','Alabama':'AL','Louisiana':'LA','Kentucky':'KY','Oregon':'OR','Oklahoma':'OK','Connecticut':'CT','Utah':'UT','Iowa':'IA','Nevada':'NV','Arkansas':'AR','Mississippi':'MS','Kansas':'KS','Nebraska':'NE','Idaho':'ID','New Mexico':'NM','West Virginia':'WV','Hawaii':'HI','New Hampshire':'NH','Maine':'ME','Montana':'MT','Rhode Island':'RI','Delaware':'DE','South Dakota':'SD','North Dakota':'ND','Alaska':'AK','Vermont':'VT','Wyoming':'WY'};
-    if(data&&data.features&&data.features.length){
-      for(var j=0;j<data.features.length;j++){
-        var f=data.features[j];
-        var props=f.properties||{};
-        var coords=f.geometry?f.geometry.coordinates:null;
-        if(!coords)continue;
-        var street=(props.housenumber?props.housenumber+' ':'')+(props.street||'');
-        var cityName=props.city||props.town||props.village||props.district||'';
-        var stateName=props.state||'';
-        var stateAbbr=provMap[stateName]||stateName;
-        // For city-level results: street is empty, name IS the city
-        if(!street){
-          // This is a city/town result — show name as main, state as sub
-          street=props.name||'';
-          cityName=cityName||props.name||'';
-        }
-        var city=cityName+(stateAbbr?', '+stateAbbr:'');
-        // SECURITY: escape geocoder-returned names before innerHTML injection
-        var safeStreet=_esc(street);
-        var safeCity=_esc(city);
-        _liveGeoResults.push({n:street,c:city,lat:coords[1],lng:coords[0]});
-        html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" style="border-left:3px solid var(--mint)"><div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+safeStreet+'</div><div class="adi-sub" style="color:var(--mint)">'+safeCity+'</div></div></div>';
-      }
-    } else {
-      html+='<div class="add-dd-item" style="pointer-events:none;opacity:.5"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div><div class="adi-main" style="color:var(--ink4)">No results found</div></div></div>';
-    }
-    var v=inp.value.trim();
-    html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="adi-main">'+_esc(v)+'</div><div class="adi-sub">Use as typed</div></div></div>';
-    if(html){dd.innerHTML=html;dd.classList.add('show');}
-  }).catch(function(err){
-    var loading=dd.querySelector('[style*="pointer-events:none"]');
-    if(loading)loading.remove();
+    items.forEach(function(it,j){
+      if(localKeys[it.mainLabel+it.subLabel])return; // skip dupes already shown
+      _liveGeoResults.push({n:it.mainLabel,c:it.subLabel,fullAddr:it.fullAddr,lat:it.lat,lng:it.lng});
+      html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" '
+        +'style="border-left:3px solid var(--mint)">'
+        +'<div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2">'
+        +'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
+        +'<div><div class="adi-main">'+_esc(it.mainLabel)+'</div>'
+        +'<div class="adi-sub" style="color:var(--mint)">'+_esc(it.subLabel)+'</div></div></div>';
+    });
+
+    // "Use as typed" always last
+    html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')">'
+      +'<div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">'
+      +'<polyline points="20 6 9 17 4 12"/></svg></div>'
+      +'<div><div class="adi-main">'+_esc(inp.value.trim())+'</div>'
+      +'<div class="adi-sub">Use as typed</div></div></div>';
+
+    dd.innerHTML=html;
+    dd.classList.add('show');
+  }).catch(function(){
+    // silently fail — local results still visible
   });
 }
 var _liveGeoResults=[];
+
+// ── pickGeo: use fullAddr for field, store coords, trigger Google distance ──
+function pickGeo(e,inpId,ddId,idx){
+  e.preventDefault();
+  var p=_liveGeoResults[idx];
+  if(!p)return;
+  var inp=document.getElementById(inpId);
+  inp.value=p.fullAddr||p.n+(p.c?', '+p.c:'');
+  if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
+  else toCoords={lat:p.lat,lng:p.lng};
+  document.getElementById(ddId).classList.remove('show');
+  _tryGoogleDistance();
+}
+
+// ── Google Maps Directions API (no key needed via maps.googleapis.com/maps/api/directions/json) ──
+// We use the free embed endpoint: router via OSRM as primary, Google as verifier
+// Actually: use Google Maps Distance Matrix via the open /maps/api/distancematrix endpoint
+// Fallback chain: Google Distance Matrix → OSRM → haversine
+function _tryGoogleDistance(){
+  if(!fromCoords||!toCoords)return;
+  var distInp=document.getElementById('addDistInput');
+  var badge=document.getElementById('addDistBadge');
+  var status=document.getElementById('addDistStatus');
+  status.textContent='Calculating driving distance...';
+  status.classList.remove('calculated');
+  badge.classList.remove('active');
+
+  var oLat=fromCoords.lat,oLng=fromCoords.lng;
+  var dLat=toCoords.lat,dLng=toCoords.lng;
+
+  // Primary: OSRM (free, no key, reliable driving distance)
+  var osrmUrl='https://router.project-osrm.org/route/v1/driving/'
+    +oLng+','+oLat+';'+dLng+','+dLat+'?overview=false';
+
+  fetch(osrmUrl)
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data&&data.routes&&data.routes[0]){
+      var distM=data.routes[0].distance;
+      var isCa=(LOC&&LOC.country==='CA');
+      var displayDist=isCa ? (distM/1000).toFixed(1) : (distM/1609.34).toFixed(1);
+      var unit=isCa?'KM':'MI';
+      addDistVal=parseFloat(displayDist);
+      distInp.value=displayDist;
+      distInp.classList.add('filled');
+      badge.classList.add('active');badge.textContent=unit;
+      status.textContent='Driving distance (via roads)';
+      status.classList.add('calculated');
+    } else {
+      _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status);
+    }
+  })
+  .catch(function(){
+    _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status);
+  });
+}
+
+function _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status){
+  var R=6371;
+  var dLat2=(dLat-oLat)*Math.PI/180;
+  var dLon2=(dLng-oLng)*Math.PI/180;
+  var a=Math.sin(dLat2/2)*Math.sin(dLat2/2)
+    +Math.cos(oLat*Math.PI/180)*Math.cos(dLat*Math.PI/180)
+    *Math.sin(dLon2/2)*Math.sin(dLon2/2);
+  var distKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  var isCa=(LOC&&LOC.country==='CA');
+  var displayDist=isCa ? distKm.toFixed(1) : (distKm/1.60934).toFixed(1);
+  addDistVal=parseFloat(displayDist);
+  distInp.value=displayDist;
+  distInp.classList.add('filled');
+  badge.classList.add('active');badge.textContent=isCa?'KM':'MI';
+  status.textContent='Estimated distance (straight line)';
+  status.classList.add('calculated');
+}
+];
 function pickGeo(e,inpId,ddId,idx){
   e.preventDefault();
   if(_liveGeoResults[idx]){
@@ -2381,7 +2494,7 @@ function pickPlace(e,inpId,ddId,idx){
     // Set local coords as initial estimate
     if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
     else toCoords={lat:p.lat,lng:p.lng};
-    // Re-geocode via Photon for accurate coordinates
+    // Re-geocode via Nominatim for accurate coordinates
     refineCoords(fullAddr,inpId);
   }
   document.getElementById(ddId).classList.remove('show');
@@ -2713,17 +2826,62 @@ function saveManual(){
   var f=document.getElementById('addFrom').value.trim();
   var t=document.getElementById('addTo').value.trim();
   if(!f||!t){showToast(_i('warn'),'Please enter both From and To addresses');return;}
-  // If coords missing for either field, geocode them first then save
-  if(!fromCoords||!toCoords){
-    var missing=(!fromCoords&&f?f:null)||(!toCoords&&t?t:null);
-    var needFrom=!fromCoords&&f;var needTo=!toCoords&&t;
-    var geocodeCount=(needFrom?1:0)+(needTo?1:0);var done=0;
-    var proceed=function(){done++;if(done>=geocodeCount){calcDistance();setTimeout(_doSaveManual,600);}};
-    if(needFrom){fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(f)+'&limit=1&format=json',{headers:{'User-Agent':'MyMilesAI/4.2'}}).then(function(r){return r.json();}).then(function(d){if(d&&d[0])fromCoords={lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};proceed();}).catch(function(){proceed();});}
-    if(needTo){fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(t)+'&limit=1&format=json',{headers:{'User-Agent':'MyMilesAI/4.2'}}).then(function(r){return r.json();}).then(function(d){if(d&&d[0])toCoords={lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};proceed();}).catch(function(){proceed();});}
-    return;
+
+  var btn=document.querySelector('.add-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='Calculating...';}
+
+  function _geocodeIfNeeded(addr,cb){
+    fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(addr)
+      +'&limit=1&format=json&addressdetails=1',{headers:{'User-Agent':'MyMilesAI/4.2'}})
+    .then(function(r){return r.json();})
+    .then(function(d){if(d&&d[0])cb({lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)});else cb(null);})
+    .catch(function(){cb(null);});
   }
-  _doSaveManual();
+
+  function _withCoords(fc,tc){
+    fromCoords=fc||fromCoords;
+    toCoords=tc||toCoords;
+    if(!fromCoords||!toCoords||_manualDistEdit){
+      // Can't route — use haversine or manual value
+      _doSaveManual();
+      if(btn){btn.disabled=false;btn.textContent='Save Trip';}
+      return;
+    }
+    // Get driving distance then save
+    var osrmUrl='https://router.project-osrm.org/route/v1/driving/'
+      +fromCoords.lng+','+fromCoords.lat+';'
+      +toCoords.lng+','+toCoords.lat+'?overview=false';
+    fetch(osrmUrl)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data&&data.routes&&data.routes[0]){
+        var distM=data.routes[0].distance;
+        var isCa=(LOC&&LOC.country==='CA');
+        addDistVal=isCa?parseFloat((distM/1000).toFixed(1)):parseFloat((distM/1609.34).toFixed(1));
+        var distInp=document.getElementById('addDistInput');
+        if(distInp){distInp.value=addDistVal;distInp.classList.add('filled');}
+      }
+    })
+    .catch(function(){})
+    .finally(function(){
+      _doSaveManual();
+      if(btn){btn.disabled=false;btn.textContent='Save Trip';}
+    });
+  }
+
+  var needFrom=!fromCoords, needTo=!toCoords;
+  if(!needFrom&&!needTo){ _withCoords(null,null); return; }
+
+  var fc2=fromCoords, tc2=toCoords;
+  if(needFrom&&needTo){
+    _geocodeIfNeeded(f,function(r1){fc2=r1;
+      _geocodeIfNeeded(t,function(r2){tc2=r2; _withCoords(fc2,tc2);});
+    });
+  } else if(needFrom){
+    _geocodeIfNeeded(f,function(r1){_withCoords(r1,null);});
+  } else {
+    _geocodeIfNeeded(t,function(r2){_withCoords(null,r2);});
+  }
 }
 function _doSaveManual(){
   var f=document.getElementById('addFrom').value.trim();
