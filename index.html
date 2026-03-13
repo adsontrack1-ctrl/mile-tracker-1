@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"><!-- v1773361145 -->
 <head>
 <meta charset="UTF-8">
 <!-- v1773360735-->
@@ -2182,7 +2182,15 @@ var PLACES_CA=[
   {n:'Tim Hortons, Portage Ave',c:'Winnipeg, MB',lat:49.883,lng:-97.155},
   {n:'Walmart, Empress St',c:'Winnipeg, MB',lat:49.879,lng:-97.189},
   {n:'Costco, Regent Ave',c:'Winnipeg, MB',lat:49.889,lng:-97.060}
-];
+,
+  {n:'Manteca',c:'Manteca, CA',lat:37.7977,lng:-121.2161},
+  {n:'Tracy',c:'Tracy, CA',lat:37.7397,lng:-121.4252},
+  {n:'Lodi',c:'Lodi, CA',lat:38.1302,lng:-121.2724},
+  {n:'Turlock',c:'Turlock, CA',lat:37.4947,lng:-120.8466},
+  {n:'Modesto',c:'Modesto, CA',lat:37.6391,lng:-120.9969},
+  {n:'Fresno',c:'Fresno, CA',lat:36.7378,lng:-119.7871},
+  {n:'Visalia',c:'Visalia, CA',lat:36.3302,lng:-119.2921},
+  {n:'Merced',c:'Merced, CA',lat:37.3022,lng:-120.4830}];
 var PLACES_US=[
   {n:'123 Main St',c:'Downtown',lat:40.712,lng:-74.006},
   {n:'456 Oak Ave',c:'Westside',lat:40.735,lng:-73.990},
@@ -2299,7 +2307,7 @@ function geocodeAddr(query,inpId,ddId){
             housenumber:addr.house_number||'',
             street:addr.road||addr.pedestrian||addr.footway||'',
             name:item.name||addr.road||'',
-            city:addr.city||addr.town||addr.village||addr.suburb||addr.county||'',
+            city:addr.city||addr.town||addr.village||addr.suburb||addr.county||item.name||'',
             state:addr.state||addr.province||''
           }
         };
@@ -2321,12 +2329,17 @@ function geocodeAddr(query,inpId,ddId){
         var props=f.properties||{};
         var coords=f.geometry?f.geometry.coordinates:null;
         if(!coords)continue;
-        var street=(props.housenumber?props.housenumber+' ':'')+(props.street||props.name||'');
+        var street=(props.housenumber?props.housenumber+' ':'')+(props.street||'');
         var cityName=props.city||props.town||props.village||props.district||'';
         var stateName=props.state||'';
         var stateAbbr=provMap[stateName]||stateName;
+        // For city-level results: street is empty, name IS the city
+        if(!street){
+          // This is a city/town result — show name as main, state as sub
+          street=props.name||'';
+          cityName=cityName||props.name||'';
+        }
         var city=cityName+(stateAbbr?', '+stateAbbr:'');
-        if(!street&&props.name)street=props.name;
         // SECURITY: escape geocoder-returned names before innerHTML injection
         var safeStreet=_esc(street);
         var safeCity=_esc(city);
@@ -3434,14 +3447,21 @@ if(autoDetect){
 updateAutoBtn();
 
 /* ── Service Worker cleanup ──
-   Single-file PWA cannot use blob: SW URLs (browser security restriction).
-   Actively unregister any stale SW left from older app versions. */
+   Single-file PWA cannot register blob: SW URLs (browser blocks it).
+   Unregister any stale SW from older versions on first load. */
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations().then(function(regs){
-    regs.forEach(function(reg){
-      console.log('[MyMilesAI] Unregistered stale SW:',reg.scope);
-      reg.unregister();
-    });
+    if(regs.length){
+      regs.forEach(function(reg){
+        reg.unregister().then(function(){
+          console.log('[MyMilesAI] Cleared stale SW:',reg.scope);
+        });
+      });
+    } else {
+      console.log('[MyMilesAI] No stale SW found — clean start');
+    }
+  }).catch(function(e){
+    console.log('[MyMilesAI] SW cleanup error:',e.message);
   });
 }
 </script>
