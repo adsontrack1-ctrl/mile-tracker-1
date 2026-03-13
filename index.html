@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!-- v1773350397 -->
+<!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0C0C1D">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src https://photon.komoot.io https://nominatim.openstreetmap.org https://router.project-osrm.org https://api.jsonbin.io; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
@@ -2399,7 +2399,13 @@ function pickCustom(e,inpId,ddId){
 }
 
 /* --- Distance calculation --- */
+var _calcDistTimer=null;
 function calcDistance(){
+  // Debounce — only fire OSRM after 300ms settle
+  clearTimeout(_calcDistTimer);
+  _calcDistTimer=setTimeout(_calcDistCore,300);
+}
+function _calcDistCore(){
   var f=document.getElementById('addFrom').value.trim();
   var t=document.getElementById('addTo').value.trim();
   var distInp=document.getElementById('addDistInput');
@@ -3427,35 +3433,16 @@ if(autoDetect){
 }
 updateAutoBtn();
 
-/* ===== SERVICE WORKER (offline support) ===== */
+/* ── Service Worker cleanup ──
+   Single-file PWA cannot use blob: SW URLs (browser security restriction).
+   Actively unregister any stale SW left from older app versions. */
 if('serviceWorker' in navigator){
-  var swCode=[
-    'var CACHE="mymilesai-v4.1";',
-    'self.addEventListener("install",function(e){',
-    '  e.waitUntil(caches.open(CACHE).then(function(c){return c.add(self.location.href.split("?")[0]);}));',
-    '  self.skipWaiting();',
-    '});',
-    'self.addEventListener("activate",function(e){',
-    '  e.waitUntil(caches.keys().then(function(keys){',
-    '    return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));',
-    '  }));self.clients.claim();',
-    '});',
-    'self.addEventListener("fetch",function(e){',
-    '  if(e.request.method!=="GET")return;',
-    '  e.respondWith(caches.match(e.request).then(function(cached){',
-    '    var net=fetch(e.request).then(function(res){',
-    '      if(res&&res.ok){var cl=res.clone();caches.open(CACHE).then(function(c){c.put(e.request,cl);});}',
-    '      return res;',
-    '    }).catch(function(){return cached;});',
-    '    return cached||net;',
-    '  }));',
-    '});'
-  ].join('\n');
-  var swBlob=new Blob([swCode],{type:'application/javascript'});
-  var swUrl=URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl).then(function(reg){
-    console.log('[MyMilesAI] SW registered:',reg.scope);
-  }).catch(function(e){console.log('[MyMilesAI] SW failed:',e.message);});
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(reg){
+      console.log('[MyMilesAI] Unregistered stale SW:',reg.scope);
+      reg.unregister();
+    });
+  });
 }
 </script>
 </body>
