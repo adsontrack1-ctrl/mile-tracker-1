@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><!-- v1773361360 -->
+<html lang="en"><!-- v1773361460 -->
 <head>
 <meta charset="UTF-8">
 <!-- v1773360735-->
@@ -2470,20 +2470,7 @@ function _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status){
   status.textContent='Estimated distance (straight line)';
   status.classList.add('calculated');
 }
-];
-function pickGeo(e,inpId,ddId,idx){
-  e.preventDefault();
-  if(_liveGeoResults[idx]){
-    var p=_liveGeoResults[idx];
-    document.getElementById(inpId).value=p.n+', '+p.c;
-    if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
-    else toCoords={lat:p.lat,lng:p.lng};
-  }
-  document.getElementById(ddId).classList.remove('show');
-  calcDistance();
-}
 
-var lastSearchResults=[];
 function pickPlace(e,inpId,ddId,idx){
   e.preventDefault();
   var results=searchAddr(document.getElementById(inpId).value.trim());
