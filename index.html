@@ -2138,6 +2138,7 @@ var addCat='biz';
 var addDistVal=0;
 var addrTimer=null;
 var fromCoords=null,toCoords=null;
+var _autoGeoFrom=null,_autoGeoTo=null;
 
 /* --- Address Database (no API needed) --- */
 var PLACES_CA=[
@@ -2285,9 +2286,25 @@ function geocodeAddr(query,inpId,ddId){
   // Photon geocoder — fuzzy matching (handles typos like "manle" → "Manley")
   var biasLat=lastGpsLat||49.89,biasLng=lastGpsLng||-97.14;
   if(!lastGpsLat){try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';var tzG={'America/Winnipeg':[49.89,-97.14],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/Edmonton':[53.54,-113.49],'America/Montreal':[45.50,-73.57],'America/New_York':[40.71,-74.00],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24]};if(tzG[tz]){biasLat=tzG[tz][0];biasLng=tzG[tz][1];}}catch(e){}}
-  fetch('https://photon.komoot.io/api/?q='+encodeURIComponent(query)+'&lat='+biasLat+'&lon='+biasLng+'&limit=5&lang=en')
+  fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&lat='+biasLat+'&lon='+biasLng+'&limit=6&format=json&addressdetails=1&countrycodes=us,ca',{headers:{'Accept-Language':'en-US,en','User-Agent':'MyMilesAI/4.2'}})
   .then(function(r){if(!r.ok)throw new Error('Network');return r.json();})
   .then(function(data){
+    // Adapt Nominatim response to match Photon processing
+    if(data&&data.length){
+      data={features:data.map(function(item){
+        var addr=item.address||{};
+        return {
+          geometry:{coordinates:[parseFloat(item.lon),parseFloat(item.lat)]},
+          properties:{
+            housenumber:addr.house_number||'',
+            street:addr.road||addr.pedestrian||addr.footway||'',
+            name:item.name||addr.road||'',
+            city:addr.city||addr.town||addr.village||addr.suburb||addr.county||'',
+            state:addr.state||addr.province||''
+          }
+        };
+      })};
+    } else { data={features:[]}; }
     var inp=document.getElementById(inpId);
     if(!inp||inp.value.trim().length<3)return;
     var localResults=searchAddr(inp.value.trim());
@@ -2359,12 +2376,11 @@ function pickPlace(e,inpId,ddId,idx){
 }
 function refineCoords(addr,inpId){
   var biasLat=lastGpsLat||49.89,biasLng=lastGpsLng||-97.14;
-  fetch('https://photon.komoot.io/api/?q='+encodeURIComponent(addr)+'&lat='+biasLat+'&lon='+biasLng+'&limit=1&lang=en')
+  fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(addr)+'&limit=1&format=json&addressdetails=1',{headers:{'Accept-Language':'en-US,en','User-Agent':'MyMilesAI/4.2'}})
   .then(function(r){return r.json();})
   .then(function(data){
-    if(data&&data.features&&data.features[0]){
-      var coords=data.features[0].geometry.coordinates;
-      console.log('[MyMilesAI] Refined '+inpId+': '+addr+' → ['+coords[1]+','+coords[0]+']');
+    if(data&&data.length>0){
+      var coords=[parseFloat(data[0].lon),parseFloat(data[0].lat)];
       if(inpId==='addFrom') fromCoords={lat:coords[1],lng:coords[0]};
       else toCoords={lat:coords[1],lng:coords[0]};
       calcDistance();
@@ -2399,6 +2415,24 @@ function calcDistance(){
     return;
   }
   
+  // Auto-geocode if text present but coords missing
+  if(f.length>=4 && !fromCoords){
+    clearTimeout(_autoGeoFrom);
+    _autoGeoFrom=setTimeout(function(){
+      fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(f)+'&limit=1&format=json',{headers:{'User-Agent':'MyMilesAI/4.2'}})
+      .then(function(r){return r.json();}).then(function(d){if(d&&d[0]){fromCoords={lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};calcDistance();}}).catch(function(){});
+    },800);
+  }
+  if(t.length>=4 && !toCoords){
+    clearTimeout(_autoGeoTo);
+    _autoGeoTo=setTimeout(function(){
+      fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(t)+'&limit=1&format=json',{headers:{'User-Agent':'MyMilesAI/4.2'}})
+      .then(function(r){return r.json();}).then(function(d){if(d&&d[0]){toCoords={lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};calcDistance();}}).catch(function(){});
+    },800);
+  }
+  if(f.length>=4 && t.length>=4 && (!fromCoords||!toCoords)){
+    status.textContent='Calculating distance...';
+  }
   if(fromCoords && toCoords){
     // Show quick Haversine estimate while OSRM loads
     var R=6371;
@@ -2466,7 +2500,7 @@ function calcDistance(){
   distInp.classList.remove('filled');
   badge.classList.remove('active');
   addDistVal=0;
-  status.textContent='Pick an address from suggestions for auto-distance';
+  status.textContent='Enter destination to calculate distance';
   status.classList.remove('calculated');
 }
 
@@ -2621,7 +2655,7 @@ function openAddTrip(){
   var _emm=String(_eh.getMinutes()).padStart(2,'0');
   document.getElementById('addStartTime').value=_hh+':'+_mm;
   document.getElementById('addEndTime').value=_ehh+':'+_emm;
-  fromCoords=null;toCoords=null;
+  fromCoords=null;toCoords=null;clearTimeout(_autoGeoFrom);clearTimeout(_autoGeoTo);
   var defCat=getDefaultCat();
   setAddCat(defCat==='uncl'?'biz':defCat);
   addDistVal=0;_manualDistEdit=false;
@@ -2660,6 +2694,21 @@ function saveManual(){
   var f=document.getElementById('addFrom').value.trim();
   var t=document.getElementById('addTo').value.trim();
   if(!f||!t){showToast(_i('warn'),'Please enter both From and To addresses');return;}
+  // If coords missing for either field, geocode them first then save
+  if(!fromCoords||!toCoords){
+    var missing=(!fromCoords&&f?f:null)||(!toCoords&&t?t:null);
+    var needFrom=!fromCoords&&f;var needTo=!toCoords&&t;
+    var geocodeCount=(needFrom?1:0)+(needTo?1:0);var done=0;
+    var proceed=function(){done++;if(done>=geocodeCount){calcDistance();setTimeout(_doSaveManual,600);}};
+    if(needFrom){fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(f)+'&limit=1&format=json',{headers:{'User-Agent':'MyMilesAI/4.2'}}).then(function(r){return r.json();}).then(function(d){if(d&&d[0])fromCoords={lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};proceed();}).catch(function(){proceed();});}
+    if(needTo){fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(t)+'&limit=1&format=json',{headers:{'User-Agent':'MyMilesAI/4.2'}}).then(function(r){return r.json();}).then(function(d){if(d&&d[0])toCoords={lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};proceed();}).catch(function(){proceed();});}
+    return;
+  }
+  _doSaveManual();
+}
+function _doSaveManual(){
+  var f=document.getElementById('addFrom').value.trim();
+  var t=document.getElementById('addTo').value.trim();
   if(addDistVal===0&&!_manualDistEdit) calcDistance();
   var rawDist=parseFloat(document.getElementById('addDistInput').value)||addDistVal;
   var mi=LOC.country==='CA'?rawDist/1.60934:rawDist;
