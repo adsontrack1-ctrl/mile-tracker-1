@@ -5,7 +5,7 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src https://photon.komoot.io https://nominatim.openstreetmap.org https://router.project-osrm.org https://api.jsonbin.io; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://api.jsonbin.io https://api.anthropic.com; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,9 +16,8 @@
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
-<title>MyMilesAI Rel 4.2</title>
+<title>MyMilesAI Rel 5.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
 :root{
   --bg:#F6F7F9;--white:#FFF;
@@ -35,7 +34,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
-.phone{width:393px;max-width:100vw;margin:0 auto;background:var(--bg);min-height:100vh;position:relative;overflow:hidden;}
+.phone{width:393px;max-width:100vw;margin:0 auto;background:var(--bg);min-height:100vh;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
 .scroll{padding-bottom:110px;}
 .tab{display:none;animation:tabIn .35s ease;}.tab.active{display:block;}
 @keyframes tabIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -51,7 +50,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 @keyframes pulse-rec{0%,100%{box-shadow:0 4px 20px rgba(0,168,112,.3)}50%{box-shadow:0 4px 28px rgba(0,168,112,.5),0 0 0 6px rgba(0,168,112,.08)}}
 
 /* HEADER */
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 10px;position:sticky;top:0;z-index:100;background:rgba(246,247,249,.85);backdrop-filter:blur(24px) saturate(2);}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:max(12px,env(safe-area-inset-top)) 20px 10px;position:sticky;top:0;z-index:100;background:rgba(246,247,249,.85);backdrop-filter:blur(24px) saturate(2);}
 .hdr-l{display:flex;align-items:center;gap:12px;}
 .hdr-av{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#D6006E,#6C3CE0,#00A870);background-size:200% 200%;animation:avGrad 6s ease-in-out infinite;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;box-shadow:0 3px 12px rgba(214,0,110,.25);}
 .hdr-greet{font-size:12px;color:var(--ink4);font-weight:500;}
@@ -460,6 +459,32 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .ob-dot.active{width:24px;border-radius:4px;background:var(--vi);}
 .ob-unit-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 12px;border:2px solid var(--ink6);border-radius:var(--r2);background:var(--white);cursor:pointer;transition:all .2s;}
 .ob-unit-btn.active{border-color:var(--vi);background:var(--vi-s);}
+
+/* AI CHAT */
+.ai-fab{position:fixed;bottom:90px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--vi),var(--mag));border:none;color:#fff;cursor:pointer;z-index:200;box-shadow:0 8px 28px rgba(108,60,224,.35);display:flex;align-items:center;justify-content:center;transition:all .3s cubic-bezier(.22,1,.36,1);}
+.ai-fab:hover{transform:scale(1.08);}
+.ai-fab:active{transform:scale(.95);}
+.ai-panel{position:fixed;inset:0;z-index:600;background:var(--bg);display:none;flex-direction:column;}
+.ai-panel.show{display:flex;animation:slideUpModal .35s cubic-bezier(.22,1,.36,1);}
+.ai-hdr{display:flex;align-items:center;justify-content:space-between;padding:max(12px,env(safe-area-inset-top)) 16px 12px;background:#0C0C1D;color:#fff;}
+.ai-hdr-title{font-family:var(--fd);font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.ai-hdr-close{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.ai-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.ai-msg{max-width:85%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;word-wrap:break-word;animation:tabIn .25s ease;}
+.ai-msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border-bottom-right-radius:6px;}
+.ai-msg.bot{align-self:flex-start;background:var(--white);border:1px solid var(--ink6);color:var(--ink);border-bottom-left-radius:6px;box-shadow:var(--s1);}
+.ai-msg.bot pre{background:var(--ink7);padding:8px 12px;border-radius:8px;overflow-x:auto;font-size:12px;margin:8px 0;}
+.ai-msg.typing{opacity:.6;}
+.ai-chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;}
+.ai-chip{padding:7px 14px;border-radius:var(--rpill);background:var(--white);border:1px solid var(--ink6);font-size:12px;font-weight:600;color:var(--vi);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.ai-chip:hover{background:var(--vi-s);border-color:var(--vi);}
+.ai-input-bar{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));background:var(--white);border-top:1px solid var(--ink6);}
+.ai-input-bar input{flex:1;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--rpill);font-family:var(--f);font-size:14px;background:var(--bg);outline:none;transition:border-color .2s;}
+.ai-input-bar input:focus{border-color:var(--vi);}
+.ai-send-btn{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--vi),var(--mag));border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.ai-send-btn:disabled{opacity:.4;cursor:default;}
+.ai-key-bar{padding:12px 16px;background:rgba(224,141,0,.06);border-bottom:1px solid rgba(224,141,0,.15);font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px;}
+.ai-key-bar a{color:var(--vi);font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -572,7 +597,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set-hdr">Tracking</div>
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
-      <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option></select></div>
+      <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="3" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
       <div class="sr"><div><h4>Navigation app</h4><p>Opens when you tap Map</p></div><select class="sr-sel" id="mapAppSel" onchange="saveMapAppPref()"><option value="inapp">In-app map</option><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div>
@@ -600,6 +625,11 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="sr"><div><h4>Weekly summary</h4><p>Sunday recap email</p></div><div class="tgl" id="notifWeeklyTgl" onclick="toggleNotifSetting(this,'weekly')"></div></div>
       <div class="sr"><div><h4>Milestone alerts</h4><p>Deduction goal reminders</p></div><div class="tgl on" id="notifMilestoneTgl" onclick="toggleNotifSetting(this,'milestone')"></div></div>
     </div>
+    <div class="set-hdr">AI Assistant</div>
+    <div class="set">
+      <div class="sr"><div><h4>Claude API key</h4><p>Required for AI chat</p></div><input type="password" class="sr-n" style="width:140px;font-size:11px" id="aiKeyInput" placeholder="sk-ant-..." onchange="saveAIKey(this.value)"></div>
+      <div class="sr"><div><h4>Remove API key</h4><p>Clear stored key</p></div><button class="btn-rd" style="font-size:11px;padding:4px 12px" onclick="removeAIKey()">Remove</button></div>
+    </div>
     <div class="set-hdr">Account & Privacy</div>
     <div class="set">
       <div class="sr" onclick="openInfoModal('Location Permissions','MyMilesAI uses your GPS location to automatically detect and record trips.<br><br><b>Background Access:</b> Allows trip tracking even when the app is minimized. Your location data stays on your device.<br><br><b>When In Use:</b> Only tracks when the app is open.<br><br><b>To change:</b> Go to your device Settings → Privacy → Location Services → MyMilesAI')"><div><h4>Location permissions</h4><p>Background GPS access</p></div><span class="sr-link">Manage →</span></div>
@@ -611,7 +641,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 4.0</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">4.0.0</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.0</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.0.0</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 3 mph), recording starts. Smart Pause keeps your trip alive through red lights and short stops — trips only end after 5 min of no movement.<br><br><b>What about short trips?</b><br>The low 3 mph threshold catches short drives. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile for 2026)<br>Canada: CRA rate ($0.72/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -633,6 +663,38 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   </div>
 
 </div></div>
+
+<!-- AI CHAT FAB -->
+<button class="ai-fab" id="aiFab" onclick="toggleAIChat()" title="AI Assistant">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+
+<!-- AI CHAT PANEL -->
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-hdr">
+    <div class="ai-hdr-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> MyMilesAI</div>
+    <button class="ai-hdr-close" onclick="toggleAIChat()">&times;</button>
+  </div>
+  <div id="aiKeyBar" class="ai-key-bar" style="display:none">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 017.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+    <span>API key needed. <a onclick="goToSettings()">Set in Settings</a></span>
+  </div>
+  <div class="ai-msgs" id="aiMsgs">
+    <div class="ai-msg bot">Hi! I'm your MyMilesAI assistant. Ask me about your trips, deductions, mileage rates, or say "export CSV" to download your data.</div>
+  </div>
+  <div class="ai-chips" id="aiChips">
+    <button class="ai-chip" onclick="sendAIChip('How much can I deduct this year?')">Total deduction</button>
+    <button class="ai-chip" onclick="sendAIChip('What is the current mileage rate?')">Mileage rate</button>
+    <button class="ai-chip" onclick="sendAIChip('Show my trips this week')">This week</button>
+    <button class="ai-chip" onclick="sendAIChip('Export my trips as CSV')">Export CSV</button>
+    <button class="ai-chip" onclick="sendAIChip('How many unclassified trips do I have?')">Unclassified</button>
+    <button class="ai-chip" onclick="sendAIChip('Give me a monthly report')">Monthly report</button>
+  </div>
+  <div class="ai-input-bar">
+    <input type="text" id="aiInput" placeholder="Ask about your trips..." onkeydown="if(event.key==='Enter')sendAIChat()">
+    <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIChat()"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+  </div>
+</div>
 
 <!-- INFO MODAL -->
 <div class="info-overlay" id="infoOverlay" onclick="closeInfoModal()"></div>
@@ -816,8 +878,15 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge">3</div></button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDPJB-f1fp2SmAID9vsiL7DZhemr62FZ4&libraries=places&callback=_initGoogleMaps" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
+/* ===== Google Maps Init Callback ===== */
+var _googleMapsReady=false;
+function _initGoogleMaps(){_googleMapsReady=true;if(typeof initMap==='function')initMap();}
+
 /* ===== SVG ICON SYSTEM ===== */
 /* ===== SECURITY: HTML escape — MUST use for all user data in innerHTML ===== */
 function _esc(str){
@@ -882,16 +951,28 @@ park:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="curren
 };var svg=(m[n]||'').replace(/SZ/g,s);if(c)svg=svg.replace(/currentColor/g,c);return svg;}
 
 /* ===== LOCALE ENGINE ===== */
-let LOC={unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate'};
+var LOCALES={
+  US:{unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.70,med:.22,char:.14}},
+  CA:{unit:'km',label:'kilometers',speed:'km/h',rate:.72,flag:'🇨🇦',country:'CA',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate',rates:{biz:.72,med:.72,char:.72}},
+  UK:{unit:'mi',label:'miles',speed:'mph',rate:.45,flag:'🇬🇧',country:'UK',conv:1,currency:'£',taxLabel:'HMRC 2026 Rate',rates:{biz:.45,med:0,char:0}},
+  AU:{unit:'km',label:'kilometres',speed:'km/h',rate:.88,flag:'🇦🇺',country:'AU',conv:1.60934,currency:'A$',taxLabel:'ATO 2025-26 Rate',rates:{biz:.88,med:0,char:0}}
+};
+let LOC=LOCALES.US;
+function _useKm(){return LOC.unit==='km';}
 function detectLocale(){
-  try{const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';if(tz.startsWith('America/Toronto')||tz.startsWith('America/Vancouver')||tz.startsWith('America/Winnipeg')||tz.startsWith('America/Edmonton')||tz.startsWith('America/Halifax')||tz.startsWith('America/St_Johns')||tz.startsWith('America/Regina')||tz.includes('Canada'))return'CA';}catch(e){}
-  try{const l=navigator.language||'';if(l==='en-CA'||l==='fr-CA')return'CA';}catch(e){}
+  try{
+    var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
+    if(tz.startsWith('America/Toronto')||tz.startsWith('America/Vancouver')||tz.startsWith('America/Winnipeg')||tz.startsWith('America/Edmonton')||tz.startsWith('America/Halifax')||tz.startsWith('America/St_Johns')||tz.startsWith('America/Regina')||tz.includes('Canada'))return'CA';
+    if(tz.startsWith('Europe/London')||tz.startsWith('Europe/Belfast'))return'UK';
+    if(tz.startsWith('Australia/'))return'AU';
+  }catch(e){}
+  try{var l=navigator.language||'';if(l==='en-CA'||l==='fr-CA')return'CA';if(l==='en-GB')return'UK';if(l==='en-AU')return'AU';}catch(e){}
   return'US';
 }
 function setLocale(c){
-  if(c==='CA'){LOC={unit:'km',label:'kilometers',speed:'km/h',rate:.72,flag:'🇨🇦',country:'CA',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate'};}
-  else{LOC={unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate'};}
-  document.getElementById('unitSel').value=c;
+  LOC=LOCALES[c]||LOCALES.US;
+  var sel=document.getElementById('unitSel');
+  if(sel)sel.value=c;
   applyLocale();
 }
 function applyLocale(){
@@ -907,12 +988,13 @@ function applyLocale(){
   _set('trackAvgU','avg '+s);
   _set('threshLbl','Min '+s+' to detect');
   _set('taxLabel',LOC.taxLabel);
-  _set('rateLabel',LOC.country==='CA'?'CRA rate':'IRS rate');
+  var _rateLabels={US:'IRS rate',CA:'CRA rate',UK:'HMRC rate',AU:'ATO rate'};
+  _set('rateLabel',_rateLabels[LOC.country]||'Tax rate');
   _set('rateDesc','Per '+LOC.unit+' deduction');
   _setv('rateVal',LOC.rate.toFixed(2));
-  _set('editDistLabel',LOC.country==='CA'?'Kilometers':'Miles');
+  _set('editDistLabel',_useKm()?'Kilometers':'Miles');
   document.querySelectorAll('.trip-mi-u').forEach(e=>e.textContent=LOC.label);
-  document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers/,LOC.country==='CA'?'Kilometers':'Miles'));
+  document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers|Kilometres/,_useKm()?LOC.label.charAt(0).toUpperCase()+LOC.label.slice(1):'Miles'));
   document.querySelectorAll('.tmpl-dist').forEach(e=>{const v=parseFloat(e.textContent);if(!isNaN(v)){const nv=LOC.country==='CA'?(v*1.60934).toFixed(1):v.toFixed(1);e.textContent=nv+' '+u;}});
   // Update template default text with correct unit
   var tmplOff=document.getElementById('tmplOffDist');
@@ -958,8 +1040,8 @@ function randomPath(){
   var x1=60+Math.floor(Math.random()*40),x2=120+Math.floor(Math.random()*40),x3=200+Math.floor(Math.random()*40),x4=280+Math.floor(Math.random()*40);
   return 'M20,'+y1+' C'+x1+','+y2+' '+x2+','+y3+' '+x3+','+y4+' S'+x4+','+y5+' 340,'+(20+Math.floor(Math.random()*50));
 }
-function tripDist(mi){return LOC.country==='CA'?(mi*1.60934).toFixed(1):mi.toFixed(1);}
-function convMi(mi){return LOC.country==='CA'?mi*1.60934:mi;}
+function tripDist(mi){return(LOC.country==='CA'||LOC.country==='AU')?(mi*1.60934).toFixed(1):mi.toFixed(1);}
+function convMi(mi){return(LOC.country==='CA'||LOC.country==='AU')?mi*1.60934:mi;}
 function tripCard(t,wide){
   const d=tripDist(t.mi),ded=t.ded?`<span class="trip-ded">+$${(parseFloat(d)*LOC.rate).toFixed(2)}</span>`:'';
   const clr={biz:'vi',pers:'mag',uncl:'amber'}[t.type]||'amber';
@@ -1287,7 +1369,10 @@ function markAllRead(){
   renderAlerts();
   showToast(_i('check'),'All notifications marked as read');
 }
-function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=type==='biz';checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(type==='biz'?'Business':'Personal'));}}
+var CAT_LABELS={biz:'Business',pers:'Personal',med:'Medical',char:'Charity',move:'Moving',uncl:'Unclassified'};
+var CAT_DEDUCTIBLE={biz:true,med:true,char:true,move:false,pers:false,uncl:false};
+function catRate(type){return(LOC.rates&&LOC.rates[type])||LOC.rate;}
+function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=!!CAT_DEDUCTIBLE[type];checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(CAT_LABELS[type]||type));}}
 
 /* ===== NAVIGATION ===== */
 var _scrollPositions={};
@@ -1544,91 +1629,216 @@ function checkEmptyState(){
 }
 
 /* ===== EXPORT FUNCTIONS ===== */
+function _tripDeduction(t){
+  var d=convMi(t.mi);
+  if(!t.ded)return 0;
+  var r=catRate(t.type);
+  return d*r;
+}
+function _shareOrDownload(content,filename,mimeType){
+  if(window.__MYMILESAI_NATIVE__ && window.ReactNativeWebView){
+    window.ReactNativeWebView.postMessage(JSON.stringify({type:'share',content:content,filename:filename,mimeType:mimeType||'text/csv'}));
+    return;
+  }
+  var blob=new Blob([content],{type:mimeType||'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function _tripSummaryByCategory(){
+  var cats={};
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];var typ=t.type||'uncl';
+    if(!cats[typ])cats[typ]={miles:0,trips:0,deduction:0};
+    var mi=convMi(t.mi);
+    cats[typ].miles+=mi;cats[typ].trips++;
+    cats[typ].deduction+=_tripDeduction(t);
+  }
+  return cats;
+}
 function exportCSV(){
   var unit=LOC.label;
-  var rows=[['Date','Time','From','To','Distance ('+unit+')','Category','Purpose','Notes','Tax Deductible','Deduction ('+LOC.currency+')']];
+  var yr=new Date().getFullYear();
+  var rows=[];
+  // IRS-compliant header
+  rows.push(['MyMilesAI Mileage Log - Tax Year '+yr]);
+  rows.push([LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' (Business) | '+LOC.currency+(LOC.rates.med||0).toFixed(2)+'/'+LOC.unit+' (Medical) | '+LOC.currency+(LOC.rates.char||0).toFixed(2)+'/'+LOC.unit+' (Charity)']);
+  rows.push([]);
+  rows.push(['Date','Start Time','From Address','To Address','Distance ('+unit+')','Category','Business Purpose','Notes','Tax Deductible','Deduction ('+LOC.currency+')']);
   for(var i=0;i<TRIPS.length;i++){
     var t=TRIPS[i];
     var d=tripDist(t.mi);
-    var ded=t.ded?(parseFloat(d)*LOC.rate).toFixed(2):'0.00';
-    rows.push([t.date||t.day,t.time,'"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,t.type==='biz'?'Business':'Personal','"'+_csvCell(t.purpose||'')+'"','"'+_csvCell(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
+    var ded=_tripDeduction(t).toFixed(2);
+    rows.push([t.date||t.day,t.startTime||t.time,'"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,CAT_LABELS[t.type]||t.type,'"'+_csvCell(t.purpose||'')+'"','"'+_csvCell(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
   }
-  // Add summary row
-  var totalBiz=0,totalPer=0;
-  for(var j=0;j<TRIPS.length;j++){
-    var dist=convMi(TRIPS[j].mi);
-    if(TRIPS[j].type==='biz') totalBiz+=dist;
-    else totalPer+=dist;
+  // Category breakdown summary
+  var cats=_tripSummaryByCategory();
+  var totalMiles=0,totalDed=0;
+  rows.push([]);rows.push(['SUMMARY']);
+  var catKeys=['biz','pers','med','char','move','uncl'];
+  for(var c=0;c<catKeys.length;c++){
+    var ck=catKeys[c];if(!cats[ck])continue;
+    rows.push([(CAT_LABELS[ck]||ck)+' '+unit,cats[ck].miles.toFixed(1),cats[ck].trips+' trips','Deduction: '+LOC.currency+cats[ck].deduction.toFixed(2)]);
+    totalMiles+=cats[ck].miles;totalDed+=cats[ck].deduction;
   }
   rows.push([]);
-  rows.push(['SUMMARY']);
-  rows.push(['Total Business '+unit,totalBiz.toFixed(1)]);
-  rows.push(['Total Personal '+unit,totalPer.toFixed(1)]);
-  rows.push(['Total '+unit,(totalBiz+totalPer).toFixed(1)]);
-  rows.push(['Total Deduction',LOC.currency+(totalBiz*LOC.rate).toFixed(2)]);
-  rows.push(['Rate',LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit]);
-  rows.push(['Generated','MyMilesAI Rel 4.0 — '+new Date().toLocaleDateString()]);
+  rows.push(['Total '+unit,totalMiles.toFixed(1)]);
+  rows.push(['Total Deduction',LOC.currency+totalDed.toFixed(2)]);
+  rows.push([]);
+  rows.push(['Disclaimer: This log is maintained in accordance with IRS Publication 463. Consult a tax professional for advice.']);
+  rows.push(['Generated','MyMilesAI v4.2 — '+new Date().toLocaleDateString()]);
 
   var csv=rows.map(function(r){return r.join(',');}).join('\n');
-  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='MyMilesAI_Trips_'+new Date().toISOString().slice(0,10)+'.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  var filename='MyMilesAI_Mileage_Log_'+yr+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  _shareOrDownload(csv,filename,'text/csv;charset=utf-8;');
 
-  // Show confirmation
-  openInfoModal('CSV Exported','Your trip data has been downloaded as a CSV file.<br><br><b>File:</b> MyMilesAI_Trips_'+new Date().toISOString().slice(0,10)+'.csv<br><br><b>Contains:</b><br>• '+TRIPS.length+' trips<br>• '+totalBiz.toFixed(1)+' business '+unit+'<br>• '+totalPer.toFixed(1)+' personal '+unit+'<br>• '+LOC.currency+(totalBiz*LOC.rate).toFixed(2)+' in deductions<br><br>Open the file in Excel, Google Sheets, or Numbers to view your data.');
+  var bizMi=cats.biz?cats.biz.miles:0;var perMi=cats.pers?cats.pers.miles:0;
+  openInfoModal('CSV Exported','Your IRS-compliant mileage log has been exported.<br><br><b>File:</b> '+filename+'<br><br><b>Contains:</b><br>• '+TRIPS.length+' trips<br>• '+bizMi.toFixed(1)+' business '+unit+'<br>• '+perMi.toFixed(1)+' personal '+unit+'<br>• '+LOC.currency+totalDed.toFixed(2)+' in deductions<br><br>Open the file in Excel, Google Sheets, or Numbers.');
 }
 
 function exportPDF(){
   var unit=LOC.label;
-  var totalBiz=0,totalPer=0;
-  for(var j=0;j<TRIPS.length;j++){
-    var dist=convMi(TRIPS[j].mi);
-    if(TRIPS[j].type==='biz') totalBiz+=dist;else totalPer+=dist;
+  var yr=new Date().getFullYear();
+  var cats=_tripSummaryByCategory();
+  var totalBiz=cats.biz?cats.biz.miles:0,totalPer=cats.pers?cats.pers.miles:0;
+  var totalMed=cats.med?cats.med.miles:0,totalChar=cats.char?cats.char.miles:0;
+  var totalDed=0;
+  var catKeys=['biz','med','char'];
+  for(var c=0;c<catKeys.length;c++){if(cats[catKeys[c]])totalDed+=cats[catKeys[c]].deduction;}
+
+  // Use jsPDF if available
+  if(window.jspdf){
+    var jsPDF=window.jspdf.jsPDF;
+    var doc=new jsPDF();
+    // Header
+    doc.setFontSize(20);doc.setFont('helvetica','bold');
+    doc.text('MyMilesAI Mileage Report',14,20);
+    doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(120);
+    doc.text('Tax Year '+yr+' — Generated '+new Date().toLocaleDateString(),14,28);
+    doc.text(LOC.taxLabel+': '+LOC.currency+LOC.rates.biz.toFixed(2)+'/'+LOC.unit+' (Business)',14,34);
+    // Summary
+    doc.setTextColor(0);doc.setFontSize(12);doc.setFont('helvetica','bold');
+    doc.text('Summary',14,46);
+    doc.setFontSize(10);doc.setFont('helvetica','normal');
+    var sy=52;
+    doc.text('Business '+unit+': '+totalBiz.toFixed(1),14,sy);
+    doc.text('Personal '+unit+': '+totalPer.toFixed(1),80,sy);
+    doc.text('Total Deduction: '+LOC.currency+totalDed.toFixed(2),146,sy);
+    sy+=8;
+    if(totalMed>0)doc.text('Medical '+unit+': '+totalMed.toFixed(1),14,sy);
+    if(totalChar>0)doc.text('Charity '+unit+': '+totalChar.toFixed(1),80,sy);
+    // Category breakdown table
+    doc.setFontSize(12);doc.setFont('helvetica','bold');
+    doc.text('Category Breakdown',14,sy+14);
+    var catRows=[];
+    var allCatKeys=['biz','pers','med','char','move','uncl'];
+    for(var k=0;k<allCatKeys.length;k++){
+      var ck=allCatKeys[k];if(!cats[ck])continue;
+      catRows.push([(CAT_LABELS[ck]||ck),String(cats[ck].trips),cats[ck].miles.toFixed(1)+' '+LOC.unit,LOC.currency+cats[ck].deduction.toFixed(2)]);
+    }
+    doc.autoTable({startY:sy+18,head:[['Category','Trips','Distance','Deduction']],body:catRows,
+      headStyles:{fillColor:[108,60,224]},styles:{fontSize:9}});
+    // Trip detail table
+    doc.setFontSize(12);doc.setFont('helvetica','bold');
+    doc.text('Trip Detail ('+TRIPS.length+' trips)',14,doc.lastAutoTable.finalY+12);
+    var tripRows=[];
+    for(var i=0;i<TRIPS.length;i++){
+      var t=TRIPS[i];
+      tripRows.push([t.date||t.day,t.startTime||t.time||'',t.from,t.to,tripDist(t.mi),CAT_LABELS[t.type]||t.type,t.ded?LOC.currency+_tripDeduction(t).toFixed(2):'--']);
+    }
+    doc.autoTable({startY:doc.lastAutoTable.finalY+16,head:[['Date','Time','From','To','Dist','Category','Deduction']],body:tripRows,
+      headStyles:{fillColor:[108,60,224]},styles:{fontSize:7,cellPadding:2},columnStyles:{2:{cellWidth:35},3:{cellWidth:35}}});
+    // Footer
+    doc.setFontSize(8);doc.setTextColor(150);
+    var taxAuth={US:'IRS Publication 463',CA:'CRA',UK:'HMRC',AU:'ATO'}[LOC.country]||'tax authority';
+    doc.text('Maintained per '+taxAuth+' requirements. MyMilesAI v5.0. Consult a qualified tax professional.',14,doc.internal.pageSize.height-10);
+
+    // Share or download
+    if(window.__MYMILESAI_NATIVE__){
+      var base64=doc.output('datauristring').split(',')[1];
+      _shareOrDownload(base64,'MyMilesAI-Report-'+yr+'.pdf','application/pdf');
+      showToast(_i('clip'),'PDF report ready for sharing');
+      return;
+    }
+    doc.save('MyMilesAI-Report-'+yr+'.pdf');
+    showToast(_i('clip'),'PDF report downloaded');
+    return;
   }
+
+  // Fallback to HTML print if jsPDF not loaded
+
+  var catColors={biz:'#6C3CE0',pers:'#D6006E',med:'#E08D00',char:'#00A870',move:'#3B82F6',uncl:'#9898B0'};
+
   var tripRows='';
   for(var i=0;i<TRIPS.length;i++){
     var t=TRIPS[i];
     var d=tripDist(t.mi);
-    var cat=t.type==='biz'?'Business':'Personal';
-    var catClr=t.type==='biz'?'#6C3CE0':'#D6006E';
-    var ded=t.ded?LOC.currency+(parseFloat(d)*LOC.rate).toFixed(2):'—';
+    var cat=CAT_LABELS[t.type]||t.type;
+    var catClr=catColors[t.type]||'#888';
+    var ded=t.ded?LOC.currency+_tripDeduction(t).toFixed(2):'—';
     var dateStr=t.date||t.day;
-    tripRows+='<tr><td>'+dateStr+'</td><td>'+t.from+' → '+t.to+(t.purpose?' <small style="color:'+catClr+'">'+t.purpose+'</small>':'')+'</td><td style="text-align:right;font-weight:700">'+d+'</td><td style="color:'+catClr+';font-weight:600">'+cat+'</td><td style="color:#00A870;font-weight:700">'+ded+'</td></tr>';
+    var startT=t.startTime||t.time||'';
+    tripRows+='<tr><td>'+dateStr+'</td><td>'+startT+'</td><td>'+t.from+'</td><td>'+t.to+'</td><td style="text-align:right;font-weight:700">'+d+'</td><td style="color:'+catClr+';font-weight:600">'+cat+'</td><td>'+_csvCell(t.purpose||'')+'</td><td style="color:#00A870;font-weight:700">'+ded+'</td></tr>';
   }
+
+  // Category breakdown rows
+  var catSummaryRows='';
+  var allCatKeys=['biz','pers','med','char','move','uncl'];
+  for(var k=0;k<allCatKeys.length;k++){
+    var ck=allCatKeys[k];if(!cats[ck])continue;
+    catSummaryRows+='<tr><td style="color:'+(catColors[ck]||'#888')+';font-weight:600">'+(CAT_LABELS[ck]||ck)+'</td><td>'+cats[ck].trips+'</td><td>'+cats[ck].miles.toFixed(1)+' '+LOC.unit+'</td><td style="font-weight:700">'+LOC.currency+cats[ck].deduction.toFixed(2)+'</td></tr>';
+  }
+
+  var rateInfo=LOC.currency+LOC.rates.biz.toFixed(2)+'/'+LOC.unit+' (Business)';
+  if(LOC.country==='US')rateInfo+=', '+LOC.currency+LOC.rates.med.toFixed(2)+'/'+LOC.unit+' (Medical), '+LOC.currency+LOC.rates.char.toFixed(2)+'/'+LOC.unit+' (Charity)';
+
+  var htmlContent='<!DOCTYPE html><html><head><title>MyMilesAI Mileage Report — Tax Year '+yr+'</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,system-ui,sans-serif;padding:40px;color:#1a1a2e;font-size:12px}'
+    +'h1{font-size:22px;margin-bottom:2px}h2{font-size:16px;margin:24px 0 8px;color:#333}'
+    +'table{width:100%;border-collapse:collapse;margin-top:8px}th,td{padding:8px 6px;text-align:left;border-bottom:1px solid #eee}'
+    +'th{background:#f5f5f7;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px}'
+    +'.summary{display:flex;gap:12px;margin:20px 0;flex-wrap:wrap}.summary div{flex:1;min-width:120px;padding:16px;border-radius:12px;text-align:center}'
+    +'.summary .v{font-size:24px;font-weight:800}.summary .l{font-size:11px;color:#666;margin-top:4px}'
+    +'.info{margin:16px 0;padding:12px 16px;background:#f9f9fb;border-radius:8px;font-size:11px;line-height:1.6}'
+    +'.footer{margin-top:24px;padding:12px;background:#f5f5f7;border-radius:8px;font-size:10px;color:#888;text-align:center}'
+    +'@media print{body{padding:16px;font-size:11px}.summary .v{font-size:20px}}</style></head><body>'
+    +'<h1>MyMilesAI Mileage Report</h1>'
+    +'<p style="color:#888;margin-bottom:4px">Tax Year '+yr+' — Generated '+new Date().toLocaleDateString()+'</p>'
+    +'<p style="color:#888;font-size:11px">Rates: '+rateInfo+'</p>'
+    +'<div class="summary">'
+    +'<div style="background:#f0e6ff"><div class="v" style="color:#6C3CE0">'+totalBiz.toFixed(1)+'</div><div class="l">Business '+unit+'</div></div>'
+    +'<div style="background:#ffe6f0"><div class="v" style="color:#D6006E">'+totalPer.toFixed(1)+'</div><div class="l">Personal '+unit+'</div></div>'
+    +(totalMed>0?'<div style="background:#fff5e6"><div class="v" style="color:#E08D00">'+totalMed.toFixed(1)+'</div><div class="l">Medical '+unit+'</div></div>':'')
+    +(totalChar>0?'<div style="background:#e6fff2"><div class="v" style="color:#00A870">'+totalChar.toFixed(1)+'</div><div class="l">Charity '+unit+'</div></div>':'')
+    +'<div style="background:#e6fff2"><div class="v" style="color:#00A870">'+LOC.currency+totalDed.toFixed(2)+'</div><div class="l">Total Deduction</div></div>'
+    +'</div>'
+    +'<h2>Category Breakdown</h2>'
+    +'<table><thead><tr><th>Category</th><th>Trips</th><th>Distance</th><th>Deduction</th></tr></thead><tbody>'+catSummaryRows+'</tbody></table>'
+    +'<h2>Trip Detail ('+TRIPS.length+' trips)</h2>'
+    +'<table><thead><tr><th>Date</th><th>Time</th><th>From</th><th>To</th><th style="text-align:right">Dist ('+LOC.unit+')</th><th>Category</th><th>Purpose</th><th>Deduction</th></tr></thead><tbody>'+tripRows+'</tbody></table>'
+    +'<div class="footer">Maintained in accordance with '+({US:'IRS Publication 463',CA:'CRA',UK:'HMRC',AU:'ATO'}[LOC.country]||'tax authority')+' requirements. '+LOC.taxLabel+' · '+TRIPS.length+' total trips · MyMilesAI v5.0<br>This report is for informational purposes. Consult a qualified tax professional for advice.</div>'
+    +'<script>window.onload=function(){window.print();}<\/script></body></html>';
+
+  if(window.__MYMILESAI_NATIVE__){
+    _shareOrDownload(htmlContent,'MyMilesAI-Report-'+yr+'.html','text/html');
+    showToast(_i('clip'),'Report ready for sharing');
+    return;
+  }
+
   var w=window.open('','_blank','width=800,height=600');
   if(!w){
-    // Popup blocked — fallback to blob download of print-ready HTML
-    var htmlContent='<!DOCTYPE html><html><head><title>MyMilesAI Trip Report</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,system-ui,sans-serif;padding:40px;color:#1a1a2e;font-size:13px}h1{font-size:22px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee}th{background:#f5f5f7;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.summary{display:flex;gap:16px;margin:24px 0}.summary div{flex:1;padding:20px;border-radius:12px;text-align:center}.summary .v{font-size:28px;font-weight:800}.footer{margin-top:24px;padding:12px;background:#f5f5f7;border-radius:8px;font-size:11px;color:#888;text-align:center}@media print{body{padding:20px}}</style></head><body>'
-      +'<h1>MyMilesAI Trip Report</h1><p style="color:#888;margin-bottom:8px">Generated '+new Date().toLocaleDateString()+'</p>'
-      +'<div class="summary"><div style="background:#f0e6ff"><div class="v" style="color:#6C3CE0">'+totalBiz.toFixed(1)+'</div><div>Business '+unit+'</div></div>'
-      +'<div style="background:#ffe6f0"><div class="v" style="color:#D6006E">'+totalPer.toFixed(1)+'</div><div>Personal '+unit+'</div></div>'
-      +'<div style="background:#e6fff2"><div class="v" style="color:#00A870">'+LOC.currency+(totalBiz*LOC.rate).toFixed(2)+'</div><div>Deductions</div></div></div>'
-      +'<table><thead><tr><th>Date</th><th>Route</th><th style="text-align:right">Dist ('+LOC.unit+')</th><th>Category</th><th>Deduction</th></tr></thead><tbody>'+tripRows+'</tbody></table>'
-      +'<div class="footer">'+LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' · '+TRIPS.length+' total trips · MyMilesAI Rel 4.1</div>'
-      +'<script>window.onload=function(){window.print();}<\/script></body></html>';
     var blob=new Blob([htmlContent],{type:'text/html'});
     var url=URL.createObjectURL(blob);
     var a=document.createElement('a');
-    a.href=url;a.download='MyMilesAI-Report-'+new Date().toISOString().slice(0,10)+'.html';
+    a.href=url;a.download='MyMilesAI-Report-'+yr+'.html';
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     setTimeout(function(){URL.revokeObjectURL(url);},5000);
     showToast(_i('clip'),'Report downloaded — open file and print to PDF');
     return;
   }
-  w.document.write('<!DOCTYPE html><html><head><title>MyMilesAI Trip Report</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,system-ui,sans-serif;padding:40px;color:#1a1a2e;font-size:13px}h1{font-size:22px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee}th{background:#f5f5f7;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.summary{display:flex;gap:16px;margin:24px 0}.summary div{flex:1;padding:20px;border-radius:12px;text-align:center}.summary .v{font-size:28px;font-weight:800}.footer{margin-top:24px;padding:12px;background:#f5f5f7;border-radius:8px;font-size:11px;color:#888;text-align:center}@media print{body{padding:20px}}</style></head><body>'+
-    '<h1>MyMilesAI Trip Report</h1><p style="color:#888;margin-bottom:8px">Generated '+new Date().toLocaleDateString()+'</p>'+
-    '<div class="summary"><div style="background:#f0e6ff"><div class="v" style="color:#6C3CE0">'+totalBiz.toFixed(1)+'</div><div>Business '+unit+'</div></div>'+
-    '<div style="background:#ffe6f0"><div class="v" style="color:#D6006E">'+totalPer.toFixed(1)+'</div><div>Personal '+unit+'</div></div>'+
-    '<div style="background:#e6fff2"><div class="v" style="color:#00A870">'+LOC.currency+(totalBiz*LOC.rate).toFixed(2)+'</div><div>Deductions</div></div></div>'+
-    '<table><thead><tr><th>Date</th><th>Route</th><th style="text-align:right">Dist ('+LOC.unit+')</th><th>Category</th><th>Deduction</th></tr></thead><tbody>'+tripRows+'</tbody></table>'+
-    '<div class="footer">'+LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' · '+TRIPS.length+' total trips · MyMilesAI Rel 4.1</div>'+
-    '<script>setTimeout(function(){window.print();},500)<\/script></body></html>');
+  w.document.write(htmlContent.replace('window.onload=function(){window.print();}','setTimeout(function(){window.print();},500)'));
   w.document.close();
   showToast(_i('clip'),'PDF report opened — use Save as PDF in the print dialog');
 }
@@ -1749,6 +1959,92 @@ function recalcStatsForPeriod(period){
   if(tripProg){tripProg.style.width=Math.min(count/20*100,100)+'%';}
 }
 
+/* ===== MILEAGE RATE CALCULATOR ===== */
+function calculateDeduction(miles,category,year){
+  var r=catRate(category||'biz');
+  return{miles:miles,rate:r,deduction:miles*r,category:CAT_LABELS[category]||'Business',unit:LOC.unit,currency:LOC.currency};
+}
+function generateSummaryReport(period){
+  var now=new Date();
+  var startDate=new Date(now);
+  if(period==='week'){startDate.setDate(now.getDate()-now.getDay());startDate.setHours(0,0,0,0);}
+  else if(period==='month'){startDate.setDate(1);startDate.setHours(0,0,0,0);}
+  else if(period==='quarter'){var q=Math.floor(now.getMonth()/3)*3;startDate=new Date(now.getFullYear(),q,1);}
+  else if(period==='year'){startDate=new Date(now.getFullYear(),0,1);}
+  else{startDate.setHours(0,0,0,0);}
+  var startTs=startDate.getTime();
+  var byCategory={},byDay={},topRoutes={},totalTrips=0,totalDeduction=0;
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];var tTs=t.ts||0;
+    if(!tTs){var td=t.date?new Date(t.date):null;if(td&&!isNaN(td.getTime()))tTs=td.getTime();}
+    if(tTs<startTs)continue;
+    totalTrips++;
+    var mi=convMi(t.mi);var typ=t.type||'uncl';
+    if(!byCategory[typ])byCategory[typ]={miles:0,trips:0,deduction:0};
+    byCategory[typ].miles+=mi;byCategory[typ].trips++;
+    byCategory[typ].deduction+=_tripDeduction(t);
+    totalDeduction+=_tripDeduction(t);
+    var dayKey=t.date||t.day;
+    if(!byDay[dayKey])byDay[dayKey]={miles:0,trips:0};
+    byDay[dayKey].miles+=mi;byDay[dayKey].trips++;
+    var routeKey=(t.from||'').split(',')[0]+' → '+(t.to||'').split(',')[0];
+    if(!topRoutes[routeKey])topRoutes[routeKey]={miles:0,trips:0};
+    topRoutes[routeKey].miles+=mi;topRoutes[routeKey].trips++;
+  }
+  var sortedRoutes=Object.keys(topRoutes).sort(function(a,b){return topRoutes[b].trips-topRoutes[a].trips;}).slice(0,5);
+  var topR=[];for(var r=0;r<sortedRoutes.length;r++){topR.push({route:sortedRoutes[r],miles:topRoutes[sortedRoutes[r]].miles,trips:topRoutes[sortedRoutes[r]].trips});}
+  return{period:period,totalTrips:totalTrips,totalDeduction:totalDeduction,byCategory:byCategory,byDay:byDay,topRoutes:topR,
+    bizMiles:byCategory.biz?byCategory.biz.miles:0,persMiles:byCategory.pers?byCategory.pers.miles:0};
+}
+function exportSummaryPDF(period){
+  var report=generateSummaryReport(period||'month');
+  var yr=new Date().getFullYear();
+  var periodLabel={week:'This Week',month:'This Month',quarter:'This Quarter',year:yr.toString()}[period]||period;
+  var catRows='';
+  var allCatKeys=['biz','pers','med','char','move','uncl'];
+  var catColors={biz:'#6C3CE0',pers:'#D6006E',med:'#E08D00',char:'#00A870',move:'#3B82F6',uncl:'#9898B0'};
+  for(var k=0;k<allCatKeys.length;k++){
+    var ck=allCatKeys[k];if(!report.byCategory[ck])continue;
+    var bc=report.byCategory[ck];
+    catRows+='<tr><td style="color:'+(catColors[ck]||'#888')+'">'+_csvCell(CAT_LABELS[ck]||ck)+'</td><td>'+bc.trips+'</td><td>'+bc.miles.toFixed(1)+' '+LOC.unit+'</td><td style="font-weight:700">'+LOC.currency+bc.deduction.toFixed(2)+'</td></tr>';
+  }
+  var routeRows='';
+  for(var r=0;r<report.topRoutes.length;r++){
+    var rt=report.topRoutes[r];
+    routeRows+='<tr><td>'+_csvCell(rt.route)+'</td><td>'+rt.trips+'</td><td>'+rt.miles.toFixed(1)+' '+LOC.unit+'</td></tr>';
+  }
+  var html='<!DOCTYPE html><html><head><title>MyMilesAI Summary — '+periodLabel+'</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,system-ui,sans-serif;padding:40px;color:#1a1a2e;font-size:12px}'
+    +'h1{font-size:20px;margin-bottom:2px}h2{font-size:14px;margin:20px 0 8px;color:#333}'
+    +'table{width:100%;border-collapse:collapse;margin-top:8px}th,td{padding:8px 6px;text-align:left;border-bottom:1px solid #eee}'
+    +'th{background:#f5f5f7;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px}'
+    +'.cards{display:flex;gap:12px;margin:16px 0;flex-wrap:wrap}.card{flex:1;min-width:100px;padding:16px;border-radius:12px;text-align:center}'
+    +'.card .v{font-size:24px;font-weight:800}.card .l{font-size:10px;color:#666;margin-top:4px}'
+    +'.footer{margin-top:20px;padding:10px;background:#f5f5f7;border-radius:8px;font-size:10px;color:#888;text-align:center}'
+    +'@media print{body{padding:16px}}</style></head><body>'
+    +'<h1>MyMilesAI Summary Report</h1>'
+    +'<p style="color:#888">'+periodLabel+' — Generated '+new Date().toLocaleDateString()+'</p>'
+    +'<div class="cards">'
+    +'<div class="card" style="background:#f0e6ff"><div class="v" style="color:#6C3CE0">'+report.totalTrips+'</div><div class="l">Total Trips</div></div>'
+    +'<div class="card" style="background:#f0e6ff"><div class="v" style="color:#6C3CE0">'+report.bizMiles.toFixed(1)+'</div><div class="l">Business '+LOC.unit+'</div></div>'
+    +'<div class="card" style="background:#ffe6f0"><div class="v" style="color:#D6006E">'+report.persMiles.toFixed(1)+'</div><div class="l">Personal '+LOC.unit+'</div></div>'
+    +'<div class="card" style="background:#e6fff2"><div class="v" style="color:#00A870">'+LOC.currency+report.totalDeduction.toFixed(2)+'</div><div class="l">Tax Deduction</div></div>'
+    +'</div>'
+    +'<h2>By Category</h2>'
+    +'<table><thead><tr><th>Category</th><th>Trips</th><th>Distance</th><th>Deduction</th></tr></thead><tbody>'+catRows+'</tbody></table>'
+    +(report.topRoutes.length?'<h2>Top Routes</h2><table><thead><tr><th>Route</th><th>Trips</th><th>Distance</th></tr></thead><tbody>'+routeRows+'</tbody></table>':'')
+    +'<div class="footer">'+LOC.taxLabel+' · MyMilesAI v4.2</div>'
+    +'<script>window.onload=function(){window.print();}<\/script></body></html>';
+  if(window.__MYMILESAI_NATIVE__){
+    _shareOrDownload(html,'MyMilesAI-Summary-'+period+'.html','text/html');
+    return;
+  }
+  var w=window.open('','_blank','width=800,height=600');
+  if(!w){_shareOrDownload(html,'MyMilesAI-Summary-'+period+'.html','text/html');return;}
+  w.document.write(html.replace('window.onload=function(){window.print();}','setTimeout(function(){window.print();},500)'));
+  w.document.close();
+}
+
 /* ===== GPS TRACKING — SMART ENGINE ===== */
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDist=0;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
@@ -1794,12 +2090,19 @@ function startTracking(){
   timerInt=setInterval(updateTimer,1000);
 }
 
+/* ── Native GPS bridge (iOS WebView → PWA) ── */
+window.__nativeGPS__ = function(coords) {
+  if (!tracking) return;
+  onPos({ coords: { latitude: coords.lat, longitude: coords.lng,
+                     speed: coords.speed, accuracy: coords.accuracy } });
+};
+
 function onPos(p){
   const spd=p.coords.speed||0;
-  const spdVal=LOC.country==='CA'?(spd*3.6).toFixed(0):(spd*2.237).toFixed(0);
+  const spdVal=_useKm()?(spd*3.6).toFixed(0):(spd*2.237).toFixed(0);
   document.getElementById('trackSpeed').textContent=spdVal;
   document.getElementById('speedNum').textContent=spdVal;
-  const maxSpd=LOC.country==='CA'?160:100;
+  const maxSpd=_useKm()?160:100;
   const pct=Math.min(parseFloat(spdVal)/maxSpd,1);
   const off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
@@ -1811,10 +2114,10 @@ function onPos(p){
   }
   positions.push({lat:p.coords.latitude,lng:p.coords.longitude,time:Date.now()});
   updateMapPos(p.coords.latitude,p.coords.longitude);
-  const dist=LOC.country==='CA'?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
+  const dist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
   document.getElementById('trackDist').textContent=dist;
   // Update hero stats with CURRENT TRIP data while tracking
-  var liveDist=LOC.country==='CA'?totalDist*1.60934:totalDist;
+  var liveDist=_useKm()?totalDist*1.60934:totalDist;
   var liveDed=liveDist*LOC.rate;
   document.getElementById('hsBiz').textContent=liveDist.toFixed(1);
   document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
@@ -1824,7 +2127,7 @@ function onPos(p){
   // Distance milestone alerts
   var milestoneKm=[1,5,10,25,50,100];
   var milestoneMi=[1,5,10,25,50,100];
-  var milestones=LOC.country==='CA'?milestoneKm:milestoneMi;
+  var milestones=_useKm()?milestoneKm:milestoneMi;
   for(var mi=0;mi<milestones.length;mi++){
     var m=milestones[mi];
     if(liveDist>=m && liveDist<m+0.2 && !window['_ms'+m]){
@@ -1834,12 +2137,12 @@ function onPos(p){
   }
   if(positions.length>1){
     const elapsed=(Date.now()-trackStart-_totalPauseMs)/3600000;
-    const avgDist=LOC.country==='CA'?totalDist*1.60934:totalDist;
+    const avgDist=_useKm()?totalDist*1.60934:totalDist;
     document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
   }
   // === SMART PAUSE DETECTION (#3 fix) ===
   var thresh=parseInt(document.getElementById('threshVal').value)||3;
-  var spdRaw=LOC.country==='CA'?spd*3.6:spd*2.237;
+  var spdRaw=_useKm()?spd*3.6:spd*2.237;
   if(spdRaw>=thresh){
     lastMoving=Date.now();
     // If we were paused, RESUME the trip (don't split!)
@@ -1942,27 +2245,52 @@ function stopAutoMonitoring(){
   updateAutoBtn();
 }
 
+var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
+var _detectCount=0; // consecutive above-threshold readings
+var _detectRequired=3; // readings needed to confirm driving
+
 function onAutoPos(p){
   // While monitoring (not recording), check if driving
   if(tracking)return;
   var spd=p.coords.speed||0;
   var thresh=parseInt(document.getElementById('threshVal').value)||3;
-  var spdVal=LOC.country==='CA'?spd*3.6:spd*2.237;
+  var spdVal=_useKm()?spd*3.6:spd*2.237;
   // Update speedo even while monitoring
   var spdDisplay=spdVal.toFixed(0);
   document.getElementById('speedNum').textContent=spdDisplay;
-  var maxSpd=LOC.country==='CA'?160:100;
+  var maxSpd=_useKm()?160:100;
   var pct=Math.min(spdVal/maxSpd,1);
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Update GPS coords for templates
   lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
+
+  // Multi-reading confirmation: require 3 consecutive readings above threshold
   if(spdVal>=thresh){
-    // Driving detected! Auto-start recording
-    showToast(_i('car'),'Driving detected! Auto-recording started',3000);
-    if(navigator.vibrate)try{navigator.vibrate([50,50,50]);}catch(e){}
-    startTracking();
+    _detectCount++;
+    if(_detectCount===1){
+      _autoState='DETECTING';
+      document.getElementById('statusText').textContent='Detecting driving...';
+    }
+    if(_detectCount>=_detectRequired){
+      _autoState='RECORDING';
+      _detectCount=0;
+      showToast(_i('car'),'Driving confirmed! Auto-recording started',3000);
+      if(navigator.vibrate)try{navigator.vibrate([50,50,50]);}catch(e){}
+      // Notify native app
+      if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+        window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'RECORDING'}));
+        window.ReactNativeWebView.postMessage(JSON.stringify({type:'tripDetected'}));
+      }
+      startTracking();
+    }
+  } else {
+    _detectCount=0;
+    if(_autoState==='DETECTING'){
+      _autoState='IDLE';
+      document.getElementById('statusText').textContent='Monitoring...';
+    }
   }
 }
 
@@ -1984,7 +2312,11 @@ function updateAutoBtn(){
 function stopTracking(){
   if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}
   clearInterval(timerInt);clearTimeout(_pauseTimeout);
-  tracking=false;_paused=false;
+  tracking=false;_paused=false;_autoState='IDLE';
+  // Notify native app
+  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'IDLE'}));
+  }
   document.getElementById('trackLive').classList.remove('show');
   document.getElementById('heroStatus').classList.remove('rec');
   document.getElementById('autoBtn').classList.remove('recording');
@@ -2007,7 +2339,7 @@ function stopTracking(){
   }
   if(totalDist>0.01){
     var mi=totalDist;
-    var dist=LOC.country==='CA'?(mi*1.60934):mi;
+    var dist=_useKm()?(mi*1.60934):mi;
     var elapsed=Math.floor((Date.now()-trackStart)/60000);
     var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
     // Build from/to from GPS positions
@@ -2097,24 +2429,18 @@ function closeClassifyPrompt(){
 }
 function reverseGeocode(pos,cb){
   if(!pos||pos.length<2){cb(null,null);return;}
+  if(!_googleMapsReady||!google||!google.maps){cb(null,null);return;}
   var start=pos[0],end=pos[pos.length-1];
   var done=0,startAddr=null,endAddr=null;
+  var geocoder=new google.maps.Geocoder();
   function check(){done++;if(done>=2)cb(startAddr,endAddr);}
   function fetchAddr(lat,lng,setter){
-    try{
-      fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&addressdetails=1')
-      .then(function(r){return r.json();})
-      .then(function(d){
-        if(d&&d.address){
-          var a=d.address;
-          var parts=[];
-          if(a.road)parts.push(a.road);
-          if(a.city||a.town||a.village)parts.push(a.city||a.town||a.village);
-          setter(parts.join(', ')||d.display_name.split(',').slice(0,2).join(','));
-        }
-        check();
-      }).catch(function(){check();});
-    }catch(e){check();}
+    geocoder.geocode({location:{lat:lat,lng:lng}},function(results,status){
+      if(status==='OK'&&results&&results[0]){
+        setter(results[0].formatted_address);
+      }
+      check();
+    });
   }
   fetchAddr(start.lat,start.lng,function(a){startAddr=a;});
   fetchAddr(end.lat,end.lng,function(a){endAddr=a;});
@@ -2140,152 +2466,52 @@ var addrTimer=null;
 var fromCoords=null,toCoords=null;
 var _autoGeoFrom=null,_autoGeoTo=null;
 
-/* --- Address Database (no API needed) --- */
-var PLACES_CA=[
-  {n:'241 Kinver Ave',c:'Winnipeg, MB',lat:49.878,lng:-97.165},
-  {n:'123 King St W',c:'Toronto, ON',lat:43.648,lng:-79.384},
-  {n:'456 Rue Sainte-Catherine',c:'Montreal, QC',lat:45.508,lng:-73.570},
-  {n:'789 Robson St',c:'Vancouver, BC',lat:49.283,lng:-123.121},
-  {n:'100 Queen St W',c:'Toronto, ON',lat:43.652,lng:-79.384},
-  {n:'55 Bloor St W',c:'Toronto, ON',lat:43.670,lng:-79.389},
-  {n:'1 Dundas St E',c:'Toronto, ON',lat:43.656,lng:-79.381},
-  {n:'200 University Ave',c:'Toronto, ON',lat:43.651,lng:-79.386},
-  {n:'350 Bay St',c:'Toronto, ON',lat:43.652,lng:-79.381},
-  {n:'500 Yonge St',c:'Toronto, ON',lat:43.662,lng:-79.384},
-  {n:'25 Kingston Rd',c:'Scarborough, ON',lat:43.682,lng:-79.259},
-  {n:'180 Steeles Ave W',c:'Brampton, ON',lat:43.805,lng:-79.749},
-  {n:'2200 Yonge St',c:'Toronto, ON',lat:43.710,lng:-79.398},
-  {n:'75 Dufferin St',c:'Toronto, ON',lat:43.635,lng:-79.427},
-  {n:'1500 Don Mills Rd',c:'North York, ON',lat:43.770,lng:-79.346},
-  {n:'300 Borough Dr',c:'Scarborough, ON',lat:43.775,lng:-79.257},
-  {n:'6301 Silver Dart Dr',c:'Mississauga, ON (YYZ)',lat:43.681,lng:-79.613},
-  {n:'241 King St N',c:'Waterloo, ON',lat:43.476,lng:-80.527},
-  {n:'77 King St S',c:'Waterloo, ON',lat:43.464,lng:-80.524},
-  {n:'400 Conestoga Blvd',c:'Cambridge, ON',lat:43.378,lng:-80.349},
-  {n:'10 Market St',c:'Kitchener, ON',lat:43.452,lng:-80.489},
-  {n:'150 Main St W',c:'Hamilton, ON',lat:43.257,lng:-79.874},
-  {n:'1 Portage Ave',c:'Winnipeg, MB',lat:49.892,lng:-97.142},
-  {n:'201 Portage Ave',c:'Winnipeg, MB',lat:49.893,lng:-97.145},
-  {n:'500 Portage Ave',c:'Winnipeg, MB',lat:49.884,lng:-97.157},
-  {n:'1000 Grant Ave',c:'Winnipeg, MB',lat:49.856,lng:-97.168},
-  {n:'2305 McPhillips St',c:'Winnipeg, MB',lat:49.940,lng:-97.150},
-  {n:'1225 St Mary Rd',c:'Winnipeg, MB',lat:49.863,lng:-97.093},
-  {n:'Costco, McGillivray Blvd',c:'Winnipeg, MB',lat:49.838,lng:-97.193},
-  {n:'Polo Park Mall',c:'Winnipeg, MB',lat:49.881,lng:-97.180},
-  {n:'St Vital Centre',c:'Winnipeg, MB',lat:49.846,lng:-97.106},
-  {n:'Kildonan Place Mall',c:'Winnipeg, MB',lat:49.929,lng:-97.069},
-  {n:'IKEA, Kenaston Blvd',c:'Winnipeg, MB',lat:49.851,lng:-97.197},
-  {n:'Winnipeg Richardson Airport',c:'Winnipeg, MB (YWG)',lat:49.910,lng:-97.240},
-  {n:'Health Sciences Centre',c:'Winnipeg, MB',lat:49.904,lng:-97.158},
-  {n:'University of Manitoba',c:'Winnipeg, MB',lat:49.810,lng:-97.131},
-  {n:'Canadian Tire, Pembina Hwy',c:'Winnipeg, MB',lat:49.841,lng:-97.148},
-  {n:'Tim Hortons, Portage Ave',c:'Winnipeg, MB',lat:49.883,lng:-97.155},
-  {n:'Walmart, Empress St',c:'Winnipeg, MB',lat:49.879,lng:-97.189},
-  {n:'Costco, Regent Ave',c:'Winnipeg, MB',lat:49.889,lng:-97.060}
-,
-  {n:'Manteca',c:'Manteca, CA',lat:37.7977,lng:-121.2161},
-  {n:'Tracy',c:'Tracy, CA',lat:37.7397,lng:-121.4252},
-  {n:'Lodi',c:'Lodi, CA',lat:38.1302,lng:-121.2724},
-  {n:'Turlock',c:'Turlock, CA',lat:37.4947,lng:-120.8466},
-  {n:'Modesto',c:'Modesto, CA',lat:37.6391,lng:-120.9969},
-  {n:'Fresno',c:'Fresno, CA',lat:36.7378,lng:-119.7871},
-  {n:'Visalia',c:'Visalia, CA',lat:36.3302,lng:-119.2921},
-  {n:'Merced',c:'Merced, CA',lat:37.3022,lng:-120.4830}];
-var PLACES_US=[
-  {n:'123 Main St',c:'Downtown',lat:40.712,lng:-74.006},
-  {n:'456 Oak Ave',c:'Westside',lat:40.735,lng:-73.990},
-  {n:'789 Elm St',c:'Midtown',lat:40.755,lng:-73.982},
-  {n:'350 5th Ave',c:'New York, NY (Empire State)',lat:40.748,lng:-73.985},
-  {n:'200 Market St',c:'San Francisco, CA',lat:37.791,lng:-122.399},
-  {n:'1600 Pennsylvania Ave',c:'Washington, DC',lat:38.897,lng:-77.036},
-  {n:'233 S Wacker Dr',c:'Chicago, IL (Willis Tower)',lat:41.878,lng:-87.635},
-  {n:'500 Boylston St',c:'Boston, MA',lat:42.351,lng:-71.075},
-  {n:'100 Broadway',c:'New York, NY',lat:40.708,lng:-74.010},
-  {n:'300 Park Ave',c:'New York, NY',lat:40.757,lng:-73.972},
-  {n:'WeWork, 5th & Main',c:'Los Angeles, CA',lat:34.048,lng:-118.258},
-  {n:'Costco, Regent Ave',c:'Portland, OR',lat:45.514,lng:-122.556},
-  {n:'FedEx, Industrial Park',c:'Houston, TX',lat:29.762,lng:-95.365},
-  {n:'Airport, Terminal 1',c:'JFK, New York, NY',lat:40.641,lng:-73.778},
-  {n:'Starbucks, Broadway',c:'Seattle, WA',lat:47.614,lng:-122.336},
-  {n:'Walmart, Highway 7',c:'Minneapolis, MN',lat:44.978,lng:-93.265},
-  {n:'Target, Oak Mall',c:'Denver, CO',lat:39.739,lng:-104.990},
-  {n:'Home Depot, Route 66',c:'Albuquerque, NM',lat:35.084,lng:-106.650}
-];
-function getPlaces(){return LOC.country==='CA'?PLACES_CA:PLACES_US;}
+/* --- Google Places Autocomplete --- */
+var _placesAutocompleteFrom=null,_placesAutocompleteTo=null;
 
-/* --- Fuzzy search --- */
-function searchAddr(query){
-  var q=query.toLowerCase().trim();
-  if(q.length<2) return [];
-  var places=getPlaces();
-  var scored=[];
-  var words=q.split(/\s+/);
-  
-  for(var i=0;i<places.length;i++){
-    var p=places[i];
-    var full=(p.n+' '+p.c).toLowerCase();
-    var score=0;
-    
-    // Exact substring match (best)
-    if(full.indexOf(q)!==-1) score+=100;
-    
-    // Each word matches start of a word in address
-    var fullWords=full.split(/[\s,]+/);
-    var allMatch=true;
-    for(var w=0;w<words.length;w++){
-      if(!words[w]) continue;
-      var found=false;
-      for(var fw=0;fw<fullWords.length;fw++){
-        if(fullWords[fw].indexOf(words[w])===0){found=true;score+=20;break;}
-        if(fullWords[fw].indexOf(words[w])!==-1){found=true;score+=10;break;}
-      }
-      if(!found){allMatch=false;break;}
-    }
-    if(!allMatch) continue;
-    if(score>0) scored.push({place:p,score:score});
-  }
-  
-  scored.sort(function(a,b){return b.score-a.score;});
-  return scored.slice(0,5);
+/* --- Dropdown rendering (Google Places powered) --- */
+var _geoTimer=null;
+var _placesService=null;
+var _placesSessionToken=null;
+
+function _getPlacesService(){
+  if(!_googleMapsReady||!google||!google.maps||!google.maps.places)return null;
+  if(!_placesService)_placesService=new google.maps.places.AutocompleteService();
+  return _placesService;
 }
 
-/* --- Dropdown rendering --- */
-var _geoTimer=null;
 function onAddrType(inpId,ddId){
   var inp=document.getElementById(inpId);
   var dd=document.getElementById(ddId);
   var v=inp.value.trim();
-  
+
   calcDistance();
-  
+
   if(v.length<2){dd.classList.remove('show');dd.innerHTML='';return;}
-  
-  var results=searchAddr(v);
+
+  // Show "Use as typed" immediately
   var html='';
-  
-  for(var i=0;i<results.length;i++){
-    var p=results[i].place;
-    html+='<div class="add-dd-item" onmousedown="pickPlace(event,\''+inpId+'\',\''+ddId+'\','+i+')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="adi-main">'+_esc(p.n)+'</div><div class="adi-sub">'+_esc(p.c)+'</div></div></div>';
-  }
-  
   if(v.length>=3){
     html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="adi-main">'+_esc(v)+'</div><div class="adi-sub">Use this address</div></div></div>';
   }
-  
-  // Always show a "searching..." hint when we'll geocode
-  if(v.length>=4){
-    html+='<div class="add-dd-item" style="pointer-events:none;opacity:.5"><div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" style="animation:gp 1.5s ease-in-out infinite"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg></div><div><div class="adi-main" style="color:var(--ink4)">Searching live addresses...</div></div></div>';
+
+  // Show searching hint
+  if(v.length>=3&&navigator.onLine){
+    html+='<div class="add-dd-item" style="pointer-events:none;opacity:.5" id="'+ddId+'Loading"><div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" style="animation:gp 1.5s ease-in-out infinite"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg></div><div><div class="adi-main" style="color:var(--ink4)">Searching addresses...</div></div></div>';
   }
-  
+  if(!navigator.onLine&&v.length>=3){
+    html+='<div class="add-dd-item" style="pointer-events:none;opacity:.5"><div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/><path d="M5 12.55a10.94 10.94 0 015.17-2.39"/></svg></div><div><div class="adi-main" style="color:var(--ink4)">Offline — type address manually</div></div></div>';
+  }
+
   if(html){dd.innerHTML=html;dd.classList.add('show');}
   else{dd.classList.remove('show');}
-  
-  // Always trigger live geocoding for 4+ chars (removed the local results < 3 restriction)
-  if(v.length>=4){
+
+  // Trigger Google Places autocomplete
+  if(v.length>=3&&navigator.onLine){
     clearTimeout(_geoTimer);
     _geoTimer=setTimeout(function(){
       geocodeAddr(v,inpId,ddId);
-    },400);
+    },300);
   }
 }
 
@@ -2294,93 +2520,45 @@ function geocodeAddr(query,inpId,ddId){
   var inp=document.getElementById(inpId);
   if(!inp||inp.value.trim().length<2)return;
 
-  // Bias to user's last GPS location or timezone-derived city
+  var svc=_getPlacesService();
+  if(!svc){return;}
+
+  // Create session token for billing optimization
+  if(!_placesSessionToken)_placesSessionToken=new google.maps.places.AutocompleteSessionToken();
+
   var biasLat=lastGpsLat||37.38,biasLng=lastGpsLng||-122.0;
   try{
     var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
     var tzG={'America/Los_Angeles':[34.05,-118.24],'America/Denver':[39.74,-104.99],
              'America/Chicago':[41.88,-87.63],'America/New_York':[40.71,-74.00],
-             'America/Phoenix':[33.45,-112.07],'America/Anchorage':[61.22,-149.90],
-             'America/Honolulu':[21.30,-157.85],'America/Toronto':[43.65,-79.38],
-             'America/Vancouver':[49.28,-123.12],'America/Edmonton':[53.54,-113.49]};
+             'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],
+             'America/Edmonton':[53.54,-113.49],'America/Winnipeg':[49.89,-97.14],
+             'Europe/London':[51.50,-0.12],'Australia/Sydney':[-33.87,151.21]};
     if(tzG[tz]&&!lastGpsLat){biasLat=tzG[tz][0];biasLng=tzG[tz][1];}
   }catch(e){}
 
-  fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)
-    +'&lat='+biasLat+'&lon='+biasLng
-    +'&limit=5&format=json&addressdetails=1&countrycodes=us,ca',
-    {headers:{'Accept-Language':'en-US,en','User-Agent':'MyMilesAI/4.2'}})
-  .then(function(r){if(!r.ok)throw new Error('net');return r.json();})
-  .then(function(data){
+  svc.getPlacePredictions({
+    input:query,
+    sessionToken:_placesSessionToken,
+    locationBias:{center:{lat:biasLat,lng:biasLng},radius:50000}
+  },function(predictions,status){
     if(!inp||inp.value.trim().length<2)return;
-    // Dedupe: key = rounded lat+lng
-    var seen={};
-    var items=[];
-    (data||[]).forEach(function(item){
-      var addr=item.address||{};
-      var lat=parseFloat(item.lat),lng=parseFloat(item.lon);
-      var key=lat.toFixed(3)+','+lng.toFixed(3);
-      if(seen[key])return; seen[key]=1;
-
-      // Build display label
-      var hn=addr.house_number||'';
-      var road=addr.road||addr.pedestrian||addr.footway||addr.path||'';
-      var city=addr.city||addr.town||addr.village||addr.suburb||addr.hamlet||'';
-      var state=addr.state||addr.province||'';
-      var stAbbr=({
-        'California':'CA','New York':'NY','Texas':'TX','Florida':'FL','Illinois':'IL',
-        'Pennsylvania':'PA','Ohio':'OH','Georgia':'GA','Michigan':'MI','North Carolina':'NC',
-        'New Jersey':'NJ','Virginia':'VA','Washington':'WA','Arizona':'AZ',
-        'Massachusetts':'MA','Tennessee':'TN','Indiana':'IN','Missouri':'MO',
-        'Maryland':'MD','Wisconsin':'WI','Colorado':'CO','Minnesota':'MN',
-        'South Carolina':'SC','Alabama':'AL','Louisiana':'LA','Kentucky':'KY',
-        'Oregon':'OR','Oklahoma':'OK','Connecticut':'CT','Utah':'UT','Iowa':'IA',
-        'Nevada':'NV','Arkansas':'AR','Mississippi':'MS','Kansas':'KS','Nebraska':'NE',
-        'Idaho':'ID','New Mexico':'NM','West Virginia':'WV','Hawaii':'HI',
-        'New Hampshire':'NH','Maine':'ME','Montana':'MT','Rhode Island':'RI',
-        'Delaware':'DE','South Dakota':'SD','North Dakota':'ND','Alaska':'AK',
-        'Vermont':'VT','Wyoming':'WY',
-        // Canada
-        'Ontario':'ON','Quebec':'QC','British Columbia':'BC','Alberta':'AB',
-        'Saskatchewan':'SK','Manitoba':'MB','Nova Scotia':'NS','New Brunswick':'NB',
-        'Newfoundland and Labrador':'NL','Prince Edward Island':'PE'
-      })[state]||state.substring(0,2).toUpperCase();
-
-      // Main line: "1348 Tannehill Dr" or "Manteca" for city-only
-      var mainLabel = road ? (hn?hn+' ':'')+road : (city||item.name||'');
-      // Sub line: "Manteca, CA" or just "CA"
-      var subLabel  = city ? city+(stAbbr?', '+stAbbr:'') : stAbbr;
-      // Full address stored for field value on pick
-      var fullAddr  = (road?(hn?hn+' ':'')+road+', ':'')+(city?city+', ':'')+stAbbr;
-
-      if(!mainLabel)return;
-      items.push({mainLabel:mainLabel,subLabel:subLabel,fullAddr:fullAddr.trim().replace(/,\s*$/,''),lat:lat,lng:lng});
-    });
-
-    // Rebuild dropdown — keep local results at top, append live results
-    var localResults=searchAddr(inp.value.trim());
-    var html='';
-    var localKeys={};
-    localResults.forEach(function(r,i){
-      var p=r.place;
-      localKeys[p.n+p.c]=1;
-      html+='<div class="add-dd-item" onmousedown="pickPlace(event,\''+inpId+'\',\''+ddId+'\','+i+')">'
-        +'<div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
-        +'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
-        +'<div><div class="adi-main">'+_esc(p.n)+'</div><div class="adi-sub">'+_esc(p.c)+'</div></div></div>';
-    });
-
     _liveGeoResults=[];
-    items.forEach(function(it,j){
-      if(localKeys[it.mainLabel+it.subLabel])return; // skip dupes already shown
-      _liveGeoResults.push({n:it.mainLabel,c:it.subLabel,fullAddr:it.fullAddr,lat:it.lat,lng:it.lng});
-      html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" '
-        +'style="border-left:3px solid var(--mint)">'
-        +'<div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2">'
-        +'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
-        +'<div><div class="adi-main">'+_esc(it.mainLabel)+'</div>'
-        +'<div class="adi-sub" style="color:var(--mint)">'+_esc(it.subLabel)+'</div></div></div>';
-    });
+    var html='';
+
+    if(status===google.maps.places.PlacesServiceStatus.OK&&predictions){
+      predictions.forEach(function(pred,j){
+        var mainLabel=pred.structured_formatting?pred.structured_formatting.main_text:pred.description;
+        var subLabel=pred.structured_formatting?pred.structured_formatting.secondary_text:'';
+        _liveGeoResults.push({placeId:pred.place_id,n:mainLabel,c:subLabel,fullAddr:pred.description});
+        html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" '
+          +'style="border-left:3px solid var(--mint)">'
+          +'<div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2">'
+          +'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
+          +'<div><div class="adi-main">'+_esc(mainLabel)+'</div>'
+          +'<div class="adi-sub" style="color:var(--mint)">'+_esc(subLabel)+'</div></div></div>';
+      });
+    }
 
     // "Use as typed" always last
     html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')">'
@@ -2391,29 +2569,43 @@ function geocodeAddr(query,inpId,ddId){
 
     dd.innerHTML=html;
     dd.classList.add('show');
-  }).catch(function(){
-    // silently fail — local results still visible
   });
 }
 var _liveGeoResults=[];
 
-// ── pickGeo: use fullAddr for field, store coords, trigger Google distance ──
+// ── pickGeo: resolve place_id to coords via Geocoder, then trigger distance calc ──
 function pickGeo(e,inpId,ddId,idx){
   e.preventDefault();
   var p=_liveGeoResults[idx];
   if(!p)return;
   var inp=document.getElementById(inpId);
   inp.value=p.fullAddr||p.n+(p.c?', '+p.c:'');
-  if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
-  else toCoords={lat:p.lat,lng:p.lng};
   document.getElementById(ddId).classList.remove('show');
-  _tryGoogleDistance();
-}
 
-// ── Google Maps Directions API (no key needed via maps.googleapis.com/maps/api/directions/json) ──
-// We use the free embed endpoint: router via OSRM as primary, Google as verifier
-// Actually: use Google Maps Distance Matrix via the open /maps/api/distancematrix endpoint
-// Fallback chain: Google Distance Matrix → OSRM → haversine
+  // If we already have lat/lng, use it
+  if(p.lat&&p.lng){
+    if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
+    else toCoords={lat:p.lat,lng:p.lng};
+    _placesSessionToken=null; // reset token after selection
+    _tryGoogleDistance();
+    return;
+  }
+
+  // Resolve place_id to coordinates
+  if(p.placeId&&_googleMapsReady){
+    var geocoder=new google.maps.Geocoder();
+    geocoder.geocode({placeId:p.placeId},function(results,status){
+      if(status==='OK'&&results&&results[0]){
+        var loc=results[0].geometry.location;
+        var coords={lat:loc.lat(),lng:loc.lng()};
+        if(inpId==='addFrom') fromCoords=coords;
+        else toCoords=coords;
+      }
+      _placesSessionToken=null;
+      _tryGoogleDistance();
+    });
+  }
+}
 function _tryGoogleDistance(){
   if(!fromCoords||!toCoords)return;
   var distInp=document.getElementById('addDistInput');
@@ -2426,30 +2618,38 @@ function _tryGoogleDistance(){
   var oLat=fromCoords.lat,oLng=fromCoords.lng;
   var dLat=toCoords.lat,dLng=toCoords.lng;
 
-  // Primary: OSRM (free, no key, reliable driving distance)
-  var osrmUrl='https://router.project-osrm.org/route/v1/driving/'
-    +oLng+','+oLat+';'+dLng+','+dLat+'?overview=false';
-
-  fetch(osrmUrl)
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data&&data.routes&&data.routes[0]){
-      var distM=data.routes[0].distance;
-      var isCa=(LOC&&LOC.country==='CA');
-      var displayDist=isCa ? (distM/1000).toFixed(1) : (distM/1609.34).toFixed(1);
-      var unit=isCa?'KM':'MI';
+  _getGoogleDistance({lat:oLat,lng:oLng},{lat:dLat,lng:dLng},function(distMi,err){
+    if(distMi!==null){
+      var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
+      var displayDist=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
       addDistVal=parseFloat(displayDist);
       distInp.value=displayDist;
       distInp.classList.add('filled');
-      badge.classList.add('active');badge.textContent=unit;
+      badge.classList.add('active');badge.textContent=LOC.unit.toUpperCase();
       status.textContent='Driving distance (via roads)';
       status.classList.add('calculated');
     } else {
       _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status);
     }
-  })
-  .catch(function(){
-    _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status);
+  });
+}
+
+function _getGoogleDistance(origin,destination,cb){
+  if(!_googleMapsReady||!google||!google.maps){cb(null,'no_maps');return;}
+  var service=new google.maps.DistanceMatrixService();
+  service.getDistanceMatrix({
+    origins:[{lat:origin.lat,lng:origin.lng}],
+    destinations:[{lat:destination.lat,lng:destination.lng}],
+    travelMode:'DRIVING',
+    unitSystem:google.maps.UnitSystem.METRIC
+  },function(response,status){
+    if(status==='OK'&&response.rows[0].elements[0].status==='OK'){
+      var distMeters=response.rows[0].elements[0].distance.value;
+      var distMi=distMeters/1609.34;
+      cb(distMi,null);
+    } else {
+      cb(null,status);
+    }
   });
 }
 
@@ -2461,44 +2661,34 @@ function _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status){
     +Math.cos(oLat*Math.PI/180)*Math.cos(dLat*Math.PI/180)
     *Math.sin(dLon2/2)*Math.sin(dLon2/2);
   var distKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-  var isCa=(LOC&&LOC.country==='CA');
-  var displayDist=isCa ? distKm.toFixed(1) : (distKm/1.60934).toFixed(1);
+  var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
+  var displayDist=useKm ? distKm.toFixed(1) : (distKm/1.60934).toFixed(1);
   addDistVal=parseFloat(displayDist);
   distInp.value=displayDist;
   distInp.classList.add('filled');
-  badge.classList.add('active');badge.textContent=isCa?'KM':'MI';
+  badge.classList.add('active');badge.textContent=LOC.unit.toUpperCase();
   status.textContent='Estimated distance (straight line)';
   status.classList.add('calculated');
 }
 
 function pickPlace(e,inpId,ddId,idx){
   e.preventDefault();
-  var results=searchAddr(document.getElementById(inpId).value.trim());
-  if(results[idx]){
-    var p=results[idx].place;
-    var fullAddr=p.n+', '+p.c;
-    document.getElementById(inpId).value=fullAddr;
-    // Set local coords as initial estimate
-    if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
-    else toCoords={lat:p.lat,lng:p.lng};
-    // Re-geocode via Nominatim for accurate coordinates
-    refineCoords(fullAddr,inpId);
-  }
+  // No longer using local places array — pickGeo handles all Google results
   document.getElementById(ddId).classList.remove('show');
   calcDistance();
 }
 function refineCoords(addr,inpId){
-  var biasLat=lastGpsLat||49.89,biasLng=lastGpsLng||-97.14;
-  fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(addr)+'&limit=1&format=json&addressdetails=1',{headers:{'Accept-Language':'en-US,en','User-Agent':'MyMilesAI/4.2'}})
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data&&data.length>0){
-      var coords=[parseFloat(data[0].lon),parseFloat(data[0].lat)];
-      if(inpId==='addFrom') fromCoords={lat:coords[1],lng:coords[0]};
-      else toCoords={lat:coords[1],lng:coords[0]};
+  if(!_googleMapsReady||!google||!google.maps)return;
+  var geocoder=new google.maps.Geocoder();
+  geocoder.geocode({address:addr},function(results,status){
+    if(status==='OK'&&results&&results[0]){
+      var loc=results[0].geometry.location;
+      var coords={lat:loc.lat(),lng:loc.lng()};
+      if(inpId==='addFrom') fromCoords=coords;
+      else toCoords=coords;
       calcDistance();
     }
-  }).catch(function(){});
+  });
 }
 function pickCustom(e,inpId,ddId){
   e.preventDefault();
@@ -2506,7 +2696,6 @@ function pickCustom(e,inpId,ddId){
   if(inpId==='addFrom') fromCoords=null;
   else toCoords=null;
   document.getElementById(ddId).classList.remove('show');
-  // Geocode the typed address for coordinates
   if(typed.length>=4) refineCoords(typed,inpId);
   calcDistance();
 }
@@ -2514,7 +2703,7 @@ function pickCustom(e,inpId,ddId){
 /* --- Distance calculation --- */
 var _calcDistTimer=null;
 function calcDistance(){
-  // Debounce — only fire OSRM after 300ms settle
+  // Debounce — only fire distance calc after 300ms settle
   clearTimeout(_calcDistTimer);
   _calcDistTimer=setTimeout(_calcDistCore,300);
 }
@@ -2524,7 +2713,7 @@ function _calcDistCore(){
   var distInp=document.getElementById('addDistInput');
   var badge=document.getElementById('addDistBadge');
   var status=document.getElementById('addDistStatus');
-  
+
   if(f.length<3 || t.length<3){
     distInp.value='';distInp.classList.remove('filled');
     badge.classList.remove('active');addDistVal=0;
@@ -2533,27 +2722,21 @@ function _calcDistCore(){
     status.classList.remove('calculated');
     return;
   }
-  
+
   // Auto-geocode if text present but coords missing
   if(f.length>=4 && !fromCoords){
     clearTimeout(_autoGeoFrom);
-    _autoGeoFrom=setTimeout(function(){
-      fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(f)+'&limit=1&format=json',{headers:{'User-Agent':'MyMilesAI/4.2'}})
-      .then(function(r){return r.json();}).then(function(d){if(d&&d[0]){fromCoords={lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};calcDistance();}}).catch(function(){});
-    },800);
+    _autoGeoFrom=setTimeout(function(){refineCoords(f,'addFrom');},800);
   }
   if(t.length>=4 && !toCoords){
     clearTimeout(_autoGeoTo);
-    _autoGeoTo=setTimeout(function(){
-      fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(t)+'&limit=1&format=json',{headers:{'User-Agent':'MyMilesAI/4.2'}})
-      .then(function(r){return r.json();}).then(function(d){if(d&&d[0]){toCoords={lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};calcDistance();}}).catch(function(){});
-    },800);
+    _autoGeoTo=setTimeout(function(){refineCoords(t,'addTo');},800);
   }
   if(f.length>=4 && t.length>=4 && (!fromCoords||!toCoords)){
     status.textContent='Calculating distance...';
   }
   if(fromCoords && toCoords){
-    // Show quick Haversine estimate while OSRM loads
+    // Show quick Haversine estimate while Google Distance Matrix loads
     var R=6371;
     var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
     var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
@@ -2562,54 +2745,35 @@ function _calcDistCore(){
           Math.sin(dLng/2)*Math.sin(dLng/2);
     var c2=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
     var quickKm=R*c2;
-    // Show quick estimate while fetching real route
-    var quickDisplay=LOC.country==='CA'?quickKm.toFixed(1):(quickKm/1.60934).toFixed(1);
+    var useKm=(LOC.country==='CA'||LOC.country==='AU');
+    var quickDisplay=useKm?quickKm.toFixed(1):(quickKm/1.60934).toFixed(1);
     distInp.value=quickDisplay;
     distInp.classList.add('filled');
     badge.classList.add('active');badge.textContent=LOC.unit;
     status.textContent='Calculating route...';
     status.classList.remove('calculated');
-    
-    // Fetch real driving distance from OSRM (free, no API key)
-    var osrmUrl='https://router.project-osrm.org/route/v1/driving/'+fromCoords.lng+','+fromCoords.lat+';'+toCoords.lng+','+toCoords.lat+'?overview=false';
-    console.log('[MyMilesAI] OSRM request:',osrmUrl);
-    console.log('[MyMilesAI] From:',fromCoords,'To:',toCoords);
-    fetch(osrmUrl)
-    .then(function(r){console.log('[MyMilesAI] OSRM status:',r.status);return r.json();})
-    .then(function(data){
-      console.log('[MyMilesAI] OSRM response:',data&&data.routes?'routes found':'no routes',data);
-      if(data&&data.routes&&data.routes[0]){
-        var distM=data.routes[0].distance; // meters
-        var distKm=distM/1000;
-        console.log('[MyMilesAI] OSRM distance:',distKm.toFixed(1),'km /',( distKm/1.60934).toFixed(1),'mi');
-        if(LOC.country==='CA'){
-          addDistVal=parseFloat(distKm.toFixed(1));
-          distInp.value=distKm.toFixed(1);
-        }else{
-          var distMi=distKm/1.60934;
-          addDistVal=parseFloat(distMi.toFixed(1));
-          distInp.value=distMi.toFixed(1);
-        }
+
+    // Fetch real driving distance from Google Distance Matrix
+    _getGoogleDistance(fromCoords,toCoords,function(distMi,err){
+      if(distMi!==null){
+        var displayDist=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
+        addDistVal=parseFloat(displayDist);
+        distInp.value=displayDist;
         distInp.classList.add('filled');
         badge.classList.add('active');badge.textContent=LOC.unit;
         status.textContent='Route distance (driving)';
         status.classList.add('calculated');
+      } else {
+        // Fallback to Haversine × 1.2
+        var fallbackKm=quickKm*1.2;
+        var fallbackDisplay=useKm?fallbackKm.toFixed(1):(fallbackKm/1.60934).toFixed(1);
+        addDistVal=parseFloat(fallbackDisplay);
+        distInp.value=fallbackDisplay;
+        distInp.classList.add('filled');
+        badge.classList.add('active');badge.textContent=LOC.unit;
+        status.textContent='Estimated distance';
+        status.classList.add('calculated');
       }
-    }).catch(function(err){
-      console.log('[MyMilesAI] OSRM FAILED:',err);
-      // Fallback to Haversine × 1.2 if OSRM fails
-      var fallbackKm=quickKm*1.2;
-      if(LOC.country==='CA'){
-        addDistVal=parseFloat(fallbackKm.toFixed(1));
-        distInp.value=fallbackKm.toFixed(1);
-      }else{
-        addDistVal=parseFloat((fallbackKm/1.60934).toFixed(1));
-        distInp.value=(fallbackKm/1.60934).toFixed(1);
-      }
-      distInp.classList.add('filled');
-      badge.classList.add('active');badge.textContent=LOC.unit;
-      status.textContent='Estimated distance';
-      status.classList.add('calculated');
     });
     return;
   }
@@ -2700,12 +2864,14 @@ function useTemplate(type){
       else if(type==='office') dest=findNearest(OFFICES,p.coords.latitude,p.coords.longitude);
       else dest=findNearest(CLIENTS,p.coords.latitude,p.coords.longitude);
       if(dest){document.getElementById('addTo').value=dest.n;toCoords={lat:dest.lat,lng:dest.lng};}
-      fetch('https://nominatim.openstreetmap.org/reverse?lat='+p.coords.latitude+'&lon='+p.coords.longitude+'&format=json')
-      .then(function(r){return r.json();}).then(function(data){
-        if(data&&data.display_name){document.getElementById('addFrom').value=data.display_name.split(',').slice(0,3).join(',').trim();}
-        else{document.getElementById('addFrom').value='Current Location';}
-        calcDistance();
-      }).catch(function(){document.getElementById('addFrom').value='Current Location';calcDistance();});
+      if(_googleMapsReady&&google&&google.maps){
+        var geocoder=new google.maps.Geocoder();
+        geocoder.geocode({location:{lat:p.coords.latitude,lng:p.coords.longitude}},function(results,status){
+          if(status==='OK'&&results&&results[0]){document.getElementById('addFrom').value=results[0].formatted_address;}
+          else{document.getElementById('addFrom').value='Current Location';}
+          calcDistance();
+        });
+      }else{document.getElementById('addFrom').value='Current Location';calcDistance();}
     },function(){
       if(lastGpsLat){
         fromCoords={lat:lastGpsLat,lng:lastGpsLng};document.getElementById('addFrom').value='Current Location';
@@ -2757,7 +2923,7 @@ function openAddTrip(){
   document.getElementById('addDistInput').classList.remove('filled');
   document.getElementById('addDistBadge').classList.remove('active');
   document.getElementById('addDistBadge').textContent=LOC.unit;
-  document.getElementById('distFieldLabel').textContent='Distance ('+(LOC.country==='CA'?'Kilometers':'Miles')+')';
+  document.getElementById('distFieldLabel').textContent='Distance ('+(_useKm()?'Kilometers':'Miles')+')';
   document.getElementById('addDistStatus').textContent='Enter both addresses to auto-calculate';
   document.getElementById('addDistStatus').classList.remove('calculated');
   document.getElementById('fromDD').classList.remove('show');
@@ -2818,11 +2984,14 @@ function saveManual(){
   if(btn){btn.disabled=true;btn.textContent='Calculating...';}
 
   function _geocodeIfNeeded(addr,cb){
-    fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(addr)
-      +'&limit=1&format=json&addressdetails=1',{headers:{'User-Agent':'MyMilesAI/4.2'}})
-    .then(function(r){return r.json();})
-    .then(function(d){if(d&&d[0])cb({lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)});else cb(null);})
-    .catch(function(){cb(null);});
+    if(!_googleMapsReady||!google||!google.maps){cb(null);return;}
+    var geocoder=new google.maps.Geocoder();
+    geocoder.geocode({address:addr},function(results,status){
+      if(status==='OK'&&results&&results[0]){
+        var loc=results[0].geometry.location;
+        cb({lat:loc.lat(),lng:loc.lng()});
+      } else {cb(null);}
+    });
   }
 
   function _withCoords(fc,tc){
@@ -2835,22 +3004,13 @@ function saveManual(){
       return;
     }
     // Get driving distance then save
-    var osrmUrl='https://router.project-osrm.org/route/v1/driving/'
-      +fromCoords.lng+','+fromCoords.lat+';'
-      +toCoords.lng+','+toCoords.lat+'?overview=false';
-    fetch(osrmUrl)
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(data&&data.routes&&data.routes[0]){
-        var distM=data.routes[0].distance;
-        var isCa=(LOC&&LOC.country==='CA');
-        addDistVal=isCa?parseFloat((distM/1000).toFixed(1)):parseFloat((distM/1609.34).toFixed(1));
+    _getGoogleDistance(fromCoords,toCoords,function(distMi,err){
+      if(distMi!==null){
+        var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
+        addDistVal=useKm?parseFloat((distMi*1.60934).toFixed(1)):parseFloat(distMi.toFixed(1));
         var distInp=document.getElementById('addDistInput');
         if(distInp){distInp.value=addDistVal;distInp.classList.add('filled');}
       }
-    })
-    .catch(function(){})
-    .finally(function(){
       _doSaveManual();
       if(btn){btn.disabled=false;btn.textContent='Save Trip';}
     });
@@ -2875,7 +3035,7 @@ function _doSaveManual(){
   var t=document.getElementById('addTo').value.trim();
   if(addDistVal===0&&!_manualDistEdit) calcDistance();
   var rawDist=parseFloat(document.getElementById('addDistInput').value)||addDistVal;
-  var mi=LOC.country==='CA'?rawDist/1.60934:rawDist;
+  var mi=_useKm()?rawDist/1.60934:rawDist;
   // Get selected date
   var dateVal=document.getElementById('addDate').value;
   var tripDate=dateVal?new Date(dateVal+'T12:00:00'):new Date();
@@ -2899,7 +3059,7 @@ function _doSaveManual(){
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
   renderAlerts();
-  var dist=LOC.country==='CA'?(mi*1.60934).toFixed(1):mi.toFixed(1);
+  var dist=_useKm()?(mi*1.60934).toFixed(1):mi.toFixed(1);
   showToast(_i('ccheck'),'Trip saved · '+dist+' '+LOC.unit);
   recordTripEnd();
   saveTripsToStorage();
@@ -3001,7 +3161,7 @@ function openMapSheet(){
   sheet.style.display='flex';
   mapSheetOpen=true;
   if(!mapReady)setTimeout(initMap,100);
-  else setTimeout(function(){map.invalidateSize();},200);
+  else if(map&&google&&google.maps)setTimeout(function(){google.maps.event.trigger(map,'resize');},200);
   updateMapTrackBtn();
   if(tracking){
     document.getElementById('mapLiveBadge').classList.add('show');
@@ -3014,38 +3174,71 @@ function closeMapSheet(){
   mapSheetOpen=false;
 }
 function initMap(){
+  if(!_googleMapsReady){
+    // Retry in 500ms if Google Maps not loaded yet
+    setTimeout(initMap,500);return;
+  }
   try{
-    // Default map location based on timezone, not NYC
-    var tzMapCoords={'America/Winnipeg':[49.89,-97.14],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/Edmonton':[53.54,-113.49],'America/Montreal':[45.50,-73.57],'America/New_York':[40.71,-74.00],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24]};
+    var tzMapCoords={'America/Winnipeg':[49.89,-97.14],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/Edmonton':[53.54,-113.49],'America/Montreal':[45.50,-73.57],'America/New_York':[40.71,-74.00],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24],'Europe/London':[51.50,-0.12],'Australia/Sydney':[-33.87,151.21]};
     var tzNow='';try{tzNow=Intl.DateTimeFormat().resolvedOptions().timeZone;}catch(e){}
     var tzDefault=tzMapCoords[tzNow]||[49.89,-97.14];
     var defLat=lastGpsLat||tzDefault[0],defLng=lastGpsLng||tzDefault[1];
-    // Try timezone guess if no GPS
-    if(!lastGpsLat){var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}var tzG={'America/Winnipeg':[49.89,-97.14],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/New_York':[40.71,-74.00],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24]};if(tzG[tz]){defLat=tzG[tz][0];defLng=tzG[tz][1];}}
-    map=L.map('liveMap',{zoomControl:false,attributionControl:false}).setView([defLat,defLng],15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-    L.control.zoom({position:'topright'}).addTo(map);
-    const pulseIcon=L.divIcon({className:'',html:'<div style="position:relative;width:18px;height:18px;"><div style="position:absolute;inset:-8px;background:rgba(108,60,224,.1);border-radius:50%;animation:gp 2s ease-in-out infinite;"></div><div style="width:18px;height:18px;background:#6C3CE0;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(108,60,224,.4);position:relative;z-index:1;"></div></div>',iconSize:[18,18],iconAnchor:[9,9]});
-    userMarker=L.marker([defLat,defLng],{icon:pulseIcon}).addTo(map);
-    routeLine=L.polyline([],{color:'#6C3CE0',weight:4,opacity:.8,smoothFactor:1,lineCap:'round',lineJoin:'round'}).addTo(map);
+    if(!lastGpsLat){var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}if(tzMapCoords[tz]){defLat=tzMapCoords[tz][0];defLng=tzMapCoords[tz][1];}}
+
+    map=new google.maps.Map(document.getElementById('liveMap'),{
+      center:{lat:defLat,lng:defLng},
+      zoom:15,
+      disableDefaultUI:false,
+      zoomControl:true,
+      zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
+      mapTypeControl:false,
+      streetViewControl:false,
+      fullscreenControl:false,
+      styles:[
+        {elementType:'geometry',stylers:[{color:'#1d2c4d'}]},
+        {elementType:'labels.text.fill',stylers:[{color:'#8ec3b9'}]},
+        {elementType:'labels.text.stroke',stylers:[{color:'#1a3646'}]},
+        {featureType:'road',elementType:'geometry',stylers:[{color:'#304a7d'}]},
+        {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#255763'}]},
+        {featureType:'water',elementType:'geometry',stylers:[{color:'#0e1626'}]}
+      ]
+    });
+    userMarker=new google.maps.Marker({
+      position:{lat:defLat,lng:defLng},
+      map:map,
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        scale:9,
+        fillColor:'#6C3CE0',
+        fillOpacity:1,
+        strokeColor:'#fff',
+        strokeWeight:3
+      }
+    });
+    routeLine=new google.maps.Polyline({
+      path:[],
+      strokeColor:'#6C3CE0',
+      strokeWeight:4,
+      strokeOpacity:0.8,
+      map:map
+    });
     mapReady=true;
     document.getElementById('mapLoading').classList.add('hidden');
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(function(p){
-        const ll=[p.coords.latitude,p.coords.longitude];
-        map.setView(ll,15);userMarker.setLatLng(ll);
-      },function(){},{ enableHighAccuracy:true });
+        var pos={lat:p.coords.latitude,lng:p.coords.longitude};
+        map.setCenter(pos);userMarker.setPosition(pos);
+      },function(){},{enableHighAccuracy:true});
     }
-    setTimeout(function(){map.invalidateSize();},400);
   }catch(e){console.log('Map init error:',e);}
 }
 function updateMapPos(lat,lng){
   if(!mapReady)return;
-  const ll=[lat,lng];
-  userMarker.setLatLng(ll);
-  if(mapSheetOpen)map.panTo(ll,{animate:true,duration:.5});
+  var pos={lat:lat,lng:lng};
+  userMarker.setPosition(pos);
+  if(mapSheetOpen)map.panTo(pos);
   if(tracking){
-    routeLine.addLatLng(ll);
+    routeLine.getPath().push(new google.maps.LatLng(lat,lng));
     if(mapSheetOpen){
       document.getElementById('mapLiveDist').textContent=document.getElementById('trackDist').textContent+' '+LOC.unit;
     }
@@ -3055,12 +3248,12 @@ function recenterMap(){
   if(!mapReady)return;
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(p){
-      const ll=[p.coords.latitude,p.coords.longitude];
-      map.setView(ll,16,{animate:true});userMarker.setLatLng(ll);
+      var pos={lat:p.coords.latitude,lng:p.coords.longitude};
+      map.setCenter(pos);map.setZoom(16);userMarker.setPosition(pos);
     });
   }
 }
-function clearRoute(){if(routeLine)routeLine.setLatLngs([]);}
+function clearRoute(){if(routeLine)routeLine.setPath([]);}
 function updateMapTrackBtn(){
   const btn=document.getElementById('mapTrackBtn');
   if(tracking){btn.innerHTML=_i('stop',14)+' Stop Trip';btn.classList.remove('primary');btn.style.background='linear-gradient(135deg,#EF3D58,#FF6B8A)';btn.style.color='#fff';btn.style.border='none';btn.style.boxShadow='0 6px 24px rgba(239,61,88,.2)';}
@@ -3071,6 +3264,224 @@ function toggleTrackingFromMap(){
   updateMapTrackBtn();
   if(tracking){document.getElementById('mapLiveBadge').classList.add('show');}
   else{document.getElementById('mapLiveBadge').classList.remove('show');}
+}
+
+/* ===== AI CHAT ENGINE ===== */
+var _aiApiKey=null;
+var _aiMessages=[];
+var _aiMsgCount=0;
+var _aiMsgLimit=20; // max messages per hour
+var _aiMsgResetTime=0;
+
+function _loadAIKey(){
+  try{_aiApiKey=localStorage.getItem('mymilesai_ai_key')||null;}catch(e){}
+  var inp=document.getElementById('aiKeyInput');
+  if(inp&&_aiApiKey)inp.value='********';
+  _updateAIKeyBar();
+}
+
+function saveAIKey(key){
+  key=key.trim();
+  if(!key){removeAIKey();return;}
+  // Validate key format
+  if(!key.startsWith('sk-ant-')){showToast(_i('warn'),'Invalid API key format');return;}
+  try{localStorage.setItem('mymilesai_ai_key',key);}catch(e){}
+  _aiApiKey=key;
+  _updateAIKeyBar();
+  // Test call
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'test'}]})
+  }).then(function(r){
+    if(r.ok)showToast(_i('ccheck'),'API key validated');
+    else showToast(_i('warn'),'API key invalid — check and try again');
+  }).catch(function(){showToast(_i('warn'),'Could not validate key — check connection');});
+}
+
+function removeAIKey(){
+  try{localStorage.removeItem('mymilesai_ai_key');}catch(e){}
+  _aiApiKey=null;
+  var inp=document.getElementById('aiKeyInput');
+  if(inp)inp.value='';
+  _updateAIKeyBar();
+  showToast(_i('trash'),'API key removed');
+}
+
+function _updateAIKeyBar(){
+  var bar=document.getElementById('aiKeyBar');
+  if(bar)bar.style.display=_aiApiKey?'none':'flex';
+}
+
+function toggleAIChat(){
+  var panel=document.getElementById('aiPanel');
+  var fab=document.getElementById('aiFab');
+  if(panel.classList.contains('show')){
+    panel.classList.remove('show');
+    fab.style.display='';
+  } else {
+    panel.classList.add('show');
+    fab.style.display='none';
+    _loadAIKey();
+    var inp=document.getElementById('aiInput');
+    if(inp)setTimeout(function(){inp.focus();},400);
+  }
+}
+
+function sendAIChip(text){
+  document.getElementById('aiInput').value=text;
+  sendAIChat();
+}
+
+function _renderAIMessage(role,text){
+  var msgs=document.getElementById('aiMsgs');
+  var div=document.createElement('div');
+  div.className='ai-msg '+(role==='user'?'user':'bot');
+  // Simple markdown: bold, code blocks
+  var safe=_esc(text)
+    .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+    .replace(/`([^`]+)`/g,'<code style="background:var(--ink7);padding:2px 6px;border-radius:4px;font-size:12px">$1</code>')
+    .replace(/\n/g,'<br>');
+  div.innerHTML=safe;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+function _buildAISystemPrompt(){
+  var name='';try{name=localStorage.getItem('mymilesai_name')||'';}catch(e){}
+  var cats=_tripSummaryByCategory();
+  var totalDed=0;
+  var catKeys=['biz','med','char'];
+  for(var c=0;c<catKeys.length;c++){if(cats[catKeys[c]])totalDed+=cats[catKeys[c]].deduction;}
+  var bizMi=cats.biz?cats.biz.miles:0;
+  var perMi=cats.pers?cats.pers.miles:0;
+  var unclCount=0;for(var i=0;i<TRIPS.length;i++){if(TRIPS[i].type==='uncl')unclCount++;}
+
+  var recentTrips=TRIPS.slice(0,20).map(function(t){
+    return{date:t.date||t.day,from:t.from,to:t.to,dist:tripDist(t.mi)+' '+LOC.unit,type:CAT_LABELS[t.type]||t.type,purpose:t.purpose||''};
+  });
+
+  return 'You are MyMilesAI, a mileage tracking AI assistant built into a GPS mileage tracker app.\n'
+    +'User: '+(name||'(unnamed)')+'\n'
+    +'Country: '+LOC.country+', Currency: '+LOC.currency+', Unit: '+LOC.unit+'\n'
+    +'Tax rate: '+LOC.taxLabel+' — Business: '+LOC.currency+LOC.rates.biz+'/'+LOC.unit
+    +(LOC.rates.med?', Medical: '+LOC.currency+LOC.rates.med+'/'+LOC.unit:'')
+    +(LOC.rates.char?', Charity: '+LOC.currency+LOC.rates.char+'/'+LOC.unit:'')+'\n'
+    +'Total trips: '+TRIPS.length+'\n'
+    +'Business '+LOC.unit+': '+bizMi.toFixed(1)+', Personal '+LOC.unit+': '+perMi.toFixed(1)+'\n'
+    +'Total deduction: '+LOC.currency+totalDed.toFixed(2)+'\n'
+    +'Unclassified trips: '+unclCount+'\n'
+    +'Recent 20 trips: '+JSON.stringify(recentTrips)+'\n\n'
+    +'You can trigger app actions by including these tags in your response:\n'
+    +'[ACTION:EXPORT_CSV] — exports trip data as CSV\n'
+    +'[ACTION:EXPORT_PDF] — exports trip report as PDF\n'
+    +'[ACTION:SHOW_STATS] — navigates to stats tab\n'
+    +'Be concise and helpful. Use data from the trips. Show calculations for deductions. Do not use emojis.';
+}
+
+function _tryOfflineResponse(text){
+  var q=text.toLowerCase();
+  if(q.match(/rate|irs|cra|hmrc|ato/)){
+    return 'The current '+LOC.taxLabel+' is '+LOC.currency+LOC.rates.biz.toFixed(2)+'/'+LOC.unit+' for business trips.'
+      +(LOC.rates.med?' Medical: '+LOC.currency+LOC.rates.med.toFixed(2)+'/'+LOC.unit+'.':'')
+      +(LOC.rates.char?' Charity: '+LOC.currency+LOC.rates.char.toFixed(2)+'/'+LOC.unit+'.':'');
+  }
+  if(q.match(/deduct|total/)){
+    var cats=_tripSummaryByCategory();var totalDed=0;
+    var ck=['biz','med','char'];for(var c=0;c<ck.length;c++){if(cats[ck[c]])totalDed+=cats[ck[c]].deduction;}
+    return 'Your total tax deduction so far is '+LOC.currency+totalDed.toFixed(2)+' from '+(cats.biz?cats.biz.trips:0)+' business trips ('+(cats.biz?cats.biz.miles.toFixed(1):0)+' '+LOC.unit+').';
+  }
+  if(q.match(/how many|count|trips/)){
+    return 'You have '+TRIPS.length+' total trips.';
+  }
+  return null;
+}
+
+function _parseAIActions(text){
+  if(text.indexOf('[ACTION:EXPORT_CSV]')!==-1){setTimeout(exportCSV,500);}
+  if(text.indexOf('[ACTION:EXPORT_PDF]')!==-1){setTimeout(exportPDF,500);}
+  if(text.indexOf('[ACTION:SHOW_STATS]')!==-1){setTimeout(function(){toggleAIChat();switchTabId('tab-stats');},500);}
+}
+
+function sendAIChat(){
+  var inp=document.getElementById('aiInput');
+  var text=inp.value.trim();
+  if(!text)return;
+  inp.value='';
+
+  // Rate limiting
+  var now=Date.now();
+  if(now-_aiMsgResetTime>3600000){_aiMsgCount=0;_aiMsgResetTime=now;}
+  if(_aiMsgCount>=_aiMsgLimit){
+    _renderAIMessage('bot','Rate limit reached ('+_aiMsgLimit+' messages/hour). Please try again later.');
+    return;
+  }
+  _aiMsgCount++;
+
+  _renderAIMessage('user',text);
+  _aiMessages.push({role:'user',content:text});
+
+  // Try offline response first
+  if(!navigator.onLine||!_aiApiKey){
+    var offline=_tryOfflineResponse(text);
+    if(offline){
+      _renderAIMessage('bot',offline);
+      _aiMessages.push({role:'assistant',content:offline});
+      return;
+    }
+    if(!_aiApiKey){
+      _renderAIMessage('bot','Please add your Claude API key in Settings to use AI chat. For basic questions, I can answer offline.');
+      return;
+    }
+    _renderAIMessage('bot','You are offline. I can only answer basic questions about rates and totals right now.');
+    return;
+  }
+
+  // Show typing indicator
+  var typing=document.createElement('div');
+  typing.className='ai-msg bot typing';
+  typing.textContent='Thinking...';
+  document.getElementById('aiMsgs').appendChild(typing);
+  document.getElementById('aiMsgs').scrollTop=document.getElementById('aiMsgs').scrollHeight;
+  document.getElementById('aiSendBtn').disabled=true;
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':_aiApiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1024,
+      system:_buildAISystemPrompt(),
+      messages:_aiMessages.slice(-20)
+    })
+  })
+  .then(function(r){
+    if(!r.ok)throw new Error('API error: '+r.status);
+    return r.json();
+  })
+  .then(function(data){
+    typing.remove();
+    var reply=(data.content&&data.content[0]&&data.content[0].text)||'Sorry, I could not generate a response.';
+    _renderAIMessage('bot',reply);
+    _aiMessages.push({role:'assistant',content:reply});
+    _parseAIActions(reply);
+  })
+  .catch(function(err){
+    typing.remove();
+    var errMsg='Error: '+err.message;
+    if(err.message.includes('401'))errMsg='Invalid API key. Please check your key in Settings.';
+    if(err.message.includes('429'))errMsg='Too many requests. Please wait a moment and try again.';
+    _renderAIMessage('bot',errMsg);
+  })
+  .finally(function(){
+    document.getElementById('aiSendBtn').disabled=false;
+  });
 }
 
 /* ===== INIT ===== */
@@ -3091,22 +3502,20 @@ function updateTemplateDists(){
   var u=LOC.unit;
   function fetchDist(dest,elId){
     if(!dest){document.getElementById(elId).textContent='— '+u;return;}
-    fetch('https://router.project-osrm.org/route/v1/driving/'+lastGpsLng+','+lastGpsLat+';'+dest.lng+','+dest.lat+'?overview=false')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(data&&data.routes&&data.routes[0]){
-        var km=data.routes[0].distance/1000;
-        var val=LOC.country==='CA'?km.toFixed(1):(km/1.60934).toFixed(1);
+    _getGoogleDistance({lat:lastGpsLat,lng:lastGpsLng},{lat:dest.lat,lng:dest.lng},function(distMi,err){
+      if(distMi!==null){
+        var useKm=(LOC.country==='CA'||LOC.country==='AU');
+        var val=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
         document.getElementById(elId).textContent=val+' '+u;
+      } else {
+        // Fallback to Haversine
+        var useKm2=(LOC.country==='CA'||LOC.country==='AU');
+        var R=useKm2?6371:3958.8;
+        var dLat=(dest.lat-lastGpsLat)*Math.PI/180,dLng=(dest.lng-lastGpsLng)*Math.PI/180;
+        var a=Math.sin(dLat/2)**2+Math.cos(lastGpsLat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+        var d=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+        document.getElementById(elId).textContent=d.toFixed(1)+' '+u;
       }
-    }).catch(function(err){
-      console.log('[MyMilesAI] OSRM FAILED:',err);
-      // Fallback to Haversine
-      var R=LOC.country==='CA'?6371:3958.8;
-      var dLat=(dest.lat-lastGpsLat)*Math.PI/180,dLng=(dest.lng-lastGpsLng)*Math.PI/180;
-      var a=Math.sin(dLat/2)**2+Math.cos(lastGpsLat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-      var d=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-      document.getElementById(elId).textContent=d.toFixed(1)+' '+u;
     });
   }
   fetchDist(ofc,'tmplOffDist');
@@ -3144,9 +3553,36 @@ function _showSyncStatus(msg,ok){
   el.style.background=ok?'#22c55e':'#f59e0b';
 }
 
+/* ===== ENCRYPTED STORAGE (client-side obfuscation) ===== */
+var _encKey=(function(){
+  try{var k=localStorage.getItem('mymilesai_enc_key');if(!k){k='mmai_'+Date.now().toString(36)+Math.random().toString(36).slice(2);localStorage.setItem('mymilesai_enc_key',k);}return k;}
+  catch(e){return 'mymilesai_default_key';}
+})();
+function _encStore(key,val){
+  try{
+    if(window.CryptoJS){
+      var enc=CryptoJS.AES.encrypt(val,_encKey).toString();
+      localStorage.setItem(key,enc);
+    }else{localStorage.setItem(key,val);}
+  }catch(e){try{localStorage.setItem(key,val);}catch(ex){}}
+}
+function _decStore(key){
+  try{
+    var raw=localStorage.getItem(key);
+    if(!raw)return null;
+    if(window.CryptoJS){
+      try{
+        var dec=CryptoJS.AES.decrypt(raw,_encKey).toString(CryptoJS.enc.Utf8);
+        return dec||raw; // fallback to raw if decryption gives empty
+      }catch(e){return raw;} // fallback: data was stored unencrypted
+    }
+    return raw;
+  }catch(e){return null;}
+}
+
 function saveTripsToStorage(){
   
-  try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
+  try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
   // Debounce cloud sync — wait 2s after last change
   if(_syncTimer)clearTimeout(_syncTimer);
   _syncTimer=setTimeout(function(){_pushToCloud();},2000);
@@ -3180,11 +3616,19 @@ function _pushToCloud(){
   }
 }
 
+function _mergeTrips(local,cloud){
+  var byId={};
+  local.forEach(function(t){byId[t.id]=t;});
+  cloud.forEach(function(t){
+    if(!byId[t.id]||(t.ts&&t.ts>(byId[t.id].ts||0))){byId[t.id]=t;}
+  });
+  return Object.values(byId).sort(function(a,b){return(b.ts||0)-(a.ts||0);});
+}
 function loadTripsFromStorage(){
   // First load from localStorage immediately (fast)
   var loadedFromLocal=false;
   try{
-    var stored=localStorage.getItem('mymilesai_trips');
+    var stored=_decStore('mymilesai_trips');
     if(stored){
       var parsed=JSON.parse(stored);
       if(parsed&&parsed.length>0){
@@ -3213,25 +3657,19 @@ function loadTripsFromStorage(){
     }).then(function(r){return r.json();}).then(function(d){
       if(d.record&&d.record.trips&&d.record.trips.length>0){
         var cloud=d.record.trips;
-        // Merge: use cloud if newer
-        var cloudTs=d.record.updated||0;
-        var localTs=parseInt(localStorage.getItem('mymilesai_last_save')||'0');
-        if(cloudTs>=localTs){
-          TRIPS.length=0;
-          for(var i=0;i<cloud.length;i++){
-            if(!cloud[i].purpose)cloud[i].purpose='';
-            if(!cloud[i].notes)cloud[i].notes='';
-            if(!cloud[i].ts){var d2=cloud[i].date?new Date(cloud[i].date):new Date();cloud[i].ts=isNaN(d2.getTime())?Date.now():d2.getTime();}
-            TRIPS.push(cloud[i]);
-          }
-          TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-          
-          try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
-          renderTrips();renderAlerts();renderDash();
-          _showSyncStatus('Synced from cloud ✓',true);
-        } else {
-          _showSyncStatus('Local data is newer ✓',true);
+        // Per-trip merge: keep newer version of each trip by ID
+        var merged=_mergeTrips(TRIPS,cloud);
+        TRIPS.length=0;
+        for(var i=0;i<merged.length;i++){
+          if(!merged[i].purpose)merged[i].purpose='';
+          if(!merged[i].notes)merged[i].notes='';
+          if(!merged[i].ts){var d2=merged[i].date?new Date(merged[i].date):new Date();merged[i].ts=isNaN(d2.getTime())?Date.now():d2.getTime();}
+          TRIPS.push(merged[i]);
         }
+        TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+        try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
+        renderTrips();renderAlerts();
+        _showSyncStatus('Synced from cloud',true);
       }
     }).catch(function(){_showSyncStatus('Offline — using local data',false);});
   } else if(!loadedFromLocal){
@@ -3370,6 +3808,7 @@ function loadSettings(){
 }
 loadSettings();
 loadNotifSettings();
+_loadAIKey();
 
 function updateRate(){
   var newRate=parseFloat(document.getElementById('rateVal').value);
@@ -3591,23 +4030,24 @@ if(autoDetect){
 }
 updateAutoBtn();
 
-/* ── Service Worker cleanup ──
-   Single-file PWA cannot register blob: SW URLs (browser blocks it).
-   Unregister any stale SW from older versions on first load. */
-if('serviceWorker' in navigator){
+/* ── Service Worker ──
+   In native wrapper: skip SW (WebView handles caching).
+   On web: register SW for offline support; also clean stale blob: SWs. */
+if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
   navigator.serviceWorker.getRegistrations().then(function(regs){
-    if(regs.length){
-      regs.forEach(function(reg){
-        reg.unregister().then(function(){
-          console.log('[MyMilesAI] Cleared stale SW:',reg.scope);
-        });
-      });
-    } else {
-      console.log('[MyMilesAI] No stale SW found — clean start');
-    }
-  }).catch(function(e){
-    console.log('[MyMilesAI] SW cleanup error:',e.message);
-  });
+    regs.forEach(function(reg){
+      if(reg.active && reg.active.scriptURL && reg.active.scriptURL.startsWith('blob:')){
+        reg.unregister().then(function(){console.log('[MyMilesAI] Cleared stale blob SW');});
+      }
+    });
+  }).catch(function(){});
+  if(location.protocol==='https:'){
+    navigator.serviceWorker.register('./sw.js').then(function(reg){
+      console.log('[MyMilesAI] SW registered, scope:',reg.scope);
+    }).catch(function(e){
+      console.log('[MyMilesAI] SW register failed:',e.message);
+    });
+  }
 }
 </script>
 </body>
