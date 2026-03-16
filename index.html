@@ -2176,8 +2176,8 @@ function releaseWakeLock(){
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible'&&tracking){
     acquireWakeLock();
-    // Re-start watchPosition in case browser killed it
-    if(!watchId&&navigator.geolocation){
+    // Re-start watchPosition in case browser killed it (not needed on native)
+    if(!watchId&&navigator.geolocation&&!window.__MYMILESAI_NATIVE__){
       watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
     }
   }
@@ -2349,10 +2349,16 @@ function toggleTracking(){
 }
 
 function startTracking(){
-  if(!navigator.geolocation){showToast(_i('pin'),'GPS not available on this device');return;}
-  if(autoWatchId){navigator.geolocation.clearWatch(autoWatchId);autoWatchId=null;}
+  if(!navigator.geolocation&&!window.__MYMILESAI_NATIVE__){showToast(_i('pin'),'GPS not available on this device');return;}
+  if(autoWatchId&&autoWatchId!=='native'){navigator.geolocation.clearWatch(autoWatchId);}
+  autoWatchId=null;
   clearTimeout(autoStopTimer);clearTimeout(_pauseTimeout);
-  watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
+  // On native, GPS is pushed via __nativeGPS__ — use sentinel watchId
+  if(window.__MYMILESAI_NATIVE__){
+    watchId='native';
+  } else {
+    watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
+  }
   tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
@@ -2381,10 +2387,21 @@ function startTracking(){
 }
 
 /* ── Native GPS bridge (iOS WebView → PWA) ── */
+// This receives GPS from the native app (Expo Location.watchPositionAsync)
+// and feeds it to either onPos (tracking) or onAutoPos (monitoring).
+// This is the PRIMARY GPS source on native — it bypasses navigator.geolocation
+// so the app appears in iOS Location Services as "MyMilesAI" not "Safari".
 window.__nativeGPS__ = function(coords) {
-  if (!tracking) return;
-  onPos({ coords: { latitude: coords.lat, longitude: coords.lng,
-                     speed: coords.speed, accuracy: coords.accuracy } });
+  var fakePos={ coords: { latitude: coords.lat, longitude: coords.lng,
+                     speed: coords.speed||0, accuracy: coords.accuracy||999 } };
+  if(tracking){
+    onPos(fakePos);
+  } else if(autoDetect){
+    // Feed to auto-monitoring even when not actively tracking
+    onAutoPos(fakePos);
+  }
+  // Always update last known GPS coords for templates etc
+  lastGpsLat=coords.lat;lastGpsLng=coords.lng;
 };
 
 /* ── GPS DEBUG PANEL UPDATE ── */
@@ -2568,7 +2585,17 @@ function toggleAutoDetect(el){
 }
 
 function startAutoMonitoring(){
-  if(!navigator.geolocation||tracking)return;
+  if(tracking)return;
+  // On native app, GPS is pushed via __nativeGPS__ — no need for watchPosition
+  if(window.__MYMILESAI_NATIVE__){
+    autoWatchId='native';
+    document.getElementById('heroStatus').classList.add('mon');
+    document.getElementById('statusText').textContent='Monitoring...';
+    updateAutoBtn();
+    updateDebugPanel();
+    return;
+  }
+  if(!navigator.geolocation)return;
   if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){
     document.getElementById('statusText').textContent='HTTPS required for GPS';
     return;
@@ -2584,7 +2611,8 @@ function startAutoMonitoring(){
 }
 
 function stopAutoMonitoring(){
-  if(autoWatchId){navigator.geolocation.clearWatch(autoWatchId);autoWatchId=null;}
+  if(autoWatchId&&autoWatchId!=='native'){navigator.geolocation.clearWatch(autoWatchId);}
+  autoWatchId=null;
   if(!tracking){
     document.getElementById('heroStatus').classList.remove('mon');
     document.getElementById('statusText').textContent='GPS Active';
@@ -2669,7 +2697,8 @@ function updateAutoBtn(){
   }
 }
 function stopTracking(){
-  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}
+  if(watchId&&watchId!=='native'){navigator.geolocation.clearWatch(watchId);}
+  watchId=null;
   clearInterval(timerInt);clearTimeout(_pauseTimeout);
   tracking=false;_paused=false;_autoState='IDLE';_stationaryStart=0;
   releaseWakeLock();
@@ -4428,7 +4457,13 @@ try{
 // Check GPS permission on load and request if needed
 checkGPSPermission();
 if(autoDetect){
-  if(navigator.permissions){
+  if(window.__MYMILESAI_NATIVE__){
+    // On native, permissions are handled by the native app (Expo Location).
+    // GPS data arrives via window.__nativeGPS__. Just start monitoring.
+    _gpsPermState='granted';
+    updateGPSPermUI();
+    setTimeout(function(){startAutoMonitoring();},500);
+  } else if(navigator.permissions){
     navigator.permissions.query({name:'geolocation'}).then(function(result){
       _gpsPermState=result.state;
       updateGPSPermUI();
