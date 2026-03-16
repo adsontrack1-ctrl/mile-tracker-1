@@ -742,6 +742,10 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <input type="text" class="add-input" id="addFrom" placeholder="Type any address..." oninput="onAddrType('addFrom','fromDD')" autocomplete="off">
       <div class="add-dd" id="fromDD"></div>
     </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:4px">
+      <label class="add-label" style="margin:0;font-size:11px;color:var(--ink4);white-space:nowrap">Departure</label>
+      <input type="time" class="add-input add-time-inp" id="addStartTime" style="flex:1;padding:8px 10px;font-size:13px">
+    </div>
 
     <div class="add-swap-row"><button class="add-swap-btn" onclick="swapAddrs()" title="Swap addresses"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 3 7 21"/><polyline points="3 7 7 3 11 7"/><polyline points="17 21 17 3"/><polyline points="13 17 17 21 21 17"/></svg></button></div>
 
@@ -750,6 +754,10 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <span class="add-input-icon" style="display:inline-flex"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--vi)" stroke="none"><circle cx="12" cy="12" r="5"/></svg></span>
       <input type="text" class="add-input" id="addTo" placeholder="Type destination..." oninput="onAddrType('addTo','toDD')" autocomplete="off">
       <div class="add-dd" id="toDD"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:4px">
+      <label class="add-label" style="margin:0;font-size:11px;color:var(--ink4);white-space:nowrap">Arrival</label>
+      <input type="time" class="add-input add-time-inp" id="addEndTime" style="flex:1;padding:8px 10px;font-size:13px">
     </div>
 
     <label class="add-label" id="distFieldLabel">Distance (Miles)</label>
@@ -782,16 +790,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <label class="add-label">Date</label>
     <input type="date" class="add-input" id="addDate" style="padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white);font-family:var(--f)">
 
-    <div class="add-time-row">
-      <div class="add-time-col">
-        <label class="add-label">Start Time</label>
-        <input type="time" class="add-input add-time-inp" id="addStartTime">
-      </div>
-      <div class="add-time-col">
-        <label class="add-label">End Time</label>
-        <input type="time" class="add-input add-time-inp" id="addEndTime">
-      </div>
-    </div>
+    <!-- Time pickers moved inline next to From/To fields -->
 
     <label class="add-label">Notes (optional)</label>
     <textarea class="add-note-input" id="addNote" placeholder="Client meeting, airport run, etc..." rows="2"></textarea>
@@ -2686,7 +2685,8 @@ function refineCoords(addr,inpId){
       var coords={lat:loc.lat(),lng:loc.lng()};
       if(inpId==='addFrom') fromCoords=coords;
       else toCoords=coords;
-      calcDistance();
+      // Immediately trigger Distance Matrix if both coords available
+      _tryGoogleDistance();
     }
   });
 }
@@ -2696,8 +2696,19 @@ function pickCustom(e,inpId,ddId){
   if(inpId==='addFrom') fromCoords=null;
   else toCoords=null;
   document.getElementById(ddId).classList.remove('show');
-  if(typed.length>=4) refineCoords(typed,inpId);
-  calcDistance();
+  // Geocode typed address, then trigger distance calc with Distance Matrix
+  if(typed.length>=3&&_googleMapsReady&&google&&google.maps){
+    var geocoder=new google.maps.Geocoder();
+    geocoder.geocode({address:typed},function(results,status){
+      if(status==='OK'&&results&&results[0]){
+        var loc=results[0].geometry.location;
+        var coords={lat:loc.lat(),lng:loc.lng()};
+        if(inpId==='addFrom') fromCoords=coords;
+        else toCoords=coords;
+      }
+      _tryGoogleDistance();
+    });
+  }
 }
 
 /* --- Distance calculation --- */
@@ -2736,24 +2747,15 @@ function _calcDistCore(){
     status.textContent='Calculating distance...';
   }
   if(fromCoords && toCoords){
-    // Show quick Haversine estimate while Google Distance Matrix loads
-    var R=6371;
-    var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
-    var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
-    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+
-          Math.cos(fromCoords.lat*Math.PI/180)*Math.cos(toCoords.lat*Math.PI/180)*
-          Math.sin(dLng/2)*Math.sin(dLng/2);
-    var c2=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-    var quickKm=R*c2;
     var useKm=(LOC.country==='CA'||LOC.country==='AU');
-    var quickDisplay=useKm?quickKm.toFixed(1):(quickKm/1.60934).toFixed(1);
-    distInp.value=quickDisplay;
-    distInp.classList.add('filled');
-    badge.classList.add('active');badge.textContent=LOC.unit;
-    status.textContent='Calculating route...';
+    // Show loading state while Distance Matrix calculates
+    distInp.value='';
+    distInp.classList.remove('filled');
+    badge.classList.remove('active');
+    status.textContent='Calculating driving distance...';
     status.classList.remove('calculated');
 
-    // Fetch real driving distance from Google Distance Matrix
+    // Always use Google Distance Matrix for accurate driving distance
     _getGoogleDistance(fromCoords,toCoords,function(distMi,err){
       if(distMi!==null){
         var displayDist=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
@@ -2761,17 +2763,23 @@ function _calcDistCore(){
         distInp.value=displayDist;
         distInp.classList.add('filled');
         badge.classList.add('active');badge.textContent=LOC.unit;
-        status.textContent='Route distance (driving)';
+        status.textContent='Driving distance (via roads)';
         status.classList.add('calculated');
       } else {
-        // Fallback to Haversine × 1.2
-        var fallbackKm=quickKm*1.2;
+        // Fallback to Haversine only if Distance Matrix fails
+        var R=6371;
+        var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
+        var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
+        var a=Math.sin(dLat/2)*Math.sin(dLat/2)+
+              Math.cos(fromCoords.lat*Math.PI/180)*Math.cos(toCoords.lat*Math.PI/180)*
+              Math.sin(dLng/2)*Math.sin(dLng/2);
+        var fallbackKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.2;
         var fallbackDisplay=useKm?fallbackKm.toFixed(1):(fallbackKm/1.60934).toFixed(1);
         addDistVal=parseFloat(fallbackDisplay);
         distInp.value=fallbackDisplay;
         distInp.classList.add('filled');
         badge.classList.add('active');badge.textContent=LOC.unit;
-        status.textContent='Estimated distance';
+        status.textContent='Estimated distance (offline)';
         status.classList.add('calculated');
       }
     });
