@@ -119,6 +119,12 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .gps-debug-body{padding:4px 10px 8px;line-height:1.6;color:rgba(255,255,255,.7);}
 .gps-debug-body b{color:#fff;font-weight:600;}
 
+/* FREQUENT LOCATION CHIPS */
+.freq-loc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:2px;}
+.freq-loc-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--rpill);background:var(--vi-s);border:1px solid var(--vi-s2);font-size:11px;font-weight:600;color:var(--vi);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.freq-loc-chip:hover{background:var(--vi-s2);border-color:var(--vi);transform:translateY(-1px);}
+.freq-loc-chip svg{flex-shrink:0;}
+
 /* GPS PERMISSION BANNER */
 .gps-perm-bar{display:none;margin:8px 16px 0;padding:14px 18px;background:rgba(239,61,88,.06);border:1.5px solid rgba(239,61,88,.15);border-radius:var(--r2);align-items:center;gap:12px;cursor:pointer;transition:all .3s;}
 .gps-perm-bar.show{display:flex;}
@@ -779,6 +785,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <div class="add-sheet-scroll">
 
     <label class="add-label">From</label>
+    <div class="freq-loc-chips" id="freqLocsFrom"></div>
     <div class="add-input-wrap">
       <span class="add-input-icon" style="display:inline-flex"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--ink)" stroke="none"><circle cx="12" cy="12" r="5"/></svg></span>
       <input type="text" class="add-input" id="addFrom" placeholder="Type any address..." oninput="onAddrType('addFrom','fromDD')" autocomplete="off">
@@ -792,6 +799,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="add-swap-row"><button class="add-swap-btn" onclick="swapAddrs()" title="Swap addresses"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 3 7 21"/><polyline points="3 7 7 3 11 7"/><polyline points="17 21 17 3"/><polyline points="13 17 17 21 21 17"/></svg></button></div>
 
     <label class="add-label">To</label>
+    <div class="freq-loc-chips" id="freqLocsTo"></div>
     <div class="add-input-wrap">
       <span class="add-input-icon" style="display:inline-flex"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--vi)" stroke="none"><circle cx="12" cy="12" r="5"/></svg></span>
       <input type="text" class="add-input" id="addTo" placeholder="Type destination..." oninput="onAddrType('addTo','toDD')" autocomplete="off">
@@ -2086,15 +2094,28 @@ function exportSummaryPDF(period){
   w.document.close();
 }
 
-/* ===== GPS TRACKING — SMART ENGINE v2 ===== */
+/* ===== GPS TRACKING — SMART ENGINE v3 ===== */
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDist=0;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
 let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
 var SMART_STOP_MS=300000; // 5 min continuous stationary → end trip
 var _stationaryStart=0; // timestamp when device became stationary
 var _startAddr=''; // captured start address via reverse geocode
+var _startAddrLocked=false; // true once we have a quality start address
 var _wakeLock=null; // Wake Lock handle for background tracking
 var _gpsPermState='unknown'; // 'granted','denied','prompt','unknown'
+// Smart start: collect accurate readings before geocoding
+var _startReadings=[]; // {lat,lng,accuracy} readings with accuracy<20m
+// Smart end: collect stationary readings for best accuracy
+var _endReadings=[]; // readings collected while stationary
+var _endCollectStart=0; // when we started collecting end readings
+// Tunnel/signal dropout
+var _lastGoodPos=null; // last known good position (accuracy<50m)
+var _lastPosTime=0; // timestamp of last GPS update
+var _signalLost=false; // true when no update for 15s
+// Frequent locations memory
+var _freqLocs=[];
+try{var _fl=localStorage.getItem('mymilesai_freq_locations');if(_fl)_freqLocs=JSON.parse(_fl);}catch(e){}
 // Missed trip detection
 var _lastTripEnd=0,_missedTripChecked=false;
 try{_lastTripEnd=parseInt(localStorage.getItem('mymilesai_last_trip_end'))||0;}catch(e){}
@@ -2162,14 +2183,159 @@ document.addEventListener('visibilitychange',function(){
   }
 });
 
-/* ── SMART START ADDRESS — reverse geocode starting position ── */
-function captureStartAddress(lat,lng){
-  _startAddr='GPS ('+lat.toFixed(4)+', '+lng.toFixed(4)+')';
+/* ── FREQUENT LOCATIONS MEMORY ── */
+function _saveFreqLocs(){try{localStorage.setItem('mymilesai_freq_locations',JSON.stringify(_freqLocs));}catch(e){}}
+function _findFreqLoc(lat,lng){
+  for(var i=0;i<_freqLocs.length;i++){
+    var fl=_freqLocs[i];
+    var dMi=haversine(lat,lng,fl.lat,fl.lng);
+    if(dMi*5280<328){return fl;} // 328ft ≈ 100m
+  }
+  return null;
+}
+function _updateFreqLoc(lat,lng,address){
+  var existing=_findFreqLoc(lat,lng);
+  if(existing){
+    existing.count++;
+    existing.lastUsed=Date.now();
+    // If used 3+ times and no label, prompt to name it
+    if(existing.count===3&&!existing.label){
+      setTimeout(function(){_promptNameLocation(existing,address);},1200);
+    }
+  } else {
+    var entry={lat:lat,lng:lng,address:address,label:'',count:1,lastUsed:Date.now()};
+    _freqLocs.push(entry);
+    // Keep top 10 by count, then recency
+    _freqLocs.sort(function(a,b){return(b.count-a.count)||((b.lastUsed||0)-(a.lastUsed||0));});
+    if(_freqLocs.length>10)_freqLocs.length=10;
+  }
+  _saveFreqLocs();
+}
+function _promptNameLocation(loc,address){
+  var short=address?address.split(',')[0]:'this location';
+  var overlay=document.createElement('div');
+  overlay.className='modal-overlay show';
+  overlay.style.cssText='display:flex;align-items:flex-end;justify-content:center';
+  var current=loc.label||'';
+  overlay.innerHTML='<div class="modal"><div class="modal-handle"></div><div class="modal-title">Name this location?</div>'
+    +'<p style="font-size:13px;color:var(--ink2);margin-bottom:16px">You\'ve visited <b>'+_esc(short)+'</b> '+loc.count+' times. Give it a name for quick access.</p>'
+    +'<div class="iw" style="padding:0;margin-bottom:12px"><input class="inp" id="freqLocName" placeholder="e.g. Home, Office, Client Site" value="'+current.replace(/"/g,'&quot;')+'" style="border-radius:var(--r)"></div>'
+    +'<div class="modal-row"><button class="modal-cancel" onclick="this.closest(\'.modal-overlay\').remove()">Skip</button>'
+    +'<button class="cta" style="flex:1" onclick="(function(el){var n=document.getElementById(\'freqLocName\').value.trim();if(n){var fl=_freqLocs.find(function(x){return x.lat==='+loc.lat+'&&x.lng==='+loc.lng+'});if(fl){fl.label=n;}_saveFreqLocs();}el.closest(\'.modal-overlay\').remove();showToast(_i(\'pin\'),n?\'Location saved as \\\"\'+n+\'\\\"\':\'\');})(this)">Save</button></div></div>';
+  document.body.appendChild(overlay);
+  setTimeout(function(){var inp=document.getElementById('freqLocName');if(inp)inp.focus();},400);
+}
+function _getFreqLocLabel(lat,lng){
+  var fl=_findFreqLoc(lat,lng);
+  return(fl&&fl.label)?fl.label:null;
+}
+function renderFreqLocChips(){
+  var fromEl=document.getElementById('freqLocsFrom');
+  var toEl=document.getElementById('freqLocsTo');
+  if(!fromEl||!toEl)return;
+  var named=_freqLocs.filter(function(fl){return fl.label;});
+  if(named.length===0){fromEl.innerHTML='';toEl.innerHTML='';return;}
+  var html='';
+  for(var i=0;i<Math.min(named.length,6);i++){
+    var fl=named[i];
+    html+='<span class="freq-loc-chip" data-addr="'+_esc(fl.address)+'" data-lat="'+fl.lat+'" data-lng="'+fl.lng+'">'
+      +'<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--vi)" stroke="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/></svg>'
+      +_esc(fl.label)+'</span>';
+  }
+  fromEl.innerHTML=html;toEl.innerHTML=html;
+  // Attach click handlers
+  fromEl.querySelectorAll('.freq-loc-chip').forEach(function(chip){
+    chip.onclick=function(){document.getElementById('addFrom').value=this.dataset.addr;calcDistance();};
+  });
+  toEl.querySelectorAll('.freq-loc-chip').forEach(function(chip){
+    chip.onclick=function(){document.getElementById('addTo').value=this.dataset.addr;calcDistance();};
+  });
+}
+
+/* ── SMART START ADDRESS — wait for accuracy<20m, median of 3 readings ── */
+function _tryLockStartAddress(lat,lng,accuracy){
+  if(_startAddrLocked)return;
+  // Only accept readings with accuracy < 20m
+  if(accuracy>20)return;
+  _startReadings.push({lat:lat,lng:lng,accuracy:accuracy});
+  if(_startReadings.length<3)return;
+  // Take median of 3 readings (sort by lat, pick middle)
+  var sorted=_startReadings.slice().sort(function(a,b){return a.lat-b.lat;});
+  var median=sorted[Math.floor(sorted.length/2)];
+  _startAddrLocked=true;
+  // Check frequent locations first
+  var freqLabel=_getFreqLocLabel(median.lat,median.lng);
+  if(freqLabel){
+    _startAddr=freqLabel;
+    return;
+  }
+  _startAddr='GPS ('+median.lat.toFixed(4)+', '+median.lng.toFixed(4)+')';
   if(!_googleMapsReady||!google||!google.maps)return;
   var geocoder=new google.maps.Geocoder();
-  geocoder.geocode({location:{lat:lat,lng:lng}},function(results,status){
+  geocoder.geocode({location:{lat:median.lat,lng:median.lng}},function(results,status){
     if(status==='OK'&&results&&results[0]){
-      _startAddr=results[0].formatted_address;
+      var addr=results[0].formatted_address;
+      // Highway snap: if address is a highway, find nearest place
+      if(_isHighwayAddress(addr)){
+        _snapToNearestPlace(median.lat,median.lng,function(placeName){
+          if(placeName)_startAddr=placeName;
+          else _startAddr=addr;
+        });
+      } else {
+        _startAddr=addr;
+      }
+    }
+  });
+}
+
+/* ── SMART END ADDRESS — best reading from stationary window ── */
+function _collectEndReading(lat,lng,accuracy){
+  if(accuracy>50)return; // accuracy filter
+  if(_endCollectStart===0)_endCollectStart=Date.now();
+  _endReadings.push({lat:lat,lng:lng,accuracy:accuracy,time:Date.now()});
+}
+function _getBestEndPosition(){
+  if(_endReadings.length===0)return null;
+  // Pick the single most accurate reading
+  var best=_endReadings[0];
+  for(var i=1;i<_endReadings.length;i++){
+    if(_endReadings[i].accuracy<best.accuracy)best=_endReadings[i];
+  }
+  return best;
+}
+
+/* ── TUNNEL/SIGNAL DROPOUT ── */
+function _checkSignalDropout(){
+  if(!tracking||!_lastPosTime)return;
+  var elapsed=Date.now()-_lastPosTime;
+  if(elapsed>15000&&!_signalLost){
+    _signalLost=true;
+    document.getElementById('statusText').textContent='Signal lost — holding position...';
+    var gdbState=document.getElementById('gdbState');if(gdbState)gdbState.textContent='SIGNAL LOST';
+  }
+}
+// Check signal every 5s during tracking
+setInterval(function(){if(tracking)_checkSignalDropout();},5000);
+
+/* ── HIGHWAY/PARKING LOT SNAP ── */
+function _isHighwayAddress(addr){
+  if(!addr)return false;
+  return /\b(I-\d|US-\d|Hwy\s*\d|Highway\s*\d|Interstate\s*\d|SR-\d|State Route\s*\d|Rte\s*\d|Freeway|Expressway|Turnpike)\b/i.test(addr);
+}
+function _snapToNearestPlace(lat,lng,cb){
+  if(!_googleMapsReady||!google||!google.maps||!google.maps.places){cb(null);return;}
+  var service=new google.maps.places.PlacesService(document.createElement('div'));
+  service.nearbySearch({
+    location:{lat:lat,lng:lng},
+    radius:200,
+    type:['establishment']
+  },function(results,status){
+    if(status==='OK'&&results&&results.length>0){
+      // Pick the nearest named place
+      var best=results[0];
+      cb(best.name+(best.vicinity?', '+best.vicinity:''));
+    } else {
+      cb(null);
     }
   });
 }
@@ -2189,7 +2355,9 @@ function startTracking(){
   watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
-  _stationaryStart=0;_startAddr='';
+  _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
+  _endReadings=[];_endCollectStart=0;
+  _lastGoodPos=null;_lastPosTime=0;_signalLost=false;
   acquireWakeLock();
   clearRoute();
   document.getElementById('trackLive').classList.add('show');
@@ -2224,8 +2392,8 @@ function updateDebugPanel(){
   var dot=document.getElementById('gpsDebugDot');
   var label=document.getElementById('gpsDebugLabel');
   if(!dot||!label)return;
-  var state=tracking?(_paused?'PAUSED':'RECORDING'):((autoDetect&&autoWatchId)?'MONITORING':'IDLE');
-  dot.className='gps-debug-dot '+(tracking?((_paused)?'yellow':'green'):((autoDetect&&autoWatchId)?'green':'red'));
+  var state=_signalLost?'SIGNAL LOST':tracking?(_paused?'PAUSED':'RECORDING'):((autoDetect&&autoWatchId)?'MONITORING':'IDLE');
+  dot.className='gps-debug-dot '+(_signalLost?'red':tracking?((_paused)?'yellow':'green'):((autoDetect&&autoWatchId)?'green':'red'));
   label.textContent='GPS: '+state;
   var el=document.getElementById('gdbState');if(el)el.textContent=state;
   el=document.getElementById('gdbPerm');if(el)el.textContent=_gpsPermState;
@@ -2241,6 +2409,21 @@ function updateDebugPanel(){
 function onPos(p){
   var spd=p.coords.speed;
   var accuracy=p.coords.accuracy||999;
+  var lat=p.coords.latitude,lng=p.coords.longitude;
+  // Track signal status
+  _lastPosTime=Date.now();
+  if(_signalLost){
+    _signalLost=false;
+    document.getElementById('statusText').textContent=_paused?'Paused — waiting for movement...':'Recording...';
+    showToast(_i('sat'),'GPS signal restored',2000);
+  }
+  // ACCURACY FILTER: ignore readings worse than 50m for position tracking
+  if(accuracy>50&&_lastGoodPos){
+    // Use last good position for display but don't update distance
+    lat=_lastGoodPos.lat;lng=_lastGoodPos.lng;
+  } else if(accuracy<=50){
+    _lastGoodPos={lat:lat,lng:lng,accuracy:accuracy};
+  }
   // Use GPS speed if available and positive, else calculate from positions
   var spdMps=0;
   if(typeof spd==='number'&&spd>=0&&spd!==null){
@@ -2249,7 +2432,7 @@ function onPos(p){
     var prev=positions[positions.length-1];
     var dt=(Date.now()-prev.time)/1000;
     if(dt>0){
-      var dMi=haversine(prev.lat,prev.lng,p.coords.latitude,p.coords.longitude);
+      var dMi=haversine(prev.lat,prev.lng,lat,lng);
       spdMps=dMi*1609.34/dt;
     }
   }
@@ -2262,20 +2445,16 @@ function onPos(p){
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
-  if(positions.length>0){
+  // Only update distance with accurate readings
+  if(positions.length>0&&accuracy<=50){
     var last=positions[positions.length-1];
-    var d=haversine(last.lat,last.lng,p.coords.latitude,p.coords.longitude);
-    // Filter GPS noise: ignore jumps with poor accuracy
-    if(accuracy<50||d<0.5){
-      totalDist+=d;
-    }
+    var d=haversine(last.lat,last.lng,lat,lng);
+    if(d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
   }
-  positions.push({lat:p.coords.latitude,lng:p.coords.longitude,time:Date.now(),accuracy:accuracy});
-  // SMART START: capture start address from first GPS position
-  if(positions.length===1){
-    captureStartAddress(p.coords.latitude,p.coords.longitude);
-  }
-  updateMapPos(p.coords.latitude,p.coords.longitude);
+  positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
+  // SMART START: wait for accuracy<20m, take median of 3 good readings
+  _tryLockStartAddress(lat,lng,accuracy);
+  updateMapPos(lat,lng);
   var dist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
   document.getElementById('trackDist').textContent=dist;
   // Update hero stats with CURRENT TRIP data while tracking
@@ -2304,9 +2483,10 @@ function onPos(p){
   var thresh=parseInt(document.getElementById('threshVal').value)||5;
   var spdRaw=spdVal;
   if(spdRaw>=thresh){
-    // Moving — reset stationary timer completely
+    // Moving — reset stationary timer and end-position collection
     lastMoving=Date.now();
     _stationaryStart=0;
+    _endReadings=[];_endCollectStart=0;
     if(_paused){
       _totalPauseMs+=(Date.now()-_pauseStart);
       _paused=false;
@@ -2318,6 +2498,9 @@ function onPos(p){
     // Not moving — track continuous stationary time
     if(_stationaryStart===0){_stationaryStart=Date.now();}
     var stationarySec=(Date.now()-_stationaryStart)/1000;
+    // SMART END: start collecting end readings when speed < 2mph for 60s
+    var spdMph=_useKm()?spdRaw/1.60934:spdRaw;
+    if(spdMph<2){_collectEndReading(lat,lng,p.coords.accuracy||999);}
     // Enter visual pause after 60s of no movement
     if(!_paused&&stationarySec>60){
       _paused=true;
@@ -2334,8 +2517,8 @@ function onPos(p){
   }
   // Update debug panel
   var gdbSpd=document.getElementById('gdbSpeed');if(gdbSpd)gdbSpd.textContent=spdRaw.toFixed(1)+(_useKm()?' km/h':' mph');
-  var gdbAcc=document.getElementById('gdbAcc');if(gdbAcc)gdbAcc.textContent=accuracy.toFixed(0)+'m';
-  var gdbCoords=document.getElementById('gdbCoords');if(gdbCoords)gdbCoords.textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4);
+  var gdbAcc=document.getElementById('gdbAcc');if(gdbAcc)gdbAcc.textContent=(p.coords.accuracy||0).toFixed(0)+'m'+(accuracy>50?' (filtered)':'');
+  var gdbCoords=document.getElementById('gdbCoords');if(gdbCoords)gdbCoords.textContent=lat.toFixed(4)+','+lng.toFixed(4);
   updateDebugPanel();
 }
 
@@ -2515,6 +2698,8 @@ function stopTracking(){
     document.getElementById('statusText').textContent='GPS Active';
     updateAutoBtn();
   }
+  // Reset milestone flags
+  for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
   if(totalDist>0.01){
     var mi=totalDist;
     var dist=_useKm()?(mi*1.60934):mi;
@@ -2522,34 +2707,68 @@ function stopTracking(){
     var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
     // SMART START: use already-captured start address
     var fromAddr=_startAddr||'GPS Start';
-    var toAddr='GPS End';
-    if(positions.length>0&&!_startAddr){
+    if(!_startAddr&&positions.length>0){
       fromAddr='GPS ('+positions[0].lat.toFixed(4)+', '+positions[0].lng.toFixed(4)+')';
     }
-    if(positions.length>0){
-      var last=positions[positions.length-1];
-      toAddr='GPS ('+last.lat.toFixed(4)+', '+last.lng.toFixed(4)+')';
+    // SMART END: use best reading from stationary window
+    var endPos=_getBestEndPosition();
+    if(!endPos&&positions.length>0){endPos=positions[positions.length-1];}
+    var toAddr='GPS End';
+    if(endPos){toAddr='GPS ('+endPos.lat.toFixed(4)+', '+endPos.lng.toFixed(4)+')';}
+    // Check frequent locations for end
+    if(endPos){
+      var endFreqLabel=_getFreqLocLabel(endPos.lat,endPos.lng);
+      if(endFreqLabel){
+        toAddr=endFreqLabel;
+        _updateFreqLoc(endPos.lat,endPos.lng,endFreqLabel);
+        finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+        // Update start freq loc too
+        if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
+        return;
+      }
     }
-    // SMART END: reverse geocode only the END position (start already captured)
-    if(positions.length>1&&_googleMapsReady&&google&&google.maps){
-      var endPos=positions[positions.length-1];
+    // Reverse geocode the end position
+    if(endPos&&_googleMapsReady&&google&&google.maps){
       var geocoder=new google.maps.Geocoder();
       geocoder.geocode({location:{lat:endPos.lat,lng:endPos.lng}},function(results,status){
-        if(status==='OK'&&results&&results[0]){toAddr=results[0].formatted_address;}
-        finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+        if(status==='OK'&&results&&results[0]){
+          var endAddr=results[0].formatted_address;
+          // If accuracy > 30m or highway address, snap to nearest place
+          if((endPos.accuracy>30||_isHighwayAddress(endAddr))){
+            _snapToNearestPlace(endPos.lat,endPos.lng,function(placeName){
+              toAddr=placeName||endAddr;
+              _updateFreqLoc(endPos.lat,endPos.lng,toAddr);
+              if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
+              finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+            });
+          } else {
+            toAddr=endAddr;
+            _updateFreqLoc(endPos.lat,endPos.lng,toAddr);
+            if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
+            finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+          }
+        } else {
+          _updateFreqLoc(endPos.lat,endPos.lng,toAddr);
+          if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
+          finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+        }
       });
       // Fallback if geocode takes too long
       setTimeout(function(){
-        if(!_gpsTrioSaved)finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
-      },4000);
+        if(!_gpsTrioSaved){
+          _updateFreqLoc(endPos.lat,endPos.lng,toAddr);
+          if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
+          finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+        }
+      },5000);
     } else {
+      if(endPos)_updateFreqLoc(endPos.lat,endPos.lng,toAddr);
+      if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
       finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
     }
   } else {
     showToast(_i('warn'),'No distance recorded — trip not saved',3000);
   }
-  // Reset milestone flags
-  for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
 }
 var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
@@ -3137,6 +3356,7 @@ function openAddTrip(){
   var defCat=getDefaultCat();
   setAddCat(defCat==='uncl'?'biz':defCat);
   addDistVal=0;_manualDistEdit=false;
+  renderFreqLocChips();
   setTimeout(function(){document.getElementById('addFrom').focus();},400);
 }
 function closeAddTrip(){
@@ -4025,6 +4245,7 @@ function exportJSON(){
     odometer:{},
     workhours:_workHours,
     freqRoutes:_freqRoutes,
+    freqLocations:_freqLocs,
     notifSettings:_notifSettings
   };
   try{backup.settings=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');}catch(e){}
@@ -4102,6 +4323,7 @@ function restoreJSON(input){
         if(data.odometer)try{localStorage.setItem('mymilesai_odometer',JSON.stringify(data.odometer));}catch(ex){}
         if(data.workhours){_workHours=data.workhours;try{localStorage.setItem('mymilesai_workhours',JSON.stringify(data.workhours));}catch(ex){}}
         if(data.freqRoutes){_freqRoutes=data.freqRoutes;try{localStorage.setItem('mymilesai_freq_routes',JSON.stringify(data.freqRoutes));}catch(ex){}}
+        if(data.freqLocations){_freqLocs=data.freqLocations;try{localStorage.setItem('mymilesai_freq_locations',JSON.stringify(data.freqLocations));}catch(ex){}}
         renderTrips();renderAlerts();loadSettings();loadNotifSettings();loadOdometer();loadWorkHours();updateGreeting();initProfile();
         closeInfoModal();
         showToast(_i('ccheck'),'Restored '+tripCount+' trips from backup');
@@ -4121,6 +4343,7 @@ function signOut(){
       localStorage.removeItem('mymilesai_odometer');
       localStorage.removeItem('mymilesai_workhours');
       localStorage.removeItem('mymilesai_freq_routes');
+      localStorage.removeItem('mymilesai_freq_locations');
       localStorage.removeItem('mymilesai_dismissed_alerts');
       localStorage.removeItem('mymilesai_autodetect');
       localStorage.removeItem('mymilesai_notif_settings');
