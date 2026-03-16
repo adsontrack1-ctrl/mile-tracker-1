@@ -108,6 +108,24 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .track-stop{width:100%;margin-top:14px;padding:15px;border-radius:var(--rpill);border:none;background:linear-gradient(135deg,var(--coral),#FF6B8A);color:#fff;font-family:var(--f);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(239,61,88,.2);transition:all .3s;}
 .track-stop:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(239,61,88,.25);}
 
+/* GPS DEBUG */
+.gps-debug{position:fixed;bottom:160px;right:8px;z-index:199;font-family:var(--f);font-size:10px;background:rgba(12,12,29,.88);color:#6EE7B7;border-radius:10px;padding:0;max-width:180px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);transition:all .3s;overflow:hidden;}
+.gps-debug.collapsed .gps-debug-body{display:none;}
+.gps-debug-toggle{display:flex;align-items:center;gap:5px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:10px;color:#6EE7B7;background:none;border:none;width:100%;}
+.gps-debug-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.gps-debug-dot.green{background:#6EE7B7;box-shadow:0 0 6px rgba(110,231,183,.6);}
+.gps-debug-dot.yellow{background:#FCD34D;box-shadow:0 0 6px rgba(252,211,77,.6);}
+.gps-debug-dot.red{background:#FCA5A5;box-shadow:0 0 6px rgba(252,165,165,.6);}
+.gps-debug-body{padding:4px 10px 8px;line-height:1.6;color:rgba(255,255,255,.7);}
+.gps-debug-body b{color:#fff;font-weight:600;}
+
+/* GPS PERMISSION BANNER */
+.gps-perm-bar{display:none;margin:8px 16px 0;padding:14px 18px;background:rgba(239,61,88,.06);border:1.5px solid rgba(239,61,88,.15);border-radius:var(--r2);align-items:center;gap:12px;cursor:pointer;transition:all .3s;}
+.gps-perm-bar.show{display:flex;}
+.gps-perm-bar:hover{border-color:rgba(239,61,88,.3);}
+.gps-perm-bar-text{flex:1;font-size:13px;font-weight:600;color:var(--coral);}
+.gps-perm-bar-btn{padding:8px 16px;border-radius:var(--rpill);background:var(--coral);color:#fff;border:none;font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;}
+
 /* MAP BOTTOM SHEET */
 .map-sheet-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(12,12,29,.6);backdrop-filter:blur(6px);}
 .map-sheet-overlay.show{display:block;animation:fadeIn .2s ease;}
@@ -461,8 +479,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .ob-unit-btn.active{border-color:var(--vi);background:var(--vi-s);}
 
 /* AI CHAT */
-.ai-fab{position:fixed;bottom:90px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--vi),var(--mag));border:none;color:#fff;cursor:pointer;z-index:200;box-shadow:0 8px 28px rgba(108,60,224,.35);display:flex;align-items:center;justify-content:center;transition:all .3s cubic-bezier(.22,1,.36,1);}
-.ai-fab:hover{transform:scale(1.08);}
+.ai-fab{position:fixed;bottom:90px;right:16px;width:56px;height:56px;border-radius:50%;background:#1B4DDB;border:none;color:#fff;cursor:pointer;z-index:200;box-shadow:0 8px 28px rgba(27,77,219,.4);display:flex;align-items:center;justify-content:center;transition:all .3s cubic-bezier(.22,1,.36,1);}
+.ai-fab:hover{transform:scale(1.08);box-shadow:0 10px 32px rgba(27,77,219,.5);}
 .ai-fab:active{transform:scale(.95);}
 .ai-panel{position:fixed;inset:0;z-index:600;background:var(--bg);display:none;flex-direction:column;}
 .ai-panel.show{display:flex;animation:slideUpModal .35s cubic-bezier(.22,1,.36,1);}
@@ -471,17 +489,17 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .ai-hdr-close{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;}
 .ai-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
 .ai-msg{max-width:85%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;word-wrap:break-word;animation:tabIn .25s ease;}
-.ai-msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border-bottom-right-radius:6px;}
+.ai-msg.user{align-self:flex-end;background:#1B4DDB;color:#fff;border-bottom-right-radius:6px;}
 .ai-msg.bot{align-self:flex-start;background:var(--white);border:1px solid var(--ink6);color:var(--ink);border-bottom-left-radius:6px;box-shadow:var(--s1);}
 .ai-msg.bot pre{background:var(--ink7);padding:8px 12px;border-radius:8px;overflow-x:auto;font-size:12px;margin:8px 0;}
 .ai-msg.typing{opacity:.6;}
 .ai-chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;}
-.ai-chip{padding:7px 14px;border-radius:var(--rpill);background:var(--white);border:1px solid var(--ink6);font-size:12px;font-weight:600;color:var(--vi);cursor:pointer;transition:all .2s;white-space:nowrap;}
-.ai-chip:hover{background:var(--vi-s);border-color:var(--vi);}
+.ai-chip{padding:7px 14px;border-radius:var(--rpill);background:var(--white);border:1px solid var(--ink6);font-size:12px;font-weight:600;color:#1B4DDB;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.ai-chip:hover{background:rgba(27,77,219,.06);border-color:#1B4DDB;}
 .ai-input-bar{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));background:var(--white);border-top:1px solid var(--ink6);}
 .ai-input-bar input{flex:1;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--rpill);font-family:var(--f);font-size:14px;background:var(--bg);outline:none;transition:border-color .2s;}
-.ai-input-bar input:focus{border-color:var(--vi);}
-.ai-send-btn{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--vi),var(--mag));border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.ai-input-bar input:focus{border-color:#1B4DDB;}
+.ai-send-btn{width:44px;height:44px;border-radius:50%;background:#1B4DDB;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
 .ai-send-btn:disabled{opacity:.4;cursor:default;}
 .ai-key-bar{padding:12px 16px;background:rgba(224,141,0,.06);border-bottom:1px solid rgba(224,141,0,.15);font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px;}
 .ai-key-bar a{color:var(--vi);font-weight:700;cursor:pointer;}
@@ -526,6 +544,13 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
         <div class="tls"><div class="tls-v" id="trackAvg">0</div><div class="tls-l" id="trackAvgU">avg</div></div>
       </div>
       <button class="track-stop" onclick="stopTracking()"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Stop & Save Trip</button>
+    </div>
+
+    <!-- GPS PERMISSION BANNER -->
+    <div class="gps-perm-bar" id="gpsPermBar" onclick="requestGPSPermission()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <div class="gps-perm-bar-text">GPS permission needed for auto-tracking</div>
+      <button class="gps-perm-bar-btn">Enable GPS</button>
     </div>
 
     <div class="qa">
@@ -598,7 +623,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
       <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
-      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="3" id="threshVal" onchange="saveSettings()"></div>
+      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="5" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
       <div class="sr"><div><h4>Navigation app</h4><p>Opens when you tap Map</p></div><select class="sr-sel" id="mapAppSel" onchange="saveMapAppPref()"><option value="inapp">In-app map</option><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div>
       <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
@@ -643,7 +668,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set">
       <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.0</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.0.0</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
-      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 3 mph), recording starts. Smart Pause keeps your trip alive through red lights and short stops — trips only end after 5 min of no movement.<br><br><b>What about short trips?</b><br>The low 3 mph threshold catches short drives. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile for 2026)<br>Canada: CRA rate ($0.72/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
+      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 5 mph), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 5 mph threshold reliably detects driving while filtering out walking. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile for 2026)<br>Canada: CRA rate ($0.72/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
     <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
@@ -664,9 +689,26 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 
 </div></div>
 
+<!-- GPS DEBUG INDICATOR -->
+<div class="gps-debug collapsed" id="gpsDebug">
+  <button class="gps-debug-toggle" onclick="document.getElementById('gpsDebug').classList.toggle('collapsed')">
+    <span class="gps-debug-dot" id="gpsDebugDot"></span>
+    <span id="gpsDebugLabel">GPS</span>
+    <span style="margin-left:auto;font-size:9px;opacity:.5">▼</span>
+  </button>
+  <div class="gps-debug-body" id="gpsDebugBody">
+    <b>State:</b> <span id="gdbState">—</span><br>
+    <b>Perm:</b> <span id="gdbPerm">—</span><br>
+    <b>Speed:</b> <span id="gdbSpeed">—</span><br>
+    <b>Accuracy:</b> <span id="gdbAcc">—</span><br>
+    <b>Coords:</b> <span id="gdbCoords">—</span><br>
+    <b>Stationary:</b> <span id="gdbPause">—</span>
+  </div>
+</div>
+
 <!-- AI CHAT FAB -->
 <button class="ai-fab" id="aiFab" onclick="toggleAIChat()" title="AI Assistant">
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.09 6.26L20.18 10l-6.09 1.74L12 18l-2.09-6.26L3.82 10l6.09-1.74L12 2z"/><path d="M19 15l1.04 3.13L23.18 19l-3.14.87L19 23l-1.04-3.13L14.82 19l3.14-.87L19 15z" opacity=".6"/></svg>
 </button>
 
 <!-- AI CHAT PANEL -->
@@ -2044,15 +2086,93 @@ function exportSummaryPDF(period){
   w.document.close();
 }
 
-/* ===== GPS TRACKING — SMART ENGINE ===== */
+/* ===== GPS TRACKING — SMART ENGINE v2 ===== */
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDist=0;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
-// Smart pause system (#3 fix)
 let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
-var SMART_STOP_MS=480000; // 8 min — stops only end trip after this (traffic jam safe)
-// Missed trip detection (#1 fix)
+var SMART_STOP_MS=300000; // 5 min continuous stationary → end trip
+var _stationaryStart=0; // timestamp when device became stationary
+var _startAddr=''; // captured start address via reverse geocode
+var _wakeLock=null; // Wake Lock handle for background tracking
+var _gpsPermState='unknown'; // 'granted','denied','prompt','unknown'
+// Missed trip detection
 var _lastTripEnd=0,_missedTripChecked=false;
 try{_lastTripEnd=parseInt(localStorage.getItem('mymilesai_last_trip_end'))||0;}catch(e){}
+
+/* ── GPS PERMISSION MANAGEMENT ── */
+function checkGPSPermission(){
+  if(navigator.permissions){
+    navigator.permissions.query({name:'geolocation'}).then(function(result){
+      _gpsPermState=result.state;
+      updateGPSPermUI();
+      result.onchange=function(){_gpsPermState=this.state;updateGPSPermUI();};
+    }).catch(function(){_gpsPermState='unknown';updateGPSPermUI();});
+  }
+}
+function updateGPSPermUI(){
+  var bar=document.getElementById('gpsPermBar');
+  if(!bar)return;
+  if(_gpsPermState==='denied'){
+    bar.classList.add('show');
+    bar.querySelector('.gps-perm-bar-text').textContent='GPS denied — tap to see how to enable';
+  } else if(_gpsPermState==='prompt'){
+    bar.classList.add('show');
+    bar.querySelector('.gps-perm-bar-text').textContent='GPS permission needed for auto-tracking';
+  } else {
+    bar.classList.remove('show');
+  }
+  updateDebugPanel();
+}
+function requestGPSPermission(){
+  if(_gpsPermState==='denied'){
+    openInfoModal('Enable GPS','<b>GPS permission is denied.</b><br><br>To enable:<br><br><b>iPhone/iPad:</b><br>Settings → Privacy & Security → Location Services → Safari (or your browser) → While Using<br><br><b>Android:</b><br>Settings → Apps → Browser → Permissions → Location → Allow<br><br><b>Desktop:</b><br>Click the lock icon in the address bar → Location → Allow<br><br>Then return to this app and refresh the page.');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(function(p){
+    _gpsPermState='granted';
+    updateGPSPermUI();
+    lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
+    showToast(_i('pin'),'GPS enabled! Auto-tracking is ready.');
+    if(autoDetect&&!tracking)startAutoMonitoring();
+  },function(err){
+    if(err.code===1){_gpsPermState='denied';updateGPSPermUI();}
+    showToast(_i('warn'),'GPS permission denied — check browser settings');
+  },{enableHighAccuracy:true,timeout:10000});
+}
+
+/* ── WAKE LOCK — keep tracking when screen off ── */
+function acquireWakeLock(){
+  if(!('wakeLock' in navigator))return;
+  navigator.wakeLock.request('screen').then(function(lock){
+    _wakeLock=lock;
+    lock.addEventListener('release',function(){_wakeLock=null;});
+  }).catch(function(){});
+}
+function releaseWakeLock(){
+  if(_wakeLock){try{_wakeLock.release();}catch(e){}_wakeLock=null;}
+}
+// Re-acquire on visibility change (browsers release wake lock when tab hidden)
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'&&tracking){
+    acquireWakeLock();
+    // Re-start watchPosition in case browser killed it
+    if(!watchId&&navigator.geolocation){
+      watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
+    }
+  }
+});
+
+/* ── SMART START ADDRESS — reverse geocode starting position ── */
+function captureStartAddress(lat,lng){
+  _startAddr='GPS ('+lat.toFixed(4)+', '+lng.toFixed(4)+')';
+  if(!_googleMapsReady||!google||!google.maps)return;
+  var geocoder=new google.maps.Geocoder();
+  geocoder.geocode({location:{lat:lat,lng:lng}},function(results,status){
+    if(status==='OK'&&results&&results[0]){
+      _startAddr=results[0].formatted_address;
+    }
+  });
+}
 
 function toggleTracking(){
   if(tracking){
@@ -2066,9 +2186,11 @@ function startTracking(){
   if(!navigator.geolocation){showToast(_i('pin'),'GPS not available on this device');return;}
   if(autoWatchId){navigator.geolocation.clearWatch(autoWatchId);autoWatchId=null;}
   clearTimeout(autoStopTimer);clearTimeout(_pauseTimeout);
-  watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
+  watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
+  _stationaryStart=0;_startAddr='';
+  acquireWakeLock();
   clearRoute();
   document.getElementById('trackLive').classList.add('show');
   document.getElementById('heroStatus').classList.remove('mon');
@@ -2087,6 +2209,7 @@ function startTracking(){
   if(mapSheetOpen){document.getElementById('mapLiveBadge').classList.add('show');}
   updateMapTrackBtn();
   timerInt=setInterval(updateTimer,1000);
+  updateDebugPanel();
 }
 
 /* ── Native GPS bridge (iOS WebView → PWA) ── */
@@ -2096,24 +2219,64 @@ window.__nativeGPS__ = function(coords) {
                      speed: coords.speed, accuracy: coords.accuracy } });
 };
 
+/* ── GPS DEBUG PANEL UPDATE ── */
+function updateDebugPanel(){
+  var dot=document.getElementById('gpsDebugDot');
+  var label=document.getElementById('gpsDebugLabel');
+  if(!dot||!label)return;
+  var state=tracking?(_paused?'PAUSED':'RECORDING'):((autoDetect&&autoWatchId)?'MONITORING':'IDLE');
+  dot.className='gps-debug-dot '+(tracking?((_paused)?'yellow':'green'):((autoDetect&&autoWatchId)?'green':'red'));
+  label.textContent='GPS: '+state;
+  var el=document.getElementById('gdbState');if(el)el.textContent=state;
+  el=document.getElementById('gdbPerm');if(el)el.textContent=_gpsPermState;
+  el=document.getElementById('gdbPause');
+  if(el){
+    if(_stationaryStart>0){
+      var secs=Math.floor((Date.now()-_stationaryStart)/1000);
+      el.textContent=secs+'s / '+(SMART_STOP_MS/1000)+'s';
+    } else {el.textContent='moving';}
+  }
+}
+
 function onPos(p){
-  const spd=p.coords.speed||0;
-  const spdVal=_useKm()?(spd*3.6).toFixed(0):(spd*2.237).toFixed(0);
-  document.getElementById('trackSpeed').textContent=spdVal;
-  document.getElementById('speedNum').textContent=spdVal;
-  const maxSpd=_useKm()?160:100;
-  const pct=Math.min(parseFloat(spdVal)/maxSpd,1);
-  const off=267-(267*pct);
+  var spd=p.coords.speed;
+  var accuracy=p.coords.accuracy||999;
+  // Use GPS speed if available and positive, else calculate from positions
+  var spdMps=0;
+  if(typeof spd==='number'&&spd>=0&&spd!==null){
+    spdMps=spd;
+  } else if(positions.length>0){
+    var prev=positions[positions.length-1];
+    var dt=(Date.now()-prev.time)/1000;
+    if(dt>0){
+      var dMi=haversine(prev.lat,prev.lng,p.coords.latitude,p.coords.longitude);
+      spdMps=dMi*1609.34/dt;
+    }
+  }
+  var spdVal=_useKm()?(spdMps*3.6):(spdMps*2.237);
+  var spdDisplay=spdVal.toFixed(0);
+  document.getElementById('trackSpeed').textContent=spdDisplay;
+  document.getElementById('speedNum').textContent=spdDisplay;
+  var maxSpd=_useKm()?160:100;
+  var pct=Math.min(spdVal/maxSpd,1);
+  var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   if(positions.length>0){
-    const last=positions[positions.length-1];
-    const d=haversine(last.lat,last.lng,p.coords.latitude,p.coords.longitude);
-    totalDist+=d;
+    var last=positions[positions.length-1];
+    var d=haversine(last.lat,last.lng,p.coords.latitude,p.coords.longitude);
+    // Filter GPS noise: ignore jumps with poor accuracy
+    if(accuracy<50||d<0.5){
+      totalDist+=d;
+    }
   }
-  positions.push({lat:p.coords.latitude,lng:p.coords.longitude,time:Date.now()});
+  positions.push({lat:p.coords.latitude,lng:p.coords.longitude,time:Date.now(),accuracy:accuracy});
+  // SMART START: capture start address from first GPS position
+  if(positions.length===1){
+    captureStartAddress(p.coords.latitude,p.coords.longitude);
+  }
   updateMapPos(p.coords.latitude,p.coords.longitude);
-  const dist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
+  var dist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
   document.getElementById('trackDist').textContent=dist;
   // Update hero stats with CURRENT TRIP data while tracking
   var liveDist=_useKm()?totalDist*1.60934:totalDist;
@@ -2124,9 +2287,7 @@ function onPos(p){
   document.getElementById('hsPerL').textContent='Minutes';
   document.getElementById('hsDed').textContent=LOC.currency+liveDed.toFixed(2);
   // Distance milestone alerts
-  var milestoneKm=[1,5,10,25,50,100];
-  var milestoneMi=[1,5,10,25,50,100];
-  var milestones=_useKm()?milestoneKm:milestoneMi;
+  var milestones=[1,5,10,25,50,100];
   for(var mi=0;mi<milestones.length;mi++){
     var m=milestones[mi];
     if(liveDist>=m && liveDist<m+0.2 && !window['_ms'+m]){
@@ -2135,55 +2296,57 @@ function onPos(p){
     }
   }
   if(positions.length>1){
-    const elapsed=(Date.now()-trackStart-_totalPauseMs)/3600000;
-    const avgDist=_useKm()?totalDist*1.60934:totalDist;
+    var elapsed=(Date.now()-trackStart-_totalPauseMs)/3600000;
+    var avgDist=_useKm()?totalDist*1.60934:totalDist;
     document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
   }
-  // === SMART PAUSE DETECTION (#3 fix) ===
-  var thresh=parseInt(document.getElementById('threshVal').value)||3;
-  var spdRaw=_useKm()?spd*3.6:spd*2.237;
+  // === SMART PAUSE: 5 min CONTINUOUS stationary → end trip ===
+  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  var spdRaw=spdVal;
   if(spdRaw>=thresh){
+    // Moving — reset stationary timer completely
     lastMoving=Date.now();
-    // If we were paused, RESUME the trip (don't split!)
+    _stationaryStart=0;
     if(_paused){
       _totalPauseMs+=(Date.now()-_pauseStart);
       _paused=false;
       clearTimeout(_pauseTimeout);
       document.getElementById('statusText').textContent='Recording...';
-      showToast(_i('ccheck'),'Trip resumed after pause',2000);
+      showToast(_i('ccheck'),'Trip resumed — movement detected',2000);
+    }
+  } else {
+    // Not moving — track continuous stationary time
+    if(_stationaryStart===0){_stationaryStart=Date.now();}
+    var stationarySec=(Date.now()-_stationaryStart)/1000;
+    // Enter visual pause after 60s of no movement
+    if(!_paused&&stationarySec>60){
+      _paused=true;
+      _pauseStart=Date.now();
+      document.getElementById('statusText').textContent='Paused — waiting for movement...';
+    }
+    // End trip after 5 min CONTINUOUS stationary
+    if(stationarySec*1000>=SMART_STOP_MS&&tracking){
+      _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
+      showToast(_i('park'),'Trip ended — stationary for 5 min',4000);
+      stopTracking();
+      return;
     }
   }
-  if(autoDetect && tracking && !_paused && (Date.now()-lastMoving)>120000){
-    // No movement for 2 min → enter PAUSE state (handles traffic lights, train crossings, drive-throughs)
-    _paused=true;
-    _pauseStart=Date.now();
-    document.getElementById('statusText').textContent='Paused...';
-    showToast(_i('clock'),'Paused — will resume when you start moving',3000);
-    // Set hard stop at 5 min of pause
-    _pauseTimeout=setTimeout(function(){
-      if(tracking && _paused){
-        _totalPauseMs+=(Date.now()-_pauseStart);
-        stopTracking();
-        showToast(_i('park'),'Trip ended — stopped for 5 min',4000);
-      }
-    },SMART_STOP_MS);
-  }
+  // Update debug panel
+  var gdbSpd=document.getElementById('gdbSpeed');if(gdbSpd)gdbSpd.textContent=spdRaw.toFixed(1)+(_useKm()?' km/h':' mph');
+  var gdbAcc=document.getElementById('gdbAcc');if(gdbAcc)gdbAcc.textContent=accuracy.toFixed(0)+'m';
+  var gdbCoords=document.getElementById('gdbCoords');if(gdbCoords)gdbCoords.textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4);
+  updateDebugPanel();
 }
 
 function onPosErr(e){
   console.log('GPS error:',e.message);
   var msg='GPS unavailable';
-  if(e.code===1)msg='GPS permission denied — enable in browser settings';
+  if(e.code===1){msg='GPS permission denied — enable in browser settings';_gpsPermState='denied';updateGPSPermUI();}
   else if(e.code===2)msg='GPS signal lost — check your connection';
   else if(e.code===3)msg='GPS timed out — try again';
-  showToast(_i('warn'),'⚠️ '+msg);
-  // If tracking was active and GPS died, pause tracking
-  if(_tracking){
-    _tracking=false;
-    var autoBtn=document.getElementById('autoBtn');
-    if(autoBtn){autoBtn.classList.remove('recording');autoBtn.querySelector('.i').innerHTML=_i('sat',17);autoBtn.querySelector('.lbl').textContent='Auto-detect';}
-    var _rd=document.getElementById('recDot');if(_rd)_rd.style.display='none';
-  }
+  showToast(_i('warn'),msg);
+  updateDebugPanel();
 }
 
 /* ===== MISSED TRIP DETECTOR (#1 fix) ===== */
@@ -2228,11 +2391,13 @@ function startAutoMonitoring(){
     return;
   }
   if(autoWatchId)navigator.geolocation.clearWatch(autoWatchId);
-  autoWatchId=navigator.geolocation.watchPosition(onAutoPos,function(){},{enableHighAccuracy:false,maximumAge:5000,timeout:15000});
+  autoWatchId=navigator.geolocation.watchPosition(onAutoPos,function(err){
+    if(err.code===1){_gpsPermState='denied';updateGPSPermUI();}
+  },{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   document.getElementById('heroStatus').classList.add('mon');
   document.getElementById('statusText').textContent='Monitoring...';
-  showToast(_i('sat'),'Auto-detect active — tracking will start when you drive',3000);
   updateAutoBtn();
+  updateDebugPanel();
 }
 
 function stopAutoMonitoring(){
@@ -2251,9 +2416,16 @@ var _detectRequired=3; // readings needed to confirm driving
 function onAutoPos(p){
   // While monitoring (not recording), check if driving
   if(tracking)return;
-  var spd=p.coords.speed||0;
-  var thresh=parseInt(document.getElementById('threshVal').value)||3;
-  var spdVal=_useKm()?spd*3.6:spd*2.237;
+  var spd=p.coords.speed;
+  // Use GPS speed if available, else calc from last known position
+  var spdMps=0;
+  if(typeof spd==='number'&&spd>=0&&spd!==null){spdMps=spd;}
+  else if(lastGpsLat&&p.coords.latitude){
+    var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);
+    spdMps=dMi*1609.34/5; // assume ~5s between readings
+  }
+  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  var spdVal=_useKm()?spdMps*3.6:spdMps*2.237;
   // Update speedo even while monitoring
   var spdDisplay=spdVal.toFixed(0);
   document.getElementById('speedNum').textContent=spdDisplay;
@@ -2264,6 +2436,11 @@ function onAutoPos(p){
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Update GPS coords for templates
   lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
+  // Update debug
+  var gdbSpd=document.getElementById('gdbSpeed');if(gdbSpd)gdbSpd.textContent=spdVal.toFixed(1)+(_useKm()?' km/h':' mph');
+  var gdbAcc=document.getElementById('gdbAcc');if(gdbAcc)gdbAcc.textContent=(p.coords.accuracy||0).toFixed(0)+'m';
+  var gdbCoords=document.getElementById('gdbCoords');if(gdbCoords)gdbCoords.textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4);
+  updateDebugPanel();
 
   // Multi-reading confirmation: require 3 consecutive readings above threshold
   if(spdVal>=thresh){
@@ -2311,7 +2488,8 @@ function updateAutoBtn(){
 function stopTracking(){
   if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}
   clearInterval(timerInt);clearTimeout(_pauseTimeout);
-  tracking=false;_paused=false;_autoState='IDLE';
+  tracking=false;_paused=false;_autoState='IDLE';_stationaryStart=0;
+  releaseWakeLock();
   // Notify native app
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
     window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'IDLE'}));
@@ -2328,6 +2506,7 @@ function stopTracking(){
   document.getElementById('hsBizL').textContent='Business '+LOC.unit;
   document.getElementById('hsPerL').textContent='Personal '+LOC.unit;
   recalcStats();
+  updateDebugPanel();
   // Resume auto-monitoring if enabled
   if(autoDetect){
     setTimeout(function(){startAutoMonitoring();},2000);
@@ -2341,26 +2520,32 @@ function stopTracking(){
     var dist=_useKm()?(mi*1.60934):mi;
     var elapsed=Math.floor((Date.now()-trackStart)/60000);
     var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
-    // Build from/to from GPS positions
-    var fromAddr='GPS Start';
+    // SMART START: use already-captured start address
+    var fromAddr=_startAddr||'GPS Start';
     var toAddr='GPS End';
-    if(positions.length>0){
+    if(positions.length>0&&!_startAddr){
       fromAddr='GPS ('+positions[0].lat.toFixed(4)+', '+positions[0].lng.toFixed(4)+')';
+    }
+    if(positions.length>0){
       var last=positions[positions.length-1];
       toAddr='GPS ('+last.lat.toFixed(4)+', '+last.lng.toFixed(4)+')';
     }
-    // Try reverse geocode for readable addresses
-    reverseGeocode(positions,function(startAddr,endAddr){
-      if(startAddr)fromAddr=startAddr;
-      if(endAddr)toAddr=endAddr;
+    // SMART END: reverse geocode only the END position (start already captured)
+    if(positions.length>1&&_googleMapsReady&&google&&google.maps){
+      var endPos=positions[positions.length-1];
+      var geocoder=new google.maps.Geocoder();
+      geocoder.geocode({location:{lat:endPos.lat,lng:endPos.lng}},function(results,status){
+        if(status==='OK'&&results&&results[0]){toAddr=results[0].formatted_address;}
+        finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+      });
+      // Fallback if geocode takes too long
+      setTimeout(function(){
+        if(!_gpsTrioSaved)finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+      },4000);
+    } else {
       finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
-    });
-    // Fallback if geocode takes too long
-    setTimeout(function(){
-      if(!_gpsTrioSaved)finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
-    },3000);
+    }
   } else {
-    // No significant movement — show a toast letting user know
     showToast(_i('warn'),'No distance recorded — trip not saved',3000);
   }
   // Reset milestone flags
@@ -3788,7 +3973,7 @@ function loadNotifSettings(){
 /* ===== SETTINGS PERSISTENCE ===== */
 function saveSettings(){
   var settings={
-    threshold:parseInt(document.getElementById('threshVal').value)||3,
+    threshold:parseInt(document.getElementById('threshVal').value)||5,
     defaultCat:document.getElementById('defaultCatSel').value,
     rate:parseFloat(document.getElementById('rateVal').value)||LOC.rate,
     pauseTimeout:parseInt(document.getElementById('pauseTimeoutSel').value)||300000,
@@ -4017,26 +4202,41 @@ try{
   if(adPref==='0'){autoDetect=false;document.getElementById('autoDetectTgl').classList.remove('on');}
   else{autoDetect=true;}
 }catch(e){}
+// Check GPS permission on load and request if needed
+checkGPSPermission();
 if(autoDetect){
-  // Check if we already have geolocation permission
   if(navigator.permissions){
     navigator.permissions.query({name:'geolocation'}).then(function(result){
+      _gpsPermState=result.state;
+      updateGPSPermUI();
       if(result.state==='granted'){
-        setTimeout(function(){startAutoMonitoring();},1200);
+        // Permission already granted — start monitoring immediately
+        setTimeout(function(){startAutoMonitoring();},800);
+      } else if(result.state==='prompt'){
+        // Request permission proactively on app load
+        navigator.geolocation.getCurrentPosition(function(p){
+          _gpsPermState='granted';
+          updateGPSPermUI();
+          lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
+          startAutoMonitoring();
+        },function(err){
+          if(err.code===1){_gpsPermState='denied';}
+          updateGPSPermUI();
+        },{enableHighAccuracy:true,timeout:10000});
       } else {
-        // Show tap-to-start banner
-        setTimeout(function(){
-          showToast(_i('sat'),'Tap "Auto On" to enable GPS tracking',5000);
-        },800);
+        // Denied — show permission banner
+        updateGPSPermUI();
       }
     }).catch(function(){
       setTimeout(function(){startAutoMonitoring();},1200);
     });
   } else {
+    // No permissions API — just try to start (will trigger browser prompt)
     setTimeout(function(){startAutoMonitoring();},1200);
   }
 }
 updateAutoBtn();
+updateDebugPanel();
 
 /* ── Service Worker ──
    In native wrapper: skip SW (WebView handles caching).
