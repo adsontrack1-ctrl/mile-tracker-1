@@ -2121,18 +2121,40 @@ var _lastTripEnd=0,_missedTripChecked=false;
 try{_lastTripEnd=parseInt(localStorage.getItem('mymilesai_last_trip_end'))||0;}catch(e){}
 
 /* ── GPS PERMISSION MANAGEMENT ── */
+// On native iOS wrapper, GPS is managed by expo-location at the native layer.
+// The WebView's navigator.geolocation will show as "denied" but that's irrelevant
+// because GPS data arrives via window.__nativeGPS__(). We must never show the
+// denied banner or "GPS denied" status when running inside the native app.
+function _isNativeGPS(){
+  return !!(window.__MYMILESAI_NATIVE__||window.__nativeGPSGranted);
+}
 function checkGPSPermission(){
+  // On native, GPS is always managed natively — skip WebView permission check
+  if(_isNativeGPS()){
+    _gpsPermState='granted';
+    updateGPSPermUI();
+    return;
+  }
   if(navigator.permissions){
     navigator.permissions.query({name:'geolocation'}).then(function(result){
       _gpsPermState=result.state;
       updateGPSPermUI();
-      result.onchange=function(){_gpsPermState=this.state;updateGPSPermUI();};
+      result.onchange=function(){
+        // Don't let WebView override native GPS state
+        if(!_isNativeGPS()){_gpsPermState=this.state;updateGPSPermUI();}
+      };
     }).catch(function(){_gpsPermState='unknown';updateGPSPermUI();});
   }
 }
 function updateGPSPermUI(){
   var bar=document.getElementById('gpsPermBar');
   if(!bar)return;
+  // NEVER show denied banner on native — GPS works via native layer
+  if(_isNativeGPS()){
+    bar.classList.remove('show');
+    updateDebugPanel();
+    return;
+  }
   if(_gpsPermState==='denied'){
     bar.classList.add('show');
     bar.querySelector('.gps-perm-bar-text').textContent='GPS denied — tap to see how to enable';
@@ -2145,6 +2167,7 @@ function updateGPSPermUI(){
   updateDebugPanel();
 }
 function requestGPSPermission(){
+  if(_isNativeGPS()){_gpsPermState='granted';updateGPSPermUI();return;}
   if(_gpsPermState==='denied'){
     openInfoModal('Enable GPS','<b>GPS permission is denied.</b><br><br>To enable:<br><br><b>iPhone/iPad:</b><br>Settings → Privacy & Security → Location Services → Safari (or your browser) → While Using<br><br><b>Android:</b><br>Settings → Apps → Browser → Permissions → Location → Allow<br><br><b>Desktop:</b><br>Click the lock icon in the address bar → Location → Allow<br><br>Then return to this app and refresh the page.');
     return;
@@ -2156,8 +2179,8 @@ function requestGPSPermission(){
     showToast(_i('pin'),'GPS enabled! Auto-tracking is ready.');
     if(autoDetect&&!tracking)startAutoMonitoring();
   },function(err){
-    if(err.code===1){_gpsPermState='denied';updateGPSPermUI();}
-    showToast(_i('warn'),'GPS permission denied — check browser settings');
+    if(err.code===1&&!_isNativeGPS()){_gpsPermState='denied';updateGPSPermUI();}
+    if(!_isNativeGPS())showToast(_i('warn'),'GPS permission denied — check browser settings');
   },{enableHighAccuracy:true,timeout:10000});
 }
 
@@ -2394,6 +2417,11 @@ function startTracking(){
 // This is the PRIMARY GPS source on native — it bypasses navigator.geolocation
 // so the app appears in iOS Location Services as "MyMilesAI" not "Safari".
 window.__nativeGPS__ = function(coords) {
+  // Receiving native GPS data proves GPS is working — ensure state reflects this
+  if(_gpsPermState!=='granted'){
+    _gpsPermState='granted';
+    updateGPSPermUI();
+  }
   var fakePos={ coords: { latitude: coords.lat, longitude: coords.lng,
                      speed: coords.speed||0, accuracy: coords.accuracy||999 } };
   if(tracking){
@@ -2544,6 +2572,8 @@ function onPos(p){
 
 function onPosErr(e){
   console.log('GPS error:',e.message);
+  // On native, WebView geolocation errors are irrelevant — GPS comes via __nativeGPS__
+  if(_isNativeGPS())return;
   var msg='GPS unavailable';
   if(e.code===1){msg='GPS permission denied — enable in browser settings';_gpsPermState='denied';updateGPSPermUI();}
   else if(e.code===2)msg='GPS signal lost — check your connection';
@@ -2605,7 +2635,7 @@ function startAutoMonitoring(){
   }
   if(autoWatchId)navigator.geolocation.clearWatch(autoWatchId);
   autoWatchId=navigator.geolocation.watchPosition(onAutoPos,function(err){
-    if(err.code===1){_gpsPermState='denied';updateGPSPermUI();}
+    if(err.code===1&&!_isNativeGPS()){_gpsPermState='denied';updateGPSPermUI();}
   },{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   document.getElementById('heroStatus').classList.add('mon');
   document.getElementById('statusText').textContent='Monitoring...';
@@ -4429,7 +4459,7 @@ function obNext(step){
         lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
         updateTemplateDists();
         showToast(_i('pin'),'GPS access granted');
-      },function(){showToast(_i('pin'),'GPS denied — you can enable later in settings');});
+      },function(){if(!_isNativeGPS())showToast(_i('pin'),'GPS denied — you can enable later in settings');});
     }
   }
   // Step 4: Odometer
