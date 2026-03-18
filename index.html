@@ -1092,7 +1092,7 @@ function randomPath(){
 function tripDist(mi){return(LOC.country==='CA'||LOC.country==='AU')?(mi*1.60934).toFixed(1):mi.toFixed(1);}
 function convMi(mi){return(LOC.country==='CA'||LOC.country==='AU')?mi*1.60934:mi;}
 function tripCard(t,wide){
-  const d=tripDist(t.mi),ded=t.ded?`<span class="trip-ded">+$${(parseFloat(d)*LOC.rate).toFixed(2)}</span>`:'';
+  const d=tripDist(t.mi),ded=t.ded?`<span class="trip-ded">+${LOC.currency}${(parseFloat(d)*catRate(t.type)).toFixed(2)}</span>`:'';
   const clr={biz:'vi',pers:'mag',uncl:'amber'}[t.type]||'amber';
   const badge={biz:'Business',pers:'Personal',uncl:'Classify'}[t.type]||'Classify';
   const dotCls={biz:'eb',pers:'ep',uncl:'eu'}[t.type]||'eu';
@@ -2308,7 +2308,9 @@ function _getBestEndPosition(){
 function _checkSignalDropout(){
   if(!tracking||!_lastPosTime)return;
   var elapsed=Date.now()-_lastPosTime;
-  if(elapsed>15000&&!_signalLost){
+  // On native, use longer timeout since GPS injection can vary in timing
+  var timeout=window.__MYMILESAI_NATIVE__?30000:15000;
+  if(elapsed>timeout&&!_signalLost){
     _signalLost=true;
     document.getElementById('statusText').textContent='Signal lost — holding position...';
     var gdbState=document.getElementById('gdbState');if(gdbState)gdbState.textContent='SIGNAL LOST';
@@ -2517,7 +2519,8 @@ function onPos(p){
     var stationarySec=(Date.now()-_stationaryStart)/1000;
     // SMART END: start collecting end readings when speed < 2mph for 60s
     var spdMph=_useKm()?spdRaw/1.60934:spdRaw;
-    if(spdMph<2){_collectEndReading(lat,lng,p.coords.accuracy||999);}
+    var rawAcc=p.coords.accuracy||999;
+    if(spdMph<2){_collectEndReading(lat,lng,rawAcc);}
     // Enter visual pause after 60s of no movement
     if(!_paused&&stationarySec>60){
       _paused=true;
@@ -2803,7 +2806,13 @@ var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   if(_gpsTrioSaved)return;
   _gpsTrioSaved=true;
-  
+  // Duplicate prevention: reject if a trip with same from/to was saved in last 60s
+  var now=Date.now();
+  for(var dp=0;dp<Math.min(TRIPS.length,3);dp++){
+    if(TRIPS[dp].from===fromAddr&&TRIPS[dp].to===toAddr&&(now-TRIPS[dp].ts)<60000){
+      _gpsTrioSaved=false;return;
+    }
+  }
   var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
   var type='uncl';
   var freq=getFreqRouteType(fromAddr,toAddr);
@@ -3475,16 +3484,22 @@ function saveManual(){
 function _doSaveManual(){
   var f=document.getElementById('addFrom').value.trim();
   var t=document.getElementById('addTo').value.trim();
+  // Validate required fields
+  if(!f){showToast(_i('warn'),'Please enter a starting address');document.getElementById('addFrom').focus();return;}
+  if(!t){showToast(_i('warn'),'Please enter a destination address');document.getElementById('addTo').focus();return;}
   if(addDistVal===0&&!_manualDistEdit) calcDistance();
   var rawDist=parseFloat(document.getElementById('addDistInput').value)||addDistVal;
   var mi=_useKm()?rawDist/1.60934:rawDist;
+  // Validate distance
+  if(!mi||mi<=0){showToast(_i('warn'),'Distance must be greater than zero');return;}
+  if(mi>500&&!_useKm()){showToast(_i('warn'),'Distance exceeds 500 miles — please verify');return;}
+  if(mi>800&&_useKm()){showToast(_i('warn'),'Distance exceeds 800 km — please verify');return;}
   // Get selected date
   var dateVal=document.getElementById('addDate').value;
   var tripDate=dateVal?new Date(dateVal+'T12:00:00'):new Date();
   var tripDay=_rel(tripDate);
   var tripDateStr=_fmt(tripDate);
   var tripTs=tripDate.getTime();
-  // Clear demo data on first real trip
   var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
   var autoType=addCat;
   if(autoType==='uncl'){
@@ -3494,10 +3509,10 @@ function _doSaveManual(){
   }
   var purpose=document.getElementById('addPurpose').value;
   var notes=document.getElementById('addNote').value.trim();
-    var startT=document.getElementById('addStartTime').value||'';
+  var startT=document.getElementById('addStartTime').value||'';
   var endT=document.getElementById('addEndTime').value||'';
   var timeLabel=startT?(startT+(endT?' – '+endT:'')):'Just now';
-  TRIPS.unshift({id:newId,from:f,to:t,mi:mi||5,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:autoType==='biz',purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT});
+  TRIPS.unshift({id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:autoType==='biz',purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT});
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
   renderAlerts();
