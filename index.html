@@ -4451,9 +4451,16 @@ try{
 /* ===== AUTO-DETECT INIT ===== */
 try{
   var adPref=localStorage.getItem('mymilesai_autodetect');
-  if(adPref==='0'){autoDetect=false;document.getElementById('autoDetectTgl').classList.remove('on');}
+  if(adPref==='0'&&!window.__MYMILESAI_NATIVE__){autoDetect=false;document.getElementById('autoDetectTgl').classList.remove('on');}
   else{autoDetect=true;}
 }catch(e){}
+// On native app, always force auto-detect ON — GPS is handled natively
+if(window.__MYMILESAI_NATIVE__){
+  autoDetect=true;
+  try{localStorage.setItem('mymilesai_autodetect','1');}catch(e){}
+  var _adTgl=document.getElementById('autoDetectTgl');
+  if(_adTgl&&!_adTgl.classList.contains('on'))_adTgl.classList.add('on');
+}
 // Check GPS permission on load and request if needed
 checkGPSPermission();
 if(autoDetect){
