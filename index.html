@@ -471,18 +471,58 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 /* WORK DAY BUTTONS */
 .wd-btn{width:30px;height:30px;border-radius:50%;border:none;font-size:11px;font-weight:700;background:var(--ink6);color:var(--ink3);cursor:pointer;transition:all .2s;}
 .wd-btn.a{background:var(--vi);color:#fff;}
-/* ONBOARDING */
-.ob-sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:393px;background:var(--white);border-radius:var(--r3) var(--r3) 0 0;padding:32px 24px 40px;z-index:10000;transition:transform .4s cubic-bezier(.22,1,.36,1);box-shadow:0 -10px 40px rgba(0,0,0,.15);}
-.ob-sheet.show{transform:translateX(-50%) translateY(0);}
-.ob-slide{flex-direction:column;align-items:center;gap:12px;text-align:center;}
-.ob-emoji{font-size:48px;margin-bottom:4px;}
-.ob-title{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:800;color:var(--ink);}
-.ob-desc{font-size:13px;color:var(--ink3);line-height:1.5;margin-bottom:8px;}
-.ob-dots{display:flex;justify-content:center;gap:8px;margin-top:20px;}
-.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--ink6);transition:all .3s;}
-.ob-dot.active{width:24px;border-radius:4px;background:var(--vi);}
-.ob-unit-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 12px;border:2px solid var(--ink6);border-radius:var(--r2);background:var(--white);cursor:pointer;transition:all .2s;}
-.ob-unit-btn.active{border-color:var(--vi);background:var(--vi-s);}
+/* ONBOARDING — Full-screen immersive */
+.ob-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;}
+.ob-overlay.show{display:flex;}
+.ob-screen{position:fixed;inset:0;width:100%;max-width:393px;margin:0 auto;background:#0C0C1D;display:flex;flex-direction:column;overflow:hidden;z-index:10000;opacity:0;transform:scale(1.02);transition:opacity .5s ease,transform .5s ease;}
+.ob-screen.show{opacity:1;transform:scale(1);}
+.ob-mesh{position:absolute;inset:0;overflow:hidden;z-index:0;}
+.ob-mesh .m1{position:absolute;width:340px;height:340px;border-radius:50%;filter:blur(80px);opacity:.4;background:radial-gradient(circle,rgba(214,0,110,.5),transparent);top:-10%;right:-20%;animation:ms1 12s ease-in-out infinite;}
+.ob-mesh .m2{position:absolute;width:300px;height:300px;border-radius:50%;filter:blur(70px);opacity:.3;background:radial-gradient(circle,rgba(108,60,224,.5),transparent);bottom:-15%;left:-20%;animation:ms2 14s ease-in-out infinite;}
+.ob-mesh .m3{position:absolute;width:200px;height:200px;border-radius:50%;filter:blur(50px);opacity:.25;background:radial-gradient(circle,rgba(0,168,112,.35),transparent);top:40%;left:50%;animation:ms3 10s ease-in-out infinite;}
+.ob-noise{position:absolute;inset:0;z-index:1;opacity:.04;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.ob-content{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:0 28px;padding-top:max(60px,env(safe-area-inset-top,44px));padding-bottom:max(36px,env(safe-area-inset-bottom,20px));}
+.ob-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.ob-back{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.6);}
+.ob-back:hover{background:rgba(255,255,255,.14);color:#fff;}
+.ob-back.hidden{visibility:hidden;pointer-events:none;}
+.ob-step-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.ob-progress{display:flex;gap:6px;margin-bottom:40px;}
+.ob-prog-bar{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;transition:all .3s;}
+.ob-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#C084FC,#D6006E);width:0%;transition:width .5s cubic-bezier(.22,1,.36,1);}
+.ob-slide{flex-direction:column;align-items:center;gap:0;text-align:center;flex:1;justify-content:center;}
+.ob-icon-wrap{width:88px;height:88px;border-radius:24px;background:linear-gradient(145deg,rgba(108,60,224,.15),rgba(214,0,110,.1));border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;margin-bottom:28px;position:relative;}
+.ob-icon-wrap::after{content:'';position:absolute;inset:-4px;border-radius:28px;background:linear-gradient(145deg,rgba(108,60,224,.08),transparent);z-index:-1;}
+.ob-title{font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1.2;margin-bottom:10px;}
+.ob-desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:28px;max-width:300px;}
+.ob-input-wrap{width:100%;margin-bottom:16px;}
+.ob-input-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.35);text-align:left;display:block;margin-bottom:8px;}
+.ob-input{width:100%;padding:16px 18px;border:1.5px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.06);color:#fff;font-family:var(--f);font-size:16px;font-weight:500;outline:none;transition:all .25s;box-sizing:border-box;}
+.ob-input::placeholder{color:rgba(255,255,255,.2);}
+.ob-input:focus{border-color:rgba(192,132,252,.5);background:rgba(255,255,255,.08);box-shadow:0 0 0 4px rgba(108,60,224,.12);}
+.ob-bottom{margin-top:auto;width:100%;padding-top:20px;}
+.ob-cta{width:100%;padding:18px 24px;border-radius:100px;border:none;background:linear-gradient(135deg,#D6006E,#6C3CE0);color:#fff;font-family:var(--f);font-size:16px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;transition:all .3s;box-shadow:0 8px 32px rgba(214,0,110,.3),0 4px 12px rgba(108,60,224,.2);}
+.ob-cta:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(214,0,110,.35),0 6px 16px rgba(108,60,224,.25);}
+.ob-cta:active{transform:scale(.97);}
+.ob-cta::before{content:'';position:absolute;top:0;left:-100%;width:200%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transition:left .6s;}
+.ob-cta:hover::before{left:100%;}
+.ob-skip{width:100%;padding:14px;border:none;background:transparent;color:rgba(255,255,255,.35);font-family:var(--f);font-size:14px;font-weight:600;cursor:pointer;transition:color .2s;margin-top:8px;}
+.ob-skip:hover{color:rgba(255,255,255,.55);}
+.ob-unit-row{display:flex;gap:12px;width:100%;margin-bottom:16px;}
+.ob-unit-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 12px;border:1.5px solid rgba(255,255,255,.08);border-radius:20px;background:rgba(255,255,255,.04);cursor:pointer;transition:all .25s;color:rgba(255,255,255,.5);}
+.ob-unit-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);}
+.ob-unit-btn.active{border-color:rgba(192,132,252,.5);background:rgba(108,60,224,.12);color:#fff;box-shadow:0 4px 20px rgba(108,60,224,.15);}
+.ob-unit-btn strong{font-size:15px;font-weight:700;color:inherit;}
+.ob-unit-btn .ob-unit-sub{font-size:11px;font-weight:500;opacity:.6;}
+.ob-trust{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:11px;font-weight:600;color:rgba(255,255,255,.2);letter-spacing:.3px;}
+.ob-trust svg{opacity:.4;}
+.ob-gps-features{display:flex;flex-direction:column;gap:10px;width:100%;margin-bottom:20px;text-align:left;}
+.ob-gps-feat{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);}
+.ob-gps-feat-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ob-gps-feat-text{font-size:13px;font-weight:500;color:rgba(255,255,255,.55);line-height:1.4;}
+.ob-gps-feat-text strong{color:rgba(255,255,255,.8);font-weight:700;}
+@keyframes obSlideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.ob-slide.animating{animation:obSlideIn .4s cubic-bezier(.22,1,.36,1) forwards;}
 
 /* AI CHAT */
 .ai-fab{position:fixed;bottom:90px;right:16px;width:56px;height:56px;border-radius:50%;background:#1B4DDB;border:none;color:#fff;cursor:pointer;z-index:200;box-shadow:0 8px 28px rgba(27,77,219,.4);display:flex;align-items:center;justify-content:center;transition:all .3s cubic-bezier(.22,1,.36,1);}
@@ -517,7 +557,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <div class="hdr">
     <div class="hdr-l"><div class="hdr-av" id="hdrAv">S</div><div><div class="hdr-greet" id="hdrGreet"><script>document.write((function(){var h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening';})())</script></div><div class="hdr-name" id="hdrName">Welcome back</div></div></div>
     <div class="hdr-r"><span id="syncStatusDot" title="Synced" style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-flex;align-self:center;transition:background 0.5s;cursor:help;margin-right:2px"></span>
-    <div class="hdr-btn" style="position:relative" onclick="switchTabId('tab-alerts')" style="display:inline-flex;align-items:center;justify-content:center" id="hdrBellIco"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="hdr-dot"></div></div><div class="hdr-btn" onclick="goToSettings()" style="display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg></div></div>
+    <div class="hdr-btn" style="position:relative;display:inline-flex;align-items:center;justify-content:center" onclick="switchTabId('tab-alerts')" id="hdrBellIco"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="hdr-dot"></div></div><div class="hdr-btn" onclick="goToSettings()" style="display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg></div></div>
   </div>
 
   <!-- TAB 1: DRIVE -->
@@ -647,7 +687,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div id="workHoursConfig" style="display:none">
         <div class="sr"><div><h4>Start time</h4><p>When your workday begins</p></div><input type="time" class="sr-n" id="workStart" value="08:00" style="width:90px" onchange="saveWorkHours()"></div>
         <div class="sr"><div><h4>End time</h4><p>When your workday ends</p></div><input type="time" class="sr-n" id="workEnd" value="18:00" style="width:90px" onchange="saveWorkHours()"></div>
-        <div class="sr"><div><h4>Work days</h4><p>Days to auto-classify</p></div><div style="display:flex;gap:4px" id="workDays"><button class="wd-btn a" onclick="toggleWD(this,0)">S</button><button class="wd-btn a" onclick="toggleWD(this,1)">M</button><button class="wd-btn a" onclick="toggleWD(this,2)">T</button><button class="wd-btn a" onclick="toggleWD(this,3)">W</button><button class="wd-btn a" onclick="toggleWD(this,4)">T</button><button class="wd-btn a" onclick="toggleWD(this,5)">F</button><button class="wd-btn" onclick="toggleWD(this,6)">S</button></div></div>
+        <div class="sr"><div><h4>Work days</h4><p>Days to auto-classify</p></div><div style="display:flex;gap:4px" id="workDays"><button class="wd-btn" onclick="toggleWD(this,0)">S</button><button class="wd-btn a" onclick="toggleWD(this,1)">M</button><button class="wd-btn a" onclick="toggleWD(this,2)">T</button><button class="wd-btn a" onclick="toggleWD(this,3)">W</button><button class="wd-btn a" onclick="toggleWD(this,4)">T</button><button class="wd-btn a" onclick="toggleWD(this,5)">F</button><button class="wd-btn" onclick="toggleWD(this,6)">S</button></div></div>
       </div>
     </div>
     <div class="set-hdr">Notifications</div>
@@ -879,41 +919,81 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
 </div></div>
 
-<!-- ONBOARDING -->
-<div class="modal-overlay" id="onboardOverlay" style="z-index:9999"><div class="ob-sheet" id="onboardSheet">
-  <div class="ob-slide" style="display:flex">
-    <div class="ob-emoji"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V7a5 5 0 019.9-1"/><path d="M14 11V5M17 11V8a2 2 0 014 0v6a8 8 0 01-16 0V7a2 2 0 014 0v4"/><path d="M11 11V3a2 2 0 014 0v8"/></svg></div>
-    <div class="ob-title">Welcome to MyMilesAI</div>
-    <div class="ob-desc">Let's set up your account in 30 seconds.</div>
-    <div class="iw" style="width:100%"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">What's your name?</label><input type="text" class="inp" id="obName" placeholder="Enter your name..."></div>
-    <button class="cta" onclick="obNext(1)" style="width:100%;margin-top:8px">Continue →</button>
-  </div>
-  <div class="ob-slide" style="display:none">
-    <div class="ob-emoji"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 15.3a2.4 2.4 0 010 3.4l-2.6 2.6a2.4 2.4 0 01-3.4 0L2.7 8.7a2.41 2.41 0 010-3.4l2.6-2.6a2.41 2.41 0 013.4 0z"/></svg></div>
-    <div class="ob-title">Choose your unit</div>
-    <div class="ob-desc">How do you measure distance?</div>
-    <div style="display:flex;gap:12px;width:100%">
-      <button class="ob-unit-btn active" data-unit="US" onclick="setObUnit(this,'US')"><span style="font-size:28px">🇺🇸</span><strong>Miles</strong><span style="font-size:11px;color:var(--ink4)">IRS rate</span></button>
-      <button class="ob-unit-btn" data-unit="CA" onclick="setObUnit(this,'CA')"><span style="font-size:28px">🇨🇦</span><strong>Kilometers</strong><span style="font-size:11px;color:var(--ink4)">CRA rate</span></button>
+<!-- ONBOARDING — Full-screen immersive -->
+<div class="ob-overlay" id="onboardOverlay"><div class="ob-screen" id="onboardSheet">
+  <div class="ob-mesh"><div class="m1"></div><div class="m2"></div><div class="m3"></div></div>
+  <div class="ob-noise"></div>
+  <div class="ob-content">
+    <div class="ob-header">
+      <div class="ob-back hidden" id="obBack" onclick="obPrev()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="ob-step-label" id="obStepLabel">Step 1 of 4</div>
     </div>
-    <button class="cta" onclick="obNext(2)" style="width:100%;margin-top:12px">Continue →</button>
+    <div class="ob-progress"><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg1" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg2" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg3" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg4" style="width:0%"></div></div></div>
+
+    <!-- Step 0: Welcome -->
+    <div class="ob-slide" id="obSlide0" style="display:flex">
+      <div class="ob-icon-wrap"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z" stroke="url(#obGrad1)" fill="none"/><circle cx="6.5" cy="14.5" r="1.5" fill="#C084FC"/><circle cx="17.5" cy="14.5" r="1.5" fill="#D6006E"/><path d="M5 11l1.5-4.5h11L19 11H5z" stroke="#6EE7B7" fill="none"/><defs><linearGradient id="obGrad1" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#C084FC"/><stop offset="50%" stop-color="#D6006E"/><stop offset="100%" stop-color="#6EE7B7"/></linearGradient></defs></svg></div>
+      <div class="ob-title">Welcome to MyMilesAI</div>
+      <div class="ob-desc">Smart mileage tracking for tax deductions. Set up in 30 seconds.</div>
+      <div class="ob-input-wrap">
+        <div class="ob-input-label">What's your name?</div>
+        <input type="text" class="ob-input" id="obName" placeholder="Enter your name..." autocomplete="given-name" onkeydown="if(event.key==='Enter')obNext(1)">
+      </div>
+      <div class="ob-bottom">
+        <button class="ob-cta" onclick="obNext(1)">Get Started</button>
+        <div class="ob-trust"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Your data stays on your device</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Units -->
+    <div class="ob-slide" id="obSlide1" style="display:none">
+      <div class="ob-icon-wrap"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="url(#obGrad1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20" stroke="rgba(255,255,255,.2)"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+      <div class="ob-title">Choose your region</div>
+      <div class="ob-desc">We'll set the right unit and tax rate for you.</div>
+      <div class="ob-unit-row">
+        <button class="ob-unit-btn active" data-unit="US" onclick="setObUnit(this,'US')"><span style="font-size:32px">🇺🇸</span><strong>Miles</strong><span class="ob-unit-sub">IRS rate $0.70/mi</span></button>
+        <button class="ob-unit-btn" data-unit="CA" onclick="setObUnit(this,'CA')"><span style="font-size:32px">🇨🇦</span><strong>Kilometers</strong><span class="ob-unit-sub">CRA rate $0.72/km</span></button>
+      </div>
+      <div class="ob-unit-row">
+        <button class="ob-unit-btn" data-unit="UK" onclick="setObUnit(this,'UK')"><span style="font-size:32px">🇬🇧</span><strong>Miles</strong><span class="ob-unit-sub">HMRC rate £0.45/mi</span></button>
+        <button class="ob-unit-btn" data-unit="AU" onclick="setObUnit(this,'AU')"><span style="font-size:32px">🇦🇺</span><strong>Kilometres</strong><span class="ob-unit-sub">ATO rate A$0.88/km</span></button>
+      </div>
+      <div class="ob-bottom">
+        <button class="ob-cta" onclick="obNext(2)">Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 2: GPS -->
+    <div class="ob-slide" id="obSlide2" style="display:none">
+      <div class="ob-icon-wrap"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="url(#obGrad1)"/><circle cx="12" cy="10" r="3" stroke="#6EE7B7"/></svg></div>
+      <div class="ob-title">Enable GPS tracking</div>
+      <div class="ob-desc">Auto-detect and record trips hands-free while you drive.</div>
+      <div class="ob-gps-features">
+        <div class="ob-gps-feat"><div class="ob-gps-feat-icon" style="background:rgba(108,60,224,.12)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C084FC" stroke-width="2"><path d="M13 7L9 11l6.5 6.5a2.12 2.12 0 003-3L12 8"/><path d="M10 11L7.5 8.5a2.12 2.12 0 00-3 3L11 18"/><circle cx="18" cy="4" r="2"/></svg></div><div class="ob-gps-feat-text"><strong>Auto-detect trips</strong> when you start driving</div></div>
+        <div class="ob-gps-feat"><div class="ob-gps-feat-icon" style="background:rgba(0,168,112,.12)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="ob-gps-feat-text"><strong>100% private</strong> — location never leaves your device</div></div>
+        <div class="ob-gps-feat"><div class="ob-gps-feat-icon" style="background:rgba(214,0,110,.12)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FB7185" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="ob-gps-feat-text"><strong>Maximize deductions</strong> — never miss a trip</div></div>
+      </div>
+      <div class="ob-bottom">
+        <button class="ob-cta" onclick="obNext(3)">Allow GPS Access</button>
+        <button class="ob-skip" onclick="obSkipGPS()">I'll enable this later</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Odometer -->
+    <div class="ob-slide" id="obSlide3" style="display:none">
+      <div class="ob-icon-wrap"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="url(#obGrad1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke="#6EE7B7"/></svg></div>
+      <div class="ob-title">Odometer reading</div>
+      <div class="ob-desc">Optional. Record your current reading for accurate year-end tax reports.</div>
+      <div class="ob-input-wrap">
+        <div class="ob-input-label">Current odometer</div>
+        <input type="number" class="ob-input" id="obOdo" placeholder="e.g. 45230" inputmode="numeric" onkeydown="if(event.key==='Enter')obNext(4)">
+      </div>
+      <div class="ob-bottom">
+        <button class="ob-cta" onclick="obNext(4)">Finish Setup</button>
+        <button class="ob-skip" onclick="closeOnboarding()">Skip for now</button>
+      </div>
+    </div>
   </div>
-  <div class="ob-slide" style="display:none">
-    <div class="ob-emoji"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-    <div class="ob-title">Enable GPS</div>
-    <div class="ob-desc">GPS is needed to auto-track your trips. Your location stays on your device.</div>
-    <button class="cta" onclick="obNext(3)" style="width:100%">Allow GPS Access →</button>
-    <button class="modal-cancel" onclick="obNext(3)" style="width:100%;margin-top:6px">Skip for now</button>
-  </div>
-  <div class="ob-slide" style="display:none">
-    <div class="ob-emoji"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
-    <div class="ob-title">Odometer Reading</div>
-    <div class="ob-desc">Record your current odometer for year-end tax calculations. You can update this anytime in Settings.</div>
-    <div class="iw" style="width:100%"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Current odometer</label><input type="number" class="inp" id="obOdo" placeholder="e.g. 45230"></div>
-    <button class="cta" onclick="obNext(4)" style="width:100%;margin-top:8px">Finish Setup <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/></svg></button>
-    <button class="modal-cancel" onclick="closeOnboarding()" style="width:100%;margin-top:6px">Skip</button>
-  </div>
-  <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
 </div></div>
 
 <!-- TOAST -->
@@ -1278,7 +1358,7 @@ function renderAlerts(){
     return;
   }
   var lt=TRIPS[0];var ld=tripDist(lt.mi);
-  var lded=lt.ded?(parseFloat(ld)*r).toFixed(2):null;
+  var lded=lt.ded?(parseFloat(ld)*catRate(lt.type)).toFixed(2):null;
 
   // Safe fallback if _notifSettings not yet initialized
   var _ns=typeof _notifSettings!=='undefined'?_notifSettings:{trip:true,weekly:false,milestone:true};
@@ -1328,7 +1408,7 @@ function renderAlerts(){
       desc:t2.from+' → '+t2.to,time:ago(310)});}
 
   if(TRIPS.length>3){var t4=TRIPS[3];var d4=tripDist(t4.mi);
-    var dd4=t4.ded?(parseFloat(d4)*r).toFixed(2):null;
+    var dd4=t4.ded?(parseFloat(d4)*catRate(t4.type)).toFixed(2):null;
     allAlerts.push({id:'trip_saved_'+t4.id,isNew:false,ic:IC.trip,bg:BG.trip,
       title:'Trip saved · <span class="al-dist">'+d4+' '+u+'</span>',
       desc:t4.from+' → '+t4.to+(dd4?' · +'+c+dd4:''),time:'Yesterday'});}
@@ -2848,7 +2928,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   var freq=getFreqRouteType(fromAddr,toAddr);
   if(freq)type=freq;
   else if(isWorkHours())type='biz';
-  TRIPS.unshift({id:newId,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:type==='biz',purpose:'',notes:'',path:randomPath()});
+  TRIPS.unshift({id:newId,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath()});
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();renderAlerts();saveTripsToStorage();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
@@ -3542,7 +3622,7 @@ function _doSaveManual(){
   var startT=document.getElementById('addStartTime').value||'';
   var endT=document.getElementById('addEndTime').value||'';
   var timeLabel=startT?(startT+(endT?' – '+endT:'')):'Just now';
-  TRIPS.unshift({id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:autoType==='biz',purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT});
+  TRIPS.unshift({id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:!!CAT_DEDUCTIBLE[autoType],purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT});
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
   renderAlerts();
@@ -3576,7 +3656,7 @@ function returnTrip(id){
 function openEdit(id){curTrip=TRIPS.find(t=>t.id===id);if(!curTrip)return;document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');}
 function closeEdit(){document.getElementById('editModal').classList.remove('show');curTrip=null;}
 function setEC(c){document.getElementById('eBiz').classList.remove('ob');document.getElementById('ePer').classList.remove('op');if(c==='biz')document.getElementById('eBiz').classList.add('ob');else document.getElementById('ePer').classList.add('op');}
-function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('editFrom').value;curTrip.to=document.getElementById('editTo').value;const v=parseFloat(document.getElementById('editMi').value);curTrip.mi=LOC.country==='CA'?v/1.60934:v;curTrip.type=document.getElementById('eBiz').classList.contains('ob')?'biz':'pers';curTrip.ded=curTrip.type==='biz';curTrip.purpose=document.getElementById('editPurpose').value;curTrip.notes=document.getElementById('editNotes').value;var edv=document.getElementById('editDate').value;if(edv){var nd=new Date(edv+'T12:00:00');curTrip.date=_fmt(nd);curTrip.day=_rel(nd);curTrip.ts=nd.getTime();}checkFrequentRoute(curTrip);renderTrips();renderAlerts();saveTripsToStorage();closeEdit();showToast(_i('edit'),'Trip updated');}
+function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('editFrom').value;curTrip.to=document.getElementById('editTo').value;const v=parseFloat(document.getElementById('editMi').value);curTrip.mi=_useKm()?v/1.60934:v;curTrip.type=document.getElementById('eBiz').classList.contains('ob')?'biz':'pers';curTrip.ded=curTrip.type==='biz';curTrip.purpose=document.getElementById('editPurpose').value;curTrip.notes=document.getElementById('editNotes').value;var edv=document.getElementById('editDate').value;if(edv){var nd=new Date(edv+'T12:00:00');curTrip.date=_fmt(nd);curTrip.day=_rel(nd);curTrip.ts=nd.getTime();}checkFrequentRoute(curTrip);renderTrips();renderAlerts();saveTripsToStorage();closeEdit();showToast(_i('edit'),'Trip updated');}
 function openDel(id){curTrip=TRIPS.find(t=>t.id===id);if(!curTrip)return;document.getElementById('delRoute').textContent=curTrip.from+' → '+curTrip.to+' · '+tripDist(curTrip.mi)+' '+LOC.label;document.getElementById('delModal').classList.add('show');}
 function closeDel(){document.getElementById('delModal').classList.remove('show');curTrip=null;}
 var _lastDeleted=null,_lastDeletedIdx=-1,_undoTimer=null;
@@ -4429,14 +4509,47 @@ function signOut(){
 }
 
 /* ===== FEATURE 6: ONBOARDING ===== */
+var _obStep=0;
 function showOnboarding(){
   document.getElementById('onboardOverlay').classList.add('show');
   document.getElementById('onboardSheet').classList.add('show');
+  _obStep=0;
+  _updateObUI(0);
+  setTimeout(function(){document.getElementById('obName').focus();},600);
 }
 function closeOnboarding(){
-  document.getElementById('onboardOverlay').classList.remove('show');
-  document.getElementById('onboardSheet').classList.remove('show');
+  var screen=document.getElementById('onboardSheet');
+  screen.style.opacity='0';screen.style.transform='scale(.98)';
+  setTimeout(function(){
+    document.getElementById('onboardOverlay').classList.remove('show');
+    document.getElementById('onboardSheet').classList.remove('show');
+    screen.style.opacity='';screen.style.transform='';
+  },400);
   try{localStorage.setItem('mymilesai_onboarded','1');}catch(e){}
+}
+function _updateObUI(step){
+  // Update slides
+  for(var i=0;i<4;i++){
+    var slide=document.getElementById('obSlide'+i);
+    if(i===step){slide.style.display='flex';slide.classList.add('animating');(function(s){setTimeout(function(){s.classList.remove('animating');},500);})(slide);}
+    else{slide.style.display='none';}
+  }
+  // Update progress bars
+  for(var j=0;j<4;j++){
+    var fill=document.getElementById('obProg'+(j+1));
+    if(j<step)fill.style.width='100%';
+    else if(j===step)fill.style.width='50%';
+    else fill.style.width='0%';
+  }
+  // Update step label
+  document.getElementById('obStepLabel').textContent='Step '+(step+1)+' of 4';
+  // Back button visibility
+  var back=document.getElementById('obBack');
+  if(step>0)back.classList.remove('hidden');
+  else back.classList.add('hidden');
+}
+function obPrev(){
+  if(_obStep>0){_obStep--;_updateObUI(_obStep);}
 }
 function obNext(step){
   // Step 1: Name
@@ -4459,10 +4572,10 @@ function obNext(step){
         lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
         updateTemplateDists();
         showToast(_i('pin'),'GPS access granted');
-      },function(){if(!_isNativeGPS())showToast(_i('pin'),'GPS denied — you can enable later in settings');});
+      },function(){if(!_isNativeGPS())showToast(_i('pin'),'GPS denied — you can enable later in Settings');});
     }
   }
-  // Step 4: Odometer
+  // Step 4: Odometer → finish
   if(step===4){
     var odo=document.getElementById('obOdo').value;
     if(odo){
@@ -4470,21 +4583,26 @@ function obNext(step){
       document.getElementById('odoCurrent').value=odo;
       saveOdometer();
     }
-    closeOnboarding();
-    showToast(_i('rocket'),'Welcome to MyMilesAI! Start tracking your first trip.',4000);
+    // Complete progress bars
+    for(var k=0;k<4;k++)document.getElementById('obProg'+(k+1)).style.width='100%';
+    setTimeout(function(){
+      closeOnboarding();
+      showToast(_i('rocket'),'Welcome to MyMilesAI! Start tracking your first trip.',4000);
+    },400);
     return;
   }
-  // Slide to next
-  var slides=document.querySelectorAll('.ob-slide');
-  for(var i=0;i<slides.length;i++)slides[i].style.display='none';
-  slides[step].style.display='flex';
-  var dots=document.querySelectorAll('.ob-dot');
-  for(var i=0;i<dots.length;i++)dots[i].classList.toggle('active',i===step);
+  // Advance slide
+  _obStep=step;
+  _updateObUI(step);
+}
+function obSkipGPS(){
+  // Skip GPS permission request, just advance to next slide
+  _obStep=3;
+  _updateObUI(3);
 }
 function setObUnit(btn,unit){
   document.querySelectorAll('.ob-unit-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  btn.dataset.unit=unit;
 }
 // Check onboarding
 try{
