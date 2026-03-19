@@ -1,5 +1,5 @@
 // MyMilesAI Service Worker — Cache-first for app shell, network-first for APIs
-var CACHE_NAME = 'mymilesai-v5.0';
+var CACHE_NAME = 'mymilesai-v5.1';
 var APP_SHELL = [
   './',
   './index.html'
@@ -55,7 +55,25 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Cache-first for everything else (app shell, CDN assets)
+  // Network-first for index.html so updates always reach the device
+  if (url.endsWith('/') || url.endsWith('/index.html') || url.endsWith('index.html')) {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        if (response.ok) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      }).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  // Cache-first for everything else (CDN assets, fonts)
   event.respondWith(
     caches.match(event.request).then(function(cached) {
       if (cached) return cached;
