@@ -3645,13 +3645,22 @@ let curTrip=null;
 function returnTrip(id){
   var orig=TRIPS.find(function(t){return t.id===id;});
   if(!orig)return;
-  
-  var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
-  TRIPS.unshift({id:newId,from:orig.to,to:orig.from,mi:orig.mi,type:orig.type,time:'Just now',day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:orig.ded,purpose:orig.purpose,notes:'Return trip',path:randomPath()});
-  if(orig.type!=='uncl')checkFrequentRoute(TRIPS[0]);
-  renderTrips();renderAlerts();saveTripsToStorage();
+  openAddTrip();
+  document.getElementById('addFrom').value=orig.to;
+  document.getElementById('addTo').value=orig.from;
   var dist=tripDist(orig.mi);
-  showToast(_i('undo'),'Return trip saved · '+dist+' '+LOC.unit);
+  document.getElementById('addDistInput').value=dist;
+  addDistVal=dist;
+  _manualDistEdit=true;
+  document.getElementById('addDistInput').classList.add('filled');
+  document.getElementById('addDistBadge').classList.add('active');
+  document.getElementById('addDistBadge').textContent=LOC.unit;
+  document.getElementById('addDistStatus').textContent='Pre-filled from return trip';
+  document.getElementById('addDistStatus').classList.add('calculated');
+  var cat=orig.type==='uncl'?'biz':orig.type;
+  setAddCat(cat);
+  document.getElementById('addPurpose').value=orig.purpose||'';
+  document.getElementById('addNote').value='Return trip';
 }
 function openEdit(id){curTrip=TRIPS.find(t=>t.id===id);if(!curTrip)return;document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');}
 function closeEdit(){document.getElementById('editModal').classList.remove('show');curTrip=null;}
