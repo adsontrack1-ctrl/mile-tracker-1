@@ -2564,7 +2564,32 @@ function onPos(p){
     }
   }
   var spdVal=_useKm()?(spdMps*3.6):(spdMps*2.237);
-  var spdDisplay=spdVal.toFixed(0);
+
+  // SMART SPEED FILTER: hide unreliable speed when indoors/poor GPS
+  if(!window._spdBuffer) window._spdBuffer=[];
+  if(accuracy<=20){
+    window._spdBuffer.push(spdVal);
+    if(window._spdBuffer.length>5) window._spdBuffer.shift();
+  } else {
+    // Poor accuracy — clear buffer, don't trust speed
+    window._spdBuffer=[];
+  }
+
+  var spdDisplay;
+  if(accuracy>20){
+    // Poor GPS signal — show signal icon not speed
+    spdDisplay='--';
+    document.getElementById('speedUnit').textContent='poor GPS';
+  } else {
+    var avgSpd=window._spdBuffer.length>=3
+      ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
+      : spdVal;
+    // Floor: under 2mph/3kmh = stationary
+    var floor=_useKm()?3:2;
+    if(avgSpd<floor) avgSpd=0;
+    spdDisplay=avgSpd.toFixed(0);
+    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+  }
   document.getElementById('trackSpeed').textContent=spdDisplay;
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
