@@ -5,7 +5,7 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://api.jsonbin.io https://api.anthropic.com; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://api.jsonbin.io https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3890,14 +3890,14 @@ function saveAIKey(key){
   _aiApiKey=key;
   _updateAIKeyBar();
   // Test call
-  fetch('https://api.anthropic.com/v1/messages',{
+  fetch('https://mymilesai-ai.mymilesai.workers.dev/api/chat',{
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'test'}]})
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({messages:[{role:'user',content:'test'}]})
   }).then(function(r){
-    if(r.ok)showToast(_i('ccheck'),'API key validated');
-    else showToast(_i('warn'),'API key invalid — check and try again');
-  }).catch(function(){showToast(_i('warn'),'Could not validate key — check connection');});
+    if(r.ok){showToast('✅','AI Assistant ready');localStorage.setItem('mymilesai_ai_enabled','true');}
+    else showToast('⚠️','AI unavailable — try again');
+  }).catch(function(){showToast('⚠️','Could not connect to AI');});
 }
 
 function removeAIKey(){
@@ -4047,19 +4047,11 @@ function sendAIChat(){
   document.getElementById('aiMsgs').scrollTop=document.getElementById('aiMsgs').scrollHeight;
   document.getElementById('aiSendBtn').disabled=true;
 
-  fetch('https://api.anthropic.com/v1/messages',{
+  fetch('https://mymilesai-ai.mymilesai.workers.dev/api/chat',{
     method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'x-api-key':_aiApiKey,
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true'
-    },
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1024,
-      system:_buildAISystemPrompt(),
-      messages:_aiMessages.slice(-20)
+      messages:[{role:'system',content:_buildAISystemPrompt()},..._aiMessages.slice(-20)]
     })
   })
   .then(function(r){
