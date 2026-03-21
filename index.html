@@ -4157,6 +4157,7 @@ setTimeout(checkMissedTrips,2000); // Check for missed trips on load
 
 /* Fix #9 — Update template distances from GPS */
 function updateTemplateDists(){
+  if(!lastGpsLat||!lastGpsLng){return;} // Skip until real GPS acquired
   if(!lastGpsLat)return;
   var ofc=findNearest(OFFICES,lastGpsLat,lastGpsLng);
   var cli=findNearest(CLIENTS,lastGpsLat,lastGpsLng);
