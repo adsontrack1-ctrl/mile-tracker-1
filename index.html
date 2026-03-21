@@ -99,7 +99,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .track-live.show{display:block;animation:tabIn .3s ease;}
 .tl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .tl-badge{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--coral);}
-.tl-badge .rdot{width:9px;height:9px;border-radius:50%;background:var(--coral);box-shadow:0 0 10px rgba(239,61,88,.4);animation:gp 1s ease-in-out infinite;}
+.tl-badge .rdot{width:9px;height:9px;border-radius:50%;background:#666;box-shadow:none;animation:none;transition:all 0.3s;}
 .tl-timer{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.5px;}
 .tl-stats{display:flex;gap:8px;}
 .tls{flex:1;text-align:center;padding:12px 8px;background:var(--ink7);border-radius:var(--r);border:1px solid var(--ink6);}
@@ -583,7 +583,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 
     <!-- LIVE TRACKING -->
     <div class="track-live" id="trackLive">
-      <div class="tl-top"><div class="tl-badge"><span class="rdot"></span>Recording Trip</div><div class="tl-timer" id="trackTimer">00:00</div></div>
+      <div class="tl-top"><div class="tl-badge" id="gpsBadge"><span class="rdot"></span>Recording Trip</div><div class="tl-timer" id="trackTimer">00:00</div></div>
       <div class="tl-stats">
         <div class="tls"><div class="tls-v" id="trackDist">0.0</div><div class="tls-l" id="trackDistU">miles</div></div>
         <div class="tls"><div class="tls-v" id="trackSpeed">0</div><div class="tls-l" id="trackSpeedU">mph</div></div>
@@ -626,13 +626,13 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div id="swipeQueue"></div>
       <div style="height:8px"></div>
     </div>
-    <div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclassified</button></div>
+    <div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclass.</button></div>
     <div class="trip-list" id="tripList"></div>
   </div>
 
   <!-- TAB 3: STATS -->
   <div class="tab" id="tab-stats">
-    <div class="sh"><span class="sh-t">Statistics</span><span class="sh-pill" id="statsPeriod">Mar 2026</span></div>
+    <div class="sh"><span class="sh-t">Statistics</span><div style="display:flex;align-items:center;gap:8px"><button onclick="changeStatsMonth(-1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8249;</button><span class="sh-pill" id="statsPeriod">Mar 2026</span><button onclick="changeStatsMonth(1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8250;</button></div></div>
     <div class="tf-row"><button class="tf a" onclick="switchStatsPeriod(this,'day')">Day</button><button class="tf" onclick="switchStatsPeriod(this,'week')">Week</button><button class="tf" onclick="switchStatsPeriod(this,'month')">Month</button><button class="tf" onclick="switchStatsPeriod(this,'year')">Year</button></div>
     <div class="ins-grid">
       <div class="ins-row">
@@ -673,13 +673,13 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
 
       <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
-      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px" id="rateVal" onchange="updateRate()"></div></div>
+      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--vi)" id="rateVal">-zsh.70/mi</div></div>
     </div>
     <div class="set-hdr">Odometer</div>
     <div class="set">
       <div class="sr"><div><h4>Start of year reading</h4><p id="odoStartLbl">Record Jan 1 odometer</p></div><input type="number" class="sr-n" style="width:80px" id="odoStart" placeholder="0" onchange="saveOdometer()"></div>
       <div class="sr"><div><h4>Current reading</h4><p id="odoCurLbl">Update periodically</p></div><input type="number" class="sr-n" style="width:80px" id="odoCurrent" placeholder="0" onchange="saveOdometer()"></div>
-      <div class="sr"><div><h4>Odometer delta</h4><p>Total driven this year</p></div><span style="font-size:13px;font-weight:700;color:var(--vi)" id="odoDelta">— mi</span></div>
+      <div class="sr"><div><h4>Odometer delta</h4><p>Total driven this year</p></div><span style="font-size:13px;font-weight:700;color:var(--ink3)" id="odoDelta">Not set</span></div>
     </div>
     <div class="set-hdr">Work Hours</div>
     <div class="set">
@@ -693,13 +693,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set-hdr">Notifications</div>
     <div class="set">
       <div class="sr"><div><h4>Trip alerts</h4><p>Notify on save</p></div><div class="tgl on" id="notifTripTgl" onclick="toggleNotifSetting(this,'trip')"></div></div>
-      <div class="sr"><div><h4>Weekly summary</h4><p>Sunday recap email</p></div><div class="tgl" id="notifWeeklyTgl" onclick="toggleNotifSetting(this,'weekly')"></div></div>
+
       <div class="sr"><div><h4>Milestone alerts</h4><p>Deduction goal reminders</p></div><div class="tgl on" id="notifMilestoneTgl" onclick="toggleNotifSetting(this,'milestone')"></div></div>
-    </div>
-    <div class="set-hdr">AI Assistant</div>
-    <div class="set">
-
-
     </div>
     <div class="set-hdr">Account & Privacy</div>
     <div class="set">
@@ -722,7 +717,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 
   <!-- TAB 4: ALERTS -->
   <div class="tab" id="tab-alerts">
-    <div class="sh"><span class="sh-t">Notifications</span><span class="sh-pill" id="alertBadge">5 new</span></div>
+    <div class="sh"><span class="sh-t">Notifications</span><span class="sh-pill" id="alertBadge" style="display:none">0 new</span></div>
     <div class="al-section">
       <div class="al-section-hdr">New <span onclick="markAllRead()">Mark all read</span></div>
     </div>
@@ -1004,7 +999,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <button class="ni a" data-tab="tab-drive" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg><span>Drive</span></button>
   <button class="ni" data-tab="tab-trips" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg><span>Trips</span></button>
   <button class="ni" data-tab="tab-stats" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M3.5 18.5l6-6.5 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 17z"/><path d="M3.5 18.5l6-6.5 4 4L22 6.92" fill="none" stroke="currentColor" stroke-width="0" /></svg><span>Stats</span></button>
-  <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge">3</div></button>
+  <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge" style="display:none">0</div></button>
 </div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
@@ -1115,7 +1110,7 @@ function applyLocale(){
   _set('trackDistU',LOC.label);
   _set('trackSpeedU',s);
   _set('trackAvgU','avg '+s);
-  _set('threshLbl','Min '+s+' to detect');
+  _set('threshLbl','Min speed to auto-detect ('+s+')');
   _set('taxLabel',LOC.taxLabel);
   var _rateLabels={US:'IRS rate',CA:'CRA rate',UK:'HMRC rate',AU:'ATO rate'};
   _set('rateLabel',_rateLabels[LOC.country]||'Tax rate');
@@ -4481,14 +4476,7 @@ function loadSettings(){
 loadSettings();
 loadNotifSettings();
 
-function updateRate(){
-  var newRate=parseFloat(document.getElementById('rateVal').value);
-  if(isNaN(newRate)||newRate<=0)return;
-  LOC.rate=newRate;
-  recalcStats();
-  saveSettings();
-  showToast(_i('dollar'),'Rate updated to '+LOC.currency+newRate.toFixed(2)+'/'+LOC.unit);
-}
+function updateRate(){/* rate is now read-only */}
 
 function getDefaultCat(){
   try{return document.getElementById('defaultCatSel').value||'uncl';}catch(e){return 'uncl';}
