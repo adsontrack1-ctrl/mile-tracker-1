@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- v1773360735-->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://api.jsonbin.io https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -99,7 +99,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .track-live.show{display:block;animation:tabIn .3s ease;}
 .tl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .tl-badge{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--coral);}
-.tl-badge .rdot{width:9px;height:9px;border-radius:50%;background:var(--coral);box-shadow:0 0 10px rgba(239,61,88,.4);animation:gp 1s ease-in-out infinite;}
+.tl-badge .rdot{width:9px;height:9px;border-radius:50%;background:#666;box-shadow:none;animation:none;transition:all 0.3s;}
 .tl-timer{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.5px;}
 .tl-stats{display:flex;gap:8px;}
 .tls{flex:1;text-align:center;padding:12px 8px;background:var(--ink7);border-radius:var(--r);border:1px solid var(--ink6);}
@@ -549,6 +549,25 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .ai-send-btn:disabled{opacity:.4;cursor:default;}
 .ai-key-bar{padding:12px 16px;background:rgba(224,141,0,.06);border-bottom:1px solid rgba(224,141,0,.15);font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px;}
 .ai-key-bar a{color:var(--vi);font-weight:700;cursor:pointer;}
+
+/* iOS Phone call / hotspot bar adaptive layout */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .top-bar, .topbar, .header, [class*="top-bar"], [class*="header"] {
+    padding-top: max(env(safe-area-inset-top), 12px) !important;
+    transition: padding-top 0.3s ease;
+  }
+  body {
+    padding-top: env(safe-area-inset-top);
+    transition: padding-top 0.3s ease;
+  }
+}
+/* Keep header always visible */
+.top-bar, .topbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 999 !important;
+  background: inherit;
+}
 </style>
 </head>
 <body>
@@ -583,7 +602,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 
     <!-- LIVE TRACKING -->
     <div class="track-live" id="trackLive">
-      <div class="tl-top"><div class="tl-badge"><span class="rdot"></span>Recording Trip</div><div class="tl-timer" id="trackTimer">00:00</div></div>
+      <div class="tl-top"><div class="tl-badge" id="gpsBadge"><span class="rdot"></span>Recording Trip</div><div class="tl-timer" id="trackTimer">00:00</div></div>
       <div class="tl-stats">
         <div class="tls"><div class="tls-v" id="trackDist">0.0</div><div class="tls-l" id="trackDistU">miles</div></div>
         <div class="tls"><div class="tls-v" id="trackSpeed">0</div><div class="tls-l" id="trackSpeedU">mph</div></div>
@@ -626,13 +645,13 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div id="swipeQueue"></div>
       <div style="height:8px"></div>
     </div>
-    <div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclassified</button></div>
+    <div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclass.</button></div>
     <div class="trip-list" id="tripList"></div>
   </div>
 
   <!-- TAB 3: STATS -->
   <div class="tab" id="tab-stats">
-    <div class="sh"><span class="sh-t">Statistics</span><span class="sh-pill" id="statsPeriod">Mar 2026</span></div>
+    <div class="sh"><span class="sh-t">Statistics</span><div style="display:flex;align-items:center;gap:8px"><button onclick="changeStatsMonth(-1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8249;</button><span class="sh-pill" id="statsPeriod">Mar 2026</span><button onclick="changeStatsMonth(1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8250;</button></div></div>
     <div class="tf-row"><button class="tf a" onclick="switchStatsPeriod(this,'day')">Day</button><button class="tf" onclick="switchStatsPeriod(this,'week')">Week</button><button class="tf" onclick="switchStatsPeriod(this,'month')">Month</button><button class="tf" onclick="switchStatsPeriod(this,'year')">Year</button></div>
     <div class="ins-grid">
       <div class="ins-row">
@@ -671,15 +690,15 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="5" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
-      <div class="sr"><div><h4>Navigation app</h4><p>Opens when you tap Map</p></div><select class="sr-sel" id="mapAppSel" onchange="saveMapAppPref()"><option value="inapp">In-app map</option><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div>
+
       <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
-      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px" id="rateVal" onchange="updateRate()"></div></div>
+      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--vi)" id="rateVal">-zsh.70/mi</div></div>
     </div>
     <div class="set-hdr">Odometer</div>
     <div class="set">
       <div class="sr"><div><h4>Start of year reading</h4><p id="odoStartLbl">Record Jan 1 odometer</p></div><input type="number" class="sr-n" style="width:80px" id="odoStart" placeholder="0" onchange="saveOdometer()"></div>
       <div class="sr"><div><h4>Current reading</h4><p id="odoCurLbl">Update periodically</p></div><input type="number" class="sr-n" style="width:80px" id="odoCurrent" placeholder="0" onchange="saveOdometer()"></div>
-      <div class="sr"><div><h4>Odometer delta</h4><p>Total driven this year</p></div><span style="font-size:13px;font-weight:700;color:var(--vi)" id="odoDelta">— mi</span></div>
+      <div class="sr"><div><h4>Odometer delta</h4><p>Total driven this year</p></div><span style="font-size:13px;font-weight:700;color:var(--ink3)" id="odoDelta">Not set</span></div>
     </div>
     <div class="set-hdr">Work Hours</div>
     <div class="set">
@@ -693,13 +712,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set-hdr">Notifications</div>
     <div class="set">
       <div class="sr"><div><h4>Trip alerts</h4><p>Notify on save</p></div><div class="tgl on" id="notifTripTgl" onclick="toggleNotifSetting(this,'trip')"></div></div>
-      <div class="sr"><div><h4>Weekly summary</h4><p>Sunday recap email</p></div><div class="tgl" id="notifWeeklyTgl" onclick="toggleNotifSetting(this,'weekly')"></div></div>
+
       <div class="sr"><div><h4>Milestone alerts</h4><p>Deduction goal reminders</p></div><div class="tgl on" id="notifMilestoneTgl" onclick="toggleNotifSetting(this,'milestone')"></div></div>
-    </div>
-    <div class="set-hdr">AI Assistant</div>
-    <div class="set">
-      <div class="sr"><div><h4>Claude API key</h4><p>Required for AI chat</p></div><input type="password" class="sr-n" style="width:140px;font-size:11px" id="aiKeyInput" placeholder="sk-ant-..." onchange="saveAIKey(this.value)"></div>
-      <div class="sr"><div><h4>Remove API key</h4><p>Clear stored key</p></div><button class="btn-rd" style="font-size:11px;padding:4px 12px" onclick="removeAIKey()">Remove</button></div>
     </div>
     <div class="set-hdr">Account & Privacy</div>
     <div class="set">
@@ -722,7 +736,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 
   <!-- TAB 4: ALERTS -->
   <div class="tab" id="tab-alerts">
-    <div class="sh"><span class="sh-t">Notifications</span><span class="sh-pill" id="alertBadge">5 new</span></div>
+    <div class="sh"><span class="sh-t">Notifications</span><span class="sh-pill" id="alertBadge" style="display:none">0 new</span></div>
     <div class="al-section">
       <div class="al-section-hdr">New <span onclick="markAllRead()">Mark all read</span></div>
     </div>
@@ -1004,7 +1018,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <button class="ni a" data-tab="tab-drive" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg><span>Drive</span></button>
   <button class="ni" data-tab="tab-trips" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg><span>Trips</span></button>
   <button class="ni" data-tab="tab-stats" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M3.5 18.5l6-6.5 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 17z"/><path d="M3.5 18.5l6-6.5 4 4L22 6.92" fill="none" stroke="currentColor" stroke-width="0" /></svg><span>Stats</span></button>
-  <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge">3</div></button>
+  <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge" style="display:none">0</div></button>
 </div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
@@ -1115,7 +1129,7 @@ function applyLocale(){
   _set('trackDistU',LOC.label);
   _set('trackSpeedU',s);
   _set('trackAvgU','avg '+s);
-  _set('threshLbl','Min '+s+' to detect');
+  _set('threshLbl','Min speed to auto-detect ('+s+')');
   _set('taxLabel',LOC.taxLabel);
   var _rateLabels={US:'IRS rate',CA:'CRA rate',UK:'HMRC rate',AU:'ATO rate'};
   _set('rateLabel',_rateLabels[LOC.country]||'Tax rate');
@@ -1386,12 +1400,7 @@ function renderAlerts(){
     time:ago(195),
     action:'<button class="al-action add" onclick="openAddTrip()">+ Add trip</button>'});
 
-  // New: Weekly summary
-  // New: Weekly summary (controlled by notif setting)
-  if(_ns.weekly) allAlerts.push({id:'weekly_current',isNew:true,ic:IC.chart,bg:BG.chart,
-    title:'Weekly mileage summary',
-    desc:totalBiz.toFixed(1)+' '+u+' business · '+totalPer.toFixed(1)+' '+u+' personal · '+c+(totalBiz*r).toFixed(2)+' earned',
-    time:'Last Sunday'});
+
 
   // New: Tax reminder (Jan-May only)
   var mo=now.getMonth();
@@ -2464,7 +2473,7 @@ function startTracking(){
   } else {
     watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   }
-  tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
+  tracking=true;_autoSaveShown=false;_pendingAutoSave=null;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -2513,6 +2522,88 @@ window.__nativeGPS__ = function(coords) {
   // Always update last known GPS coords for templates etc
   lastGpsLat=coords.lat;lastGpsLng=coords.lng;
 };
+
+
+
+/* Handle iOS dynamic safe area changes (phone call bar, hotspot bar) */
+function _updateSafeArea(){
+  var safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || 
+    getComputedStyle(document.documentElement).paddingTop || '0');
+  document.documentElement.style.setProperty('--safe-top', 
+    'env(safe-area-inset-top)');
+}
+// Listen for visual viewport changes (triggered by iOS call bar)
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', function(){
+    _updateSafeArea();
+    // Redraw header
+    var header = document.querySelector('.top-bar, .topbar, header');
+    if(header) header.style.paddingTop = 'env(safe-area-inset-top)';
+  });
+}
+// Also handle on focus/blur (when returning from call)
+window.addEventListener('focus', _updateSafeArea);
+window.addEventListener('pageshow', _updateSafeArea);
+
+/* SMART LOCATION MEMORY */
+function _loadKnownLocations(){try{var r=localStorage.getItem('mymilesai_kl');return r?JSON.parse(r):{};}catch(e){return {};}}
+function _saveKnownLocations(l){try{localStorage.setItem('mymilesai_kl',JSON.stringify(l));}catch(e){}}
+function _learnLocation(lat,lng,label,cat){
+  if(!lat||!lng||!label)return;
+  var locs=_loadKnownLocations(),key=lat.toFixed(3)+'_'+lng.toFixed(3);
+  locs[key]={lat:lat,lng:lng,label:label,category:cat||'Unclassified',visits:(locs[key]?locs[key].visits:0)+1,lastSeen:Date.now()};
+  _saveKnownLocations(locs);
+}
+function _matchKnownLocation(lat,lng){
+  if(!lat||!lng)return null;
+  var locs=_loadKnownLocations(),best=null,bestD=999;
+  Object.keys(locs).forEach(function(k){var loc=locs[k],d=haversine(lat,lng,loc.lat,loc.lng)*1609;if(d<200&&d<bestD){bestD=d;best=loc;}});
+  return best;
+}
+var _pendingAutoSave=null,_autoSaveShown=false;
+function _promptSmartSave(kd){
+  if(_autoSaveShown)return;_autoSaveShown=true;
+  var dist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
+  var ded=(parseFloat(dist)*LOC.rate).toFixed(2);
+  var dl=kd?kd.label:'',dc=kd?kd.category:'Unclassified',rep=kd&&kd.visits>1;
+  var msg='<div style="text-align:center;margin-bottom:12px;"><div style="font-size:32px;">🚗</div>'
+    +'<div style="font-size:18px;font-weight:700;margin:8px 0;">Trip Completed!</div>'
+    +'<div style="font-size:14px;color:rgba(255,255,255,0.7);">'+dist+' '+LOC.unit+' · '+LOC.currency+ded+' deduction</div></div>';
+  if(rep){
+    msg+='<div style="background:rgba(110,231,183,0.15);border:1px solid rgba(110,231,183,0.4);border-radius:12px;padding:12px;margin-bottom:12px;">'
+      +'<div style="font-size:12px;color:#6EE7B7;font-weight:600;">📍 RECOGNIZED</div>'
+      +'<div style="font-size:15px;font-weight:600;margin-top:4px;">'+dl+'</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,0.6);">'+dc+'</div></div>'
+      +'<div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:12px;">Save as <b>'+dc+'</b> trip to <b>'+dl+'</b>?</div>';
+  } else {
+    msg+='<div style="margin-bottom:10px;"><label style="font-size:12px;color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">Destination</label>'
+      +'<input id="asDest" type="text" value="'+dl+'" placeholder="e.g. Office, Client, Farm" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;outline:none;"></div>'
+      +'<div><label style="font-size:12px;color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">Category</label>'
+      +'<select id="asCat" style="width:100%;box-sizing:border-box;background:rgba(30,30,50,0.95);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;outline:none;">'
+      +'<option value="Business"'+(dc==="Business"?" selected":"")+'>Business</option>'
+      +'<option value="Personal"'+(dc==="Personal"?" selected":"")+'>Personal</option>'
+      +'<option value="Medical"'+(dc==="Medical"?" selected":"")+'>Medical</option>'
+      +'<option value="Charity"'+(dc==="Charity"?" selected":"")+'>Charity</option>'
+      +'</select></div>';
+  }
+  _pendingAutoSave={dist:dist,kd:kd,rep:rep,dl:dl,dc:dc};
+  openInfoModal('💾 Save Trip',msg,rep?'Save as '+dc:'Save Trip',function(){_confirmAutoSave();},'Discard',function(){_autoSaveShown=false;});
+}
+function _confirmAutoSave(){
+  if(!_pendingAutoSave)return;
+  var p=_pendingAutoSave;
+  var dest=p.rep?p.dl:(document.getElementById('asDest')?document.getElementById('asDest').value.trim():p.dl);
+  var cat=p.rep?p.dc:(document.getElementById('asCat')?document.getElementById('asCat').value:'Unclassified');
+  if(!dest){showToast('⚠️','Please enter a destination');return;}
+  if(lastGpsLat&&lastGpsLng)_learnLocation(lastGpsLat,lastGpsLng,dest,cat);
+  var now=new Date(),trip={id:Date.now(),date:now.toISOString().split('T')[0],from:'Current Location',
+    to:dest,distance:parseFloat(p.dist),unit:LOC.unit,category:cat,
+    deduction:parseFloat(p.dist)*LOC.rate,note:'Auto-saved',ts:Date.now()};
+  var trips=loadTrips();trips.unshift(trip);saveTrips(trips);
+  recalcStats();renderTrips();
+  showToast('✅','Saved — '+p.dist+' '+LOC.unit+' ('+cat+')');
+  _pendingAutoSave=null;_autoSaveShown=false;
+}
 
 /* ── GPS DEBUG PANEL UPDATE ── */
 function updateDebugPanel(){
@@ -2567,7 +2658,7 @@ function onPos(p){
 
   // SMART SPEED FILTER: hide unreliable speed when indoors/poor GPS
   if(!window._spdBuffer) window._spdBuffer=[];
-  if(accuracy<=20){
+  if(accuracy<=80){
     window._spdBuffer.push(spdVal);
     if(window._spdBuffer.length>5) window._spdBuffer.shift();
   } else {
@@ -2576,7 +2667,7 @@ function onPos(p){
   }
 
   var spdDisplay;
-  if(accuracy>20){
+  if(accuracy>80){
     // Poor GPS signal — show signal icon not speed
     spdDisplay='--';
     document.getElementById('speedUnit').textContent='poor GPS';
@@ -2584,8 +2675,8 @@ function onPos(p){
     var avgSpd=window._spdBuffer.length>=3
       ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
       : spdVal;
-    // Floor: under 2mph/3kmh = stationary
-    var floor=_useKm()?3:2;
+    // Floor: under 3mph/5kmh = GPS drift noise when stationary
+    var floor=_useKm()?5:3;
     if(avgSpd<floor) avgSpd=0;
     spdDisplay=avgSpd.toFixed(0);
     document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
@@ -2601,7 +2692,7 @@ function onPos(p){
   if(positions.length>0&&accuracy<=50){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
-    if(d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
+    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
@@ -2632,7 +2723,9 @@ function onPos(p){
     document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
   }
   // === SMART PAUSE: 5 min CONTINUOUS stationary → end trip ===
-  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  var _thEl=document.getElementById('threshVal');
+  var _svT=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
+  var thresh=(_thEl&&parseInt(_thEl.value))||_svT||5;
   var spdRaw=spdVal;
   if(spdRaw>=thresh){
     // Moving — reset stationary timer and end-position collection
@@ -2688,6 +2781,15 @@ function onPosErr(e){
 }
 
 /* ===== MISSED TRIP DETECTOR (#1 fix) ===== */
+function clearStaleAlerts(){
+  // Clear any hardcoded/stale alerts on fresh load
+  try{
+    var stored=localStorage.getItem('mymilesai_alerts');
+    if(!stored){
+      localStorage.setItem('mymilesai_alerts','[]');
+    }
+  }catch(e){}
+}
 function checkMissedTrips(){
   if(!_lastTripEnd||_missedTripChecked)return;
   var gap=Date.now()-_lastTripEnd;
@@ -2760,7 +2862,7 @@ function stopAutoMonitoring(){
 
 var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
 var _detectCount=0; // consecutive above-threshold readings
-var _detectRequired=3; // readings needed to confirm driving
+var _detectRequired=2; // readings needed to confirm driving
 
 function onAutoPos(p){
   // While monitoring (not recording), check if driving
@@ -2768,15 +2870,30 @@ function onAutoPos(p){
   var spd=p.coords.speed;
   // Use GPS speed if available, else calc from last known position
   var spdMps=0;
-  if(typeof spd==='number'&&spd>=0&&spd!==null){spdMps=spd;}
+  var _t2=Date.now();
+  if(typeof spd==='number'&&spd>0&&spd!==null){spdMps=spd;}
   else if(lastGpsLat&&p.coords.latitude){
     var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);
-    spdMps=dMi*1609.34/5; // assume ~5s between readings
+    var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;
+    if(_dt<0.5)_dt=0.5;if(_dt>30)_dt=5;
+    spdMps=dMi*1609.34/_dt;
   }
-  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  window._lastAutoT=_t2;
+  var _threshEl=document.getElementById('threshVal');
+  var _savedThresh=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
+  var thresh=(_threshEl&&parseInt(_threshEl.value))||_savedThresh||5;
   var spdVal=_useKm()?spdMps*3.6:spdMps*2.237;
+  var _acc2=p.coords.accuracy||999;
+  if(!window._autoSpdBuf)window._autoSpdBuf=[];
+  if(_acc2<=25){window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();}
+  else window._autoSpdBuf=[];
+  var _avgA=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:spdVal;
+  if(_avgA<(_useKm()?5:3))_avgA=0;
+  spdVal=_acc2>30?0:_avgA;
   // Update speedo even while monitoring
   var spdDisplay=spdVal.toFixed(0);
+  if(_acc2>30){spdDisplay='--';document.getElementById('speedUnit').textContent='poor GPS';}
+  else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
   var pct=Math.min(spdVal/maxSpd,1);
@@ -2867,6 +2984,8 @@ function stopTracking(){
   }
   // Reset milestone flags
   for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
+  var _tMin=(Date.now()-trackStart)/60000;
+  if(totalDist>0.05&&_tMin>=5){var _kd=_matchKnownLocation(lastGpsLat,lastGpsLng);setTimeout(function(){_promptSmartSave(_kd);},1500);}
   if(totalDist>0.01){
     var mi=totalDist;
     var dist=_useKm()?(mi*1.60934):mi;
@@ -3911,7 +4030,7 @@ function removeAIKey(){
 
 function _updateAIKeyBar(){
   var bar=document.getElementById('aiKeyBar');
-  if(bar)bar.style.display=_aiApiKey?'none':'flex';
+  if(bar)bar.style.display='none';
 }
 
 function toggleAIChat(){
@@ -3923,7 +4042,6 @@ function toggleAIChat(){
   } else {
     panel.classList.add('show');
     fab.style.display='none';
-    _loadAIKey();
     var inp=document.getElementById('aiInput');
     if(inp)setTimeout(function(){inp.focus();},400);
   }
@@ -4024,7 +4142,7 @@ function sendAIChat(){
   _aiMessages.push({role:'user',content:text});
 
   // Try offline response first
-  if(!navigator.onLine||!_aiApiKey){
+  if(!navigator.onLine){
     var offline=_tryOfflineResponse(text);
     if(offline){
       _renderAIMessage('bot',offline);
@@ -4032,7 +4150,7 @@ function sendAIChat(){
       return;
     }
     if(!_aiApiKey){
-      _renderAIMessage('bot','Please add your Claude API key in Settings to use AI chat. For basic questions, I can answer offline.');
+      _renderAIMessage('bot','You are offline. Please check your connection and try again.');
       return;
     }
     _renderAIMessage('bot','You are offline. I can only answer basic questions about rates and totals right now.');
@@ -4088,6 +4206,7 @@ setTimeout(checkMissedTrips,2000); // Check for missed trips on load
 
 /* Fix #9 — Update template distances from GPS */
 function updateTemplateDists(){
+  if(!lastGpsLat||!lastGpsLng){return;} // Skip until real GPS acquired
   if(!lastGpsLat)return;
   var ofc=findNearest(OFFICES,lastGpsLat,lastGpsLng);
   var cli=findNearest(CLIENTS,lastGpsLat,lastGpsLng);
@@ -4401,16 +4520,8 @@ function loadSettings(){
 }
 loadSettings();
 loadNotifSettings();
-_loadAIKey();
 
-function updateRate(){
-  var newRate=parseFloat(document.getElementById('rateVal').value);
-  if(isNaN(newRate)||newRate<=0)return;
-  LOC.rate=newRate;
-  recalcStats();
-  saveSettings();
-  showToast(_i('dollar'),'Rate updated to '+LOC.currency+newRate.toFixed(2)+'/'+LOC.unit);
-}
+function updateRate(){/* rate is now read-only */}
 
 function getDefaultCat(){
   try{return document.getElementById('defaultCatSel').value||'uncl';}catch(e){return 'uncl';}
@@ -4443,7 +4554,7 @@ function exportJSON(){
 function _showConfirm(title,message,confirmLabel,confirmColor,onConfirm){
   var overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0) 0';
-  overlay.innerHTML='<div style="background:var(--white);border-radius:var(--r2) var(--r2) 0 0;padding:28px 24px 32px;width:100%;max-width:480px;box-shadow:0 -8px 40px rgba(0,0,0,.18)">'
+  overlay.innerHTML='<div style="background:var(--white);border-radius:var(--r2) var(--r2) 0 0;padding:28px 24px 32px;width:100%;max-width:100%;box-shadow:0 -8px 40px rgba(0,0,0,.18)">'
     +'<div style="width:36px;height:4px;background:var(--ink5);border-radius:4px;margin:0 auto 20px"></div>'
     +'<div style="font-size:18px;font-weight:700;margin-bottom:10px;font-family:var(--fd)">'+title+'</div>'
     +'<div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:24px">'+message+'</div>'
