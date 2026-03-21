@@ -2652,7 +2652,7 @@ function onPos(p){
   if(positions.length>0&&accuracy<=50){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
-    if(d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
+    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
