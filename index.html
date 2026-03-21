@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- v1773360735-->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://api.jsonbin.io https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -671,7 +671,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="5" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
-      <div class="sr"><div><h4>Navigation app</h4><p>Opens when you tap Map</p></div><select class="sr-sel" id="mapAppSel" onchange="saveMapAppPref()"><option value="inapp">In-app map</option><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div>
+
       <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
       <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px" id="rateVal" onchange="updateRate()"></div></div>
     </div>
@@ -698,8 +698,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     </div>
     <div class="set-hdr">AI Assistant</div>
     <div class="set">
-      <div class="sr"><div><h4>Claude API key</h4><p>Required for AI chat</p></div><input type="password" class="sr-n" style="width:140px;font-size:11px" id="aiKeyInput" placeholder="sk-ant-..." onchange="saveAIKey(this.value)"></div>
-      <div class="sr"><div><h4>Remove API key</h4><p>Clear stored key</p></div><button class="btn-rd" style="font-size:11px;padding:4px 12px" onclick="removeAIKey()">Remove</button></div>
+
+
     </div>
     <div class="set-hdr">Account & Privacy</div>
     <div class="set">
@@ -2464,7 +2464,7 @@ function startTracking(){
   } else {
     watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   }
-  tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
+  tracking=true;_autoSaveShown=false;_pendingAutoSave=null;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -2513,6 +2513,67 @@ window.__nativeGPS__ = function(coords) {
   // Always update last known GPS coords for templates etc
   lastGpsLat=coords.lat;lastGpsLng=coords.lng;
 };
+
+
+/* SMART LOCATION MEMORY */
+function _loadKnownLocations(){try{var r=localStorage.getItem('mymilesai_kl');return r?JSON.parse(r):{};}catch(e){return {};}}
+function _saveKnownLocations(l){try{localStorage.setItem('mymilesai_kl',JSON.stringify(l));}catch(e){}}
+function _learnLocation(lat,lng,label,cat){
+  if(!lat||!lng||!label)return;
+  var locs=_loadKnownLocations(),key=lat.toFixed(3)+'_'+lng.toFixed(3);
+  locs[key]={lat:lat,lng:lng,label:label,category:cat||'Unclassified',visits:(locs[key]?locs[key].visits:0)+1,lastSeen:Date.now()};
+  _saveKnownLocations(locs);
+}
+function _matchKnownLocation(lat,lng){
+  if(!lat||!lng)return null;
+  var locs=_loadKnownLocations(),best=null,bestD=999;
+  Object.keys(locs).forEach(function(k){var loc=locs[k],d=haversine(lat,lng,loc.lat,loc.lng)*1609;if(d<200&&d<bestD){bestD=d;best=loc;}});
+  return best;
+}
+var _pendingAutoSave=null,_autoSaveShown=false;
+function _promptSmartSave(kd){
+  if(_autoSaveShown)return;_autoSaveShown=true;
+  var dist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
+  var ded=(parseFloat(dist)*LOC.rate).toFixed(2);
+  var dl=kd?kd.label:'',dc=kd?kd.category:'Unclassified',rep=kd&&kd.visits>1;
+  var msg='<div style="text-align:center;margin-bottom:12px;"><div style="font-size:32px;">🚗</div>'
+    +'<div style="font-size:18px;font-weight:700;margin:8px 0;">Trip Completed!</div>'
+    +'<div style="font-size:14px;color:rgba(255,255,255,0.7);">'+dist+' '+LOC.unit+' · '+LOC.currency+ded+' deduction</div></div>';
+  if(rep){
+    msg+='<div style="background:rgba(110,231,183,0.15);border:1px solid rgba(110,231,183,0.4);border-radius:12px;padding:12px;margin-bottom:12px;">'
+      +'<div style="font-size:12px;color:#6EE7B7;font-weight:600;">📍 RECOGNIZED</div>'
+      +'<div style="font-size:15px;font-weight:600;margin-top:4px;">'+dl+'</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,0.6);">'+dc+'</div></div>'
+      +'<div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:12px;">Save as <b>'+dc+'</b> trip to <b>'+dl+'</b>?</div>';
+  } else {
+    msg+='<div style="margin-bottom:10px;"><label style="font-size:12px;color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">Destination</label>'
+      +'<input id="asDest" type="text" value="'+dl+'" placeholder="e.g. Office, Client, Farm" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;outline:none;"></div>'
+      +'<div><label style="font-size:12px;color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">Category</label>'
+      +'<select id="asCat" style="width:100%;box-sizing:border-box;background:rgba(30,30,50,0.95);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;outline:none;">'
+      +'<option value="Business"'+(dc==="Business"?" selected":"")+'>Business</option>'
+      +'<option value="Personal"'+(dc==="Personal"?" selected":"")+'>Personal</option>'
+      +'<option value="Medical"'+(dc==="Medical"?" selected":"")+'>Medical</option>'
+      +'<option value="Charity"'+(dc==="Charity"?" selected":"")+'>Charity</option>'
+      +'</select></div>';
+  }
+  _pendingAutoSave={dist:dist,kd:kd,rep:rep,dl:dl,dc:dc};
+  openInfoModal('💾 Save Trip',msg,rep?'Save as '+dc:'Save Trip',function(){_confirmAutoSave();},'Discard',function(){_autoSaveShown=false;});
+}
+function _confirmAutoSave(){
+  if(!_pendingAutoSave)return;
+  var p=_pendingAutoSave;
+  var dest=p.rep?p.dl:(document.getElementById('asDest')?document.getElementById('asDest').value.trim():p.dl);
+  var cat=p.rep?p.dc:(document.getElementById('asCat')?document.getElementById('asCat').value:'Unclassified');
+  if(!dest){showToast('⚠️','Please enter a destination');return;}
+  if(lastGpsLat&&lastGpsLng)_learnLocation(lastGpsLat,lastGpsLng,dest,cat);
+  var now=new Date(),trip={id:Date.now(),date:now.toISOString().split('T')[0],from:'Current Location',
+    to:dest,distance:parseFloat(p.dist),unit:LOC.unit,category:cat,
+    deduction:parseFloat(p.dist)*LOC.rate,note:'Auto-saved',ts:Date.now()};
+  var trips=loadTrips();trips.unshift(trip);saveTrips(trips);
+  recalcStats();renderTrips();
+  showToast('✅','Saved — '+p.dist+' '+LOC.unit+' ('+cat+')');
+  _pendingAutoSave=null;_autoSaveShown=false;
+}
 
 /* ── GPS DEBUG PANEL UPDATE ── */
 function updateDebugPanel(){
@@ -2584,8 +2645,8 @@ function onPos(p){
     var avgSpd=window._spdBuffer.length>=3
       ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
       : spdVal;
-    // Floor: under 2mph/3kmh = stationary
-    var floor=_useKm()?3:2;
+    // Floor: under 1mph/1.6kmh = truly stationary
+    var floor=_useKm()?1.6:1;
     if(avgSpd<floor) avgSpd=0;
     spdDisplay=avgSpd.toFixed(0);
     document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
@@ -2632,7 +2693,9 @@ function onPos(p){
     document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
   }
   // === SMART PAUSE: 5 min CONTINUOUS stationary → end trip ===
-  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  var _thEl=document.getElementById('threshVal');
+  var _svT=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
+  var thresh=(_thEl&&parseInt(_thEl.value))||_svT||5;
   var spdRaw=spdVal;
   if(spdRaw>=thresh){
     // Moving — reset stationary timer and end-position collection
@@ -2760,7 +2823,7 @@ function stopAutoMonitoring(){
 
 var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
 var _detectCount=0; // consecutive above-threshold readings
-var _detectRequired=3; // readings needed to confirm driving
+var _detectRequired=2; // readings needed to confirm driving
 
 function onAutoPos(p){
   // While monitoring (not recording), check if driving
@@ -2768,15 +2831,30 @@ function onAutoPos(p){
   var spd=p.coords.speed;
   // Use GPS speed if available, else calc from last known position
   var spdMps=0;
-  if(typeof spd==='number'&&spd>=0&&spd!==null){spdMps=spd;}
+  var _t2=Date.now();
+  if(typeof spd==='number'&&spd>0&&spd!==null){spdMps=spd;}
   else if(lastGpsLat&&p.coords.latitude){
     var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);
-    spdMps=dMi*1609.34/5; // assume ~5s between readings
+    var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;
+    if(_dt<0.5)_dt=0.5;if(_dt>30)_dt=5;
+    spdMps=dMi*1609.34/_dt;
   }
-  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  window._lastAutoT=_t2;
+  var _threshEl=document.getElementById('threshVal');
+  var _savedThresh=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
+  var thresh=(_threshEl&&parseInt(_threshEl.value))||_savedThresh||5;
   var spdVal=_useKm()?spdMps*3.6:spdMps*2.237;
+  var _acc2=p.coords.accuracy||999;
+  if(!window._autoSpdBuf)window._autoSpdBuf=[];
+  if(_acc2<=25){window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();}
+  else window._autoSpdBuf=[];
+  var _avgA=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:spdVal;
+  if(_avgA<(_useKm()?1.6:1))_avgA=0;
+  spdVal=_acc2>30?0:_avgA;
   // Update speedo even while monitoring
   var spdDisplay=spdVal.toFixed(0);
+  if(_acc2>30){spdDisplay='--';document.getElementById('speedUnit').textContent='poor GPS';}
+  else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
   var pct=Math.min(spdVal/maxSpd,1);
@@ -2867,6 +2945,8 @@ function stopTracking(){
   }
   // Reset milestone flags
   for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
+  var _tMin=(Date.now()-trackStart)/60000;
+  if(totalDist>0.05&&_tMin>=5){var _kd=_matchKnownLocation(lastGpsLat,lastGpsLng);setTimeout(function(){_promptSmartSave(_kd);},1500);}
   if(totalDist>0.01){
     var mi=totalDist;
     var dist=_useKm()?(mi*1.60934):mi;
@@ -3911,7 +3991,7 @@ function removeAIKey(){
 
 function _updateAIKeyBar(){
   var bar=document.getElementById('aiKeyBar');
-  if(bar)bar.style.display=_aiApiKey?'none':'flex';
+  if(bar)bar.style.display='none';
 }
 
 function toggleAIChat(){
@@ -3923,7 +4003,6 @@ function toggleAIChat(){
   } else {
     panel.classList.add('show');
     fab.style.display='none';
-    _loadAIKey();
     var inp=document.getElementById('aiInput');
     if(inp)setTimeout(function(){inp.focus();},400);
   }
@@ -4024,7 +4103,7 @@ function sendAIChat(){
   _aiMessages.push({role:'user',content:text});
 
   // Try offline response first
-  if(!navigator.onLine||!_aiApiKey){
+  if(!navigator.onLine){
     var offline=_tryOfflineResponse(text);
     if(offline){
       _renderAIMessage('bot',offline);
@@ -4032,7 +4111,7 @@ function sendAIChat(){
       return;
     }
     if(!_aiApiKey){
-      _renderAIMessage('bot','Please add your Claude API key in Settings to use AI chat. For basic questions, I can answer offline.');
+      _renderAIMessage('bot','You are offline. Please check your connection and try again.');
       return;
     }
     _renderAIMessage('bot','You are offline. I can only answer basic questions about rates and totals right now.');
@@ -4401,7 +4480,6 @@ function loadSettings(){
 }
 loadSettings();
 loadNotifSettings();
-_loadAIKey();
 
 function updateRate(){
   var newRate=parseFloat(document.getElementById('rateVal').value);
