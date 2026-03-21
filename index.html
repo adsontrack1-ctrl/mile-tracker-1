@@ -1381,12 +1381,7 @@ function renderAlerts(){
     time:ago(195),
     action:'<button class="al-action add" onclick="openAddTrip()">+ Add trip</button>'});
 
-  // New: Weekly summary
-  // New: Weekly summary (controlled by notif setting)
-  if(_ns.weekly) allAlerts.push({id:'weekly_current',isNew:true,ic:IC.chart,bg:BG.chart,
-    title:'Weekly mileage summary',
-    desc:totalBiz.toFixed(1)+' '+u+' business · '+totalPer.toFixed(1)+' '+u+' personal · '+c+(totalBiz*r).toFixed(2)+' earned',
-    time:'Last Sunday'});
+
 
   // New: Tax reminder (Jan-May only)
   var mo=now.getMonth();
@@ -2657,7 +2652,7 @@ function onPos(p){
   if(positions.length>0&&accuracy<=50){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
-    if(d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
+    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
@@ -4162,6 +4157,7 @@ setTimeout(checkMissedTrips,2000); // Check for missed trips on load
 
 /* Fix #9 — Update template distances from GPS */
 function updateTemplateDists(){
+  if(!lastGpsLat||!lastGpsLng){return;} // Skip until real GPS acquired
   if(!lastGpsLat)return;
   var ofc=findNearest(OFFICES,lastGpsLat,lastGpsLng);
   var cli=findNearest(CLIENTS,lastGpsLat,lastGpsLng);
