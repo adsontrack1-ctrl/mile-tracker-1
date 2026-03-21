@@ -35,7 +35,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 .phone{width:393px;max-width:100vw;margin:0 auto;background:var(--bg);min-height:100vh;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
-.scroll {overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 110px; height: calc(100% - 60px); position: relative;}
+.scroll{padding-bottom:110px;}
 .tab{display:none;animation:tabIn .35s ease;}.tab.active{display:block;}
 @keyframes tabIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes gp{0%,100%{opacity:1}50%{opacity:.5}}
@@ -549,25 +549,6 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .ai-send-btn:disabled{opacity:.4;cursor:default;}
 .ai-key-bar{padding:12px 16px;background:rgba(224,141,0,.06);border-bottom:1px solid rgba(224,141,0,.15);font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px;}
 .ai-key-bar a{color:var(--vi);font-weight:700;cursor:pointer;}
-
-/* iOS Phone call / hotspot bar adaptive layout */
-@supports (padding-top: env(safe-area-inset-top)) {
-  .top-bar, .topbar, .header, [class*="top-bar"], [class*="header"] {
-    padding-top: max(env(safe-area-inset-top), 12px) !important;
-    transition: padding-top 0.3s ease;
-  }
-  body {
-    padding-top: env(safe-area-inset-top);
-    transition: padding-top 0.3s ease;
-  }
-}
-/* Keep header always visible */
-.top-bar, .topbar {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 999 !important;
-  background: inherit;
-}
 </style>
 </head>
 <body>
@@ -1400,7 +1381,12 @@ function renderAlerts(){
     time:ago(195),
     action:'<button class="al-action add" onclick="openAddTrip()">+ Add trip</button>'});
 
-
+  // New: Weekly summary
+  // New: Weekly summary (controlled by notif setting)
+  if(_ns.weekly) allAlerts.push({id:'weekly_current',isNew:true,ic:IC.chart,bg:BG.chart,
+    title:'Weekly mileage summary',
+    desc:totalBiz.toFixed(1)+' '+u+' business · '+totalPer.toFixed(1)+' '+u+' personal · '+c+(totalBiz*r).toFixed(2)+' earned',
+    time:'Last Sunday'});
 
   // New: Tax reminder (Jan-May only)
   var mo=now.getMonth();
@@ -2524,27 +2510,6 @@ window.__nativeGPS__ = function(coords) {
 };
 
 
-
-/* Handle iOS dynamic safe area changes (phone call bar, hotspot bar) */
-function _updateSafeArea(){
-  var safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || 
-    getComputedStyle(document.documentElement).paddingTop || '0');
-  document.documentElement.style.setProperty('--safe-top', 
-    'env(safe-area-inset-top)');
-}
-// Listen for visual viewport changes (triggered by iOS call bar)
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', function(){
-    _updateSafeArea();
-    // Redraw header
-    var header = document.querySelector('.top-bar, .topbar, header');
-    if(header) header.style.paddingTop = 'env(safe-area-inset-top)';
-  });
-}
-// Also handle on focus/blur (when returning from call)
-window.addEventListener('focus', _updateSafeArea);
-window.addEventListener('pageshow', _updateSafeArea);
-
 /* SMART LOCATION MEMORY */
 function _loadKnownLocations(){try{var r=localStorage.getItem('mymilesai_kl');return r?JSON.parse(r):{};}catch(e){return {};}}
 function _saveKnownLocations(l){try{localStorage.setItem('mymilesai_kl',JSON.stringify(l));}catch(e){}}
@@ -2658,7 +2623,7 @@ function onPos(p){
 
   // SMART SPEED FILTER: hide unreliable speed when indoors/poor GPS
   if(!window._spdBuffer) window._spdBuffer=[];
-  if(accuracy<=80){
+  if(accuracy<=20){
     window._spdBuffer.push(spdVal);
     if(window._spdBuffer.length>5) window._spdBuffer.shift();
   } else {
@@ -2667,7 +2632,7 @@ function onPos(p){
   }
 
   var spdDisplay;
-  if(accuracy>80){
+  if(accuracy>20){
     // Poor GPS signal — show signal icon not speed
     spdDisplay='--';
     document.getElementById('speedUnit').textContent='poor GPS';
@@ -2675,8 +2640,8 @@ function onPos(p){
     var avgSpd=window._spdBuffer.length>=3
       ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
       : spdVal;
-    // Floor: under 3mph/5kmh = GPS drift noise when stationary
-    var floor=_useKm()?5:3;
+    // Floor: under 1mph/1.6kmh = truly stationary
+    var floor=_useKm()?1.6:1;
     if(avgSpd<floor) avgSpd=0;
     spdDisplay=avgSpd.toFixed(0);
     document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
@@ -2692,7 +2657,7 @@ function onPos(p){
   if(positions.length>0&&accuracy<=50){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
-    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
+    if(d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
@@ -2781,15 +2746,6 @@ function onPosErr(e){
 }
 
 /* ===== MISSED TRIP DETECTOR (#1 fix) ===== */
-function clearStaleAlerts(){
-  // Clear any hardcoded/stale alerts on fresh load
-  try{
-    var stored=localStorage.getItem('mymilesai_alerts');
-    if(!stored){
-      localStorage.setItem('mymilesai_alerts','[]');
-    }
-  }catch(e){}
-}
 function checkMissedTrips(){
   if(!_lastTripEnd||_missedTripChecked)return;
   var gap=Date.now()-_lastTripEnd;
@@ -2888,7 +2844,7 @@ function onAutoPos(p){
   if(_acc2<=25){window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();}
   else window._autoSpdBuf=[];
   var _avgA=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:spdVal;
-  if(_avgA<(_useKm()?5:3))_avgA=0;
+  if(_avgA<(_useKm()?1.6:1))_avgA=0;
   spdVal=_acc2>30?0:_avgA;
   // Update speedo even while monitoring
   var spdDisplay=spdVal.toFixed(0);
@@ -4206,7 +4162,6 @@ setTimeout(checkMissedTrips,2000); // Check for missed trips on load
 
 /* Fix #9 — Update template distances from GPS */
 function updateTemplateDists(){
-  if(!lastGpsLat||!lastGpsLng){return;} // Skip until real GPS acquired
   if(!lastGpsLat)return;
   var ofc=findNearest(OFFICES,lastGpsLat,lastGpsLng);
   var cli=findNearest(CLIENTS,lastGpsLat,lastGpsLng);
@@ -4554,7 +4509,7 @@ function exportJSON(){
 function _showConfirm(title,message,confirmLabel,confirmColor,onConfirm){
   var overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0) 0';
-  overlay.innerHTML='<div style="background:var(--white);border-radius:var(--r2) var(--r2) 0 0;padding:28px 24px 32px;width:100%;max-width:100%;box-shadow:0 -8px 40px rgba(0,0,0,.18)">'
+  overlay.innerHTML='<div style="background:var(--white);border-radius:var(--r2) var(--r2) 0 0;padding:28px 24px 32px;width:100%;max-width:480px;box-shadow:0 -8px 40px rgba(0,0,0,.18)">'
     +'<div style="width:36px;height:4px;background:var(--ink5);border-radius:4px;margin:0 auto 20px"></div>'
     +'<div style="font-size:18px;font-weight:700;margin-bottom:10px;font-family:var(--fd)">'+title+'</div>'
     +'<div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:24px">'+message+'</div>'
