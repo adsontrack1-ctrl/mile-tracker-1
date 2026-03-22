@@ -568,56 +568,6 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   z-index: 999 !important;
   background: inherit;
 }
-
-.tc-overlay{position:fixed;inset:0;background:rgba(12,12,29,0.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:600;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
-.tc-overlay.show{opacity:1;pointer-events:all;}
-.tc-sheet{width:100%;background:#fff;border-radius:28px 28px 0 0;padding:14px 20px max(28px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform 0.42s cubic-bezier(0.34,1.4,0.64,1);max-height:92vh;overflow-y:auto;}
-.tc-overlay.show .tc-sheet{transform:translateY(0);}
-.tc-handle{width:40px;height:4px;background:var(--ink5);border-radius:100px;margin:0 auto 18px;}
-.tc-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
-.tc-car-icon{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,rgba(214,0,110,0.1),rgba(108,60,224,0.08));display:flex;align-items:center;justify-content:center;color:var(--mag);flex-shrink:0;}
-.tc-title{font-size:20px;font-weight:800;color:var(--ink);line-height:1.1;}
-.tc-subtitle{font-size:12px;font-weight:500;color:var(--ink3);margin-top:2px;}
-.tc-auto-badge{margin-left:auto;font-size:11px;font-weight:700;color:var(--green);background:rgba(0,168,112,0.1);border:1px solid rgba(0,168,112,0.2);border-radius:100px;padding:4px 10px;white-space:nowrap;flex-shrink:0;}
-.tc-route-card{display:flex;gap:14px;background:var(--bg);border-radius:18px;padding:16px 14px;margin-bottom:14px;}
-.tc-route-dots{display:flex;flex-direction:column;align-items:center;padding-top:6px;flex-shrink:0;}
-.tc-rdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.tc-rdot-from{background:#fff;border:2.5px solid var(--ink3);}
-.tc-rdot-to{background:linear-gradient(135deg,#D6006E,#6C3CE0);}
-.tc-rline{width:2px;flex:1;min-height:18px;background:var(--ink5);margin:5px 0;}
-.tc-route-addrs{flex:1;display:flex;flex-direction:column;gap:14px;min-width:0;}
-.tc-addr-sep{height:1px;background:var(--ink5);margin:0;}
-.tc-addr-block{display:flex;flex-direction:column;gap:2px;}
-.tc-addr-label{font-size:10px;font-weight:700;color:var(--ink4);letter-spacing:1px;text-transform:uppercase;}
-.tc-addr-street{font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tc-addr-city{font-size:13px;font-weight:500;color:var(--ink3);}
-.tc-stats-row{display:flex;align-items:center;justify-content:space-around;background:var(--bg);border-radius:16px;padding:14px;margin-bottom:12px;}
-.tc-stat-box{text-align:center;flex:1;}
-.tc-stat-val{font-size:22px;font-weight:800;color:var(--mag);}
-.tc-stat-green{color:var(--green)!important;}
-.tc-stat-lbl{font-size:10px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
-.tc-stat-sep{width:1px;height:34px;background:var(--ink5);}
-.tc-ai-hint{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(108,60,224,0.06),rgba(214,0,110,0.04));border:1px solid rgba(108,60,224,0.15);border-radius:12px;padding:10px 14px;margin-bottom:18px;color:var(--purple);}
-.tc-ai-hint span{font-size:13px;font-weight:600;color:var(--ink2);}
-.tc-question{font-size:11px;font-weight:700;color:var(--ink3);text-align:center;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.8px;}
-.tc-type-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.tc-type-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:18px 12px;border-radius:20px;border:2px solid transparent;cursor:pointer;transition:all 0.18s;background:var(--bg);-webkit-tap-highlight-color:transparent;}
-.tc-type-biz{border-color:rgba(108,60,224,0.25);background:rgba(108,60,224,0.04);}
-.tc-type-biz:active{background:rgba(108,60,224,0.12);transform:scale(0.97);}
-.tc-type-per{border-color:rgba(21,101,192,0.25);background:rgba(21,101,192,0.04);}
-.tc-type-per:active{background:rgba(21,101,192,0.12);transform:scale(0.97);}
-.tc-type-icon{font-size:28px;line-height:1;}
-.tc-type-name{font-size:16px;font-weight:800;color:var(--ink);}
-.tc-type-sub{font-size:11px;font-weight:500;color:var(--ink3);}
-.tc-more-row{display:flex;gap:8px;margin-bottom:6px;}
-.tc-more-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;background:transparent;border:1.5px solid var(--ink6);border-radius:14px;font-size:13px;font-weight:600;color:var(--ink3);cursor:pointer;}
-.tc-skip-btn{padding:12px 18px;background:transparent;border:none;font-size:13px;font-weight:500;color:var(--ink4);cursor:pointer;}
-.tc-more-types{padding-top:8px;}
-.tc-more-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-.tc-more-chip{padding:12px 8px;background:var(--bg);border:1.5px solid var(--ink6);border-radius:14px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;text-align:center;}
-.tc-more-chip:active{background:var(--ink6);transform:scale(0.97);}
-@keyframes slideUpFade{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-
 </style>
 </head>
 <body>
@@ -969,7 +919,19 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 <div class="modal-overlay" id="delModal"><div class="modal del-modal"><div class="modal-handle"></div><div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Delete Trip</div><div class="del-msg">Are you sure? This can't be undone.</div><div class="del-route" id="delRoute"></div><div class="modal-row"><button class="modal-cancel" onclick="closeDel()">Cancel</button><button class="btn-del-confirm" onclick="confirmDel()">Delete</button></div></div></div>
 
 <!-- CLASSIFY PROMPT -->
-<div class="tc-overlay" id="classifyModal"><div class="tc-sheet"><div class="tc-handle"></div><div class="tc-header"><div class="tc-car-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div><div class="tc-title">Trip Detected</div><div class="tc-subtitle" id="tcTimeLine">Tap to confirm your trip</div></div><div class="tc-auto-badge" id="tcAutoBadge" style="display:none"></div></div><div class="tc-route-card"><div class="tc-route-dots"><div class="tc-rdot tc-rdot-from"></div><div class="tc-rline"></div><div class="tc-rdot tc-rdot-to"></div></div><div class="tc-route-addrs"><div class="tc-addr-block"><div class="tc-addr-label">FROM</div><div class="tc-addr-street" id="tcFromStreet">Detecting...</div><div class="tc-addr-city" id="tcFromCity"></div></div><div class="tc-addr-sep"></div><div class="tc-addr-block"><div class="tc-addr-label">TO</div><div class="tc-addr-street" id="tcToStreet">Detecting...</div><div class="tc-addr-city" id="tcToCity"></div></div></div></div><div class="tc-stats-row"><div class="tc-stat-box"><div class="tc-stat-val" id="tcDistVal">—</div><div class="tc-stat-lbl">miles</div></div><div class="tc-stat-sep"></div><div class="tc-stat-box"><div class="tc-stat-val tc-stat-green" id="tcDedVal">—</div><div class="tc-stat-lbl">deduction</div></div><div class="tc-stat-sep"></div><div class="tc-stat-box"><div class="tc-stat-val" id="tcDurVal">—</div><div class="tc-stat-lbl">duration</div></div></div><div class="tc-ai-hint" id="tcAiHint"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg><span id="tcHintText">Analyzing trip pattern...</span></div><div class="tc-question">What type of trip was this?</div><div class="tc-type-btns"><button class="tc-type-btn tc-type-biz" onclick="classifyLastTrip('biz')"><div class="tc-type-icon">💼</div><div class="tc-type-name">Business</div><div class="tc-type-sub">Tax deductible</div></button><button class="tc-type-btn tc-type-per" onclick="classifyLastTrip('per')"><div class="tc-type-icon">🏠</div><div class="tc-type-name">Personal</div><div class="tc-type-sub">Not deductible</div></button></div><div class="tc-more-row"><button class="tc-more-btn" onclick="showTCMoreTypes()">&#8943; Other category</button><button class="tc-skip-btn" onclick="closeClassifyPrompt()">Skip</button></div><div class="tc-more-types" id="tcMoreTypes" style="display:none"><div class="tc-more-grid"><button class="tc-more-chip" onclick="classifyLastTrip('medical')">🏥 Medical</button><button class="tc-more-chip" onclick="classifyLastTrip('charity')">💝 Charity</button><button class="tc-more-chip" onclick="classifyLastTrip('moving')">📦 Moving</button><button class="tc-more-chip" onclick="classifyLastTrip('client')">🤝 Client</button><button class="tc-more-chip" onclick="classifyLastTrip('airport')">✈️ Airport</button><button class="tc-more-chip" onclick="classifyLastTrip('other')">📌 Other</button></div></div></div></div>
+<div class="modal-overlay" id="classifyModal"><div class="modal" style="text-align:center">
+  <div class="modal-handle"></div>
+  <div style="font-size:36px;margin-bottom:8px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+  <div class="modal-title" style="text-align:center;margin-bottom:4px">Trip Complete!</div>
+  <div id="clsRoute" style="font-size:13px;color:var(--ink3);margin-bottom:4px"></div>
+  <div id="clsDist" style="font-family:var(--fd);font-size:28px;font-weight:800;color:var(--vi);margin-bottom:16px"></div>
+  <div id="clsAutoHint" style="font-size:13px;color:var(--ink3);margin-bottom:14px">How would you like to classify this trip?</div>
+  <div style="display:flex;gap:10px;margin-bottom:12px">
+    <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('biz')"><span class="cls-d" style="border-color:var(--vi)"></span><span style="font-size:14px">Business</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div></button>
+    <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('pers')"><span class="cls-d" style="border-color:var(--mag)"></span><span style="font-size:14px">Personal</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div></button>
+  </div>
+  <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
+</div></div>
 
 <!-- ONBOARDING — Full-screen immersive -->
 <div class="ob-overlay" id="onboardOverlay"><div class="ob-screen" id="onboardSheet">
@@ -2304,8 +2266,7 @@ function requestGPSPermission(){
     updateGPSPermUI();
     lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
     showToast(_i('pin'),'GPS enabled! Auto-tracking is ready.');
-    if(autoDetect&&!tracking)initSmartDetection();
-  startAutoMonitoring();
+    if(autoDetect&&!tracking)startAutoMonitoring();
   },function(err){
     if(err.code===1&&!_isNativeGPS()){_gpsPermState='denied';updateGPSPermUI();}
     if(!_isNativeGPS())showToast(_i('warn'),'GPS permission denied — check browser settings');
@@ -2829,38 +2790,19 @@ function clearStaleAlerts(){
     }
   }catch(e){}
 }
-
-var _autoTripStartTime=null;
-var _smartDetectInit=false;
-function initSmartDetection(){
-  if(_smartDetectInit)return; _smartDetectInit=true;
-  if(navigator.connection){
-    var _wasWifi=['wifi','ethernet'].indexOf(navigator.connection.type)>-1;
-    navigator.connection.addEventListener('change',function(){
-      var nowWifi=['wifi','ethernet'].indexOf(navigator.connection.type)>-1;
-      if(_wasWifi&&!nowWifi&&autoDetect&&!tracking)showToast('📍','Left WiFi — auto-tracking ready',2500);
-      _wasWifi=nowWifi;
-    });
-  }
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(checkMissedTrips,1500);});
-}
 function checkMissedTrips(){
   if(!_lastTripEnd||_missedTripChecked)return;
-  var gap=Date.now()-_lastTripEnd,hrs=gap/(1000*60*60);
-  if(hrs>=1&&hrs<=72){
-    var h=Math.floor(hrs),m=Math.floor((gap%(1000*60*60))/(1000*60));
-    setTimeout(function(){_showMissedTripCard(h,m);},2000);
+  var gap=Date.now()-_lastTripEnd;
+  var hoursSince=gap/(1000*60*60);
+  // If it's been 2-48 hours since last trip, and we're opening the app during work hours, prompt
+  if(hoursSince>=2 && hoursSince<=48 && isWorkHours()){
+    var hrs=Math.floor(hoursSince);
+    // Don't nag — just show a gentle alert
+    setTimeout(function(){
+      showToast(_i('warn'),'No trips logged in '+hrs+'h — did you drive?',5000);
+    },3000);
   }
   _missedTripChecked=true;
-}
-function _showMissedTripCard(hrs,mins){
-  var ex=document.getElementById('missedTripCard');if(ex)ex.remove();
-  var ts=hrs>0?(hrs+'h '+(mins>0?mins+'m ':'')):mins+'m';
-  var c=document.createElement('div');c.id='missedTripCard';
-  c.style.cssText='position:fixed;bottom:85px;left:16px;right:16px;z-index:500;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 8px 32px rgba(12,12,29,0.18);border:1px solid var(--ink6);display:flex;align-items:center;gap:12px;animation:slideUpFade 0.4s ease;';
-  c.innerHTML='<div style="font-size:24px">🚗</div><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--ink)">Did you drive '+ts+' ago?</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">Log it to track your deductions</div></div><button onclick="var e=document.getElementById('missedTripCard');if(e)e.remove();if(typeof openAddModal==='function')openAddModal();" style="background:var(--mag);color:#fff;border:none;border-radius:100px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Log it</button><button onclick="document.getElementById('missedTripCard').remove()" style="background:transparent;border:none;color:var(--ink4);font-size:20px;cursor:pointer;padding:4px;line-height:1">×</button>';
-  document.body.appendChild(c);
-  setTimeout(function(){if(c.parentNode)c.remove();},8000);
 }
 function recordTripEnd(){
   _lastTripEnd=Date.now();
@@ -3130,8 +3072,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   var freq=getFreqRouteType(fromAddr,toAddr);
   if(freq)type=freq;
   else if(isWorkHours())type='biz';
-  var _dur=_autoTripStartTime?Math.round((Date.now()-_autoTripStartTime)/1000):0;_autoTripStartTime=null;
-  TRIPS.unshift({id:newId,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),dur:_dur});
+  TRIPS.unshift({id:newId,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath()});
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();renderAlerts();saveTripsToStorage();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
@@ -3140,49 +3081,17 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
   _gpsTrioSaved=false;
 }
-function _parseAddr(full){
-  if(!full||full.indexOf('GPS (')==0)return{street:full||'Unknown',city:''};
-  var parts=full.split(',').map(function(p){return p.trim();});
-  if(parts.length===1)return{street:parts[0],city:''};
-  var street=parts[0];
-  var rest=parts.slice(1).filter(function(p){return p!=='USA'&&p!=='Canada';});
-  return{street:street,city:rest.join(', ')};
-}
-function showTCMoreTypes(){
-  var el=document.getElementById('tcMoreTypes');
-  if(el)el.style.display=el.style.display==='none'?'block':'none';
-}
-function _getAIHint(from,to,autoType,dist){
-  var freq=getFreqRouteType&&getFreqRouteType(from,to);
-  if(freq==='biz')return'Frequent business route detected';
-  if(freq==='per')return'Frequent personal route detected';
-  if(autoType==='biz')return'Likely business — trip during work hours';
-  if(dist>50)return'Long distance — often a business trip';
-  var h=new Date().getHours();
-  if(h>=8&&h<=18)return'Weekday daytime — often business';
-  return'New route — select the trip type below';
-}
 function showClassifyPrompt(tripId,from,to,dist,autoType){
-  var f=_parseAddr(from),t=_parseAddr(to);
-  document.getElementById('tcFromStreet').textContent=f.street;
-  document.getElementById('tcFromCity').textContent=f.city;
-  document.getElementById('tcToStreet').textContent=t.street;
-  document.getElementById('tcToCity').textContent=t.city;
-  var rate=(LOC&&LOC.rate)||0.70;
-  document.getElementById('tcDistVal').textContent=dist.toFixed(1);
-  document.getElementById('tcDedVal').textContent='$'+(dist*rate).toFixed(2);
-  var trip=TRIPS&&TRIPS.find(function(x){return x.id===tripId;});
-  var durStr='—';
-  if(trip&&trip.dur&&trip.dur>0){var m=Math.round(trip.dur/60);durStr=m<60?m+'m':Math.floor(m/60)+'h '+(m%60)+'m';}
-  document.getElementById('tcDurVal').textContent=durStr;
-  var now=new Date(),hh=now.getHours()%12||12,mm=String(now.getMinutes()).padStart(2,'0'),ap=now.getHours()<12?'AM':'PM';
-  document.getElementById('tcTimeLine').textContent='Today at '+hh+':'+mm+' '+ap;
-  document.getElementById('tcHintText').textContent=_getAIHint(from,to,autoType,dist);
-  var badge=document.getElementById('tcAutoBadge');
-  if(autoType&&autoType!=='uncl'){badge.textContent=autoType==='biz'?'Auto: Business':'Auto: Personal';badge.style.display='';}
-  else badge.style.display='none';
-  var more=document.getElementById('tcMoreTypes');
-  if(more)more.style.display='none';
+  document.getElementById('clsRoute').textContent=from.split(',')[0]+' → '+to.split(',')[0];
+  document.getElementById('clsDist').textContent=dist.toFixed(1)+' '+LOC.label;
+  // Show auto-classified hint if applicable
+  var hint=document.getElementById('clsAutoHint');
+  if(autoType&&autoType!=='uncl'){
+    var label=autoType==='biz'?'Business (work hours)':'Personal';
+    if(hint)hint.textContent='Auto-classified as '+label+' — confirm or change:';
+  } else {
+    if(hint)hint.textContent='How would you like to classify this trip?';
+  }
   document.getElementById('classifyModal').classList.add('show');
   window._classifyTripId=tripId;
 }
