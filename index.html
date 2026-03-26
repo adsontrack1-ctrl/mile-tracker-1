@@ -728,7 +728,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="set">
       <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.0</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.0.0</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
-      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 5 mph), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 5 mph threshold reliably detects driving while filtering out walking. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile for 2026)<br>Canada: CRA rate ($0.72/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
+      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
     <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
@@ -966,7 +966,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="ob-desc">We'll set the right unit and tax rate for you.</div>
       <div class="ob-unit-row">
         <button class="ob-unit-btn active" data-unit="US" onclick="setObUnit(this,'US')"><span style="font-size:32px">🇺🇸</span><strong>Miles</strong><span class="ob-unit-sub">IRS rate $0.70/mi</span></button>
-        <button class="ob-unit-btn" data-unit="CA" onclick="setObUnit(this,'CA')"><span style="font-size:32px">🇨🇦</span><strong>Kilometers</strong><span class="ob-unit-sub">CRA rate $0.72/km</span></button>
+        <button class="ob-unit-btn" data-unit="CA" onclick="setObUnit(this,'CA')"><span style="font-size:32px">🇨🇦</span><strong>Kilometers</strong><span class="ob-unit-sub">CRA rate $0.73/km</span></button>
       </div>
       <div class="ob-unit-row">
         <button class="ob-unit-btn" data-unit="UK" onclick="setObUnit(this,'UK')"><span style="font-size:32px">🇬🇧</span><strong>Miles</strong><span class="ob-unit-sub">HMRC rate £0.45/mi</span></button>
@@ -1095,8 +1095,8 @@ park:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="curren
 
 /* ===== LOCALE ENGINE ===== */
 var LOCALES={
-  US:{unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.70,med:.22,char:.14}},
-  CA:{unit:'km',label:'kilometers',speed:'km/h',rate:.72,flag:'🇨🇦',country:'CA',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate',rates:{biz:.72,med:.72,char:.72}},
+  US:{unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.70,med:.21,char:.14}},
+  CA:{unit:'km',label:'kilometers',speed:'km/h',rate:.73,flag:'🇨🇦',country:'CA',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate',rates:{biz:.73,med:.73,char:.73}},
   UK:{unit:'mi',label:'miles',speed:'mph',rate:.45,flag:'🇬🇧',country:'UK',conv:1,currency:'£',taxLabel:'HMRC 2026 Rate',rates:{biz:.45,med:0,char:0}},
   AU:{unit:'km',label:'kilometres',speed:'km/h',rate:.88,flag:'🇦🇺',country:'AU',conv:1.60934,currency:'A$',taxLabel:'ATO 2025-26 Rate',rates:{biz:.88,med:0,char:0}}
 };
@@ -2675,8 +2675,8 @@ function onPos(p){
     var avgSpd=window._spdBuffer.length>=3
       ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
       : spdVal;
-    // Floor: under 3mph/5kmh = GPS drift noise, filtered to prevent phantom speed
-    var floor=_useKm()?5:3;
+    // Floor: under 8mph/13kmh = GPS drift noise, filtered to prevent phantom speed
+    var floor=_useKm()?13:8;
     if(avgSpd<floor) avgSpd=0;
     spdDisplay=avgSpd.toFixed(0);
     document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
@@ -2684,7 +2684,8 @@ function onPos(p){
   document.getElementById('trackSpeed').textContent=spdDisplay;
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var pct=Math.min(spdVal/maxSpd,1);
+  var _dispSpd=(spdDisplay==='--'||spdDisplay==='0')?0:parseFloat(spdDisplay);
+  var pct=Math.min(_dispSpd/maxSpd,1);
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
@@ -2863,6 +2864,7 @@ function stopAutoMonitoring(){
 var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
 var _detectCount=0; // consecutive above-threshold readings
 var _detectRequired=4; // readings needed to confirm driving
+var _stillCount=0; // consecutive below-threshold readings needed to reset detection
 
 function onAutoPos(p){
   // While monitoring (not recording), check if driving
@@ -2901,7 +2903,7 @@ function onAutoPos(p){
   // Layer 4: require >=3 readings before trusting average
   var _avgA=window._autoSpdBuf.length>=3?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
   // Speed floor: GPS drift noise
-  if(_avgA<(_useKm()?5:3))_avgA=0;
+  if(_avgA<(_useKm()?13:8))_avgA=0;
   spdVal=_acc2>20?0:_avgA;
   // Update speedo even while monitoring
   var spdDisplay;
@@ -2923,6 +2925,7 @@ function onAutoPos(p){
 
   // Multi-reading confirmation: require 4 consecutive readings above threshold
   if(spdVal>=thresh){
+    _stillCount=0;
     _detectCount++;
     if(_detectCount===1){
       _autoState='DETECTING';
@@ -2941,10 +2944,14 @@ function onAutoPos(p){
       startTracking();
     }
   } else {
-    _detectCount=0;
-    if(_autoState==='DETECTING'){
-      _autoState='IDLE';
-      document.getElementById('statusText').textContent='Monitoring...';
+    _stillCount++;
+    if(_stillCount>=3){
+      _detectCount=0;
+      _stillCount=0;
+      if(_autoState==='DETECTING'){
+        _autoState='IDLE';
+        document.getElementById('statusText').textContent='Monitoring...';
+      }
     }
   }
 }
