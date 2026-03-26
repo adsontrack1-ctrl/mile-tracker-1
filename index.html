@@ -1135,6 +1135,11 @@ function applyLocale(){
   _set('trackAvgU','avg '+s);
   _set('threshLbl','Min speed to auto-detect ('+s+')');
   _set('taxLabel',LOC.taxLabel);
+  // FIX: update tax rate detail display when locale changes
+  var _taxDet=document.getElementById('taxDet');
+  if(_taxDet)_taxDet.textContent=LOC.currency+LOC.rates.biz.toFixed(2)+'/'+LOC.unit+' business · '+LOC.currency+LOC.rates.med.toFixed(2)+'/'+LOC.unit+' medical';
+  var _taxAmt=document.getElementById('taxAmt');
+  if(_taxAmt&&typeof recalcStats==='function')setTimeout(recalcStats,50);
   var _rateLabels={US:'IRS rate',CA:'CRA rate',UK:'HMRC rate',AU:'ATO rate'};
   _set('rateLabel',_rateLabels[LOC.country]||'Tax rate');
   _set('rateDesc','Per '+LOC.unit+' deduction');
