@@ -4432,13 +4432,17 @@ function updateTemplateDists(){
   fetchDist(cli,'tmplCliDist');
   fetchDist(air,'tmplAirDist');
 }
-// Try to get GPS for template distances
-if(navigator.geolocation){
+// Auto-refresh GPS for template distances
+function _refreshTemplateDists(){
+  if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(function(p){
     lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
     updateTemplateDists();
-  },function(){},{ enableHighAccuracy:false,timeout:3000 });
+  },function(){},{enableHighAccuracy:true,timeout:10000});
 }
+_refreshTemplateDists();
+setInterval(_refreshTemplateDists,300000); // refresh every 5 min
+document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshTemplateDists();});
 
 /* Fix #19 — Persist trips to localStorage */
 /* ===== CLOUD SYNC (JSONBin.io) ===== */
