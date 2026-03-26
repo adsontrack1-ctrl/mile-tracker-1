@@ -2675,7 +2675,7 @@ function onPos(p){
     var avgSpd=window._spdBuffer.length>=3
       ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
       : spdVal;
-    // Floor: under 3mph/5kmh = GPS drift noise when stationary
+    // Floor: under 3mph/5kmh = GPS drift noise, filtered to prevent phantom speed
     var floor=_useKm()?5:3;
     if(avgSpd<floor) avgSpd=0;
     spdDisplay=avgSpd.toFixed(0);
@@ -2862,7 +2862,7 @@ function stopAutoMonitoring(){
 
 var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
 var _detectCount=0; // consecutive above-threshold readings
-var _detectRequired=2; // readings needed to confirm driving
+var _detectRequired=4; // readings needed to confirm driving
 
 function onAutoPos(p){
   // While monitoring (not recording), check if driving
@@ -2876,7 +2876,9 @@ function onAutoPos(p){
     var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);
     var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;
     if(_dt<0.5)_dt=0.5;if(_dt>30)_dt=5;
-    spdMps=dMi*1609.34/_dt;
+    // Layer 3: reject teleportation (>0.1mi in <2s)
+    if(dMi>0.1&&_dt<2){spdMps=0;}
+    else{spdMps=dMi*1609.34/_dt;}
   }
   window._lastAutoT=_t2;
   var _threshEl=document.getElementById('threshVal');
@@ -2885,18 +2887,29 @@ function onAutoPos(p){
   var spdVal=_useKm()?spdMps*3.6:spdMps*2.237;
   var _acc2=p.coords.accuracy||999;
   if(!window._autoSpdBuf)window._autoSpdBuf=[];
-  if(_acc2<=25){window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();}
-  else window._autoSpdBuf=[];
-  var _avgA=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:spdVal;
+  // Layer 1: accuracy gate — only trust readings <=20m
+  if(_acc2<=20){
+    // Layer 2: spike rejection — discard jumps >15mph/24kmh above avg
+    var _prevAvg=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
+    var _spikeMax=_useKm()?24:15;
+    if(window._autoSpdBuf.length<2||spdVal<=_prevAvg+_spikeMax){
+      window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();
+    }
+  } else {
+    window._autoSpdBuf=[];
+  }
+  // Layer 4: require >=3 readings before trusting average
+  var _avgA=window._autoSpdBuf.length>=3?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
+  // Speed floor: GPS drift noise
   if(_avgA<(_useKm()?5:3))_avgA=0;
-  spdVal=_acc2>30?0:_avgA;
+  spdVal=_acc2>20?0:_avgA;
   // Update speedo even while monitoring
-  var spdDisplay=spdVal.toFixed(0);
-  if(_acc2>30){spdDisplay='--';document.getElementById('speedUnit').textContent='poor GPS';}
-  else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+  var spdDisplay;
+  if(_acc2>20||spdVal<=0){spdDisplay=_acc2>20?'--':'0';if(_acc2>20)document.getElementById('speedUnit').textContent='poor GPS';else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
+  else{spdDisplay=spdVal.toFixed(0);document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var pct=Math.min(spdVal/maxSpd,1);
+  var pct=spdDisplay==='--'?0:Math.min(spdVal/maxSpd,1);
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
@@ -2908,7 +2921,7 @@ function onAutoPos(p){
   var gdbCoords=document.getElementById('gdbCoords');if(gdbCoords)gdbCoords.textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4);
   updateDebugPanel();
 
-  // Multi-reading confirmation: require 3 consecutive readings above threshold
+  // Multi-reading confirmation: require 4 consecutive readings above threshold
   if(spdVal>=thresh){
     _detectCount++;
     if(_detectCount===1){
