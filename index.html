@@ -3728,25 +3728,8 @@ var AIRPORTS=[
   {n:'Phoenix Airport (PHX)',lat:33.437,lng:-112.008},
   {n:'Orlando Airport (MCO)',lat:28.431,lng:-81.308}
 ];
-var OFFICES=[
-  {n:'WeWork, Portage Ave, Winnipeg',lat:49.884,lng:-97.157},
-  {n:'WeWork, King St W, Toronto',lat:43.645,lng:-79.395},
-  {n:'WeWork, 5th Ave, New York',lat:40.749,lng:-73.986},
-  {n:'WeWork, Market St, San Francisco',lat:37.790,lng:-122.399},
-  {n:'WeWork, Wacker Dr, Chicago',lat:41.886,lng:-87.637},
-  {n:'WeWork, Boylston St, Boston',lat:42.350,lng:-71.077},
-  {n:'WeWork, Wilshire Blvd, Los Angeles',lat:34.062,lng:-118.361},
-  {n:'WeWork, Main St, Seattle',lat:47.603,lng:-122.335}
-];
-var CLIENTS=[
-  {n:'Client, 201 Portage Ave, Winnipeg',lat:49.893,lng:-97.145},
-  {n:'Client, Bay St, Toronto',lat:43.650,lng:-79.381},
-  {n:'Client, Park Ave, New York',lat:40.757,lng:-73.972},
-  {n:'Client, Mission St, San Francisco',lat:37.788,lng:-122.396},
-  {n:'Client, Michigan Ave, Chicago',lat:41.889,lng:-87.624},
-  {n:'Client, Brickell Ave, Miami',lat:25.765,lng:-80.190},
-  {n:'Client, Peachtree St, Atlanta',lat:33.782,lng:-84.386}
-];
+var OFFICES=[];
+var CLIENTS=[];
 function findNearest(list,lat,lng){
   var best=null,bestDist=Infinity;
   for(var i=0;i<list.length;i++){var dLat=list[i].lat-lat,dLng=list[i].lng-lng,d=dLat*dLat+dLng*dLng;if(d<bestDist){bestDist=d;best=list[i];}}
