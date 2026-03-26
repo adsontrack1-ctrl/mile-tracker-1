@@ -4402,35 +4402,77 @@ initProfile();
 setTimeout(animateCounters,600);
 setTimeout(checkMissedTrips,2000); // Check for missed trips on load
 
-/* Fix #9 — Update template distances from GPS */
+/* Fix #9 — Update template distances using FRESH GPS + Google Places */
 function updateTemplateDists(){
-  if(!lastGpsLat||!lastGpsLng){return;} // Skip until real GPS acquired
-  if(!lastGpsLat)return;
-  var ofc=findNearest(OFFICES,lastGpsLat,lastGpsLng);
-  var cli=findNearest(CLIENTS,lastGpsLat,lastGpsLng);
-  var air=findNearest(AIRPORTS,lastGpsLat,lastGpsLng);
-  var u=LOC.unit;
-  function fetchDist(dest,elId){
-    if(!dest){document.getElementById(elId).textContent='— '+u;return;}
-    _getGoogleDistance({lat:lastGpsLat,lng:lastGpsLng},{lat:dest.lat,lng:dest.lng},function(distMi,err){
-      if(distMi!==null){
-        var useKm=(LOC.country==='CA'||LOC.country==='AU');
-        var val=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
-        document.getElementById(elId).textContent=val+' '+u;
-      } else {
-        // Fallback to Haversine
-        var useKm2=(LOC.country==='CA'||LOC.country==='AU');
-        var R=useKm2?6371:3958.8;
-        var dLat=(dest.lat-lastGpsLat)*Math.PI/180,dLng=(dest.lng-lastGpsLng)*Math.PI/180;
-        var a=Math.sin(dLat/2)**2+Math.cos(lastGpsLat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-        var d=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-        document.getElementById(elId).textContent=d.toFixed(1)+' '+u;
-      }
+  // Clear stale values immediately
+  ['tmplOffDist','tmplCliDist','tmplAirDist'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.textContent='...';
+  });
+  if(!navigator.geolocation)return;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude,lng=pos.coords.longitude;
+    lastGpsLat=lat;lastGpsLng=lng;
+    var u=LOC.unit;
+    var useKm=(LOC.country==='CA'||LOC.country==='AU');
+    var unitSys=useKm?'metric':'imperial';
+
+    // AIRPORT: Use Google Places to find nearest real airport
+    if(window.google&&window.google.maps&&window.google.maps.places){
+      var dummy=document.createElement('div');
+      var svc=new google.maps.places.PlacesService(dummy);
+      svc.nearbySearch({
+        location:new google.maps.LatLng(lat,lng),
+        rankBy:google.maps.places.RankBy.DISTANCE,
+        keyword:'airport'
+      },function(results,status){
+        var airEl=document.getElementById('tmplAirDist');
+        if(status===google.maps.places.PlacesServiceStatus.OK&&results&&results[0]){
+          var airLat=results[0].geometry.location.lat();
+          var airLng=results[0].geometry.location.lng();
+          var airName=results[0].name;
+          // Update template label to show actual airport name
+          var nameEl=document.querySelector('.tmpl:nth-child(3) .tmpl-n');
+          if(nameEl&&airName)nameEl.textContent=airName.length>15?airName.substring(0,15)+'…':airName;
+          _getGoogleDistance({lat:lat,lng:lng},{lat:airLat,lng:airLng},function(distMi){
+            if(airEl){
+              if(distMi!==null){
+                airEl.textContent=(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u;
+              } else {
+                // Haversine fallback
+                var R=useKm?6371:3958.8;
+                var dLat=(airLat-lat)*Math.PI/180,dLng=(airLng-lng)*Math.PI/180;
+                var a=Math.sin(dLat/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(airLat*Math.PI/180)*Math.sin(dLng/2)**2;
+                airEl.textContent=(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1)+' '+u;
+              }
+            }
+          });
+        } else {if(airEl)airEl.textContent='— '+u;}
+      });
+    } else {
+      var airEl=document.getElementById('tmplAirDist');
+      if(airEl)airEl.textContent='— '+u;
+    }
+
+    // OFFICE & CLIENT: show saved address distance or prompt to set
+    var settings={};try{settings=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');}catch(e){}
+    var offEl=document.getElementById('tmplOffDist');
+    var cliEl=document.getElementById('tmplCliDist');
+    if(settings.officeAddress){
+      _getGoogleDistance({lat:lat,lng:lng},settings.officeAddress,function(distMi){
+        if(offEl)offEl.textContent=distMi!==null?(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u:'— '+u;
+      });
+    } else {if(offEl)offEl.textContent='Tap to set';}
+    if(settings.clientAddress){
+      _getGoogleDistance({lat:lat,lng:lng},settings.clientAddress,function(distMi){
+        if(cliEl)cliEl.textContent=distMi!==null?(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u:'— '+u;
+      });
+    } else {if(cliEl)cliEl.textContent='Tap to set';}
+  },function(){
+    // GPS denied — show dashes
+    ['tmplOffDist','tmplCliDist','tmplAirDist'].forEach(function(id){
+      var el=document.getElementById(id);if(el)el.textContent='— '+LOC.unit;
     });
-  }
-  fetchDist(ofc,'tmplOffDist');
-  fetchDist(cli,'tmplCliDist');
-  fetchDist(air,'tmplAirDist');
+  },{enableHighAccuracy:true,timeout:8000,maximumAge:0});
 }
 // Auto-refresh GPS for template distances
 function _refreshTemplateDists(){
