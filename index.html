@@ -251,6 +251,10 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .trip:hover{border-color:var(--ink5);box-shadow:var(--s3);transform:translateY(-4px);}
 .trip-list{padding:0 16px;display:flex;flex-direction:column;gap:12px;}
 .trip-list .trip{min-width:auto;max-width:none;flex-shrink:unset;}
+.trip-real-map{width:100%;height:140px;object-fit:cover;border-radius:12px 12px 0 0;display:block;}
+.trip-map.has-rmap{background:none;position:relative;overflow:hidden;}
+.trip-map.has-rmap .trip-map-badge{position:absolute;top:8px;left:8px;z-index:3;}
+.trip-map.has-rmap .trip-map-time{position:absolute;top:8px;right:8px;z-index:3;background:rgba(0,0,0,0.55);color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;}
 .trip-map{height:90px;position:relative;overflow:hidden;}
 .trip-map-bg{position:absolute;inset:0;}
 .trip-map-bg.biz{background:linear-gradient(135deg,#F0ECFF,#E8E0FF,#F5F0FF);}
@@ -1185,6 +1189,27 @@ function randomPath(){
 }
 function tripDist(mi){return(LOC.country==='CA'||LOC.country==='AU')?(mi*1.60934).toFixed(1):mi.toFixed(1);}
 function convMi(mi){return(LOC.country==='CA'||LOC.country==='AU')?mi*1.60934:mi;}
+function _encodePolyline(pos){
+  var r='',pLat=0,pLng=0,pts=pos;
+  if(pts.length>50){var st=Math.floor(pts.length/50),sm=[];for(var i=0;i<pts.length;i+=st)sm.push(pts[i]);if(sm[sm.length-1]!==pts[pts.length-1])sm.push(pts[pts.length-1]);pts=sm;}
+  function e(v){v=Math.round(v*1e5);v=v<0?~(v<<1):(v<<1);var s='';while(v>=0x20){s+=String.fromCharCode((0x20|(v&0x1f))+63);v>>=5;}s+=String.fromCharCode(v+63);return s;}
+  for(var j=0;j<pts.length;j++){var la=pts[j].lat,ln=pts[j].lng;r+=e(la-pLat)+e(ln-pLng);pLat=la;pLng=ln;}
+  return r;
+}
+function _tripStaticMap(t,wide){
+  var W=wide?360:310,H=140,K='AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE';
+  var st='&style=feature:poi|visibility:off&style=feature:transit|visibility:off&style=feature:road|element:geometry|color:0xffffff&style=feature:landscape|element:geometry|color:0xf5f5f0&style=feature:water|element:geometry|color:0xcfe8ff';
+  var base='https://maps.googleapis.com/maps/api/staticmap?size='+W+'x'+H+'&scale=2'+st;
+  var url='';
+  if(t.positions&&t.positions.length>=2){
+    var enc=_encodePolyline(t.positions);
+    url=base+'&path=color:0xF72F6Eff|weight:4|enc:'+encodeURIComponent(enc)+'&markers=color:green|size:small|'+t.positions[0].lat+','+t.positions[0].lng+'&markers=color:red|size:small|'+t.positions[t.positions.length-1].lat+','+t.positions[t.positions.length-1].lng+'&key='+K;
+  } else if(t.from&&t.to&&t.from.length>5&&t.to.length>5){
+    url=base+'&markers=color:green|size:small|'+encodeURIComponent(t.from)+'&markers=color:red|size:small|'+encodeURIComponent(t.to)+'&key='+K;
+  }
+  if(!url)return '';
+  return '<img class="trip-real-map" src="'+url+'" onerror="this.style.display=\'none\'" />';
+}
 function tripCard(t,wide){
   const d=tripDist(t.mi),ded=t.ded?`<span class="trip-ded">+${LOC.currency}${(parseFloat(d)*catRate(t.type)).toFixed(2)}</span>`:'';
   const clr={biz:'vi',pers:'mag',uncl:'amber'}[t.type]||'amber';
@@ -1204,7 +1229,11 @@ function tripCard(t,wide){
   const pathStartY=safePath.match(/M\d+,(\d+)/)?safePath.match(/M\d+,(\d+)/)[1]:'45';
   const pathEndXY=safePath.match(/(\d+)$/)?safePath.match(/(\d+)$/)[1]:'45';
   const purposeTag=safePurpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${safePurpose}</span>`:'';
-  var card = `<div class="trip" data-id="${t.id}"><div class="trip-map"><div class="trip-map-bg ${t.type}"></div><div class="trip-map-grid"></div><svg viewBox="${vb}" preserveAspectRatio="none"><path d="${safePath}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round"${dash}/><circle cx="20" cy="${pathStartY}" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="${wide?340:290}" cy="${pathEndXY}" r="5" fill="${dotFill}" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge ${t.type}">${badge}</div><div class="trip-map-time">${safeTime}</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div><div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var _rmap=_tripStaticMap(t,wide);
+  var _mapDiv=_rmap
+    ? ('<div class="trip-map has-rmap">'+_rmap+'<div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>')
+    : ('<div class="trip-map"><div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+( wide?340:290 )+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>');
+  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div><div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -3078,6 +3107,8 @@ function stopTracking(){
 }
 var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
+  var _snapPos=[];
+  if(positions&&positions.length>=2){var _st=Math.max(1,Math.floor(positions.length/80));for(var _pi=0;_pi<positions.length;_pi+=_st)_snapPos.push({lat:positions[_pi].lat,lng:positions[_pi].lng});if(_snapPos[_snapPos.length-1]!==positions[positions.length-1])_snapPos.push({lat:positions[positions.length-1].lat,lng:positions[positions.length-1].lng});}
   if(_gpsTrioSaved)return;
   _gpsTrioSaved=true;
   // Duplicate prevention: reject if a trip with same from/to was saved in last 60s
