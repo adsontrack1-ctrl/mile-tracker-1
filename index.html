@@ -692,11 +692,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
       <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
-      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="5" id="threshVal" onchange="saveSettings()"></div>
+      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="8" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
 
       <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
-      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--vi)" id="rateVal">-zsh.70/mi</div></div>
+      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--vi)" id="rateVal">$0.70/mi</div></div>
     </div>
     <div class="set-hdr">Odometer</div>
     <div class="set">
@@ -1143,7 +1143,7 @@ function applyLocale(){
   var _rateLabels={US:'IRS rate',CA:'CRA rate',UK:'HMRC rate',AU:'ATO rate'};
   _set('rateLabel',_rateLabels[LOC.country]||'Tax rate');
   _set('rateDesc','Per '+LOC.unit+' deduction');
-  _setv('rateVal',LOC.rate.toFixed(2));
+  var _rv=document.getElementById('rateVal');if(_rv)_rv.textContent=LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit;
   _set('editDistLabel',_useKm()?'Kilometers':'Miles');
   document.querySelectorAll('.trip-mi-u').forEach(e=>e.textContent=LOC.label);
   document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers|Kilometres/,_useKm()?LOC.label.charAt(0).toUpperCase()+LOC.label.slice(1):'Miles'));
