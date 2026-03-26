@@ -1044,7 +1044,10 @@ function _esc(str){
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#x27;')
-    .replace(/\//g,'&#x2F;');
+    .replace(/\//g,'&#x2F;')
+    .replace(/on\w+\s*=/gi,'')
+    .replace(/javascript\s*:/gi,'')
+    .replace(/data\s*:/gi,'');
 }
 /* Sanitize path for SVG d= attribute — allow only valid SVG path chars */
 function _safePath(p){
