@@ -282,6 +282,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .trip-mi-v{font-family:var(--fd);font-size:34px;font-weight:800;letter-spacing:-2px;line-height:1;}
 .trip-mi-v.biz{color:var(--vi)}.trip-mi-v.pers{color:var(--mag)}.trip-mi-v.uncl{color:var(--amber)}
 .trip-mi-u{font-size:10px;font-weight:600;color:var(--ink4);}
+.trip-notes{padding:4px 16px 8px;font-size:11px;color:var(--ink3);font-style:italic;border-top:1px solid var(--ink6);margin:0 4px;}
 .trip-foot{display:flex;align-items:center;padding:6px 16px 12px;font-size:12px;color:var(--ink3);}
 .trip-foot-l{display:flex;gap:6px;font-weight:600;}
 .trip-foot-l span{padding:4px 12px;border-radius:var(--rpill);background:var(--ink7);font-size:11px;font-weight:600;color:var(--ink3);}
@@ -600,6 +601,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
           <div class="hs"><div class="hs-v c1" id="hsBiz">0</div><div class="hs-l" id="hsBizL">Business mi</div></div>
           <div class="hs"><div class="hs-v c2" id="hsPer">0</div><div class="hs-l" id="hsPerL">Personal mi</div></div>
           <div class="hs"><div class="hs-v c3" id="hsDed">$0</div><div class="hs-l">Deduction</div></div>
+          <div class="hs"><div class="hs-v" id="hsStreak" style="color:#f59e0b">0🔥</div><div class="hs-l">Day streak</div></div>
         </div>
       </div>
     </div>
@@ -691,7 +693,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="set-hdr">Tracking</div>
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
-      <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
+      <div class="sr"><div><h4>Appearance</h4><p>App theme</p></div><div style="display:flex;gap:8px"><button onclick="_setTheme('auto')" id="themeAuto" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--vi);background:var(--vi-s);font-size:13px;cursor:pointer;font-weight:700;color:var(--vi)">Auto</button><button onclick="_setTheme('light')" id="themeLight" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);font-size:13px;cursor:pointer">☀️ Light</button><button onclick="_setTheme('dark')" id="themeDark" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);font-size:13px;cursor:pointer">🌙 Dark</button></div></div>
+<div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="8" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
 
@@ -1119,6 +1122,16 @@ function detectLocale(){
   try{var l=navigator.language||'';if(l==='en-CA'||l==='fr-CA')return'CA';if(l==='en-GB')return'UK';if(l==='en-AU')return'AU';}catch(e){}
   return'US';
 }
+function _setTheme(t){
+  try{localStorage.setItem('mymilesai_theme',t);}catch(e){}
+  ['Auto','Light','Dark'].forEach(function(n){var b=document.getElementById('theme'+n);if(b){b.style.background='var(--white)';b.style.borderColor='var(--ink6)';b.style.fontWeight='400';b.style.color='var(--ink1)';}});
+  var act=document.getElementById('theme'+t.charAt(0).toUpperCase()+t.slice(1));
+  if(act){act.style.background='var(--vi-s)';act.style.borderColor='var(--vi)';act.style.fontWeight='700';act.style.color='var(--vi)';}
+  if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}
+  else if(t==='light'){document.documentElement.removeAttribute('data-theme');}
+  else{if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');}
+}
+function _initTheme(){try{_setTheme(localStorage.getItem('mymilesai_theme')||'auto');}catch(e){}}
 function setLocale(c){
   LOC=LOCALES[c]||LOCALES.US;
   var sel=document.getElementById('unitSel');
@@ -1241,7 +1254,7 @@ function tripCard(t,wide){
   var _mapDiv=_rmap
     ? ('<div class="trip-map has-rmap">'+_rmap+'<div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>')
     : ('<div class="trip-map"><div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+( wide?340:290 )+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>');
-  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div><div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -1278,6 +1291,7 @@ function renderTrips(){
   document.getElementById('tripList').innerHTML=html;
   recalcStats();
   checkEmptyState();
+  _updateStreak();
   bindSwipeCards();
   if(_activeFilter!=='all')applyFilter();
 }
@@ -1547,7 +1561,7 @@ function markAllRead(){
 var CAT_LABELS={biz:'Business',pers:'Personal',med:'Medical',char:'Charity',move:'Moving',uncl:'Unclassified'};
 var CAT_DEDUCTIBLE={biz:true,med:true,char:true,move:false,pers:false,uncl:false};
 function catRate(type){return(LOC.rates&&LOC.rates[type])||LOC.rate;}
-function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=!!CAT_DEDUCTIBLE[type];checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(CAT_LABELS[type]||type));}}
+function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=!!CAT_DEDUCTIBLE[type];checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();_checkReviewPrompt();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(CAT_LABELS[type]||type));}}
 
 /* ===== NAVIGATION ===== */
 var _scrollPositions={};
@@ -1665,6 +1679,25 @@ function initProfile(){
 }
 
 /* ===== RECALC ALL STATS ===== */
+function _calcStreak(){
+  if(!TRIPS||TRIPS.length===0)return 0;
+  var days=new Set();
+  TRIPS.forEach(function(t){if(t.day){try{var d=new Date(t.day);d.setHours(0,0,0,0);days.add(d.getTime());}catch(e){}}});
+  var streak=0;
+  var cur=new Date();cur.setHours(0,0,0,0);
+  for(var i=0;i<365;i++){
+    if(days.has(cur.getTime())){streak++;}
+    else if(i===0){cur.setDate(cur.getDate()-1);continue;}
+    else break;
+    cur.setDate(cur.getDate()-1);
+  }
+  return streak;
+}
+function _updateStreak(){
+  var s=_calcStreak();
+  var el=document.getElementById('hsStreak');
+  if(el)el.textContent=s>0?s+'🔥':'0';
+}
 function recalcStats(){
   var totalBiz=0,totalPer=0,unclCount=0,totalTrips=TRIPS.length;
   var bizTrips=0,perTrips=0;
@@ -2794,6 +2827,7 @@ function onPos(p){
     // End trip after 5 min CONTINUOUS stationary
     if(stationarySec*1000>=SMART_STOP_MS&&tracking){
       _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
+      try{navigator.vibrate&&navigator.vibrate([50,30,50]);}catch(e){}
       showToast(_i('park'),'Trip ended — stationary for 5 min',4000);
       stopTracking();
       return;
@@ -2841,6 +2875,28 @@ function checkMissedTrips(){
     },3000);
   }
   _missedTripChecked=true;
+}
+function _checkReviewPrompt(){
+  try{
+    if(localStorage.getItem('mymilesai_reviewed'))return;
+    var n=TRIPS.length;
+    if(n!==3&&n!==10&&n!==25)return;
+    setTimeout(function(){
+      if(window.__MYMILESAI_NATIVE__&&window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.requestReview){
+        window.webkit.messageHandlers.requestReview.postMessage({});
+        localStorage.setItem('mymilesai_reviewed','1');
+        return;
+      }
+      var msg=n===3?'You just saved your 3rd trip! Loving MyMilesAI?':'You\'ve logged '+n+' trips — amazing work! 🎉';
+      showToast('⭐',msg+' Tap to rate us!',6000);
+      setTimeout(function(){
+        if(confirm(msg+'\n\nWould you rate us 5 stars? It keeps the app free and helps us grow!')){
+          window.open('https://apps.apple.com/app/id6760873036','_blank');
+          localStorage.setItem('mymilesai_reviewed','1');
+        }
+      },500);
+    },2500);
+  }catch(e){}
 }
 function recordTripEnd(){
   _lastTripEnd=Date.now();
@@ -4578,6 +4634,7 @@ function loadSettings(){
   loadMapAppPref();
 }
 loadSettings();
+_initTheme();
 loadNotifSettings();
 
 function updateRate(){/* rate is now read-only */}
