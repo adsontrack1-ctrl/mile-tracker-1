@@ -4929,7 +4929,7 @@ function setObUnit(btn,unit){
 try{
   var _hasName=false;
   try{_hasName=!!localStorage.getItem('mymilesai_name');}catch(e){}
-  if(!localStorage.getItem('mymilesai_onboarded')||!_hasName)setTimeout(showOnboarding,800);
+  if(!localStorage.getItem('mymilesai_onboarded'))setTimeout(showOnboarding,800);
 }catch(e){}
 
 /* ===== AUTO-DETECT INIT ===== */
