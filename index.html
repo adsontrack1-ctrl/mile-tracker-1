@@ -16,7 +16,7 @@
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
-<title>MyMilesAI Rel 5.0</title>
+<title>MyMilesAI Rel 5.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -643,7 +643,20 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
 
     <div class="uncl" id="unclBanner" style="display:none" onclick="switchTabId('tab-trips')"><span class="uncl-i" style="display:inline-flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg></span><div><div class="uncl-t" id="unclText"></div><div class="uncl-d">Tap to classify →</div></div><span class="uncl-a">›</span></div>
-    <div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div>
+    <div id="ytdBar" style="margin:8px 16px 0;padding:14px 16px;background:var(--white);border-radius:var(--r2);border:1px solid var(--ink6);display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;font-weight:700;color:var(--ink2)">📅 Year-to-date savings</span>
+    <span style="font-size:12px;color:var(--vi);font-weight:700" id="ytdPct">0%</span>
+  </div>
+  <div style="background:var(--ink6);border-radius:var(--rpill);height:8px;overflow:hidden">
+    <div id="ytdFill" style="height:8px;background:linear-gradient(90deg,var(--vi),var(--mag));border-radius:var(--rpill);width:0%;transition:width .6s ease"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <span style="font-size:11px;font-weight:600;color:var(--vi)" id="ytdSaved">$0 saved</span>
+    <span style="font-size:11px;color:var(--ink4)" id="ytdGoal">Goal: $5,000</span>
+  </div>
+</div>
+<div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div>
     <div class="trips" id="recentTrips"></div>
     <div class="sh"><span class="sh-t">Quick Templates</span></div>
     <div class="tmpl-r">
@@ -662,7 +675,12 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div id="swipeQueue"></div>
       <div style="height:8px"></div>
     </div>
-    <div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclass.</button></div>
+    <div style="padding:0 16px 10px">
+  <input type="search" id="tripSearch" placeholder="🔍 Search trips by address or notes..." 
+    style="width:100%;padding:10px 14px;border:1.5px solid var(--ink6);border-radius:var(--rpill);font-size:14px;background:var(--white);color:var(--ink1);box-sizing:border-box;outline:none;-webkit-appearance:none"
+    oninput="_searchTrips(this.value)">
+</div>
+<div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclass.</button></div>
     <div class="trip-list" id="tripList"></div>
   </div>
 
@@ -744,7 +762,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.0</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.0.0</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.1</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.0.0</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1265,7 +1283,7 @@ function tripCard(t,wide){
   var _mapDiv=_rmap
     ? ('<div class="trip-map has-rmap">'+_rmap+'<div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>')
     : ('<div class="trip-map"><div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+( wide?340:290 )+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>');
-  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip">📤 Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -1273,7 +1291,7 @@ function tripCard(t,wide){
 }
 function renderTrips(){
   if(TRIPS.length===0){
-    document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--ink3)">'+_i('car',36,'var(--ink4)')+'<div style="margin-top:12px;font-size:15px;font-weight:500">No trips yet</div><div style="font-size:13px;margin-top:4px;color:var(--ink4)">Tap Auto On to start tracking</div></div>';
+    document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px">'+_i('car',48,'var(--vi)')+'<div style="margin-top:16px;font-size:17px;font-weight:700;color:var(--ink1)">Start tracking your miles</div><div style="font-size:13px;margin-top:8px;color:var(--ink3);line-height:1.6">Every mile you drive for work = money back at tax time.</div><div style="margin-top:12px;font-size:13px;background:var(--vi-s);color:var(--vi);font-weight:600;padding:8px 16px;border-radius:var(--rpill);display:inline-block">At $0.70/mi you could save $8,400/yr</div></div>';
   } else {
     document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,3).map(t=>tripCard(t,false)).join('');
   }
@@ -1303,11 +1321,27 @@ function renderTrips(){
   recalcStats();
   checkEmptyState();
   _updateStreak();
+  _updateYTD();
   bindSwipeCards();
   if(_activeFilter!=='all')applyFilter();
 }
 
 /* ===== SWIPE TO CLASSIFY ===== */
+function _searchTrips(q){
+  q=(q||'').trim().toLowerCase();
+  if(!q){renderTrips();return;}
+  var list=document.getElementById('tripList');if(!list)return;
+  var filtered=TRIPS.filter(function(t){
+    return [(t.from||''),(t.to||''),(t.day||''),(t.notes||''),(t.purpose||'')].some(function(v){return v.toLowerCase().includes(q);});
+  });
+  var html='',lastDay='';
+  if(filtered.length===0){list.innerHTML='<div style="text-align:center;padding:30px;color:var(--ink4)">No trips match "'+_esc(q)+'"</div>';return;}
+  filtered.forEach(function(t){
+    if(t.day!==lastDay){lastDay=t.day;html+='<div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:var(--ink4)">'+_esc(t.day)+'</div>';}
+    html+=tripCard(t,true);
+  });
+  list.innerHTML=html;bindSwipeCards();
+}
 function bindSwipeCards(){
   document.querySelectorAll('.swipe-card').forEach(function(card){
     var startX=0,curX=0,dragging=false,tid=parseInt(card.dataset.swipeId);
@@ -1572,6 +1606,14 @@ function markAllRead(){
 var CAT_LABELS={biz:'Business',pers:'Personal',med:'Medical',char:'Charity',move:'Moving',uncl:'Unclassified'};
 var CAT_DEDUCTIBLE={biz:true,med:true,char:true,move:false,pers:false,uncl:false};
 function catRate(type){return(LOC.rates&&LOC.rates[type])||LOC.rate;}
+function _shareTrip(id){
+  var t=TRIPS.find(function(x){return x.id===id;});if(!t)return;
+  var dist=tripDist(t.mi);
+  var ded=t.ded?(LOC.currency+(parseFloat(dist)*catRate(t.type)).toFixed(2)+' potential deduction'):'';
+  var txt='Trip Log\n'+t.day+(t.time?' at '+t.time:'')+'\nFrom: '+t.from+'\nTo: '+t.to+'\nDistance: '+dist+' '+LOC.unit+(ded?'\nValue: '+ded:'')+(t.notes?'\nNotes: '+t.notes:'')+'\n\nTracked with MyMilesAI';
+  if(navigator.share){navigator.share({title:'MyMilesAI Trip',text:txt}).catch(function(){});}
+  else{try{navigator.clipboard.writeText(txt).then(function(){showToast('📋','Trip details copied!',2500);});}catch(e){showToast('📤','Share not available on this device',2500);}}
+}
 function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=!!CAT_DEDUCTIBLE[type];checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();_checkReviewPrompt();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(CAT_LABELS[type]||type));}}
 
 /* ===== NAVIGATION ===== */
@@ -1708,6 +1750,21 @@ function _updateStreak(){
   var s=_calcStreak();
   var el=document.getElementById('hsStreak');
   if(el)el.textContent=s>0?s+'🔥':'0';
+}
+function _updateYTD(){
+  var goal=5000;
+  var totalDed=0,yr=new Date().getFullYear();
+  TRIPS.forEach(function(t){
+    if(t.ded&&t.day){try{var d=new Date(t.day);if(d.getFullYear()===yr)totalDed+=(parseFloat(tripDist(t.mi))||0)*catRate(t.type);}catch(e){}}
+  });
+  var pct=Math.min(Math.round((totalDed/goal)*100),100);
+  var bar=document.getElementById('ytdBar');
+  if(bar){
+    bar.style.display=TRIPS.length>0?'block':'none';
+    var f=document.getElementById('ytdFill');if(f)f.style.width=pct+'%';
+    var p=document.getElementById('ytdPct');if(p)p.textContent=pct+'%';
+    var s=document.getElementById('ytdSaved');if(s)s.textContent=LOC.currency+totalDed.toFixed(0)+' saved';
+  }
 }
 function recalcStats(){
   var totalBiz=0,totalPer=0,unclCount=0,totalTrips=TRIPS.length;
