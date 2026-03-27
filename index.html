@@ -3073,8 +3073,8 @@ function onAutoPos(p){
   var spdVal=_useKm()?spdMps*3.6:spdMps*2.237;
   var _acc2=p.coords.accuracy||999;
   if(!window._autoSpdBuf)window._autoSpdBuf=[];
-  // Layer 1: accuracy gate — only trust readings <=20m
-  if(_acc2<=12){  // Tighter accuracy gate — only trust GPS within 12m
+  // Layer 1: accuracy gate — only trust readings <=25m
+  if(_acc2<=25){
     // Layer 2: spike rejection — discard jumps >15mph/24kmh above avg
     var _prevAvg=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
     var _spikeMax=_useKm()?24:15;
@@ -3085,13 +3085,14 @@ function onAutoPos(p){
     window._autoSpdBuf=[];
   }
   // Layer 4: require >=3 readings before trusting average
-  var _avgA=window._autoSpdBuf.length>=5?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0; // Need 5 readings for stable average
-  // Speed floor: GPS drift noise — raise to eliminate red light false readings
-  if(_avgA<(_useKm()?20:12))_avgA=0; // Show 0 below 12mph/20kmh (GPS noise threshold)
-  spdVal=_acc2>20?0:_avgA;
+  // Layer 4: require >=3 readings before trusting average
+  var _avgA=window._autoSpdBuf.length>=3?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
+  // Speed floor: GPS drift noise
+  if(_avgA<(_useKm()?8:5))_avgA=0;
+  spdVal=_acc2>25?0:_avgA;
   // Update speedo even while monitoring
   var spdDisplay;
-  if(_acc2>12||spdVal<=0){spdDisplay=_acc2>12?'--':'0';if(_acc2>12)document.getElementById('speedUnit').textContent='poor signal';else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
+  if(_acc2>25||spdVal<=0){spdDisplay=_acc2>25?'--':'0';if(_acc2>25)document.getElementById('speedUnit').textContent='poor GPS';else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   else{spdDisplay=spdVal.toFixed(0);document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
