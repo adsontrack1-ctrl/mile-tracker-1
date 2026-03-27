@@ -3099,8 +3099,17 @@ function onAutoPos(p){
   // Layer 4: require >=3 readings before trusting average
   // Layer 4: require >=3 readings before trusting average
   var _avgA=window._autoSpdBuf.length>=3?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
-  // Speed floor: GPS drift noise
-  if(_avgA<(_useKm()?8:5))_avgA=0;
+  // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent
+  var _monFloor=_useKm()?8:5;
+  if(_avgA<_monFloor){
+    _avgA=0;
+  } else if(window._autoSpdBuf.length>=4){
+    var _mMean=window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length;
+    var _mVar=window._autoSpdBuf.reduce(function(acc,v){return acc+Math.pow(v-_mMean,2);},0)/window._autoSpdBuf.length;
+    var _mStd=Math.sqrt(_mVar);
+    // High variance at low speed = drift not real movement
+    if(_mMean>0&&_mStd/_mMean>0.6&&_mMean<(_useKm()?25:15)){_avgA=0;}
+  }
   spdVal=_acc2>25?0:_avgA;
   // Update speedo even while monitoring
   var spdDisplay;
