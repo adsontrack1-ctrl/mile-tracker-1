@@ -2830,9 +2830,21 @@ function onPos(p){
     var avgSpd=window._spdBuffer.length>=3
       ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
       : spdVal;
-    // Floor: under 8mph/13kmh = GPS drift noise, filtered to prevent phantom speed
-    var floor=_useKm()?13:8;
-    if(avgSpd<floor) avgSpd=0;
+    // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent readings
+    var floor=_useKm()?8:5; // Low floor — only kills near-zero drift
+    if(avgSpd<floor){
+      avgSpd=0;
+    } else if(window._spdBuffer.length>=3){
+      // Calculate variance of recent readings
+      var _mean=window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length;
+      var _variance=window._spdBuffer.reduce(function(acc,v){return acc+Math.pow(v-_mean,2);},0)/window._spdBuffer.length;
+      var _stdDev=Math.sqrt(_variance);
+      // High variance at low speed = GPS drift noise (readings jumping randomly)
+      // Real movement at any speed = consistent readings (low variance relative to mean)
+      if(_mean>0&&_stdDev/_mean>0.6&&_mean<(_useKm()?25:15)){
+        avgSpd=0; // Inconsistent low-speed readings = stationary drift
+      }
+    }
     spdDisplay=avgSpd.toFixed(0);
     document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
   }
