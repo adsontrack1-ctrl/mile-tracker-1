@@ -2667,7 +2667,7 @@ window.__nativeGPS__ = function(coords) {
     updateGPSPermUI();
   }
   var fakePos={ coords: { latitude: coords.lat, longitude: coords.lng,
-                     speed: coords.speed||0, accuracy: coords.accuracy||999 } };
+                     speed: (coords.speed!=null?coords.speed:null), accuracy: coords.accuracy||999 } };
   if(tracking){
     onPos(fakePos);
   } else if(autoDetect){
@@ -3069,7 +3069,7 @@ function onAutoPos(p){
   // Use GPS speed if available, else calc from last known position
   var spdMps=0;
   var _t2=Date.now();
-  if(typeof spd==='number'&&spd>0&&spd!==null){spdMps=spd;}
+  if(typeof spd==='number'&&spd>=0&&spd!==null){spdMps=spd;} // spd=0 means stationary — trust it, skip haversine
   else if(lastGpsLat&&p.coords.latitude){
     var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);
     var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;
