@@ -940,7 +940,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
 
     <label class="add-label">Purpose</label>
-    <select class="add-input" id="addPurpose" style="appearance:auto;padding:10px 12px;border:2px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white)"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select>
+    <select class="add-input" id="addPurpose" style="appearance:auto;padding:10px 12px;border:2px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white)"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical Appointment</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select>
 
     <label class="add-label">Date</label>
     <input type="date" class="add-input" id="addDate" style="padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white);font-family:var(--f)">
@@ -962,7 +962,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">To</label><input type="text" class="inp" id="editTo" placeholder="To address..."></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px" id="editDistLabel">Miles</label><input type="number" class="inp" id="editMi" step="0.1"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Category</label><div style="display:flex;gap:8px"><button class="cls ob" id="eBiz" onclick="setEC('biz')" style="flex:1"><span class="cls-d"></span>Business</button><button class="cls" id="ePer" onclick="setEC('pers')" style="flex:1"><span class="cls-d"></span>Personal</button></div></div>
-  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Purpose</label><select class="inp" id="editPurpose" style="appearance:auto;padding-right:8px"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select></div>
+  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Purpose</label><select class="inp" id="editPurpose" style="appearance:auto;padding-right:8px"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical Appointment</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Notes <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><input type="text" class="inp" id="editNotes" placeholder="Add a note..." maxlength="100"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Date</label><input type="date" class="inp" id="editDate" style="padding:10px 16px"></div>
   <div class="modal-row"><button class="modal-cancel" onclick="closeEdit()">Cancel</button><button class="cta" onclick="saveEdit()" style="flex:1">Save</button></div>
@@ -982,6 +982,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('biz')"><span class="cls-d" style="border-color:var(--vi)"></span><span style="font-size:14px">Business</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div></button>
     <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('pers')"><span class="cls-d" style="border-color:var(--mag)"></span><span style="font-size:14px">Personal</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div></button>
   </div>
+  <button onclick="classifyLastTrip('uncl')" style="width:100%;padding:10px;background:none;border:1px solid var(--ink6);border-radius:var(--rpill);font-size:13px;color:var(--ink4);cursor:pointer;margin-bottom:8px">Save as Unclassified</button>
   <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
 </div></div>
 
@@ -1307,7 +1308,7 @@ function tripCard(t,wide){
 }
 function renderTrips(){
   if(TRIPS.length===0){
-    document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px">'+_i('car',48,'var(--vi)')+'<div style="margin-top:16px;font-size:17px;font-weight:700;color:var(--ink1)">Start tracking your miles</div><div style="font-size:13px;margin-top:8px;color:var(--ink3);line-height:1.6">Every mile you drive for work = money back at tax time.</div><div style="margin-top:12px;font-size:13px;background:var(--vi-s);color:var(--vi);font-weight:600;padding:8px 16px;border-radius:var(--rpill);display:inline-block">At $0.70/mi you could save $8,400/yr</div></div>';
+    document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px">'+_i('car',48,'var(--vi)')+'<div style="margin-top:16px;font-size:17px;font-weight:700;color:var(--ink1)">Start tracking your miles</div><div style="font-size:13px;margin-top:8px;color:var(--ink3);line-height:1.6">Drive anywhere for work and MyMilesAI will auto-detect and record your trip.</div><div style="margin-top:12px;font-size:13px;background:var(--vi-s);color:var(--vi);font-weight:600;padding:8px 16px;border-radius:var(--rpill);display:inline-block">'+LOC.currency+LOC.rates.biz+'/'+LOC.unit+' tax rate — up to '+LOC.currency+'8,400/yr saved</div></div>';
   } else {
     document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,3).map(t=>tripCard(t,false)).join('');
   }
@@ -1692,7 +1693,7 @@ function updateGreeting(){
   document.getElementById('hdrGreet').textContent=greet;
   // Load user name
   var name='';
-  try{name=localStorage.getItem('mymilesai_name')||'';}catch(e){}
+  try{name=localStorage.getItem('mymilesai_name')||'';if(!name){var _gs=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');name=_gs.userName||'';}}catch(e){}
   if(name){
     document.getElementById('hdrName').textContent=name;
     document.getElementById('hdrAv').textContent=name.charAt(0).toUpperCase();
@@ -1739,7 +1740,7 @@ function editProfileName(){
 }
 function initProfile(){
   var name='';
-  try{name=localStorage.getItem('mymilesai_name')||'';}catch(e){}
+  try{name=localStorage.getItem('mymilesai_name')||'';if(!name){var _gs=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');name=_gs.userName||'';}}catch(e){}
   if(name){
     document.getElementById('profileName').textContent=name;
     document.getElementById('profileEmail').textContent='Tap to edit your name';
@@ -4268,7 +4269,7 @@ function _renderAIMessage(role,text){
 }
 
 function _buildAISystemPrompt(){
-  var name='';try{name=localStorage.getItem('mymilesai_name')||'';}catch(e){}
+  var name='';try{name=localStorage.getItem('mymilesai_name')||'';if(!name){var _gs=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');name=_gs.userName||'';}}catch(e){}
   var cats=_tripSummaryByCategory();
   var totalDed=0;
   var catKeys=['biz','med','char'];
@@ -4855,7 +4856,7 @@ function restoreJSON(input){
         // SECURITY: sanitize name — strip all HTML, limit to 100 chars
         if(data.name&&typeof data.name==='string'){
           var safeName=data.name.replace(/<[^>]*>/g,'').trim().slice(0,100);
-          try{localStorage.setItem('mymilesai_name',safeName);}catch(ex){}
+          try{localStorage.setItem('mymilesai_name',safeName);var _os=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');_os.userName=safeName;localStorage.setItem('mymilesai_settings',JSON.stringify(_os));}catch(ex){}
         }
         if(data.settings)try{localStorage.setItem('mymilesai_settings',JSON.stringify(data.settings));}catch(ex){}
         if(data.odometer)try{localStorage.setItem('mymilesai_odometer',JSON.stringify(data.odometer));}catch(ex){}
