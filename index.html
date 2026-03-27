@@ -977,6 +977,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div id="clsRoute" style="font-size:13px;color:var(--ink3);margin-bottom:4px"></div>
   <div id="clsDist" style="font-family:var(--fd);font-size:28px;font-weight:800;color:var(--vi);margin-bottom:16px"></div>
   <div id="clsAutoHint" style="font-size:13px;color:var(--ink3);margin-bottom:14px">How would you like to classify this trip?</div>
+  <div id="clsCountdown" style="font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;font-weight:500"></div>
   <div style="display:flex;gap:10px;margin-bottom:12px">
     <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('biz')"><span class="cls-d" style="border-color:var(--vi)"></span><span style="font-size:14px">Business</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div></button>
     <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('pers')"><span class="cls-d" style="border-color:var(--mag)"></span><span style="font-size:14px">Personal</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div></button>
@@ -3039,8 +3040,14 @@ function stopAutoMonitoring(){
 
 var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
 var _detectCount=0; // consecutive above-threshold readings
-var _detectRequired=4; // readings needed to confirm driving
-var _stillCount=0; // consecutive below-threshold readings needed to reset detection
+var _detectRequired=3;
+var _stillCount=0;
+var _stopRequired=8;
+var _charging=false;
+var _accelMoving=false;
+var _accelBuf=[];
+if(navigator.getBattery){navigator.getBattery().then(function(bat){_charging=bat.charging;bat.addEventListener('chargingchange',function(){_charging=bat.charging;_detectRequired=_charging?2:3;});}).catch(function(){});}
+if(window.DeviceMotionEvent){window.addEventListener('devicemotion',function(e){if(!e.acceleration)return;var mag=Math.sqrt(Math.pow(e.acceleration.x||0,2)+Math.pow(e.acceleration.y||0,2)+Math.pow(e.acceleration.z||0,2));_accelBuf.push(mag);if(_accelBuf.length>10)_accelBuf.shift();var avg=_accelBuf.reduce(function(a,b){return a+b;},0)/(_accelBuf.length||1);_accelMoving=(avg>0.5&&avg<15);},{passive:true});}
 
 function onAutoPos(p){
   // While monitoring (not recording), check if driving
@@ -3110,7 +3117,7 @@ function onAutoPos(p){
     if(_detectCount>=_detectRequired){
       _autoState='RECORDING';
       _detectCount=0;
-      showToast(_i('car'),'Driving confirmed! Auto-recording started',3000);
+      showToast(_i('car'),'Trip detected — recording automatically',3000);
       if(navigator.vibrate)try{navigator.vibrate([50,50,50]);}catch(e){}
       // Notify native app
       if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
@@ -3121,7 +3128,8 @@ function onAutoPos(p){
     }
   } else {
     _stillCount++;
-    if(_stillCount>=3){
+    var _stopThresh=_accelMoving?(_stopRequired+4):_stopRequired;
+    if(_stillCount>=_stopThresh){
       _detectCount=0;
       _stillCount=0;
       if(_autoState==='DETECTING'){
@@ -3279,21 +3287,31 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
   _gpsTrioSaved=false;
 }
+var _classifyCountdown=null;
 function showClassifyPrompt(tripId,from,to,dist,autoType){
   document.getElementById('clsRoute').textContent=from.split(',')[0]+' → '+to.split(',')[0];
   document.getElementById('clsDist').textContent=dist.toFixed(1)+' '+LOC.label;
-  // Show auto-classified hint if applicable
   var hint=document.getElementById('clsAutoHint');
-  if(autoType&&autoType!=='uncl'){
-    var label=autoType==='biz'?'Business (work hours)':'Personal';
-    if(hint)hint.textContent='Auto-classified as '+label+' — confirm or change:';
-  } else {
-    if(hint)hint.textContent='How would you like to classify this trip?';
-  }
+  if(hint)hint.textContent='Business or Personal?';
   document.getElementById('classifyModal').classList.add('show');
   window._classifyTripId=tripId;
+  var _secs=15;
+  if(_classifyCountdown)clearInterval(_classifyCountdown);
+  var _timerEl=document.getElementById('clsCountdown');
+  if(_timerEl)_timerEl.textContent='Auto-saves as Unclassified in '+_secs+'s';
+  _classifyCountdown=setInterval(function(){
+    _secs--;
+    if(_timerEl)_timerEl.textContent=_secs>0?'Auto-saves as Unclassified in '+_secs+'s':'Saved as Unclassified';
+    if(_secs<=0){
+      clearInterval(_classifyCountdown);_classifyCountdown=null;
+      document.getElementById('classifyModal').classList.remove('show');
+      window._classifyTripId=null;
+      switchTabId('tab-drive');
+    }
+  },1000);
 }
 function classifyLastTrip(type){
+  if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
   var id=window._classifyTripId;
   if(id){clsTrip(id,type);}
   document.getElementById('classifyModal').classList.remove('show');
@@ -3315,6 +3333,7 @@ function classifyLastTrip(type){
   },150);
 }
 function closeClassifyPrompt(){
+  if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
   document.getElementById('classifyModal').classList.remove('show');
   window._classifyTripId=null;
   switchTabId('tab-drive');
@@ -4991,6 +5010,7 @@ if(window.__MYMILESAI_NATIVE__){
 }
 // Check GPS permission on load and request if needed
 checkGPSPermission();
+autoDetect=true; // Always start monitoring
 if(autoDetect){
   if(window.__MYMILESAI_NATIVE__){
     // On native, permissions are handled by the native app (Expo Location).
