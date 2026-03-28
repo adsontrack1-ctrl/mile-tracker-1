@@ -4530,6 +4530,11 @@ try{
 }catch(e){console.warn('Supabase init:',e);}
 
 function _updateAuthUI(){
+  // FIX23: Toggle sign-in/out buttons in settings
+  var soBtn=document.getElementById('settingsSignOut');
+  var siBtn=document.getElementById('settingsSignIn');
+  if(soBtn)soBtn.style.display=_sbUser?'block':'none';
+  if(siBtn)siBtn.style.display=_sbUser?'none':'block';
   var av=document.getElementById('hdrAv'),nm=document.getElementById('hdrName');
   if(_sbUser){var m=_sbUser.user_metadata||{},n=m.full_name||m.name||_sbUser.email||'User';if(av)av.textContent=n.charAt(0).toUpperCase();if(nm)nm.textContent=n.split(' ')[0];try{localStorage.setItem('mymilesai_name',n.split(' ')[0]);}catch(e){}}
 }
@@ -4594,9 +4599,25 @@ function _decStore(key){
 
 function saveTripsToStorage(){
   try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
-  // Debounce Supabase sync — wait 2s after last change
-  if(_syncTimer)clearTimeout(_syncTimer);
-  _syncTimer=setTimeout(function(){if(_sbUser)_syncTripsToCloud();},2000);
+  // FIX19: Sync to Supabase instead of jsonbin
+  if(typeof _sbUser!=='undefined'&&_sbUser&&!window._skipCloudPush){
+    clearTimeout(window._cloudSyncTimer);
+    window._cloudSyncTimer=setTimeout(async function(){
+      if(!_supabase||!_sbUser||typeof TRIPS==='undefined'||!TRIPS.length)return;
+      var rows=TRIPS.map(function(t){return{
+        id:t.id,user_id:_sbUser.id,
+        date:t.date||'',
+        start_address:t.start||t.startAddress||'',
+        end_address:t.end||t.endAddress||'',
+        distance:parseFloat(t.miles||t.distance||0),
+        purpose:t.purpose||'',type:t.type||t.category||'business',
+        deduction:parseFloat(t.deduction||t.ded||0),
+        notes:t.notes||''
+      };});
+      try{await _supabase.from('trips').upsert(rows,{onConflict:'id'});}
+      catch(e){console.error('Auto-sync error:',e);}
+    },2000);
+  }
 }
 function loadTripsFromStorage(){
   // Load from localStorage immediately
@@ -5057,6 +5078,17 @@ if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
     });
   }
 }
+
+// FIX24: Show auth modal on load if no session (after 1.5s)
+setTimeout(async function(){
+  if(typeof _sbUser!=='undefined'&&!_sbUser&&typeof _supabase!=='undefined'&&_supabase){
+    var sess=await _supabase.auth.getSession();
+    if(!sess.data||!sess.data.session){
+      _showAuthModal();
+    }
+  }
+},1500);
+
 </script>
 <!-- SUPABASE AUTH MODAL -->
 <div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center">
