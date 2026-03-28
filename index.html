@@ -4611,8 +4611,13 @@ async function _migrateLocalTripsToCloud(userId){
   await _supabase.from('trips').upsert(rows,{ignoreDuplicates:true});}catch(e){console.warn('Migration:',e);}
 }
 async function _syncTripsToCloud(){
-  if(!_supabase||!_sbUser||!TRIPS||TRIPS.length===0)return;
-  try{var rows=TRIPS.map(function(t){return{user_id:_sbUser.id,from_addr:t.from||'',to_addr:t.to||'',miles:parseFloat(t.mi)||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',trip_date:t.date||'',trip_time:t.time||'',deductible:!!t.ded};});
+  if(!_supabase||!_sbUser)return;
+  // Read from encrypted storage as fallback if TRIPS global is empty
+  var tripsData=null;
+  try{var raw=typeof _decStore==='function'?_decStore('mymilesai_trips'):null;if(raw)tripsData=JSON.parse(raw);}catch(e){}
+  if((!tripsData||!tripsData.length)&&typeof TRIPS!=='undefined'&&TRIPS&&TRIPS.length)tripsData=TRIPS;
+  if(!tripsData||!tripsData.length)return;
+  try{var rows=tripsData.map(function(t){return{user_id:_sbUser.id,from_addr:t.from||'',to_addr:t.to||'',miles:parseFloat(t.mi)||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',trip_date:t.date||'',trip_time:t.time||'',deductible:!!t.ded};});
   var r=await _supabase.from('trips').upsert(rows,{ignoreDuplicates:true});
   if(!r.error)showToast('','Trips backed up \u2713',2000);}catch(e){console.warn('Sync:',e);}
 }
