@@ -1700,6 +1700,7 @@ function updateGreeting(){
     document.getElementById('hdrName').textContent=name;
     document.getElementById('hdrAv').textContent=name.charAt(0).toUpperCase();
   } else {
+    if(_sbUser){var m=_sbUser.user_metadata||{},sn=m.full_name||m.name||_sbUser.email||'';if(sn){document.getElementById('hdrName').textContent=sn.split(' ')[0];document.getElementById('hdrAv').textContent=sn.charAt(0).toUpperCase();return;}}
     document.getElementById('hdrName').textContent='Welcome back';
     document.getElementById('hdrAv').textContent='M';
   }
@@ -4526,7 +4527,10 @@ try{
       _updateAuthUI();
       if(event==='SIGNED_IN'){showToast('\u2601\uFE0F','Signed in! Syncing trips...',3000);setTimeout(_syncTripsToCloud,1500);}
     });
-    _supabase.auth.getSession().then(function(d){if(d.data&&d.data.session){_sbUser=d.data.session.user;_updateAuthUI();}});
+    _supabase.auth.getSession().then(function(d){
+      if(d.data&&d.data.session){_sbUser=d.data.session.user;_updateAuthUI();setTimeout(_loadTripsFromCloud,1000);}
+      else{setTimeout(_showAuthModal,1000);}
+    });
   }
 }catch(e){console.warn('Supabase init:',e);}
 
@@ -4553,7 +4557,7 @@ async function _authEmail(){
   var email=(document.getElementById('authEmail').value||'').trim(),pass=document.getElementById('authPassword').value||'';
   if(!email||!pass){showToast('','Enter email and password',2000);return;}
   try{var r=await _supabase.auth.signInWithPassword({email:email,password:pass});
-  if(r.error&&r.error.message.includes('Invalid')){r=await _supabase.auth.signUp({email:email,password:pass});if(!r.error)showToast('','Account created! Check email to confirm.',4000);}
+  if(r.error&&r.error.message.includes('Invalid')){var _aName=(document.getElementById('authName').value||'').trim();r=await _supabase.auth.signUp({email:email,password:pass,options:{data:{full_name:_aName||email.split('@')[0]}}});if(!r.error)showToast('','Account created! Check email to confirm.',4000);}
   if(r.error)showToast('',''+r.error.message,3000);else _hideAuthModal();}catch(e){showToast('','Auth error',2000);}
 }
 async function _signOut(){if(!_supabase)return;await _supabase.auth.signOut();_sbUser=null;showToast('','Signed out',2000);}
@@ -5083,6 +5087,7 @@ if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
       Continue with Apple
     </button>
     <div style="display:flex;align-items:center;gap:8px;margin:16px 0"><div style="flex:1;height:1px;background:var(--ink6)"></div><span style="font-size:12px;color:var(--ink4)">or</span><div style="flex:1;height:1px;background:var(--ink6)"></div></div>
+    <input id="authName" type="text" placeholder="Your name" autocomplete="name" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:10px;outline:none;background:var(--white);color:var(--ink)">
     <input id="authEmail" type="email" placeholder="Email address" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:10px;outline:none;background:var(--white);color:var(--ink)">
     <input id="authPassword" type="password" placeholder="Password" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:14px;outline:none;background:var(--white);color:var(--ink)">
     <button onclick="_authEmail()" style="width:100%;padding:14px;border:none;border-radius:var(--rpill);background:var(--vi);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Sign In / Sign Up</button>
