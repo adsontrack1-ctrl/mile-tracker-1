@@ -6,7 +6,7 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://api.jsonbin.io https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://*.supabase.co https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -4562,27 +4562,8 @@ async function _loadTripsFromCloud(){
 }
 
 /* Fix #19 — Persist trips to localStorage */
-/* ===== CLOUD SYNC (JSONBin.io) ===== */
-var _JSONBIN_KEY='$2a$10$MyMilesAI_PLACEHOLDER_KEY'; // set via setupCloudSync()
-var _JSONBIN_BIN=''; // bin ID stored in localStorage per user
-var _syncPending=false;
+/* ===== CLOUD SYNC (Supabase) ===== */
 var _syncTimer=null;
-
-function _getSyncId(){
-  // Use device-unique ID derived from localStorage — same user = same bin
-  try{
-    var sid=localStorage.getItem('mymilesai_syncid');
-    if(!sid){sid='mmai_'+(Date.now().toString(36))+(Math.random().toString(36).slice(2));localStorage.setItem('mymilesai_syncid',sid);}
-    return sid;
-  }catch(e){return 'mmai_default';}
-}
-
-function _showSyncStatus(msg,ok){
-  var el=document.getElementById('syncStatusDot');
-  if(!el)return;
-  el.title=msg;
-  el.style.background=ok?'#22c55e':'#f59e0b';
-}
 
 /* ===== ENCRYPTED STORAGE (client-side obfuscation) ===== */
 var _encKey=(function(){
@@ -4612,51 +4593,13 @@ function _decStore(key){
 }
 
 function saveTripsToStorage(){
-  
   try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
-  // Debounce cloud sync — wait 2s after last change
+  // Debounce Supabase sync — wait 2s after last change
   if(_syncTimer)clearTimeout(_syncTimer);
-  _syncTimer=setTimeout(function(){_pushToCloud();},2000);
-}
-
-function _pushToCloud(){
-  var binId=localStorage.getItem('mymilesai_bin_id');
-  var payload={trips:TRIPS,updated:Date.now(),version:'4.2'};
-  var apiKey='$2a$10$8QxhDcU6bLmNJvKpXwYrZeWqA9nF3dTsE7gHmP2jRcVuB4kL6oNy';
-  if(!binId){
-    // Create new bin
-    fetch('https://api.jsonbin.io/v3/b',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-Master-Key':apiKey,'X-Bin-Name':_getSyncId(),'X-Bin-Private':'true'},
-      body:JSON.stringify(payload)
-    }).then(function(r){return r.json();}).then(function(d){
-      if(d.metadata&&d.metadata.id){
-        localStorage.setItem('mymilesai_bin_id',d.metadata.id);
-        _showSyncStatus('Synced to cloud ✓',true);
-      }
-    }).catch(function(){_showSyncStatus('Sync failed — saved locally',false);});
-  } else {
-    // Update existing bin
-    fetch('https://api.jsonbin.io/v3/b/'+binId,{
-      method:'PUT',
-      headers:{'Content-Type':'application/json','X-Master-Key':apiKey},
-      body:JSON.stringify(payload)
-    }).then(function(r){return r.json();}).then(function(d){
-      if(d.metadata)_showSyncStatus('Synced ✓ '+new Date().toLocaleTimeString(),true);
-    }).catch(function(){_showSyncStatus('Sync failed — saved locally',false);});
-  }
-}
-
-function _mergeTrips(local,cloud){
-  var byId={};
-  local.forEach(function(t){byId[t.id]=t;});
-  cloud.forEach(function(t){
-    if(!byId[t.id]||(t.ts&&t.ts>(byId[t.id].ts||0))){byId[t.id]=t;}
-  });
-  return Object.values(byId).sort(function(a,b){return(b.ts||0)-(a.ts||0);});
+  _syncTimer=setTimeout(function(){if(_sbUser)_syncTripsToCloud();},2000);
 }
 function loadTripsFromStorage(){
-  // First load from localStorage immediately (fast)
+  // Load from localStorage immediately
   var loadedFromLocal=false;
   try{
     var stored=_decStore('mymilesai_trips');
@@ -4671,43 +4614,14 @@ function loadTripsFromStorage(){
           TRIPS.push(parsed[i]);
         }
         TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-        
         loadedFromLocal=true;
         renderTrips();renderAlerts();
       }
     }
   }catch(e){}
-
-  // Then try to pull fresher data from cloud
-  var binId=localStorage.getItem('mymilesai_bin_id');
-  var apiKey='$2a$10$8QxhDcU6bLmNJvKpXwYrZeWqA9nF3dTsE7gHmP2jRcVuB4kL6oNy';
-  if(binId){
-    _showSyncStatus('Syncing...',true);
-    fetch('https://api.jsonbin.io/v3/b/'+binId+'/latest',{
-      headers:{'X-Master-Key':apiKey}
-    }).then(function(r){return r.json();}).then(function(d){
-      if(d.record&&d.record.trips&&d.record.trips.length>0){
-        var cloud=d.record.trips;
-        // Per-trip merge: keep newer version of each trip by ID
-        var merged=_mergeTrips(TRIPS,cloud);
-        TRIPS.length=0;
-        for(var i=0;i<merged.length;i++){
-          if(!merged[i].purpose)merged[i].purpose='';
-          if(!merged[i].notes)merged[i].notes='';
-          if(!merged[i].ts){var d2=merged[i].date?new Date(merged[i].date):new Date();merged[i].ts=isNaN(d2.getTime())?Date.now():d2.getTime();}
-          TRIPS.push(merged[i]);
-        }
-        TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-        try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
-        renderTrips();renderAlerts();
-        _showSyncStatus('Synced from cloud',true);
-      }
-    }).catch(function(){_showSyncStatus('Offline — using local data',false);});
-  } else if(!loadedFromLocal){
-    // No local, no cloud — show empty state
-    renderTrips();renderAlerts();
-  }
-  if(!binId&&!loadedFromLocal){renderTrips();renderAlerts();}
+  // Then try Supabase cloud if signed in
+  if(_sbUser){setTimeout(_loadTripsFromCloud,1000);}
+  else if(!loadedFromLocal){renderTrips();renderAlerts();}
 }
 
 /* Fix #24 — Haptic feedback on buttons */
