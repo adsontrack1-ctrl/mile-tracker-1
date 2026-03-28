@@ -4514,7 +4514,7 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)_ref
 
 /* === SUPABASE AUTH + CLOUD SYNC === */
 var _SB_URL='https://dxpuuiqibtizewbbffjk.supabase.co';
-var _SB_KEY='sb_publishable_fiH2OGcy-0lon9qlXxFFIg_QqTDhm3u';
+var _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cHV1aXFpYnRpemV3YmJmZmprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTQ1MDAsImV4cCI6MjA5MDIzMDUwMH0.GSVgcjCxenp4uwahNBnQn5MZzuFKIfcf3gt1AlsVEuc';
 var _supabase=null;
 var _sbUser=null;
 try{
@@ -4536,8 +4536,8 @@ function _updateAuthUI(){
 function _showAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='flex';}
 function _hideAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='none';}
 function _skipAuth(){_hideAuthModal();}
-async function _authGoogle(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});if(r.error)showToast('','Google sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
-async function _authApple(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'apple',options:{redirectTo:location.origin+location.pathname}});if(r.error)showToast('','Apple sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
+async function _authGoogle(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'}});if(r.error)showToast('','Google sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
+async function _authApple(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'apple',options:{redirectTo:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'}});if(r.error)showToast('','Apple sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
 async function _authEmail(){
   if(!_supabase)return;
   var email=(document.getElementById('authEmail').value||'').trim(),pass=document.getElementById('authPassword').value||'';
