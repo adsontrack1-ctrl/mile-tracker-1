@@ -4517,6 +4517,7 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)_ref
 /* === SUPABASE AUTH + CLOUD SYNC === */
 var _SB_URL='https://dxpuuiqibtizewbbffjk.supabase.co';
 var _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cHV1aXFpYnRpemV3YmJmZmprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTQ1MDAsImV4cCI6MjA5MDIzMDUwMH0.GSVgcjCxenp4uwahNBnQn5MZzuFKIfcf3gt1AlsVEuc';
+var _SB_REDIRECT='https://adsontrack1-ctrl.github.io/mile-tracker-1/';
 var _supabase=null;
 var _sbUser=null;
 try{
@@ -4553,14 +4554,62 @@ function _skipAuth(){_hideAuthModal();}
 async function _authGoogle(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'}});if(r.error)showToast('','Google sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
 async function _authApple(){showToast('','Apple Sign-In coming soon — use Google or Email for now',3500);}
 async function _authEmail(){
-  if(!_supabase)return;
-  var email=(document.getElementById('authEmail').value||'').trim(),pass=document.getElementById('authPassword').value||'';
-  if(!email||!pass){showToast('','Enter email and password',2000);return;}
-  try{var r=await _supabase.auth.signInWithPassword({email:email,password:pass});
-  if(r.error&&r.error.message.includes('Invalid')){var _aName=(document.getElementById('authName').value||'').trim();r=await _supabase.auth.signUp({email:email,password:pass,options:{data:{full_name:_aName||email.split('@')[0]}}});if(!r.error)showToast('','Account created! Check email to confirm.',4000);}
-  if(r.error)showToast('',''+r.error.message,3000);else _hideAuthModal();}catch(e){showToast('','Auth error',2000);}
+  if(!_supabase){showToast('','Service unavailable',2000);return;}
+  var nameEl=document.getElementById('authName'),emailEl=document.getElementById('authEmail'),passEl=document.getElementById('authPassword');
+  var name=(nameEl?nameEl.value.trim():''),email=(emailEl?emailEl.value.trim().toLowerCase():''),pass=(passEl?passEl.value:'');
+  var submitBtn=Array.from(document.querySelectorAll('button')).find(function(b){return b.textContent.includes('Sign In')||b.textContent.includes('Sign Up');});
+
+  if(!email||!email.includes('@')||!email.includes('.')||email.length<5){showToast('','Please enter a valid email address',2500);return;}
+  if(!pass){showToast('','Please enter a password',2500);return;}
+  if(pass.length<10){showToast('','Password must be at least 10 characters',2500);return;}
+  if(!/[A-Z]/.test(pass)){showToast('','Password needs an uppercase letter',2500);return;}
+  if(!/[a-z]/.test(pass)){showToast('','Password needs a lowercase letter',2500);return;}
+  if(!/[^A-Za-z0-9]/.test(pass)){showToast('','Password needs a special character (!@#$...)',2500);return;}
+
+  if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='Please wait...';}
+  try{
+    var d=await _supabase.auth.signInWithPassword({email:email,password:pass});
+    if(d.error&&(d.error.message.includes('Invalid')||d.error.message.includes('credentials')||d.error.message.includes('not found'))){
+      if(submitBtn)submitBtn.textContent='Creating account...';
+      var nameVal=name||email.split('@')[0];
+      d=await _supabase.auth.signUp({email:email,password:pass,options:{emailRedirectTo:_SB_REDIRECT,data:{full_name:nameVal}}});
+      if(!d.error&&d.data&&d.data.user){_showEmailConfirmScreen(email);if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Sign In / Sign Up';}return;}
+    }
+    if(d.error){
+      if(d.error.message.includes('confirm')||d.error.message.includes('Email not confirmed')){_showEmailConfirmScreen(email);if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Sign In / Sign Up';}return;}
+      showToast('',d.error.message,3500);if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Sign In / Sign Up';}return;
+    }
+    if(d.data&&d.data.user){
+      if(!d.data.user.email_confirmed_at&&!d.data.user.confirmed_at){_showEmailConfirmScreen(email);if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Sign In / Sign Up';}return;}
+      _sbUser=d.data.user;_hideAuthModal();_updateAuthUI();
+      await _migrateLocalTripsToCloud(d.data.user.id);
+      await _loadTripsFromCloud();
+      var un=d.data.user.user_metadata&&d.data.user.user_metadata.full_name?d.data.user.user_metadata.full_name.split(' ')[0]:email.split('@')[0];
+      showToast('','Welcome, '+un+'!',3000);
+    }
+  }catch(e){showToast('','Error: '+e.message,3000);}
+  finally{if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Sign In / Sign Up';}}
+}
+
+function _showEmailConfirmScreen(email){
+  var sheet=document.getElementById('authSheet');
+  if(!sheet){showToast('','Check your email! Click the link to confirm.',6000);return;}
+  var orig=sheet.innerHTML;
+  sheet.innerHTML='<div style="text-align:center;padding:32px 24px;">'
+    +'<div style="font-size:48px;margin-bottom:16px;">&#x1F4E7;</div>'
+    +'<h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:var(--ink)">Check your email</h2>'
+    +'<p style="color:var(--ink3);font-size:14px;line-height:1.6;margin-bottom:24px;">We sent a confirmation link to<br><strong>'+email+'</strong><br><br>Click the link to activate your account. Check spam if needed.</p>'
+    +'<button onclick="window.location.reload()" style="width:100%;padding:14px;background:var(--vi);color:white;border:none;border-radius:var(--rpill);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;">I confirmed — Open App</button>'
+    +'<button id="_emailBackBtn" style="width:100%;padding:12px;background:transparent;border:1px solid var(--ink6);border-radius:var(--rpill);font-size:14px;cursor:pointer;color:var(--ink3);">Back</button>'
+    +'</div>';
+  document.getElementById('_emailBackBtn').onclick=function(){sheet.innerHTML=orig;};
 }
 async function _signOut(){if(!_supabase)return;await _supabase.auth.signOut();_sbUser=null;showToast('','Signed out',2000);}
+async function _migrateLocalTripsToCloud(userId){
+  if(!_supabase||!userId||!TRIPS||TRIPS.length===0)return;
+  try{var rows=TRIPS.map(function(t){return{user_id:userId,from_addr:t.from||'',to_addr:t.to||'',miles:parseFloat(t.mi)||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',trip_date:t.date||'',trip_time:t.time||'',deductible:!!t.ded};});
+  await _supabase.from('trips').upsert(rows,{ignoreDuplicates:true});}catch(e){console.warn('Migration:',e);}
+}
 async function _syncTripsToCloud(){
   if(!_supabase||!_sbUser||!TRIPS||TRIPS.length===0)return;
   try{var rows=TRIPS.map(function(t){return{user_id:_sbUser.id,from_addr:t.from||'',to_addr:t.to||'',miles:parseFloat(t.mi)||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',trip_date:t.date||'',trip_time:t.time||'',deductible:!!t.ded};});
@@ -5089,7 +5138,8 @@ if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
     <div style="display:flex;align-items:center;gap:8px;margin:16px 0"><div style="flex:1;height:1px;background:var(--ink6)"></div><span style="font-size:12px;color:var(--ink4)">or</span><div style="flex:1;height:1px;background:var(--ink6)"></div></div>
     <input id="authName" type="text" placeholder="Your name" autocomplete="name" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:10px;outline:none;background:var(--white);color:var(--ink)">
     <input id="authEmail" type="email" placeholder="Email address" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:10px;outline:none;background:var(--white);color:var(--ink)">
-    <input id="authPassword" type="password" placeholder="Password" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:14px;outline:none;background:var(--white);color:var(--ink)">
+    <input id="authPassword" type="password" placeholder="Password (10+ chars, Aa!)" oninput="var p=this.value,s=document.getElementById('passStrength');if(!s)return;var b=[];if(p.length<10)b.push('10+ chars');if(!/[A-Z]/.test(p))b.push('uppercase');if(!/[a-z]/.test(p))b.push('lowercase');if(!/[^A-Za-z0-9]/.test(p))b.push('special char');s.textContent=b.length?'Need: '+b.join(', '):'Strong password!';s.style.color=b.length?'var(--coral)':'var(--mint)';" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:14px;outline:none;background:var(--white);color:var(--ink)">
+    <div id="passStrength" style="font-size:11px;margin:4px 0 10px 4px;color:var(--ink4)"></div>
     <button onclick="_authEmail()" style="width:100%;padding:14px;border:none;border-radius:var(--rpill);background:var(--vi);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Sign In / Sign Up</button>
     <button onclick="_skipAuth()" style="width:100%;padding:10px;border:none;background:none;font-size:13px;color:var(--ink4);cursor:pointer">Skip for now</button>
   </div>
