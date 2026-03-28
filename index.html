@@ -4552,7 +4552,16 @@ function _showAuthModal(){var o=document.getElementById('authOverlay');if(o)o.st
 function _hideAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='none';}
 function _skipAuth(){_hideAuthModal();}
 async function _authGoogle(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'}});if(r.error)showToast('','Google sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
-async function _authApple(){showToast('','Apple Sign-In coming soon — use Google or Email for now',3500);}
+async function _authApple(){
+  if(!_supabase){showToast('','Service unavailable',2000);return;}
+  try{
+    var r=await _supabase.auth.signInWithOAuth({
+      provider:'apple',
+      options:{redirectTo:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'}
+    });
+    if(r.error)showToast('','Apple sign-in failed: '+r.error.message,3000);
+  }catch(e){showToast('','Apple sign-in error: '+e.message,2500);}
+}
 async function _authEmail(){
   if(!_supabase){showToast('','Service unavailable',2000);return;}
   var nameEl=document.getElementById('authName'),emailEl=document.getElementById('authEmail'),passEl=document.getElementById('authPassword');
