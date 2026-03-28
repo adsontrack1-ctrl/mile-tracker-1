@@ -782,6 +782,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
+    <button id="settingsSignIn" onclick="_showAuthModal()" style="display:block;width:calc(100% - 32px);margin:16px 16px 0;padding:14px;border-radius:var(--r2);background:var(--vi-s);border:1.5px solid var(--vi);color:var(--vi);font-family:var(--f);font-size:14px;font-weight:700;cursor:pointer;text-align:center">Sign In to Sync Trips</button>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
     <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
   </div>
@@ -4531,7 +4532,16 @@ try{
 
 function _updateAuthUI(){
   var av=document.getElementById('hdrAv'),nm=document.getElementById('hdrName');
-  if(_sbUser){var m=_sbUser.user_metadata||{},n=m.full_name||m.name||_sbUser.email||'User';if(av)av.textContent=n.charAt(0).toUpperCase();if(nm)nm.textContent=n.split(' ')[0];try{localStorage.setItem('mymilesai_name',n.split(' ')[0]);}catch(e){}}
+  var siBtn=document.getElementById('settingsSignIn');
+  if(_sbUser){
+    var m=_sbUser.user_metadata||{},n=m.full_name||m.name||_sbUser.email||'User';
+    if(av)av.textContent=n.charAt(0).toUpperCase();
+    if(nm)nm.textContent=n.split(' ')[0];
+    try{localStorage.setItem('mymilesai_name',n.split(' ')[0]);}catch(e){}
+    if(siBtn)siBtn.style.display='none';
+  } else {
+    if(siBtn)siBtn.style.display='block';
+  }
 }
 function _showAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='flex';}
 function _hideAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='none';}
