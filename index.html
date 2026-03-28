@@ -4530,7 +4530,6 @@ try{
 }catch(e){console.warn('Supabase init:',e);}
 
 function _updateAuthUI(){
-  // FIX23: Toggle sign-in/out buttons in settings
   var soBtn=document.getElementById('settingsSignOut');
   var siBtn=document.getElementById('settingsSignIn');
   if(soBtn)soBtn.style.display=_sbUser?'block':'none';
