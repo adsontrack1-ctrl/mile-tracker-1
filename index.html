@@ -2,6 +2,7 @@
 <html lang="en"><!-- v1773361460 -->
 <head>
 <meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -4511,6 +4512,55 @@ _refreshTemplateDists();
 setInterval(_refreshTemplateDists,300000); // refresh every 5 min
 document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshTemplateDists();});
 
+/* === SUPABASE AUTH + CLOUD SYNC === */
+var _SB_URL='https://dxpuuiqibtizewbbffjk.supabase.co';
+var _SB_KEY='sb_publishable_fiH2OGcy-0lon9qlXxFFIg_QqTDhm3u';
+var _supabase=null;
+var _sbUser=null;
+try{
+  if(window.supabase){
+    _supabase=window.supabase.createClient(_SB_URL,_SB_KEY);
+    _supabase.auth.onAuthStateChange(function(event,session){
+      _sbUser=session?session.user:null;
+      _updateAuthUI();
+      if(event==='SIGNED_IN'){showToast('\u2601\uFE0F','Signed in! Syncing trips...',3000);setTimeout(_syncTripsToCloud,1500);}
+    });
+    _supabase.auth.getSession().then(function(d){if(d.data&&d.data.session){_sbUser=d.data.session.user;_updateAuthUI();}});
+  }
+}catch(e){console.warn('Supabase init:',e);}
+
+function _updateAuthUI(){
+  var av=document.getElementById('hdrAv'),nm=document.getElementById('hdrName');
+  if(_sbUser){var m=_sbUser.user_metadata||{},n=m.full_name||m.name||_sbUser.email||'User';if(av)av.textContent=n.charAt(0).toUpperCase();if(nm)nm.textContent=n.split(' ')[0];try{localStorage.setItem('mymilesai_name',n.split(' ')[0]);}catch(e){}}
+}
+function _showAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='flex';}
+function _hideAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='none';}
+function _skipAuth(){_hideAuthModal();}
+async function _authGoogle(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});if(r.error)showToast('','Google sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
+async function _authApple(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'apple',options:{redirectTo:location.origin+location.pathname}});if(r.error)showToast('','Apple sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
+async function _authEmail(){
+  if(!_supabase)return;
+  var email=(document.getElementById('authEmail').value||'').trim(),pass=document.getElementById('authPassword').value||'';
+  if(!email||!pass){showToast('','Enter email and password',2000);return;}
+  try{var r=await _supabase.auth.signInWithPassword({email:email,password:pass});
+  if(r.error&&r.error.message.includes('Invalid')){r=await _supabase.auth.signUp({email:email,password:pass});if(!r.error)showToast('','Account created! Check email to confirm.',4000);}
+  if(r.error)showToast('',''+r.error.message,3000);else _hideAuthModal();}catch(e){showToast('','Auth error',2000);}
+}
+async function _signOut(){if(!_supabase)return;await _supabase.auth.signOut();_sbUser=null;showToast('','Signed out',2000);}
+async function _syncTripsToCloud(){
+  if(!_supabase||!_sbUser||!TRIPS||TRIPS.length===0)return;
+  try{var rows=TRIPS.map(function(t){return{user_id:_sbUser.id,from_addr:t.from||'',to_addr:t.to||'',miles:parseFloat(t.mi)||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',trip_date:t.date||'',trip_time:t.time||'',deductible:!!t.ded};});
+  var r=await _supabase.from('trips').upsert(rows,{ignoreDuplicates:true});
+  if(!r.error)showToast('','Trips backed up \u2713',2000);}catch(e){console.warn('Sync:',e);}
+}
+async function _loadTripsFromCloud(){
+  if(!_supabase||!_sbUser)return;
+  try{var r=await _supabase.from('trips').select('*').eq('user_id',_sbUser.id).order('created_at',{ascending:false});
+  if(r.error||!r.data||r.data.length===0)return;
+  TRIPS=r.data.map(function(t,i){return{id:t.id||Date.now()+i,from:t.from_addr||'',to:t.to_addr||'',mi:t.miles||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',date:t.trip_date||'',day:t.trip_date||'Today',time:t.trip_time||'',ded:!!t.deductible};});
+  saveTripsToStorage();renderTrips();recalcStats();showToast('','Trips loaded from cloud \u2713',2000);}catch(e){console.warn('Load:',e);}
+}
+
 /* Fix #19 — Persist trips to localStorage */
 /* ===== CLOUD SYNC (JSONBin.io) ===== */
 var _JSONBIN_KEY='$2a$10$MyMilesAI_PLACEHOLDER_KEY'; // set via setupCloudSync()
@@ -5094,5 +5144,25 @@ if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
   }
 }
 </script>
+<!-- SUPABASE AUTH MODAL -->
+<div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center">
+  <div id="authSheet" style="background:var(--white);border-radius:24px;padding:32px 24px;width:90%;max-width:380px;text-align:center">
+    <div style="font-family:var(--fd);font-size:24px;font-weight:800;color:var(--ink);margin-bottom:8px">MyMilesAI</div>
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:28px">Sign in to sync your trips across devices</div>
+    <button onclick="_authGoogle()" style="width:100%;padding:14px;border:1.5px solid var(--ink6);border-radius:var(--rpill);background:var(--white);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;color:var(--ink)">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.6 2.5 30.1 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.8 6.1C12.4 13.1 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17z"/><path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 019.5 24c0-1.6.3-3.2.8-4.6l-7.8-6.1A23.9 23.9 0 000 24c0 3.9.9 7.5 2.7 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.2-2 14.9-5.4l-7.5-5.8c-2 1.4-4.6 2.2-7.4 2.2-6.3 0-11.6-3.6-13.5-8.8l-7.8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
+      Continue with Google
+    </button>
+    <button onclick="_authApple()" style="width:100%;padding:14px;border:none;border-radius:var(--rpill);background:#000;color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px">
+      <svg width="16" height="18" viewBox="0 0 814 1000" fill="#fff"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.9 135.4-317.8 268.3-317.8 98.9 0 181.4 65.2 241.9 65.2 57.2 0 147.5-69.3 261.1-69.3z"/></svg>
+      Continue with Apple
+    </button>
+    <div style="display:flex;align-items:center;gap:8px;margin:16px 0"><div style="flex:1;height:1px;background:var(--ink6)"></div><span style="font-size:12px;color:var(--ink4)">or</span><div style="flex:1;height:1px;background:var(--ink6)"></div></div>
+    <input id="authEmail" type="email" placeholder="Email address" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:10px;outline:none;background:var(--white);color:var(--ink)">
+    <input id="authPassword" type="password" placeholder="Password" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:14px;outline:none;background:var(--white);color:var(--ink)">
+    <button onclick="_authEmail()" style="width:100%;padding:14px;border:none;border-radius:var(--rpill);background:var(--vi);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Sign In / Sign Up</button>
+    <button onclick="_skipAuth()" style="width:100%;padding:10px;border:none;background:none;font-size:13px;color:var(--ink4);cursor:pointer">Skip for now</button>
+  </div>
+</div>
 </body>
 </html>
