@@ -2782,6 +2782,32 @@ function updateDebugPanel(){
   }
 }
 
+
+// ENG-GRADE SPEED FILTER — single source of truth for onPos + onAutoPos
+function _computeDisplaySpeed(spdMps, accuracy, coordsSpeedRaw) {
+  var KMH = _useKm();
+  var POOR_ACCURACY = 65;
+  if (coordsSpeedRaw === 0) { window._spdEMA = 0; window._spdPrev = 0; return 0; }
+  if (accuracy > POOR_ACCURACY) { return null; }
+  var spdRaw = KMH ? (spdMps * 3.6) : (spdMps * 2.237);
+  var ABS_MAX = KMH ? 145 : 90;
+  if (window._spdPrev !== undefined && window._spdPrev > (KMH ? 5 : 3)) {
+    if (spdRaw > window._spdPrev * 2.5) spdRaw = window._spdPrev;
+  }
+  spdRaw = Math.min(spdRaw, ABS_MAX);
+  var ALPHA = 0.25;
+  if (window._spdEMA === undefined || window._spdEMA === null) window._spdEMA = spdRaw;
+  window._spdEMA = ALPHA * spdRaw + (1 - ALPHA) * window._spdEMA;
+  window._spdPrev = window._spdEMA;
+  var deadZone;
+  if (typeof _accelMoving !== 'undefined') {
+    deadZone = _accelMoving ? (KMH ? 5 : 3) : (KMH ? 13 : 8);
+  } else {
+    deadZone = KMH ? 10 : 6;
+  }
+  return window._spdEMA < deadZone ? 0 : window._spdEMA;
+}
+
 function onPos(p){
   var spd=p.coords.speed;
   var accuracy=p.coords.accuracy||999;
@@ -2802,59 +2828,18 @@ function onPos(p){
   }
   // Use GPS speed if available and positive, else calculate from positions
   var spdMps=0;
-  if(typeof spd==='number'&&spd>=0&&spd!==null){
-    spdMps=spd;
-  } else if(positions.length>0){
-    var prev=positions[positions.length-1];
-    var dt=(Date.now()-prev.time)/1000;
-    if(dt>0){
-      var dMi=haversine(prev.lat,prev.lng,lat,lng);
-      spdMps=dMi*1609.34/dt;
-    }
-  }
+  var _rawSpd=p.coords.speed;
+  if(typeof _rawSpd==='number'&&_rawSpd!==null&&_rawSpd>=0){spdMps=_rawSpd;}
+  else if(positions.length>0){var prev=positions[positions.length-1];var dt=(Date.now()-prev.time)/1000;if(dt>0.1&&dt<10){var dMi=haversine(prev.lat,prev.lng,lat,lng);if(!(dMi>0.15&&dt<3))spdMps=dMi*1609.34/dt;}}
   var spdVal=_useKm()?(spdMps*3.6):(spdMps*2.237);
-
-  // SMART SPEED FILTER: hide unreliable speed when indoors/poor GPS
-  if(!window._spdBuffer) window._spdBuffer=[];
-  if(accuracy<=80){
-    window._spdBuffer.push(spdVal);
-    if(window._spdBuffer.length>5) window._spdBuffer.shift();
-  } else {
-    // Poor accuracy — clear buffer, don't trust speed
-    window._spdBuffer=[];
-  }
-
+  var _filteredSpd=_computeDisplaySpeed(spdMps, accuracy, p.coords.speed);
   var spdDisplay;
-  if(accuracy>80){
-    // Poor GPS signal — show signal icon not speed
-    spdDisplay='--';
-    document.getElementById('speedUnit').textContent='poor GPS';
-  } else {
-    var avgSpd=window._spdBuffer.length>=3
-      ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
-      : spdVal;
-    // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent readings
-    var floor=_useKm()?8:5; // Low floor — only kills near-zero drift
-    if(avgSpd<floor){
-      avgSpd=0;
-    } else if(window._spdBuffer.length>=3){
-      // Calculate variance of recent readings
-      var _mean=window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length;
-      var _variance=window._spdBuffer.reduce(function(acc,v){return acc+Math.pow(v-_mean,2);},0)/window._spdBuffer.length;
-      var _stdDev=Math.sqrt(_variance);
-      // High variance at low speed = GPS drift noise (readings jumping randomly)
-      // Real movement at any speed = consistent readings (low variance relative to mean)
-      if(_mean>0&&_stdDev/_mean>0.6&&_mean<(_useKm()?25:15)){
-        avgSpd=0; // Inconsistent low-speed readings = stationary drift
-      }
-    }
-    spdDisplay=avgSpd.toFixed(0);
-    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
-  }
+  if(_filteredSpd===null){spdDisplay='--';document.getElementById('speedUnit').textContent='poor GPS';}
+  else{spdDisplay=_filteredSpd.toFixed(0);document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   document.getElementById('trackSpeed').textContent=spdDisplay;
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var _dispSpd=(spdDisplay==='--'||spdDisplay==='0')?0:parseFloat(spdDisplay);
+  var _dispSpd=(spdDisplay==='--')?0:parseFloat(spdDisplay);
   var pct=Math.min(_dispSpd/maxSpd,1);
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
@@ -3071,56 +3056,23 @@ function onAutoPos(p){
   var spd=p.coords.speed;
   // Use GPS speed if available, else calc from last known position
   var spdMps=0;
+  var _rawSpd=p.coords.speed;
   var _t2=Date.now();
-  if(typeof spd==='number'&&spd>=0&&spd!==null){spdMps=spd;} // spd=0 means stationary — trust it, skip haversine
-  else if(lastGpsLat&&p.coords.latitude){
-    var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);
-    var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;
-    if(_dt<0.5)_dt=0.5;if(_dt>30)_dt=5;
-    // Layer 3: reject teleportation (>0.1mi in <2s)
-    if(dMi>0.1&&_dt<2){spdMps=0;}
-    else{spdMps=dMi*1609.34/_dt;}
-  }
+  if(typeof _rawSpd==='number'&&_rawSpd!==null&&_rawSpd>=0){spdMps=_rawSpd;}
+  else if(lastGpsLat&&p.coords.latitude){var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;if(_dt<0.5)_dt=0.5;if(_dt>30)_dt=5;if(!(dMi>0.1&&_dt<2))spdMps=dMi*1609.34/_dt;}
   window._lastAutoT=_t2;
   var _threshEl=document.getElementById('threshVal');
   var _savedThresh=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
   var thresh=(_threshEl&&parseInt(_threshEl.value))||_savedThresh||5;
-  var spdVal=_useKm()?spdMps*3.6:spdMps*2.237;
   var _acc2=p.coords.accuracy||999;
-  if(!window._autoSpdBuf)window._autoSpdBuf=[];
-  // Layer 1: accuracy gate — only trust readings <=25m
-  if(_acc2<=25){
-    // Layer 2: spike rejection — discard jumps >15mph/24kmh above avg
-    var _prevAvg=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
-    var _spikeMax=_useKm()?24:15;
-    if(window._autoSpdBuf.length<2||spdVal<=_prevAvg+_spikeMax){
-      window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();
-    }
-  } else {
-    window._autoSpdBuf=[];
-  }
-  // Layer 4: require >=3 readings before trusting average
-  // Layer 4: require >=3 readings before trusting average
-  var _avgA=window._autoSpdBuf.length>=3?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
-  // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent
-  var _monFloor=_useKm()?8:5;
-  if(_avgA<_monFloor){
-    _avgA=0;
-  } else if(window._autoSpdBuf.length>=4){
-    var _mMean=window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length;
-    var _mVar=window._autoSpdBuf.reduce(function(acc,v){return acc+Math.pow(v-_mMean,2);},0)/window._autoSpdBuf.length;
-    var _mStd=Math.sqrt(_mVar);
-    // High variance at low speed = drift not real movement
-    if(_mMean>0&&_mStd/_mMean>0.6&&_mMean<(_useKm()?25:15)){_avgA=0;}
-  }
-  spdVal=_acc2>25?0:_avgA;
-  // Update speedo even while monitoring
+  var _filteredSpd=_computeDisplaySpeed(spdMps, _acc2, p.coords.speed);
+  var spdVal=(_filteredSpd===null||_filteredSpd===undefined)?0:_filteredSpd;
   var spdDisplay;
-  if(_acc2>25||spdVal<=0){spdDisplay=_acc2>25?'--':'0';if(_acc2>25)document.getElementById('speedUnit').textContent='poor GPS';else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
+  if(_filteredSpd===null){spdDisplay='--';document.getElementById('speedUnit').textContent='poor GPS';}
   else{spdDisplay=spdVal.toFixed(0);document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var pct=spdDisplay==='--'?0:Math.min(spdVal/maxSpd,1);
+  var pct=_filteredSpd===null?0:Math.min(spdVal/maxSpd,1);
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
