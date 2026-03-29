@@ -4745,22 +4745,88 @@ async function _migrateLocalTripsToCloud(userId){
   await _supabase.from('trips').upsert(rows,{ignoreDuplicates:true});}catch(e){console.warn('Migration:',e);}
 }
 async function _syncTripsToCloud(){
-  if(!_supabase||!_sbUser)return;
-  // Read from encrypted storage as fallback if TRIPS global is empty
-  var tripsData=null;
-  try{var raw=typeof _decStore==='function'?_decStore('mymilesai_trips'):null;if(raw)tripsData=JSON.parse(raw);}catch(e){}
-  if((!tripsData||!tripsData.length)&&typeof TRIPS!=='undefined'&&TRIPS&&TRIPS.length)tripsData=TRIPS;
-  if(!tripsData||!tripsData.length)return;
-  try{var rows=tripsData.map(function(t){return{user_id:_sbUser.id,from_addr:t.from||'',to_addr:t.to||'',miles:parseFloat(t.mi)||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',trip_date:t.date||'',trip_time:t.time||'',deductible:!!t.ded};});
-  var r=await _supabase.from('trips').upsert(rows,{ignoreDuplicates:true});
-  if(!r.error)showToast('','Trips backed up \u2713',2000);}catch(e){console.warn('Sync:',e);}
+  if(!_supabase)return;
+  var sess=await _supabase.auth.getSession();
+  var userId=sess&&sess.data&&sess.data.session&&sess.data.session.user&&sess.data.session.user.id;
+  if(!userId)return;
+  var trips=_decStore('mymilesai_trips');
+  if(!trips)return;
+  try{trips=JSON.parse(trips);}catch(e){return;}
+  if(!Array.isArray(trips)||trips.length===0)return;
+  try{
+    var rows=trips.map(function(t){return{
+      user_id:userId,
+      trip_id:String(t.id||Date.now()),
+      from_addr:t.from||'',
+      to_addr:t.to||'',
+      miles:parseFloat(t.mi)||0,
+      type:t.type||'uncl',
+      time_label:t.time||'',
+      trip_date:t.date||'',
+      ts:t.ts||Date.now(),
+      deductible:!!t.ded,
+      purpose:t.purpose||'',
+      notes:t.notes||'',
+      path:t.path||'',
+      positions:t.positions?JSON.stringify(t.positions):null
+    };});
+    var r=await _supabase.from('trips').upsert(rows,{onConflict:'trip_id,user_id',ignoreDuplicates:false});
+    if(r.error){
+      var minRows=trips.map(function(t){return{
+        user_id:userId,
+        trip_id:String(t.id||Date.now()),
+        from_addr:t.from||'',
+        to_addr:t.to||'',
+        miles:parseFloat(t.mi)||0,
+        type:t.type||'uncl',
+        ts:t.ts||Date.now(),
+        deductible:!!t.ded
+      };});
+      await _supabase.from('trips').upsert(minRows,{onConflict:'trip_id,user_id',ignoreDuplicates:false});
+    }
+      }catch(e){}
 }
 async function _loadTripsFromCloud(){
-  if(!_supabase||!_sbUser)return;
-  try{var r=await _supabase.from('trips').select('*').eq('user_id',_sbUser.id).order('created_at',{ascending:false});
-  if(r.error||!r.data||r.data.length===0)return;
-  TRIPS=r.data.map(function(t,i){return{id:t.id||Date.now()+i,from:t.from_addr||'',to:t.to_addr||'',mi:t.miles||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',date:t.trip_date||'',day:t.trip_date||'Today',time:t.trip_time||'',ded:!!t.deductible};});
-  saveTripsToStorage();renderTrips();recalcStats();showToast('','Trips loaded from cloud \u2713',2000);}catch(e){console.warn('Load:',e);}
+  if(!_supabase)return;
+  var sess=await _supabase.auth.getSession();
+  var userId=sess&&sess.data&&sess.data.session&&sess.data.session.user&&sess.data.session.user.id;
+  if(!userId)return;
+  try{
+    var r=await _supabase.from('trips')
+      .select('trip_id,from_addr,to_addr,miles,type,time_label,trip_date,ts,deductible,purpose,notes,path,positions,created_at')
+      .eq('user_id',userId)
+      .order('ts',{ascending:false})
+      .limit(500);
+    if(r.error||!r.data||r.data.length===0)return;
+    var loaded=r.data.map(function(t,i){
+      var pos=null;
+      try{pos=t.positions?JSON.parse(t.positions):null;}catch(e){}
+      return{
+        id:parseInt(t.trip_id)||Date.now()+i,
+        from:t.from_addr||'',
+        to:t.to_addr||'',
+        mi:parseFloat(t.miles)||0,
+        type:t.type||'uncl',
+        time:t.time_label||'',
+        date:t.trip_date||new Date(t.ts||t.created_at).toLocaleDateString(),
+        day:_fmt(new Date(t.ts||t.created_at||Date.now())),
+        ts:t.ts||new Date(t.created_at).getTime()||Date.now(),
+        ded:!!t.deductible,
+        purpose:t.purpose||'',
+        notes:t.notes||'',
+        path:t.path||randomPath(),
+        positions:pos||[]
+      };
+    });
+    var cloudIds=new Set(loaded.map(function(t){return String(t.id);}));
+    var localOnly=(typeof TRIPS!=='undefined'?TRIPS:[]).filter(function(t){return!cloudIds.has(String(t.id));});
+    while(TRIPS.length)TRIPS.pop();
+    loaded.concat(localOnly).forEach(function(t){TRIPS.push(t);});
+    TRIPS.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
+    saveTripsToStorage();
+    renderTrips();renderAlerts();recalcStats();_updateStreak();
+    showToast('\u2601\ufe0f','Trips synced from cloud \u2014 '+loaded.length+' trips loaded',3000);
+  }catch(e){}
 }
 
 /* Fix #19 — Persist trips to localStorage */
@@ -4795,10 +4861,12 @@ function _decStore(key){
 }
 
 function saveTripsToStorage(){
-  try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
-  // Debounce Supabase sync — wait 2s after last change
-  if(_syncTimer)clearTimeout(_syncTimer);
-  _syncTimer=setTimeout(function(){if(_sbUser)_syncTripsToCloud();},2000);
+  try{
+    _encStore('mymilesai_trips',JSON.stringify(TRIPS));
+    localStorage.setItem('mymilesai_last_save',Date.now().toString());
+  }catch(e){}
+  if(window._syncTimer)clearTimeout(window._syncTimer);
+  window._syncTimer=setTimeout(function(){_syncTripsToCloud();},1000);
 }
 function loadTripsFromStorage(){
   // Load from localStorage immediately
