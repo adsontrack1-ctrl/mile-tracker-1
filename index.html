@@ -984,6 +984,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Trip Complete</div>
   <div id="clsRoute" style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px"></div>
   <div id="clsDist" style="font-family:var(--fd);font-size:32px;font-weight:800;color:var(--vi);line-height:1;margin-bottom:4px"></div>
+  <div id="clsTripValue" style="margin-bottom:12px;text-align:center"></div>
   <div id="clsAutoHint" style="font-size:12px;color:var(--ink4);margin-bottom:20px">How would you classify this drive?</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
     <button onclick="classifyLastTrip('biz')" style="padding:18px 12px;background:linear-gradient(135deg,rgba(108,60,224,.15),rgba(108,60,224,.05));border:1.5px solid var(--vi);border-radius:16px;cursor:pointer;font-family:inherit">
@@ -3120,7 +3121,11 @@ function onAutoPos(p){
       // Notify native app
       if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
         window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'RECORDING'}));
-        window.ReactNativeWebView.postMessage(JSON.stringify({type:'tripDetected'}));
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+        type:'tripDetected',
+        startAddr:_startAddr||'Current location',
+        time:new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})
+      }));
       }
       startTracking();
     }
@@ -3279,7 +3284,11 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   TRIPS.unshift({id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath()});
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();renderAlerts();saveTripsToStorage();
-  showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
+  var _saveDed=(dist*catRate(type)).toFixed(2);
+  var _saveMsg=type==='biz'||type==='med'||type==='char'
+    ? 'Trip saved! '+dist.toFixed(1)+' '+LOC.unit+' · '+LOC.currency+_saveDed+' deduction'
+    : 'Trip saved! '+dist.toFixed(1)+' '+LOC.unit+' recorded.';
+  showToast(_i('ccheck'),_saveMsg);
   recordTripEnd();
   // Always ask user to confirm trip type after every trip
   setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
@@ -3294,6 +3303,13 @@ function showClassifyPrompt(tripId,from,to,dist,autoType){
   if(routeEl)routeEl.textContent=(from||'').split(',')[0]+' \u2192 '+(to||'').split(',')[0];
   if(distEl)distEl.textContent=dist.toFixed(1)+' '+LOC.label;
   if(hintEl)hintEl.textContent='How would you classify this drive?';
+  // Show deduction value for this trip
+  var _tripVal=(dist*(typeof catRate==='function'?catRate('biz'):LOC.rate)).toFixed(2);
+  var _ytdBizMi=0;if(typeof TRIPS!=='undefined'){for(var _ci=0;_ci<TRIPS.length;_ci++){if(TRIPS[_ci].type==='biz')_ytdBizMi+=parseFloat(TRIPS[_ci].mi)||0;}}
+  var _ytdDed=(_ytdBizMi*(typeof catRate==='function'?catRate('biz'):LOC.rate)).toFixed(2);
+  var valEl=document.getElementById('clsTripValue');
+  if(valEl)valEl.innerHTML='<span style="color:var(--vi);font-weight:800;font-size:18px">'+LOC.currency+_tripVal+'</span><span style="color:var(--ink4);font-size:11px"> potential deduction</span>'
+    +'<div style="font-size:10px;color:var(--ink4);margin-top:2px">YTD business deductions: '+LOC.currency+_ytdDed+'</div>';
   var modal=document.getElementById('classifyModal');
   if(modal)modal.classList.add('show');
   window._classifyTripId=tripId;
@@ -3329,14 +3345,27 @@ function showClassifyPrompt(tripId,from,to,dist,autoType){
       showToast('\u2713','Saved as Unclassified',2000);
     }
   },1000);
+  // Rich notification — beat MileIQ
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    var _notifRate=autoType==='biz'?catRate('biz'):autoType==='med'?catRate('med'):autoType==='char'?catRate('char'):LOC.rate;
+    var _notifVal=(dist*_notifRate).toFixed(2);
+    var _notifFrom=(from||'').split(',')[0].trim();
+    var _notifTo=(to||'').split(',')[0].trim();
+    var _notifType=autoType==='biz'?'Business':autoType==='pers'?'Personal':autoType==='med'?'Medical':'Unclassified';
+    var _ytdBiz=0;for(var _ni=0;_ni<TRIPS.length;_ni++){if(TRIPS[_ni].type==='biz')_ytdBiz+=parseFloat(TRIPS[_ni].mi)||0;}
+    var _ytdVal=(_ytdBiz*catRate('biz')).toFixed(2);
     window.ReactNativeWebView.postMessage(JSON.stringify({
       type:'tripClassifyPrompt',
       tripId:tripId,
-      from:(from||'').split(',')[0],
-      to:(to||'').split(',')[0],
+      from:_notifFrom,
+      to:_notifTo,
       dist:dist.toFixed(1),
-      unit:LOC.label
+      unit:LOC.unit,
+      value:_notifVal,
+      currency:LOC.currency,
+      tripType:_notifType,
+      ytdValue:_ytdVal,
+      autoClassified:autoType!=='uncl'
     }));
   }
 }
