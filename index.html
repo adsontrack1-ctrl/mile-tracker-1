@@ -1191,8 +1191,15 @@ function _setTheme(t){
   if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}
   else if(t==='light'){document.documentElement.removeAttribute('data-theme');}
   else{if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');}
+  _applyMapTheme();
 }
-function _initTheme(){try{_setTheme(localStorage.getItem('mymilesai_theme')||'auto');}catch(e){}}
+function _initTheme(){
+  try{_setTheme(localStorage.getItem('mymilesai_theme')||'auto');}catch(e){}
+  try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){
+    var t=localStorage.getItem('mymilesai_theme')||'auto';
+    if(t==='auto')_setTheme('auto');
+  });}catch(e){}
+}
 function setLocale(c){
   LOC=LOCALES[c]||LOCALES.US;
   var sel=document.getElementById('unitSel');
@@ -4093,6 +4100,20 @@ function closeMapSheet(){
   document.getElementById('mapSheet').style.display='none';
   mapSheetOpen=false;
 }
+var MAP_STYLES_DARK=[
+  {elementType:'geometry',stylers:[{color:'#1d2c4d'}]},
+  {elementType:'labels.text.fill',stylers:[{color:'#8ec3b9'}]},
+  {elementType:'labels.text.stroke',stylers:[{color:'#1a3646'}]},
+  {featureType:'road',elementType:'geometry',stylers:[{color:'#304a7d'}]},
+  {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#255763'}]},
+  {featureType:'water',elementType:'geometry',stylers:[{color:'#0e1626'}]}
+];
+var MAP_STYLES_LIGHT=[];
+function _applyMapTheme(){
+  if(!map)return;
+  var isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  map.setOptions({styles:isDark?MAP_STYLES_DARK:MAP_STYLES_LIGHT});
+}
 function initMap(){
   if(!_googleMapsReady){
     // Retry in 500ms if Google Maps not loaded yet
@@ -4113,16 +4134,9 @@ function initMap(){
       zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
       mapTypeControl:false,
       streetViewControl:false,
-      fullscreenControl:false,
-      styles:[
-        {elementType:'geometry',stylers:[{color:'#1d2c4d'}]},
-        {elementType:'labels.text.fill',stylers:[{color:'#8ec3b9'}]},
-        {elementType:'labels.text.stroke',stylers:[{color:'#1a3646'}]},
-        {featureType:'road',elementType:'geometry',stylers:[{color:'#304a7d'}]},
-        {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#255763'}]},
-        {featureType:'water',elementType:'geometry',stylers:[{color:'#0e1626'}]}
-      ]
+      fullscreenControl:false
     });
+    _applyMapTheme();
     userMarker=new google.maps.Marker({
       position:{lat:defLat,lng:defLng},
       map:map,
