@@ -972,20 +972,33 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 <div class="modal-overlay" id="delModal"><div class="modal del-modal"><div class="modal-handle"></div><div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Delete Trip</div><div class="del-msg">Are you sure? This can't be undone.</div><div class="del-route" id="delRoute"></div><div class="modal-row"><button class="modal-cancel" onclick="closeDel()">Cancel</button><button class="btn-del-confirm" onclick="confirmDel()">Delete</button></div></div></div>
 
 <!-- CLASSIFY PROMPT -->
-<div class="modal-overlay" id="classifyModal"><div class="modal" style="text-align:center">
+<div class="modal-overlay" id="classifyModal"><div class="modal" style="text-align:center;padding:24px 20px 20px">
   <div class="modal-handle"></div>
-  <div style="font-size:36px;margin-bottom:8px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-  <div class="modal-title" style="text-align:center;margin-bottom:4px">Trip Complete!</div>
-  <div id="clsRoute" style="font-size:13px;color:var(--ink3);margin-bottom:4px"></div>
-  <div id="clsDist" style="font-family:var(--fd);font-size:28px;font-weight:800;color:var(--vi);margin-bottom:16px"></div>
-  <div id="clsAutoHint" style="font-size:13px;color:var(--ink3);margin-bottom:14px">How would you like to classify this trip?</div>
-  <div id="clsCountdown" style="font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;font-weight:500"></div>
-  <div style="display:flex;gap:10px;margin-bottom:12px">
-    <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('biz')"><span class="cls-d" style="border-color:var(--vi)"></span><span style="font-size:14px">Business</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div></button>
-    <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('pers')"><span class="cls-d" style="border-color:var(--mag)"></span><span style="font-size:14px">Personal</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div></button>
+  <div style="position:relative;width:72px;height:72px;margin:0 auto 16px">
+    <svg width="72" height="72" style="transform:rotate(-90deg)">
+      <circle cx="36" cy="36" r="30" fill="none" stroke="var(--ink6)" stroke-width="4"/>
+      <circle id="clsRing" cx="36" cy="36" r="30" fill="none" stroke="var(--vi)" stroke-width="4" stroke-dasharray="188.4" stroke-dashoffset="0" style="transition:stroke-dashoffset 1s linear;stroke-linecap:round"/>
+    </svg>
+    <div id="clsTimerNum" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:22px;font-weight:800;color:var(--vi)">10</div>
   </div>
-  <button onclick="classifyLastTrip('uncl')" style="width:100%;padding:10px;background:none;border:1px solid var(--ink6);border-radius:var(--rpill);font-size:13px;color:var(--ink4);cursor:pointer;margin-bottom:8px">Save as Unclassified</button>
-  <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
+  <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Trip Complete</div>
+  <div id="clsRoute" style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px"></div>
+  <div id="clsDist" style="font-family:var(--fd);font-size:32px;font-weight:800;color:var(--vi);line-height:1;margin-bottom:4px"></div>
+  <div id="clsAutoHint" style="font-size:12px;color:var(--ink4);margin-bottom:20px">How would you classify this drive?</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+    <button onclick="classifyLastTrip('biz')" style="padding:18px 12px;background:linear-gradient(135deg,rgba(108,60,224,.15),rgba(108,60,224,.05));border:1.5px solid var(--vi);border-radius:16px;cursor:pointer;font-family:inherit">
+      <div style="font-size:22px;margin-bottom:4px">&#x1F4BC;</div>
+      <div style="font-size:15px;font-weight:700;color:var(--vi)">Business</div>
+      <div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div>
+    </button>
+    <button onclick="classifyLastTrip('pers')" style="padding:18px 12px;background:linear-gradient(135deg,rgba(214,0,110,.15),rgba(214,0,110,.05));border:1.5px solid var(--mag);border-radius:16px;cursor:pointer;font-family:inherit">
+      <div style="font-size:22px;margin-bottom:4px">&#x1F3E0;</div>
+      <div style="font-size:15px;font-weight:700;color:var(--mag)">Personal</div>
+      <div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div>
+    </button>
+  </div>
+  <div id="clsCountdown" style="font-size:11px;color:var(--ink4);margin-bottom:10px;font-weight:500;min-height:16px"></div>
+  <button onclick="closeClassifyPrompt()" style="width:100%;padding:11px;background:none;border:1px solid var(--ink6);border-radius:12px;font-size:13px;color:var(--ink4);cursor:pointer;font-family:inherit">&#x2715; &nbsp;Skip</button>
 </div></div>
 
 <!-- ONBOARDING — Full-screen immersive -->
@@ -3267,26 +3280,33 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
 }
 var _classifyCountdown=null;
 function showClassifyPrompt(tripId,from,to,dist,autoType){
-  document.getElementById('clsRoute').textContent=from.split(',')[0]+' → '+to.split(',')[0];
-  document.getElementById('clsDist').textContent=dist.toFixed(1)+' '+LOC.label;
-  var hint=document.getElementById('clsAutoHint');
-  if(hint)hint.textContent='Business or Personal?';
-  document.getElementById('classifyModal').classList.add('show');
+  var SECS=10,CIRC=188.4;
+  var routeEl=document.getElementById('clsRoute'),distEl=document.getElementById('clsDist'),hintEl=document.getElementById('clsAutoHint');
+  if(routeEl)routeEl.textContent=(from.split(',')[0]||from)+' \u2192 '+(to.split(',')[0]||to);
+  if(distEl)distEl.textContent=dist.toFixed(1)+' '+LOC.label;
+  if(hintEl)hintEl.textContent='How would you classify this drive?';
+  var modal=document.getElementById('classifyModal');if(modal)modal.classList.add('show');
   window._classifyTripId=tripId;
-  var _secs=15;
+  var ring=document.getElementById('clsRing'),numEl=document.getElementById('clsTimerNum'),cdEl=document.getElementById('clsCountdown');
+  if(ring){ring.style.strokeDashoffset='0';ring.style.stroke='var(--vi)';}
+  if(numEl){numEl.textContent=SECS;numEl.style.color='var(--vi)';}
+  if(cdEl)cdEl.textContent='Auto-saves in '+SECS+'s';
   if(_classifyCountdown)clearInterval(_classifyCountdown);
-  var _timerEl=document.getElementById('clsCountdown');
-  if(_timerEl)_timerEl.textContent='Auto-saves as Unclassified in '+_secs+'s';
+  var _el=0;
   _classifyCountdown=setInterval(function(){
-    _secs--;
-    if(_timerEl)_timerEl.textContent=_secs>0?'Auto-saves as Unclassified in '+_secs+'s':'Saved as Unclassified';
-    if(_secs<=0){
+    _el++;var rem=SECS-_el;
+    if(ring){ring.style.strokeDashoffset=CIRC*(_el/SECS);ring.style.stroke=rem>6?'var(--vi)':rem>3?'#E08D00':'#FF4444';}
+    if(numEl){numEl.textContent=rem>0?rem:'';numEl.style.color=rem>6?'var(--vi)':rem>3?'#E08D00':'#FF4444';}
+    if(cdEl)cdEl.textContent=rem>0?'Auto-saves in '+rem+'s':'Saved \u2713';
+    if(_el>=SECS){
       clearInterval(_classifyCountdown);_classifyCountdown=null;
-      document.getElementById('classifyModal').classList.remove('show');
-      window._classifyTripId=null;
-      switchTabId('tab-drive');
+      if(modal)modal.classList.remove('show');window._classifyTripId=null;
+      renderTrips();renderAlerts();saveTripsToStorage();switchTabId('tab-drive');
     }
   },1000);
+  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    window.ReactNativeWebView.postMessage(JSON.stringify({type:'tripClassifyPrompt',tripId:tripId,from:from.split(',')[0],to:to.split(',')[0],dist:dist.toFixed(1),unit:LOC.label}));
+  }
 }
 function classifyLastTrip(type){
   if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
@@ -3312,6 +3332,8 @@ function classifyLastTrip(type){
 }
 function closeClassifyPrompt(){
   if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
+  var _r=document.getElementById('clsRing');if(_r){_r.style.strokeDashoffset='0';_r.style.stroke='var(--vi)';}
+  var _n=document.getElementById('clsTimerNum');if(_n)_n.textContent='10';
   document.getElementById('classifyModal').classList.remove('show');
   window._classifyTripId=null;
   switchTabId('tab-drive');
