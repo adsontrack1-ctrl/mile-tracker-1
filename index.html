@@ -3287,32 +3287,57 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
 }
 var _classifyCountdown=null;
 function showClassifyPrompt(tripId,from,to,dist,autoType){
-  var SECS=10,CIRC=188.4;
-  var routeEl=document.getElementById('clsRoute'),distEl=document.getElementById('clsDist'),hintEl=document.getElementById('clsAutoHint');
-  if(routeEl)routeEl.textContent=(from.split(',')[0]||from)+' \u2192 '+(to.split(',')[0]||to);
+  var SECS=10;
+  var routeEl=document.getElementById('clsRoute');
+  var distEl=document.getElementById('clsDist');
+  var hintEl=document.getElementById('clsAutoHint');
+  if(routeEl)routeEl.textContent=(from||'').split(',')[0]+' \u2192 '+(to||'').split(',')[0];
   if(distEl)distEl.textContent=dist.toFixed(1)+' '+LOC.label;
   if(hintEl)hintEl.textContent='How would you classify this drive?';
-  var modal=document.getElementById('classifyModal');if(modal)modal.classList.add('show');
+  var modal=document.getElementById('classifyModal');
+  if(modal)modal.classList.add('show');
   window._classifyTripId=tripId;
-  var ring=document.getElementById('clsRing'),numEl=document.getElementById('clsTimerNum'),cdEl=document.getElementById('clsCountdown');
-  if(ring){ring.style.strokeDashoffset='0';ring.style.stroke='var(--vi)';}
+  var ring=document.getElementById('clsRing');
+  var numEl=document.getElementById('clsTimerNum');
+  var countdownEl=document.getElementById('clsCountdown');
+  var CIRC=188.4;
+  if(ring){ring.style.transition='none';ring.style.strokeDashoffset='0';ring.style.stroke='var(--vi)';}
   if(numEl){numEl.textContent=SECS;numEl.style.color='var(--vi)';}
-  if(cdEl)cdEl.textContent='Auto-saves in '+SECS+'s';
+  if(countdownEl)countdownEl.textContent='Auto-saves as Unclassified in '+SECS+'s';
   if(_classifyCountdown)clearInterval(_classifyCountdown);
-  var _el=0;
+  var _elapsed=0;
+  setTimeout(function(){if(ring)ring.style.transition='stroke-dashoffset 1s linear';},50);
   _classifyCountdown=setInterval(function(){
-    _el++;var rem=SECS-_el;
-    if(ring){ring.style.strokeDashoffset=CIRC*(_el/SECS);ring.style.stroke=rem>6?'var(--vi)':rem>3?'#E08D00':'#FF4444';}
-    if(numEl){numEl.textContent=rem>0?rem:'';numEl.style.color=rem>6?'var(--vi)':rem>3?'#E08D00':'#FF4444';}
-    if(cdEl)cdEl.textContent=rem>0?'Auto-saves in '+rem+'s':'Saved \u2713';
-    if(_el>=SECS){
+    _elapsed++;
+    var remaining=SECS-_elapsed;
+    var offset=CIRC*(_elapsed/SECS);
+    if(ring){
+      ring.style.strokeDashoffset=offset;
+      ring.style.stroke=remaining>6?'var(--vi)':remaining>3?'#E08D00':'#FF4444';
+    }
+    if(numEl){
+      numEl.textContent=remaining>0?remaining:'';
+      numEl.style.color=remaining>6?'var(--vi)':remaining>3?'#E08D00':'#FF4444';
+    }
+    if(countdownEl)countdownEl.textContent=remaining>0?'Auto-saves as Unclassified in '+remaining+'s':'Saved as Unclassified \u2713';
+    if(_elapsed>=SECS){
       clearInterval(_classifyCountdown);_classifyCountdown=null;
-      if(modal)modal.classList.remove('show');window._classifyTripId=null;
-      renderTrips();renderAlerts();saveTripsToStorage();switchTabId('tab-drive');
+      if(modal)modal.classList.remove('show');
+      window._classifyTripId=null;
+      renderTrips();renderAlerts();saveTripsToStorage();
+      switchTabId('tab-drive');
+      showToast('\u2713','Saved as Unclassified',2000);
     }
   },1000);
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
-    window.ReactNativeWebView.postMessage(JSON.stringify({type:'tripClassifyPrompt',tripId:tripId,from:from.split(',')[0],to:to.split(',')[0],dist:dist.toFixed(1),unit:LOC.label}));
+    window.ReactNativeWebView.postMessage(JSON.stringify({
+      type:'tripClassifyPrompt',
+      tripId:tripId,
+      from:(from||'').split(',')[0],
+      to:(to||'').split(',')[0],
+      dist:dist.toFixed(1),
+      unit:LOC.label
+    }));
   }
 }
 function classifyLastTrip(type){
@@ -3339,9 +3364,10 @@ function classifyLastTrip(type){
 }
 function closeClassifyPrompt(){
   if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
-  var _r=document.getElementById('clsRing');if(_r){_r.style.strokeDashoffset='0';_r.style.stroke='var(--vi)';}
-  var _n=document.getElementById('clsTimerNum');if(_n)_n.textContent='10';
-  document.getElementById('classifyModal').classList.remove('show');
+  var ring=document.getElementById('clsRing');
+  if(ring){ring.style.transition='none';ring.style.strokeDashoffset='0';ring.style.stroke='var(--vi)';}
+  var numEl=document.getElementById('clsTimerNum');if(numEl){numEl.textContent='10';numEl.style.color='var(--vi)';}
+  var modal=document.getElementById('classifyModal');if(modal)modal.classList.remove('show');
   window._classifyTripId=null;
   switchTabId('tab-drive');
   setTimeout(function(){renderTrips();renderAlerts();},150);
