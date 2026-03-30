@@ -1,5 +1,5 @@
 // MyMilesAI Service Worker — Cache-first for app shell, network-first for APIs
-var CACHE_NAME = 'mymilesai-v5.3';
+var CACHE_NAME = 'mymilesai-v5.4';
 var APP_SHELL = [
   './',
   './index.html'
