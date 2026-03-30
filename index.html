@@ -2954,7 +2954,7 @@ function _computeDisplaySpeed(spdMps, accuracy, coordsSpeedRaw) {
   // Hysteresis: count consecutive near-zero readings
   var NEAR_ZERO = KMH ? 4 : 2.5; // below this = probably stopped
   var ZERO_CONFIRM = 3; // readings needed to confirm stop
-  var MOVE_CONFIRM = KMH ? 8 : 5; // must exceed this to unlock from zero
+  var MOVE_CONFIRM = KMH ? 6 : 4; // must exceed this to unlock from zero (display units)
   if (_gpsAI.ema < NEAR_ZERO) {
     _gpsAI.zeroCount = Math.min(_gpsAI.zeroCount + 1, 20);
   } else {
@@ -2965,8 +2965,8 @@ function _computeDisplaySpeed(spdMps, accuracy, coordsSpeedRaw) {
     _gpsAI.zeroLock = true;
     _gpsAI.kX = 0; _gpsAI.ema = 0;
   }
-  // Exit zero lock only when clearly moving
-  if (_gpsAI.zeroLock && _gpsAI.ema >= MOVE_CONFIRM) {
+  // Exit zero lock only when clearly moving — check both EMA and raw kalman
+  if (_gpsAI.zeroLock && (_gpsAI.ema >= MOVE_CONFIRM || kalmanDisplay >= MOVE_CONFIRM * 1.5)) {
     _gpsAI.zeroLock = false;
     _gpsAI.zeroCount = 0;
   }
