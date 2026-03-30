@@ -17,7 +17,7 @@
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
-<title>MyMilesAI Rel 5.4</title>
+<title>MyMilesAI Rel 5.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -779,7 +779,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.4</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.4.0</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.5</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.5.0</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -2036,7 +2036,7 @@ function exportCSV(){
   rows.push(['Total Deduction',LOC.currency+totalDed.toFixed(2)]);
   rows.push([]);
   rows.push(['Disclaimer: This log is maintained in accordance with IRS Publication 463. Consult a tax professional for advice.']);
-  rows.push(['Generated','MyMilesAI v5.2 — '+new Date().toLocaleDateString()]);
+  rows.push(['Generated','MyMilesAI v5.5 — '+new Date().toLocaleDateString()]);
 
   var csv=rows.map(function(r){return r.join(',');}).join('\n');
   var filename='MyMilesAI_Mileage_Log_'+yr+'_'+new Date().toISOString().slice(0,10)+'.csv';
@@ -2381,7 +2381,7 @@ function exportSummaryPDF(period){
     +'<h2>By Category</h2>'
     +'<table><thead><tr><th>Category</th><th>Trips</th><th>Distance</th><th>Deduction</th></tr></thead><tbody>'+catRows+'</tbody></table>'
     +(report.topRoutes.length?'<h2>Top Routes</h2><table><thead><tr><th>Route</th><th>Trips</th><th>Distance</th></tr></thead><tbody>'+routeRows+'</tbody></table>':'')
-    +'<div class="footer">'+LOC.taxLabel+' · MyMilesAI v5.2</div>'
+    +'<div class="footer">'+LOC.taxLabel+' · MyMilesAI v5.5</div>'
     +'<script>window.onload=function(){window.print();}<\/script></body></html>';
   if(window.__MYMILESAI_NATIVE__){
     _shareOrDownload(html,'MyMilesAI-Summary-'+period+'.html','text/html');
@@ -3463,6 +3463,30 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     : 'Trip saved! '+dist.toFixed(1)+' '+LOC.unit+' recorded.';
   showToast(_i('ccheck'),_saveMsg);
   recordTripEnd();
+  // Send tripSaved notification to native app
+  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    window.ReactNativeWebView.postMessage(JSON.stringify({
+      type:'tripSaved',
+      summary:dist.toFixed(1)+' '+LOC.unit+' · '+LOC.currency+(dist*catRate(type)).toFixed(2)+' saved',
+      category:CAT_LABELS[type]||type,
+      miles:dist.toFixed(1),
+      deduction:(dist*catRate(type)).toFixed(2),
+    }));
+    // Check milestones
+    var _bizMi=TRIPS.reduce(function(s,t){return s+(t.type==='biz'?parseFloat(t.mi)||0:0);},0);
+    var _milestones=[100,250,500,1000,2500,5000];
+    for(var _mi=0;_mi<_milestones.length;_mi++){
+      var _m=_milestones[_mi];
+      if(_bizMi>=_m&&(_bizMi-dist)<_m){
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type:'milestone',
+          title:'🎉 '+_m+' business '+LOC.unit+'!',
+          body:'You've saved '+LOC.currency+((_m)*catRate('biz')).toFixed(0)+' in deductions this year!'
+        }));
+        break;
+      }
+    }
+  }
   // Always ask user to confirm trip type after every trip
   setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
   _gpsTrioSaved=false;
@@ -4209,6 +4233,15 @@ function _doSaveManual(){
   showToast(_i('ccheck'),'Trip saved · '+dist+' '+LOC.unit);
   recordTripEnd();
   saveTripsToStorage();
+  // Notify native of manual trip save
+  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    window.ReactNativeWebView.postMessage(JSON.stringify({
+      type:'tripSaved',
+      summary:dist+' '+LOC.unit+' recorded',
+      category:CAT_LABELS[autoType]||autoType,
+      miles:dist,
+    }));
+  }
   closeAddTrip();
 }
 // Close dropdowns on outside click
@@ -5577,8 +5610,10 @@ function deleteAccount(){
     '<div style="text-align:center;padding:8px 0">'
     +'<div style="font-size:40px;margin-bottom:12px">⚠️</div>'
     +'<div style="font-weight:700;font-size:17px;color:#E74C3C;margin-bottom:8px">Permanently Delete Account</div>'
-    +'<div style="font-size:13px;color:var(--ink3);margin-bottom:20px">This will permanently delete all your trips, settings, and account data. This action <b>cannot be undone</b>.</div>'
-    +'<button onclick="confirmDeleteAccount()" style="width:100%;padding:14px;background:#E74C3C;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Yes, Delete My Account</button>'
+    +'<div style="font-size:13px;color:var(--ink3);margin-bottom:12px">This will permanently delete <b>all your trips, settings, and account data</b>. This action <b>cannot be undone</b>.</div>'
+    +'<div style="font-size:12px;color:var(--ink3);margin-bottom:8px">Type <b>DELETE</b> to confirm:</div>'
+    +'<input id="_deleteConfirmInput" type="text" placeholder="Type DELETE here" style="width:100%;padding:12px;border:1.5px solid #E74C3C;border-radius:10px;font-size:15px;text-align:center;margin-bottom:12px;box-sizing:border-box;font-family:inherit" oninput="document.getElementById('_deleteConfirmBtn').style.opacity=this.value==='DELETE'?'1':'0.4';document.getElementById('_deleteConfirmBtn').disabled=this.value!=='DELETE'">'
+    +'<button id="_deleteConfirmBtn" onclick="confirmDeleteAccount()" disabled style="width:100%;padding:14px;background:#E74C3C;color:white;border:none;opacity:0.4;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Yes, Delete My Account</button>'
     +'<button onclick="closeInfoModal()" style="width:100%;padding:14px;background:var(--ink7);color:var(--ink);border:1.5px solid var(--ink6);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">Cancel</button>'
     +'</div>'
   );
