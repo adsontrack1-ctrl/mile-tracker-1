@@ -2673,6 +2673,8 @@ function toggleTracking(){
 }
 
 function startTracking(){
+  // Reset AI GPS engine for fresh trip
+  if(typeof _gpsAI!=='undefined'){_gpsAI.kX=0;_gpsAI.kP=1;_gpsAI.ema=0;_gpsAI.prev=0;_gpsAI.zeroCount=0;_gpsAI.zeroLock=false;_gpsAI.history=[];}
   if(!navigator.geolocation&&!window.__MYMILESAI_NATIVE__){showToast(_i('pin'),'GPS not available on this device');return;}
   if(autoWatchId&&autoWatchId!=='native'){navigator.geolocation.clearWatch(autoWatchId);}
   autoWatchId=null;
@@ -2840,28 +2842,154 @@ function updateDebugPanel(){
 
 
 // ENG-GRADE SPEED FILTER — single source of truth for onPos + onAutoPos
+// ══════════════════════════════════════════════════════════════
+// AI GPS SPEED ENGINE v2.0 — World-class accuracy
+// Kalman filter + Adaptive EMA + Traffic light zero lock
+// Jerk limiter + Confidence scoring + Hysteresis dead zone
+// ══════════════════════════════════════════════════════════════
+
+// Persistent state for AI GPS engine
+var _gpsAI = {
+  // Kalman filter state
+  kX: 0,        // Kalman estimated speed (m/s)
+  kP: 1,        // Kalman error covariance
+  kQ: 0.3,      // Process noise (how fast speed can change)
+  kR: 2.0,      // Measurement noise (GPS accuracy factor)
+  // Adaptive EMA state
+  ema: 0,       // EMA smoothed speed
+  prev: 0,      // Previous output
+  // Traffic light detector
+  zeroCount: 0, // Consecutive near-zero readings
+  zeroLock: false, // True when we are confident we are stopped
+  // History for jerk detection
+  history: [],  // Last 5 speed readings {spd, t, acc}
+  // Confidence
+  confidence: 0.5,
+  lastUpdate: 0,
+};
+
 function _computeDisplaySpeed(spdMps, accuracy, coordsSpeedRaw) {
+  var now = Date.now();
   var KMH = _useKm();
-  var POOR_ACCURACY = 65;
-  if (coordsSpeedRaw === 0) { window._spdEMA = 0; window._spdPrev = 0; return 0; }
-  if (accuracy > POOR_ACCURACY) { return null; }
-  var spdRaw = KMH ? (spdMps * 3.6) : (spdMps * 2.237);
-  var ABS_MAX = KMH ? 145 : 90;
-  if (window._spdPrev !== undefined && window._spdPrev > (KMH ? 5 : 3)) {
-    if (spdRaw > window._spdPrev * 2.5) spdRaw = window._spdPrev;
+  var dt = Math.min((now - (_gpsAI.lastUpdate || now)) / 1000, 3.0);
+  _gpsAI.lastUpdate = now;
+
+  // ── 1. REJECT BAD SIGNAL ─────────────────────────────────
+  var POOR_ACC = 80; // metres — above this GPS is unreliable
+  if (accuracy > POOR_ACC) {
+    // If we were moving fast, decay gradually instead of showing null
+    if (_gpsAI.ema > (KMH ? 20 : 12)) {
+      _gpsAI.ema = _gpsAI.ema * 0.85; // decay 15% per reading
+      return _gpsAI.ema;
+    }
+    return null; // truly unknown — show "--"
   }
-  spdRaw = Math.min(spdRaw, ABS_MAX);
-  var ALPHA = 0.25;
-  if (window._spdEMA === undefined || window._spdEMA === null) window._spdEMA = spdRaw;
-  window._spdEMA = ALPHA * spdRaw + (1 - ALPHA) * window._spdEMA;
-  window._spdPrev = window._spdEMA;
-  var deadZone;
-  if (typeof _accelMoving !== 'undefined') {
-    deadZone = _accelMoving ? (KMH ? 5 : 3) : (KMH ? 13 : 8);
+
+  // ── 2. HARDWARE ZERO — phone says speed = 0.0 exactly ───
+  // iOS GPS reports exact 0.0 when hardware-confirmed stopped
+  if (coordsSpeedRaw === 0 || coordsSpeedRaw === 0.0) {
+    _gpsAI.kX = 0; _gpsAI.kP = 1;
+    _gpsAI.ema = 0; _gpsAI.prev = 0;
+    _gpsAI.zeroCount = 10; _gpsAI.zeroLock = true;
+    _gpsAI.history = [];
+    return 0; // Traffic light — show 0 immediately
+  }
+
+  // ── 3. CONFIDENCE SCORE ──────────────────────────────────
+  // Better accuracy = higher confidence in this reading
+  var conf = Math.max(0.1, Math.min(1.0, 1 - (accuracy / POOR_ACC)));
+  // Accelerometer fusion — if phone says still, lower confidence
+  if (typeof _accelMoving !== 'undefined' && !_accelMoving && spdMps < 3) {
+    conf *= 0.4;
+  }
+
+  // ── 4. KALMAN FILTER ─────────────────────────────────────
+  // Predict step: project state forward
+  var kQ_adaptive = _gpsAI.kQ * (1 + Math.abs(spdMps - _gpsAI.kX) * 0.1);
+  _gpsAI.kP = _gpsAI.kP + kQ_adaptive * dt;
+  // Measurement noise adapts to GPS accuracy
+  var kR_adaptive = _gpsAI.kR * (accuracy / 20.0) * (1 / Math.max(conf, 0.1));
+  // Update step: incorporate new measurement
+  var kK = _gpsAI.kP / (_gpsAI.kP + kR_adaptive); // Kalman gain
+  _gpsAI.kX = _gpsAI.kX + kK * (spdMps - _gpsAI.kX);
+  _gpsAI.kP = (1 - kK) * _gpsAI.kP;
+  var kalmanSpd = Math.max(0, _gpsAI.kX);
+
+  // ── 5. JERK LIMITER ──────────────────────────────────────
+  // Max physically possible acceleration for a car: ~0-60mph in 4s = ~6.7 m/s²
+  // We allow 8 m/s² to be safe, but reject anything > 12 m/s²
+  var MAX_ACCEL = 12; // m/s² — absolute max (sports car)
+  var SOFT_ACCEL = 8;  // m/s² — smooth limit
+  if (dt > 0.1 && dt < 5) {
+    var accel = Math.abs(kalmanSpd - _gpsAI.prev / (KMH ? 3.6 : 2.237)) / dt;
+    if (accel > MAX_ACCEL) {
+      // GPS glitch — reject, keep previous
+      kalmanSpd = _gpsAI.prev / (KMH ? 3.6 : 2.237);
+      _gpsAI.kX = kalmanSpd; // reset Kalman to prevent drift
+    } else if (accel > SOFT_ACCEL) {
+      // Soft limit — blend toward previous
+      var blend = (accel - SOFT_ACCEL) / (MAX_ACCEL - SOFT_ACCEL);
+      kalmanSpd = kalmanSpd * (1 - blend * 0.5) + (_gpsAI.prev / (KMH ? 3.6 : 2.237)) * blend * 0.5;
+    }
+  }
+
+  // ── 6. ADAPTIVE EMA ──────────────────────────────────────
+  // Alpha adapts: fast response when accelerating, slow when steady
+  var speedChange = Math.abs(kalmanSpd - _gpsAI.ema / (KMH ? 3.6 : 2.237));
+  var ALPHA;
+  if (speedChange > 4) {
+    ALPHA = 0.55; // Fast change — respond quickly
+  } else if (speedChange > 1.5) {
+    ALPHA = 0.35; // Medium change
   } else {
-    deadZone = KMH ? 10 : 6;
+    ALPHA = 0.20; // Steady state — smooth heavily
   }
-  return window._spdEMA < deadZone ? 0 : window._spdEMA;
+  // Accuracy bonus — better signal = faster response
+  ALPHA = ALPHA * (0.7 + conf * 0.3);
+  // Convert kalman to display units for EMA
+  var kalmanDisplay = KMH ? (kalmanSpd * 3.6) : (kalmanSpd * 2.237);
+  _gpsAI.ema = ALPHA * kalmanDisplay + (1 - ALPHA) * _gpsAI.ema;
+
+  // ── 7. TRAFFIC LIGHT ZERO LOCK ───────────────────────────
+  // Hysteresis: count consecutive near-zero readings
+  var NEAR_ZERO = KMH ? 4 : 2.5; // below this = probably stopped
+  var ZERO_CONFIRM = 3; // readings needed to confirm stop
+  var MOVE_CONFIRM = KMH ? 8 : 5; // must exceed this to unlock from zero
+  if (_gpsAI.ema < NEAR_ZERO) {
+    _gpsAI.zeroCount = Math.min(_gpsAI.zeroCount + 1, 20);
+  } else {
+    _gpsAI.zeroCount = Math.max(_gpsAI.zeroCount - 2, 0);
+  }
+  // Enter zero lock
+  if (_gpsAI.zeroCount >= ZERO_CONFIRM && !_gpsAI.zeroLock) {
+    _gpsAI.zeroLock = true;
+    _gpsAI.kX = 0; _gpsAI.ema = 0;
+  }
+  // Exit zero lock only when clearly moving
+  if (_gpsAI.zeroLock && _gpsAI.ema >= MOVE_CONFIRM) {
+    _gpsAI.zeroLock = false;
+    _gpsAI.zeroCount = 0;
+  }
+  // Apply zero lock
+  if (_gpsAI.zeroLock) {
+    _gpsAI.ema = 0;
+    _gpsAI.prev = 0;
+    return 0; // Stopped at traffic light — show 0
+  }
+
+  // ── 8. ABSOLUTE LIMITS ───────────────────────────────────
+  var ABS_MAX = KMH ? 160 : 100; // Freeway max
+  _gpsAI.ema = Math.min(_gpsAI.ema, ABS_MAX);
+
+  // ── 9. FINAL OUTPUT ──────────────────────────────────────
+  _gpsAI.prev = _gpsAI.ema;
+
+  // Store history for debug
+  _gpsAI.history.push({spd: _gpsAI.ema, t: now, acc: accuracy});
+  if (_gpsAI.history.length > 5) _gpsAI.history.shift();
+
+  // Round to 1 decimal for display
+  return Math.round(_gpsAI.ema * 10) / 10;
 }
 
 function onPos(p){
@@ -3061,6 +3189,10 @@ function toggleAutoDetect(el){
 
 function startAutoMonitoring(){
   if(tracking)return;
+  // Reset AI GPS engine state for clean start
+  _gpsAI.kX=0;_gpsAI.kP=1;_gpsAI.ema=0;_gpsAI.prev=0;
+  _gpsAI.zeroCount=0;_gpsAI.zeroLock=false;_gpsAI.history=[];
+  window._spdEMA=0;window._spdPrev=0;
   // On native app, GPS is pushed via __nativeGPS__ — no need for watchPosition
   if(window.__MYMILESAI_NATIVE__){
     autoWatchId='native';
