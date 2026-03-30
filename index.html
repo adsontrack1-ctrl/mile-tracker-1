@@ -771,10 +771,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="set">
       <div class="sr" onclick="openInfoModal('Location Permissions','MyMilesAI uses your GPS location to automatically detect and record trips.<br><br><b>Background Access:</b> Allows trip tracking even when the app is minimized. Your location data stays on your device.<br><br><b>When In Use:</b> Only tracks when the app is open.<br><br><b>To change:</b> Go to your device Settings → Privacy → Location Services → MyMilesAI')"><div><h4>Location permissions</h4><p>Background GPS access</p></div><span class="sr-link">Manage →</span></div>
       <div class="sr" onclick="openInfoModal('Data & Privacy','<b>What we collect:</b><br>• Trip start/end locations<br>• Distance traveled<br>• Trip timestamps<br>• Category classifications<br><br><b>What we don\'t collect:</b><br>• Personal contacts<br>• Browsing history<br>• Photos or files<br><br><b>Storage:</b> All trip data is stored locally on your device. No data is sent to external servers unless you explicitly export it.<br><br><b>Analytics:</b> We collect anonymized usage statistics to improve the app. No personally identifiable information is included.')"><div><h4>Data & privacy</h4><p>How we use your data</p></div><span class="sr-link">View →</span></div>
-      <div class="sr" onclick="openInfoModal('Privacy Policy','<b>MyMilesAI Privacy Policy</b><br>Last updated: March 2026<br><br>MyMilesAI is committed to protecting your privacy. This policy describes how we handle your personal information.<br><br><b>1. Information We Collect</b><br>We collect location data solely for the purpose of mileage tracking. This data remains on your device.<br><br><b>2. How We Use Your Data</b><br>Your trip data is used exclusively to calculate distances, generate reports, and estimate tax deductions.<br><br><b>3. Data Sharing</b><br>We do not sell, trade, or share your personal data with third parties.<br><br><b>4. Data Retention</b><br>Your data is stored on your device until you choose to delete it.<br><br><b>5. Your Rights</b><br>You can export or delete all your data at any time from Settings.<br><br><b>6. Contact</b><br>Questions? Email privacy@mymilesai.com')"><div><h4>Privacy policy</h4><p>Legal information</p></div><span class="sr-link">Read →</span></div>
+      <div class="sr" id="demoBtnRow" style="display:none" onclick="loadDemoData()"><div><h4 style="color:var(--vi)">🎬 Load Demo Data</h4><p>Populate app with sample trips for testing</p></div><div>›</div></div>
+<div class="sr" onclick="openInfoModal('Privacy Policy','<b>MyMilesAI Privacy Policy</b><br>Last updated: March 2026<br><br>MyMilesAI is committed to protecting your privacy. This policy describes how we handle your personal information.<br><br><b>1. Information We Collect</b><br>We collect location data solely for the purpose of mileage tracking. This data remains on your device.<br><br><b>2. How We Use Your Data</b><br>Your trip data is used exclusively to calculate distances, generate reports, and estimate tax deductions.<br><br><b>3. Data Sharing</b><br>We do not sell, trade, or share your personal data with third parties.<br><br><b>4. Data Retention</b><br>Your data is stored on your device until you choose to delete it.<br><br><b>5. Your Rights</b><br>You can export or delete all your data at any time from Settings.<br><br><b>6. Contact</b><br>Questions? Email privacy@mymilesai.com')"><div><h4>Privacy policy</h4><p>Legal information</p></div><span class="sr-link">Read →</span></div>
       <div class="sr" onclick="openInfoModal('Terms & Conditions','<b>MyMilesAI Terms of Service</b><br>Last updated: March 2026<br><br><b>1. Acceptance</b><br>By using MyMilesAI, you agree to these terms.<br><br><b>2. Service Description</b><br>MyMilesAI provides automatic mileage tracking and tax deduction estimates for business and personal trips.<br><br><b>3. Accuracy Disclaimer</b><br>Distance calculations are estimates based on GPS data. Actual distances may vary. Tax deduction amounts are estimates and should not be considered tax advice. Consult a tax professional.<br><br><b>4. User Responsibilities</b><br>You are responsible for classifying trips correctly and verifying data accuracy.<br><br><b>5. Limitation of Liability</b><br>MyMilesAI is provided as-is. We are not liable for inaccurate distance readings or tax calculations.<br><br><b>6. Changes</b><br>We may update these terms. Continued use constitutes acceptance.<br><br><b>7. Contact</b><br>support@mymilesai.com')"><div><h4>Terms & conditions</h4><p>Service agreement</p></div><span class="sr-link">Read →</span></div>
       <div class="sr" onclick="openInfoModal('Export My Data','<b>Download Your Data</b><br><br>Choose your export format:<br><br><b>CSV</b> — Spreadsheet-compatible<br><b>PDF</b> — Print-ready report<br><b>JSON Backup</b> — Full data backup for device migration<br><br><button onclick=&quot;exportJSON()&quot; style=&quot;padding:12px 24px;border-radius:100px;border:2px solid #6C3CE0;background:rgba(108,60,224,.06);color:#6C3CE0;font-weight:700;font-size:14px;cursor:pointer;margin:8px 0&quot;>Download JSON Backup</button><br><br><b>Restore from backup:</b><br><input type=&quot;file&quot; id=&quot;restoreFile&quot; accept=&quot;.json&quot; onchange=&quot;restoreJSON(this)&quot; style=&quot;margin:8px 0;font-size:13px&quot;><br><br><i>JSON backup includes all trips, settings, and preferences.</i>')"><div><h4>Export my data</h4><p>Download or restore backup</p></div><span class="sr-link">Export →</span></div>
-      <div class="sr" onclick="openInfoModal('Delete Account','<b>This action is permanent</b><br><br>Deleting your account will:<br><br>• Remove all saved trips<br>• Delete all settings and preferences<br>• Remove your profile data<br>• Cancel any active subscription<br><br>This cannot be undone. We recommend exporting your data first.<br><br><i>To proceed, contact support@mymilesai.com with your deletion request.</i>')"><div><h4>Delete account</h4><p>Permanently remove data</p></div><button class="btn-rd">Delete</button></div>
+      <div class="sr" onclick="deleteAccount()" style="border-top:1px solid rgba(231,76,60,.15)"><div><h4 style="color:#E74C3C">Delete account</h4><p>Permanently remove all data</p></div><button class="btn-rd" style="background:#E74C3C;color:white;border-color:#E74C3C">Delete</button></div>
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
@@ -2023,7 +2024,7 @@ function exportCSV(){
   rows.push(['Total Deduction',LOC.currency+totalDed.toFixed(2)]);
   rows.push([]);
   rows.push(['Disclaimer: This log is maintained in accordance with IRS Publication 463. Consult a tax professional for advice.']);
-  rows.push(['Generated','MyMilesAI v4.2 — '+new Date().toLocaleDateString()]);
+  rows.push(['Generated','MyMilesAI v5.2 — '+new Date().toLocaleDateString()]);
 
   var csv=rows.map(function(r){return r.join(',');}).join('\n');
   var filename='MyMilesAI_Mileage_Log_'+yr+'_'+new Date().toISOString().slice(0,10)+'.csv';
@@ -2368,7 +2369,7 @@ function exportSummaryPDF(period){
     +'<h2>By Category</h2>'
     +'<table><thead><tr><th>Category</th><th>Trips</th><th>Distance</th><th>Deduction</th></tr></thead><tbody>'+catRows+'</tbody></table>'
     +(report.topRoutes.length?'<h2>Top Routes</h2><table><thead><tr><th>Route</th><th>Trips</th><th>Distance</th></tr></thead><tbody>'+routeRows+'</tbody></table>':'')
-    +'<div class="footer">'+LOC.taxLabel+' · MyMilesAI v4.2</div>'
+    +'<div class="footer">'+LOC.taxLabel+' · MyMilesAI v5.2</div>'
     +'<script>window.onload=function(){window.print();}<\/script></body></html>';
   if(window.__MYMILESAI_NATIVE__){
     _shareOrDownload(html,'MyMilesAI-Summary-'+period+'.html','text/html');
@@ -4929,7 +4930,7 @@ function updateOdoDelta(){
 loadOdometer();
 
 /* ===== FEATURE 4: WORK HOURS AUTO-CLASSIFY ===== */
-var _workHours={enabled:false,start:'08:00',end:'18:00',days:[0,1,1,1,1,1,0]};
+var _workHours={enabled:false,start:'09:00',end:'17:00',days:[0,1,1,1,1,1,0]};
 function loadWorkHours(){
   try{
     var wh=JSON.parse(localStorage.getItem('mymilesai_workhours')||'null');
@@ -5327,6 +5328,100 @@ if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
     });
   }
 }
+
+
+// ── ACCOUNT DELETION (App Store Guideline 5.1.1) ─────────────
+function deleteAccount(){
+  openInfoModal('Delete Account',
+    '<div style="text-align:center;padding:8px 0">'
+    +'<div style="font-size:40px;margin-bottom:12px">⚠️</div>'
+    +'<div style="font-weight:700;font-size:17px;color:#E74C3C;margin-bottom:8px">Permanently Delete Account</div>'
+    +'<div style="font-size:13px;color:var(--ink3);margin-bottom:20px">This will permanently delete all your trips, settings, and account data. This action <b>cannot be undone</b>.</div>'
+    +'<button onclick="confirmDeleteAccount()" style="width:100%;padding:14px;background:#E74C3C;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Yes, Delete My Account</button>'
+    +'<button onclick="closeInfoModal()" style="width:100%;padding:14px;background:var(--ink7);color:var(--ink);border:1.5px solid var(--ink6);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">Cancel</button>'
+    +'</div>'
+  );
+}
+async function confirmDeleteAccount(){
+  closeInfoModal();
+  showToast('\u231B','Deleting your account...', 3000);
+  try{
+    // Clear all local data
+    TRIPS=[];
+    saveTripsToStorage();
+    try{localStorage.clear();}catch(e){}
+    // Sign out from Supabase if available
+    if(window._sb){
+      try{await window._sb.auth.signOut();}catch(e){}
+    }
+    // Show confirmation
+    setTimeout(function(){
+      document.body.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:40px;text-align:center">'
+        +'<div style="font-size:48px;margin-bottom:16px">✓</div>'
+        +'<div style="font-size:20px;font-weight:700;margin-bottom:8px">Account Deleted</div>'
+        +'<div style="font-size:14px;color:#888;margin-bottom:24px">All your data has been permanently removed.</div>'
+        +'<button onclick="location.reload()" style="padding:14px 28px;background:#1B4DDB;color:white;border:none;border-radius:12px;font-size:15px;cursor:pointer">Start Fresh</button>'
+        +'</div>';
+    }, 1500);
+  }catch(e){
+    showToast('\u26A0','Error deleting account. Please try again.',3000);
+  }
+}
+
+
+// ── DEMO DATA for App Store reviewer / TestFlight testers ──────
+function loadDemoData(){
+  if(!confirm('Add 15 sample trips to demonstrate the app?'))return;
+  var today=new Date();
+  var categories=['biz','biz','biz','pers','biz','biz','pers','biz','med','biz','biz','pers','biz','char','biz'];
+  var routes=[
+    {from:'123 Main St, Manteca, CA',to:'Client Office, Stockton, CA',mi:12.4},
+    {from:'Home, Manteca, CA',to:'Downtown Office, Sacramento, CA',mi:45.2},
+    {from:'Office, Stockton, CA',to:'Airport, Sacramento, CA',mi:38.1},
+    {from:'Home, Manteca, CA',to:'Grocery Store, Manteca, CA',mi:3.2},
+    {from:'Office, Stockton, CA',to:'Client Site, Modesto, CA',mi:28.7},
+    {from:'Home, Manteca, CA',to:'Bank, Tracy, CA',mi:8.9},
+    {from:'Home, Manteca, CA',to:'Gym, Manteca, CA',mi:2.1},
+    {from:'Client Site, Modesto, CA',to:'Office, Stockton, CA',mi:28.5},
+    {from:'Home, Manteca, CA',to:'Medical Center, Stockton, CA',mi:15.3},
+    {from:'Office, Stockton, CA',to:'Client Meeting, Lodi, CA',mi:22.6},
+    {from:'Home, Manteca, CA',to:'Office, Stockton, CA',mi:18.4},
+    {from:'Office, Stockton, CA',to:'Home, Manteca, CA',mi:18.4},
+    {from:'Home, Manteca, CA',to:'Supplier, Tracy, CA',mi:11.2},
+    {from:'Office, Stockton, CA',to:'Food Bank, Stockton, CA',mi:4.8},
+    {from:'Home, Manteca, CA',to:'Client HQ, San Jose, CA',mi:78.3},
+  ];
+  var newTrips=[];
+  for(var i=0;i<15;i++){
+    var d=new Date(today);d.setDate(d.getDate()-(i*2+1));
+    var dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    var type=categories[i];
+    newTrips.push({
+      id:'demo_'+i+'_'+Date.now(),date:dateStr,day:dateStr,
+      from:routes[i].from,to:routes[i].to,mi:String(routes[i].mi),
+      type:type,ded:type==='biz'||type==='med'||type==='char',
+      purpose:type==='biz'?'Client meeting':'',notes:'',
+      startTime:'09:'+String(i*3+10).padStart(2,'0'),
+      time:'09:'+String(i*3+10).padStart(2,'0'),
+    });
+  }
+  TRIPS=newTrips.concat(TRIPS);
+  saveTripsToStorage();
+  renderTrips();
+  if(typeof renderStats==='function')renderStats();
+  renderAlerts();_updateStreak();
+  showToast('\u2713','15 sample trips loaded! Browse Trips and Stats tabs.',3500);
+  closeSettings();switchTabId('tab-trips');
+}
+// Show demo button on GitHub Pages and in TestFlight builds
+(function(){
+  try{
+    var show=window.location.href.includes('github.io')||
+             window.location.href.includes('localhost')||
+             window.__MYMILESAI_TESTFLIGHT__;
+    if(show){var b=document.getElementById('demoBtnRow');if(b)b.style.display='';}
+  }catch(e){}
+})();
 
 </script>
 <!-- SUPABASE AUTH MODAL -->
