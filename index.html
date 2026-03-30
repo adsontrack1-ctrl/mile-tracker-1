@@ -6,7 +6,7 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://*.supabase.co https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://*.supabase.co https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev https://cdn.jsdelivr.net https://dxpuuiqibtizewbbffjk.supabase.co wss://*.supabase.co; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -4491,6 +4491,17 @@ updateGreeting();
 initProfile();
 setTimeout(animateCounters,600);
 setTimeout(checkMissedTrips,2000); // Check for missed trips on load
+// On iOS native WebView, run full init immediately (no auth modal flow)
+if(window.__MYMILESAI_NATIVE__){
+  setTimeout(function(){
+    try{loadSettings();}catch(e){}
+    try{loadWorkHours();}catch(e){}
+    try{loadNotifSettings();}catch(e){}
+    try{loadOdometer();}catch(e){}
+    try{renderTrips();}catch(e){}
+    try{renderAlerts();}catch(e){}
+  },500);
+}
 
 /* Fix #9 — Update template distances using FRESH GPS + Google Places */
 function updateTemplateDists(){
@@ -4582,20 +4593,49 @@ var _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
 var _SB_REDIRECT='https://adsontrack1-ctrl.github.io/mile-tracker-1/';
 var _supabase=null;
 var _sbUser=null;
-try{
-  if(window.supabase){
-    _supabase=window.supabase.createClient(_SB_URL,_SB_KEY);
-    _supabase.auth.onAuthStateChange(function(event,session){
-      _sbUser=session?session.user:null;
-      _updateAuthUI();
-      if(event==='SIGNED_IN'){showToast('\u2601\uFE0F','Signed in! Syncing trips...',3000);setTimeout(_syncTripsToCloud,1500);}
-    });
-    _supabase.auth.getSession().then(function(d){
-      if(d.data&&d.data.session){_sbUser=d.data.session.user;_updateAuthUI();setTimeout(_loadTripsFromCloud,1000);}
-      else{setTimeout(_showAuthModal,1000);}
-    });
+// ── Supabase init with robust fallback ─────────────────────
+function _initSupabase(){
+  try{
+    if(window.supabase){
+      _supabase=window.supabase.createClient(_SB_URL,_SB_KEY);
+      _supabase.auth.onAuthStateChange(function(event,session){
+        _sbUser=session?session.user:null;
+        _updateAuthUI();
+        if(event==='SIGNED_IN'){showToast('\u2601\uFE0F','Signed in! Syncing trips...',3000);setTimeout(_syncTripsToCloud,1500);}
+        if(event==='SIGNED_OUT'){_sbUser=null;_updateAuthUI();}
+      });
+      _supabase.auth.getSession().then(function(d){
+        if(d.data&&d.data.session){
+          _sbUser=d.data.session.user;
+          _updateAuthUI();
+          setTimeout(_loadTripsFromCloud,1000);
+        } else {
+          // On native app — don't show modal, app already works in guest mode
+          if(!window.__MYMILESAI_NATIVE__){
+            setTimeout(_showAuthModal,1000);
+          }
+        }
+      }).catch(function(err){
+        console.warn('Supabase getSession failed:',err);
+        // Still works in offline/guest mode
+      });
+    } else {
+      // Supabase CDN not loaded — retry once after delay
+      setTimeout(function(){
+        if(window.supabase && !_supabase){
+          _initSupabase();
+        } else if(!window.__MYMILESAI_NATIVE__) {
+          // Only show auth on web, not native (native has its own auth)
+          setTimeout(_showAuthModal, 500);
+        }
+      }, 2000);
+    }
+  }catch(e){
+    console.warn('Supabase init error:',e);
+    // App still works without Supabase — local storage mode
   }
-}catch(e){console.warn('Supabase init:',e);}
+}
+_initSupabase();
 
 function _updateAuthUI(){
   var av=document.getElementById('hdrAv'),nm=document.getElementById('hdrName');
@@ -4612,7 +4652,25 @@ function _updateAuthUI(){
 }
 function _showAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='flex';}
 function _hideAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='none';}
-function _skipAuth(){_hideAuthModal();}
+function _skipAuth(){
+  _hideAuthModal();
+  // Run full app initialization for guest mode
+  _initGuestMode();
+}
+function _initGuestMode(){
+  try{localStorage.setItem('mymilesai_guest','1');}catch(e){}
+  updateGreeting();
+  try{initProfile();}catch(e){}
+  try{loadSettings();}catch(e){}
+  try{loadWorkHours();}catch(e){}
+  try{loadNotifSettings();}catch(e){}
+  try{loadOdometer();}catch(e){}
+  try{renderTrips();}catch(e){}
+  try{renderAlerts();}catch(e){}
+  try{animateCounters();}catch(e){}
+  try{checkMissedTrips();}catch(e){}
+  showToast('\u2714','Welcome! Trips are saved on this device.',3000);
+}
 async function _authGoogle(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'}});if(r.error)showToast('','Google sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
 async function _authApple(){
   if(!_supabase){showToast('','Service unavailable',2000);return;}
