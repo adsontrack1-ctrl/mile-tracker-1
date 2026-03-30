@@ -988,18 +988,30 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div id="clsTripValue" style="margin-bottom:12px;text-align:center"></div>
   <div id="clsAutoHint" style="font-size:12px;color:var(--ink4);margin-bottom:20px">How would you classify this drive?</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-    <button onclick="classifyLastTrip('biz')" style="padding:18px 12px;background:linear-gradient(135deg,rgba(108,60,224,.15),rgba(108,60,224,.05));border:1.5px solid var(--vi);border-radius:16px;cursor:pointer;font-family:inherit">
-      <div style="font-size:22px;margin-bottom:4px">&#x1F4BC;</div>
-      <div style="font-size:15px;font-weight:700;color:var(--vi)">Business</div>
-      <div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div>
+    <button onclick="classifyLastTrip('biz')" style="padding:14px 10px;background:linear-gradient(135deg,rgba(108,60,224,.15),rgba(108,60,224,.05));border:1.5px solid var(--vi);border-radius:16px;cursor:pointer;font-family:inherit">
+      <div style="font-size:20px;margin-bottom:3px">&#x1F4BC;</div>
+      <div style="font-size:14px;font-weight:700;color:var(--vi)">Business</div>
+      <div style="font-size:10px;color:var(--ink4);margin-top:1px">Tax deductible</div>
     </button>
-    <button onclick="classifyLastTrip('pers')" style="padding:18px 12px;background:linear-gradient(135deg,rgba(214,0,110,.15),rgba(214,0,110,.05));border:1.5px solid var(--mag);border-radius:16px;cursor:pointer;font-family:inherit">
+    <button onclick="classifyLastTrip('pers')" style="padding:14px 10px;background:linear-gradient(135deg,rgba(214,0,110,.15),rgba(214,0,110,.05));border:1.5px solid var(--mag);border-radius:16px;cursor:pointer;font-family:inherit">
       <div style="font-size:22px;margin-bottom:4px">&#x1F3E0;</div>
       <div style="font-size:15px;font-weight:700;color:var(--mag)">Personal</div>
       <div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div>
     </button>
   </div>
   <div id="clsCountdown" style="font-size:11px;color:var(--ink4);margin-bottom:10px;font-weight:500;min-height:16px"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+    <button onclick="classifyLastTrip('med')" style="padding:12px 8px;background:linear-gradient(135deg,rgba(52,199,89,.12),rgba(52,199,89,.04));border:1.5px solid #34C759;border-radius:14px;cursor:pointer;font-family:inherit">
+      <div style="font-size:18px;margin-bottom:2px">🏥</div>
+      <div style="font-size:13px;font-weight:700;color:#34C759">Medical</div>
+      <div style="font-size:9px;color:var(--ink4);margin-top:1px">$0.21/mi</div>
+    </button>
+    <button onclick="classifyLastTrip('char')" style="padding:12px 8px;background:linear-gradient(135deg,rgba(255,159,10,.12),rgba(255,159,10,.04));border:1.5px solid #FF9F0A;border-radius:14px;cursor:pointer;font-family:inherit">
+      <div style="font-size:18px;margin-bottom:2px">❤️</div>
+      <div style="font-size:13px;font-weight:700;color:#FF9F0A">Charity</div>
+      <div style="font-size:9px;color:var(--ink4);margin-top:1px">$0.14/mi</div>
+    </button>
+  </div>
   <button onclick="closeClassifyPrompt()" style="width:100%;padding:11px;background:none;border:1px solid var(--ink6);border-radius:12px;font-size:13px;color:var(--ink4);cursor:pointer;font-family:inherit">&#x2715; &nbsp;Skip</button>
 </div></div>
 
@@ -3148,6 +3160,7 @@ function onAutoPos(p){
       // Notify native app
       if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
         window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'RECORDING'}));
+        window.ReactNativeWebView.postMessage(JSON.stringify({type:'scheduleReminder',hours:4}));
         window.ReactNativeWebView.postMessage(JSON.stringify({
         type:'tripDetected',
         startAddr:_startAddr||'Current location',
@@ -3194,6 +3207,7 @@ function stopTracking(){
   // Notify native app
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
     window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'IDLE'}));
+        window.ReactNativeWebView.postMessage(JSON.stringify({type:'stopBgTracking'}));
   }
   document.getElementById('trackLive').classList.remove('show');
   document.getElementById('heroStatus').classList.remove('rec');
