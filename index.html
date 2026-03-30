@@ -1278,8 +1278,8 @@ function randomPath(){
   var x1=60+Math.floor(Math.random()*40),x2=120+Math.floor(Math.random()*40),x3=200+Math.floor(Math.random()*40),x4=280+Math.floor(Math.random()*40);
   return 'M20,'+y1+' C'+x1+','+y2+' '+x2+','+y3+' '+x3+','+y4+' S'+x4+','+y5+' 340,'+(20+Math.floor(Math.random()*50));
 }
-function tripDist(mi){return(LOC.country==='CA'||LOC.country==='AU')?(mi*1.60934).toFixed(1):mi.toFixed(1);}
-function convMi(mi){return(LOC.country==='CA'||LOC.country==='AU')?mi*1.60934:mi;}
+function tripDist(mi){var m=parseFloat(mi)||0;return(LOC.country==='CA'||LOC.country==='AU')?(m*1.60934).toFixed(1):m.toFixed(1);}
+function convMi(mi){var m=parseFloat(mi)||0;return(LOC.country==='CA'||LOC.country==='AU')?m*1.60934:m;}
 function _encodePolyline(pos){
   var r='',pLat=0,pLng=0,pts=pos;
   if(pts.length>50){var st=Math.floor(pts.length/50),sm=[];for(var i=0;i<pts.length;i+=st)sm.push(pts[i]);if(sm[sm.length-1]!==pts[pts.length-1])sm.push(pts[pts.length-1]);pts=sm;}
