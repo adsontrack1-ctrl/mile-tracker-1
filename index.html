@@ -600,6 +600,66 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   z-index: 999 !important;
   background: inherit;
 }
+/* ============================================================
+   MYMILESAI UI OVERRIDE v6.1 — Design Doc Compliance
+   Fixes: tab bar, action grid, header, colors, modals
+   ============================================================ */
+
+/* TAB BAR: active = solid purple, no rainbow */
+.ni.a{background:linear-gradient(135deg,#7C3AED,#9F5AF4)!important;animation:none!important;box-shadow:0 4px 16px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.12)!important;}
+.bnav{padding:7px!important;gap:4px!important;background:rgba(13,15,26,.97)!important;border:1px solid rgba(255,255,255,.07)!important;box-shadow:0 16px 48px rgba(0,0,0,.5),0 4px 12px rgba(0,0,0,.3)!important;bottom:max(18px,env(safe-area-inset-bottom,18px))!important;}
+.ni{padding:9px 20px!important;min-width:76px!important;}
+.ni svg{width:22px!important;height:22px!important;}
+.ni span{font-size:10px!important;letter-spacing:.4px!important;}
+
+/* HEADER: solid name, purple avatar */
+.hdr-name{background:none!important;-webkit-background-clip:unset!important;-webkit-text-fill-color:var(--ink)!important;background-clip:unset!important;color:var(--ink)!important;font-size:17px!important;font-weight:800!important;}
+.hdr-av{background:linear-gradient(135deg,#7C3AED,#9F5AF4)!important;border-radius:50%!important;box-shadow:0 3px 12px rgba(124,58,237,.3)!important;animation:none!important;}
+.hdr-dot{background:#1B4DDB!important;}
+
+/* ACTION BUTTONS: 2x2 dark card grid */
+.qa{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;padding:8px 16px 14px!important;overflow-x:unset!important;}
+.qa-btn{flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:8px!important;padding:18px 12px!important;border-radius:16px!important;background:#1A1D2E!important;border:1px solid rgba(255,255,255,.07)!important;color:rgba(255,255,255,.85)!important;box-shadow:0 2px 8px rgba(0,0,0,.25)!important;min-width:unset!important;white-space:normal!important;text-align:center!important;font-size:12px!important;font-weight:600!important;transition:all .18s ease!important;flex-shrink:unset!important;}
+.qa-btn:hover{background:#20243A!important;border-color:rgba(255,255,255,.13)!important;transform:translateY(-2px)!important;box-shadow:0 6px 20px rgba(0,0,0,.3)!important;}
+.qa-btn:active{transform:scale(.96)!important;}
+.qa-btn .i{display:flex!important;align-items:center!important;justify-content:center!important;width:44px!important;height:44px!important;border-radius:12px!important;background:rgba(255,255,255,.07)!important;margin:0!important;}
+.qa-btn .i svg{width:20px!important;height:20px!important;stroke:rgba(255,255,255,.75)!important;}
+.qa-btn.pri{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 4px 20px rgba(27,77,219,.35)!important;animation:none!important;}
+.qa-btn.pri .i{background:rgba(255,255,255,.15)!important;}
+.qa-btn.pri .i svg{stroke:#fff!important;}
+.qa-btn.pri.recording{background:linear-gradient(135deg,#E74C3C,#FF6B6B)!important;box-shadow:0 4px 20px rgba(231,76,60,.4)!important;animation:pulse-rec 2s ease-in-out infinite!important;}
+
+/* FILTER PILLS: active = purple */
+.tf.a{background:linear-gradient(135deg,#7C3AED,#9F5AF4)!important;animation:none!important;box-shadow:0 4px 16px rgba(124,58,237,.25)!important;border-color:transparent!important;}
+
+/* SAVE BUTTON = blue */
+.add-save{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;box-shadow:0 6px 24px rgba(27,77,219,.3),inset 0 1px 0 rgba(255,255,255,.12)!important;}
+.add-save:hover{background:linear-gradient(135deg,#1238A8,#1B4DDB)!important;transform:translateY(-2px)!important;}
+.add-save:active{transform:scale(.97)!important;}
+
+/* TOGGLES = blue */
+.tgl.on{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;}
+
+/* SECTION HEADERS: no gradient text clip */
+.sh-t{background:none!important;-webkit-background-clip:unset!important;-webkit-text-fill-color:var(--ink)!important;color:var(--ink)!important;font-size:18px!important;font-weight:800!important;}
+
+/* CLASSIFY buttons */
+.cls.ob{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;box-shadow:0 4px 16px rgba(27,77,219,.25)!important;}
+.cls.op{background:linear-gradient(135deg,#F72585,#C9006E)!important;animation:none!important;}
+
+/* TRIP card business miles = blue */
+.trip-mi-v.biz{color:#1B4DDB!important;}
+
+/* SHEETS: larger radius */
+.map-sheet,.add-sheet,.info-sheet{border-radius:28px 28px 0 0!important;}
+
+/* MAP sheet primary button = blue */
+.map-sheet-btn.primary{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;}
+
+/* DARK MODE */
+[data-theme="dark"] .hdr-name{-webkit-text-fill-color:var(--ink)!important;color:var(--ink)!important;}
+[data-theme="dark"] .sh-t{-webkit-text-fill-color:var(--ink)!important;color:var(--ink)!important;}
+[data-theme="dark"] .tgl.on{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;}
 </style>
 </head>
 <body>
