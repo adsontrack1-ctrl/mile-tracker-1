@@ -1103,7 +1103,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge" style="display:none">0</div></button>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places,marker&callback=_initGoogleMaps" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
@@ -3807,21 +3807,28 @@ function _tryGoogleDistance(){
 
 function _getGoogleDistance(origin,destination,cb){
   if(!_googleMapsReady||!google||!google.maps){cb(null,'no_maps');return;}
-  var service=new google.maps.DistanceMatrixService();
-  service.getDistanceMatrix({
-    origins:[{lat:origin.lat,lng:origin.lng}],
-    destinations:[{lat:destination.lat,lng:destination.lng}],
-    travelMode:'DRIVING',
-    unitSystem:google.maps.UnitSystem.METRIC
-  },function(response,status){
-    if(status==='OK'&&response.rows[0].elements[0].status==='OK'){
-      var distMeters=response.rows[0].elements[0].distance.value;
-      var distMi=distMeters/1609.34;
-      cb(distMi,null);
-    } else {
-      cb(null,status);
-    }
-  });
+  var apiKey='AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE';
+  var orig=encodeURIComponent(origin.lat+','+origin.lng);
+  var dest=encodeURIComponent(destination.lat+','+destination.lng);
+  fetch('https://maps.googleapis.com/maps/api/distancematrix/json?origins='+orig+'&destinations='+dest+'&mode=driving&key='+apiKey)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.rows&&data.rows[0]&&data.rows[0].elements&&data.rows[0].elements[0].status==='OK'){
+        var el=data.rows[0].elements[0];
+        cb({distance:el.distance,duration:el.duration},null);
+      } else {
+        var R=3958.8,dLat=(destination.lat-origin.lat)*Math.PI/180,dLon=(destination.lng-origin.lng)*Math.PI/180;
+        var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(origin.lat*Math.PI/180)*Math.cos(destination.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+        var dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+        cb({distance:{value:dist*1609.34,text:(dist).toFixed(2)+' mi'},duration:{value:0,text:''}},null);
+      }
+    })
+    .catch(function(){
+      var R=3958.8,dLat=(destination.lat-origin.lat)*Math.PI/180,dLon=(destination.lng-origin.lng)*Math.PI/180;
+      var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(origin.lat*Math.PI/180)*Math.cos(destination.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+      var dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+      cb({distance:{value:dist*1609.34,text:(dist).toFixed(2)+' mi'},duration:{value:0,text:''}},null);
+    });
 }
 
 function _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status){
@@ -4399,18 +4406,12 @@ function initMap(){
     });
     document.getElementById('mapLoading').classList.add('hidden');
     _applyMapTheme();
-    userMarker=new google.maps.Marker({
-      position:{lat:defLat,lng:defLng},
-      map:map,
-      icon:{
-        path:google.maps.SymbolPath.CIRCLE,
-        scale:9,
-        fillColor:'#6C3CE0',
-        fillOpacity:1,
-        strokeColor:'#fff',
-        strokeWeight:3
-      }
-    });
+    if(google.maps.marker&&google.maps.marker.AdvancedMarkerElement){
+      var pin=new google.maps.marker.PinElement({background:'#6C3CE0',borderColor:'#fff',glyphColor:'#fff'});
+      userMarker=new google.maps.marker.AdvancedMarkerElement({position:{lat:defLat,lng:defLng},map:map,content:pin.element});
+    } else {
+      userMarker=new google.maps.Marker({position:{lat:defLat,lng:defLng},map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:'#6C3CE0',fillOpacity:1,strokeColor:'#fff',strokeWeight:3}});
+    }
     routeLine=new google.maps.Polyline({
       path:[],
       strokeColor:'#6C3CE0',
