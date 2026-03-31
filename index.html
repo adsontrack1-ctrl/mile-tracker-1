@@ -3695,23 +3695,10 @@ function geocodeAddr(query,inpId,ddId){
   var inp=document.getElementById(inpId);
   if(!inp||inp.value.trim().length<2)return;
 
-  // Places API New - AutocompleteSuggestion (replaces deprecated AutocompleteService)
-  var apiKey='AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE';
-  var biasLat=lastGpsLat||37.38, biasLng=lastGpsLng||(-121.0);
-  fetch('https://places.googleapis.com/v1/places:autocomplete',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','X-Goog-Api-Key':apiKey},
-    body:JSON.stringify({input:q,locationBias:{circle:{center:{latitude:biasLat,longitude:biasLng},radius:50000}}})
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var predictions=(data.suggestions||[]).map(function(s){
-      var p=s.placePrediction;
-      return {description:p.text.text,place_id:p.placeId,structured_formatting:{main_text:p.text.text,secondary_text:''}};
-    });
-    cb(predictions, predictions.length>0?'OK':'ZERO_RESULTS');
-  })
-  .catch(function(){cb([],'ERROR');});
+  var svc=new google.maps.places.AutocompleteService();
+  svc.getPlacePredictions({input:q,locationBias:{center:{lat:lastGpsLat||37.38,lng:lastGpsLng||(-121.0)},radius:50000}},function(predictions,status){
+    cb(predictions||[],status);
+  });
 }
 var _liveGeoResults=[];
 
