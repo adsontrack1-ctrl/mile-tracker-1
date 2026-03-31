@@ -3807,28 +3807,24 @@ function _tryGoogleDistance(){
 
 function _getGoogleDistance(origin,destination,cb){
   if(!_googleMapsReady||!google||!google.maps){cb(null,'no_maps');return;}
-  var apiKey='AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE';
-  var orig=encodeURIComponent(origin.lat+','+origin.lng);
-  var dest=encodeURIComponent(destination.lat+','+destination.lng);
-  fetch('https://maps.googleapis.com/maps/api/distancematrix/json?origins='+orig+'&destinations='+dest+'&mode=driving&key='+apiKey)
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(data.rows&&data.rows[0]&&data.rows[0].elements&&data.rows[0].elements[0].status==='OK'){
-        var el=data.rows[0].elements[0];
-        cb({distance:el.distance,duration:el.duration},null);
-      } else {
-        var R=3958.8,dLat=(destination.lat-origin.lat)*Math.PI/180,dLon=(destination.lng-origin.lng)*Math.PI/180;
-        var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(origin.lat*Math.PI/180)*Math.cos(destination.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-        var dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-        cb({distance:{value:dist*1609.34,text:(dist).toFixed(2)+' mi'},duration:{value:0,text:''}},null);
-      }
-    })
-    .catch(function(){
+  var svc=new google.maps.DirectionsService();
+  svc.route({
+    origin:new google.maps.LatLng(origin.lat,origin.lng),
+    destination:new google.maps.LatLng(destination.lat,destination.lng),
+    travelMode:google.maps.TravelMode.DRIVING,
+    unitSystem:LOC.unit==='km'?google.maps.UnitSystem.METRIC:google.maps.UnitSystem.IMPERIAL
+  },function(result,status){
+    if(status===google.maps.DirectionsStatus.OK&&result.routes[0]){
+      var leg=result.routes[0].legs[0];
+      cb({distance:leg.distance,duration:leg.duration},null);
+    } else {
       var R=3958.8,dLat=(destination.lat-origin.lat)*Math.PI/180,dLon=(destination.lng-origin.lng)*Math.PI/180;
       var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(origin.lat*Math.PI/180)*Math.cos(destination.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
       var dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-      cb({distance:{value:dist*1609.34,text:(dist).toFixed(2)+' mi'},duration:{value:0,text:''}},null);
-    });
+      if(LOC.unit==='km') dist=dist*1.60934;
+      cb({distance:{value:dist*(LOC.unit==='km'?1000:1609.34),text:dist.toFixed(1)+' '+(LOC.unit==='km'?'km':'mi')+' (est)'},duration:{value:0,text:''}},null);
+    }
+  });
 }
 
 function _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status){
