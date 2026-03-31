@@ -3481,7 +3481,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
         window.ReactNativeWebView.postMessage(JSON.stringify({
           type:'milestone',
           title:'🎉 '+_m+' business '+LOC.unit+'!',
-          body:'You've saved '+LOC.currency+((_m)*catRate('biz')).toFixed(0)+' in deductions this year!'
+          body:'You\'ve saved '+LOC.currency+((_m)*catRate('biz')).toFixed(0)+' in deductions this year!'
         }));
         break;
       }
