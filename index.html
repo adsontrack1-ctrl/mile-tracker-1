@@ -1103,6 +1103,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge" style="display:none">0</div></button>
 </div>
 
+<script>window._initGoogleMaps=function(){window._mapsCallbackQueued=true;};</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places,marker&callback=_initGoogleMaps" async ></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -1112,6 +1113,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 var _googleMapsReady=false;
 function _initGoogleMaps(){
   _googleMapsReady=true;_googleMapsReady=true;if(typeof initMap==='function')initMap();}
+if(window._mapsCallbackQueued){window._mapsCallbackQueued=false;_initGoogleMaps();}
+
 
 /* ===== SVG ICON SYSTEM ===== */
 /* ===== SECURITY: HTML escape — MUST use for all user data in innerHTML ===== */
