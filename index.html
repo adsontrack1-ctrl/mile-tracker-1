@@ -4397,6 +4397,7 @@ function initMap(){
       streetViewControl:false,
       fullscreenControl:false
     });
+    document.getElementById('mapLoading').classList.add('hidden');
     _applyMapTheme();
     userMarker=new google.maps.Marker({
       position:{lat:defLat,lng:defLng},
@@ -4418,7 +4419,6 @@ function initMap(){
       map:map
     });
     mapReady=true;
-    document.getElementById('mapLoading').classList.add('hidden');
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(function(p){
         var pos={lat:p.coords.latitude,lng:p.coords.longitude};
