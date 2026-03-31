@@ -3784,13 +3784,14 @@ function _getGoogleDistance(origin,destination,cb){
   },function(result,status){
     if(status===google.maps.DirectionsStatus.OK&&result.routes[0]){
       var leg=result.routes[0].legs[0];
-      cb({distance:leg.distance,duration:leg.duration},null);
+      var mi=LOC.unit==='km'?(leg.distance.value/1000).toFixed(2):(leg.distance.value/1609.34).toFixed(2);
+      cb(parseFloat(mi),null);
     } else {
       var R=3958.8,dLat=(destination.lat-origin.lat)*Math.PI/180,dLon=(destination.lng-origin.lng)*Math.PI/180;
       var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(origin.lat*Math.PI/180)*Math.cos(destination.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
       var dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
       if(LOC.unit==='km') dist=dist*1.60934;
-      cb({distance:{value:dist*(LOC.unit==='km'?1000:1609.34),text:dist.toFixed(1)+' '+(LOC.unit==='km'?'km':'mi')+' (est)'},duration:{value:0,text:''}},null);
+      cb(parseFloat(dist.toFixed(2)),null);
     }
   });
 }
