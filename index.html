@@ -3696,8 +3696,21 @@ function geocodeAddr(query,inpId,ddId){
   if(!inp||inp.value.trim().length<2)return;
 
   var svc=new google.maps.places.AutocompleteService();
-  svc.getPlacePredictions({input:q,locationBias:{center:{lat:lastGpsLat||37.38,lng:lastGpsLng||(-121.0)},radius:50000}},function(predictions,status){
-    cb(predictions||[],status);
+  svc.getPlacePredictions({input:query,locationBias:{center:{lat:lastGpsLat||37.38,lng:lastGpsLng||(-121.0)},radius:50000}},function(predictions,status){
+    if(status===google.maps.places.PlacesServiceStatus.OK&&predictions){
+      _liveGeoResults=predictions.map(function(p){return {name:p.description,place_id:p.place_id};});
+      var html='';
+      predictions.forEach(function(p,i){
+        html+='<div class="geo-item" onclick="_selectGeoResult('+i+',\''+inpId+'\')">'
+          +'<span class="geo-icon">📍</span>'
+          +'<div><div class="geo-name">'+p.structured_formatting.main_text+'</div>'
+          +'<div class="geo-addr">'+p.description+'</div></div></div>';
+      });
+      dd.innerHTML=html;
+      dd.style.display='block';
+    } else {
+      dd.style.display='none';
+    }
   });
 }
 var _liveGeoResults=[];
