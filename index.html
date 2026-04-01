@@ -2790,11 +2790,8 @@ function onPos(p){
     document.getElementById('statusText').textContent=_paused?'Paused — waiting for movement...':'Recording...';
     showToast(_i('sat'),'GPS signal restored',2000);
   }
-  // ACCURACY FILTER: ignore readings worse than 50m for position tracking
-  if(accuracy>50&&_lastGoodPos){
-    // Use last good position for display but don't update distance
-    lat=_lastGoodPos.lat;lng=_lastGoodPos.lng;
-  } else if(accuracy<=50){
+  // ACCURACY: track best position but always use actual lat/lng for distance
+  if(accuracy<=50){
     _lastGoodPos={lat:lat,lng:lng,accuracy:accuracy};
   }
   // Use GPS speed if available and positive, else calculate from positions
@@ -2856,13 +2853,33 @@ function onPos(p){
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
-  // Only update distance with accurate readings
-  if(positions.length>0&&accuracy<=100){
+  // DISTANCE: use speed-based integration (speed is accurate) + haversine cross-check
+  var _now=Date.now();
+  if(positions.length>0){
     var last=positions[positions.length-1];
-    var d=haversine(last.lat,last.lng,lat,lng);
-    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi (accuracy<=100)
+    var dt=(_now-last.time)/3600000; // hours
+    if(dt>0&&dt<0.05){ // only accumulate if <3 min since last reading (avoid gaps)
+      var dSpd=0,dHav=0;
+      // Primary: speed integration (mph * hours = miles)
+      if(typeof spd==='number'&&spd>0){
+        var spdMph=_useKm()?(spd*3.6/1.60934):(spd*2.237);
+        dSpd=spdMph*dt;
+      }
+      // Secondary: haversine between actual GPS points
+      if(accuracy<=150){
+        dHav=haversine(last.lat,last.lng,lat,lng);
+      }
+      // Use speed-integration if available and reasonable, else haversine
+      var d=0;
+      if(dSpd>0&&dSpd<0.5){
+        d=dSpd; // speed*time is primary — most accurate
+      } else if(dHav>0&&dHav<0.5){
+        d=dHav; // fallback to haversine
+      }
+      if(d>0){totalDist+=d;}
+    }
   }
-  positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
+  positions.push({lat:lat,lng:lng,time:_now,accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
   _tryLockStartAddress(lat,lng,accuracy);
   updateMapPos(lat,lng);
