@@ -1785,15 +1785,16 @@ function _updateYTD(){
 }
 function recalcStats(){
   var totalBiz=0,totalPer=0,unclCount=0,totalTrips=TRIPS.length;
-  var bizTrips=0,perTrips=0;
+  var bizTrips=0,perTrips=0,totalDed=0;
   for(var i=0;i<TRIPS.length;i++){
     var mi=convMi(TRIPS[i].mi);
     if(TRIPS[i].type==='biz'){totalBiz+=mi;bizTrips++;}
     else if(TRIPS[i].type==='pers'){totalPer+=mi;perTrips++;}
     if(TRIPS[i].type==='uncl')unclCount++;
+    totalDed+=_tripDeduction(TRIPS[i]);
   }
   var totalAll=totalBiz+totalPer;
-  var ded=totalBiz*LOC.rate;
+  var ded=totalDed;
   var bizPct=totalAll>0?Math.round(totalBiz/totalAll*100):0;
   var perPct=totalAll>0?100-bizPct:0;
 
@@ -2210,7 +2211,7 @@ function recalcStatsForPeriod(period){
   else if(period==='month'){startDate.setDate(1);startDate.setHours(0,0,0,0);}
   else{startDate=new Date(now.getFullYear(),0,1);}
   // Filter trips by date
-  var totalBiz=0,totalPer=0,count=0;
+  var totalBiz=0,totalPer=0,count=0,totalDed=0;
   var startTs=startDate.getTime();
   for(var i=0;i<TRIPS.length;i++){
     var t=TRIPS[i];
@@ -2227,9 +2228,10 @@ function recalcStatsForPeriod(period){
       var mi=convMi(t.mi);
       if(t.type==='biz')totalBiz+=mi;
       else if(t.type==='pers')totalPer+=mi;
+      totalDed+=_tripDeduction(t);
     }
   }
-  var ded=totalBiz*LOC.rate;
+  var ded=totalDed;
   var totalAll=totalBiz+totalPer;
   var bizPct=totalAll>0?Math.round(totalBiz/totalAll*100):0;
   var perPct=totalAll>0?100-bizPct:0;
@@ -2790,8 +2792,11 @@ function onPos(p){
     document.getElementById('statusText').textContent=_paused?'Paused — waiting for movement...':'Recording...';
     showToast(_i('sat'),'GPS signal restored',2000);
   }
-  // ACCURACY: track best position but always use actual lat/lng for distance
-  if(accuracy<=50){
+  // ACCURACY FILTER: ignore readings worse than 50m for position tracking
+  if(accuracy>50&&_lastGoodPos){
+    // Use last good position for display but don't update distance
+    lat=_lastGoodPos.lat;lng=_lastGoodPos.lng;
+  } else if(accuracy<=50){
     _lastGoodPos={lat:lat,lng:lng,accuracy:accuracy};
   }
   // Use GPS speed if available and positive, else calculate from positions
@@ -2853,33 +2858,13 @@ function onPos(p){
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
-  // DISTANCE: use speed-based integration (speed is accurate) + haversine cross-check
-  var _now=Date.now();
-  if(positions.length>0){
+  // Only update distance with accurate readings
+  if(positions.length>0&&accuracy<=100){
     var last=positions[positions.length-1];
-    var dt=(_now-last.time)/3600000; // hours
-    if(dt>0&&dt<0.05){ // only accumulate if <3 min since last reading (avoid gaps)
-      var dSpd=0,dHav=0;
-      // Primary: speed integration (mph * hours = miles)
-      if(typeof spd==='number'&&spd>0){
-        var spdMph=_useKm()?(spd*3.6/1.60934):(spd*2.237);
-        dSpd=spdMph*dt;
-      }
-      // Secondary: haversine between actual GPS points
-      if(accuracy<=150){
-        dHav=haversine(last.lat,last.lng,lat,lng);
-      }
-      // Use speed-integration if available and reasonable, else haversine
-      var d=0;
-      if(dSpd>0&&dSpd<0.5){
-        d=dSpd; // speed*time is primary — most accurate
-      } else if(dHav>0&&dHav<0.5){
-        d=dHav; // fallback to haversine
-      }
-      if(d>0){totalDist+=d;}
-    }
+    var d=haversine(last.lat,last.lng,lat,lng);
+    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi (accuracy<=100)
   }
-  positions.push({lat:lat,lng:lng,time:_now,accuracy:accuracy});
+  positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
   _tryLockStartAddress(lat,lng,accuracy);
   updateMapPos(lat,lng);
@@ -2887,7 +2872,7 @@ function onPos(p){
   document.getElementById('trackDist').textContent=dist;
   // Update hero stats with CURRENT TRIP data while tracking
   var liveDist=_useKm()?totalDist*1.60934:totalDist;
-  var liveDed=liveDist*LOC.rate;
+  var liveDed=liveDist*catRate('biz');
   document.getElementById('hsBiz').textContent=liveDist.toFixed(1);
   document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
   document.getElementById('hsPer').textContent=((Date.now()-trackStart-_totalPauseMs-(_paused?(Date.now()-_pauseStart):0))/60000).toFixed(0);
@@ -4069,13 +4054,14 @@ function confirmDel(){if(!curTrip)return;const i=TRIPS.findIndex(t=>t.id===curTr
 
 /* ===== COUNTERS ===== */
 function animateCounters(){
-  var totalBiz=0,totalPer=0;
+  var totalBiz=0,totalPer=0,totalDed=0;
   for(var i=0;i<TRIPS.length;i++){
     var mi=convMi(TRIPS[i].mi);
     if(TRIPS[i].type==='biz')totalBiz+=mi;
     else if(TRIPS[i].type==='pers')totalPer+=mi;
+    totalDed+=_tripDeduction(TRIPS[i]);
   }
-  var ded=totalBiz*LOC.rate;
+  var ded=totalDed;
   var targets=[
     {el:document.getElementById('hsBiz'),val:totalBiz,prefix:''},
     {el:document.getElementById('hsPer'),val:totalPer,prefix:''},
