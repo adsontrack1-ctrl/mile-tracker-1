@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <!-- v1773360735-->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://api.jsonbin.io https://api.anthropic.com; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://*.googleapis.com https://maps.gstatic.com https://*.gstatic.com https://api.jsonbin.io https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
-<title>MyMilesAI Rel 5.4</title>
+<title>MyMilesAI Rel 5.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -32,10 +32,36 @@
   --s1:0 1px 2px rgba(12,12,29,0.04);--s2:0 2px 8px rgba(12,12,29,0.04),0 1px 2px rgba(12,12,29,0.03);
   --s3:0 8px 24px rgba(12,12,29,0.06),0 2px 6px rgba(12,12,29,0.03);
 }
+[data-theme="dark"]{
+  --bg:#0C0C1D;--white:#1A1A2E;
+  --ink:#E8E8F0;--ink2:#C8C8D8;--ink3:#9898B0;--ink4:#6E6E8A;--ink5:#3A3A54;--ink6:#2A2A40;--ink7:#1E1E34;
+  --mag:#F0307E;--mag2:#D6006E;--mag-s:rgba(240,48,126,0.1);--mag-s2:rgba(240,48,126,0.16);
+  --vi:#8B5CF6;--vi-s:rgba(139,92,246,0.1);--vi-s2:rgba(139,92,246,0.16);
+  --mint:#34D399;--mint2:#00A870;--mint-s:rgba(52,211,153,0.1);--mint-s2:rgba(52,211,153,0.16);
+  --coral:#F87171;--coral-s:rgba(248,113,113,0.1);
+  --amber:#FBBF24;--amber-s:rgba(251,191,36,0.1);--amber-s2:rgba(251,191,36,0.16);
+  --s1:0 1px 2px rgba(0,0,0,0.2);--s2:0 2px 8px rgba(0,0,0,0.2),0 1px 2px rgba(0,0,0,0.15);
+  --s3:0 8px 24px rgba(0,0,0,0.3),0 2px 6px rgba(0,0,0,0.15);
+}
+[data-theme="dark"] .qa-btn{background:rgba(255,255,255,.08);color:var(--ink);border-color:rgba(255,255,255,.12);}
+[data-theme="dark"] .qa-btn.pri{background:linear-gradient(135deg,#6C3CE0,#B8005D);color:#fff;border-color:transparent;}
+[data-theme="dark"] .qa-btn.pri:hover{background:linear-gradient(135deg,#7C4CF0,#C8106D);}
+[data-theme="dark"] .bnav{background:rgba(10,10,20,.96);border-color:rgba(255,255,255,.06);}
+[data-theme="dark"] .modal-overlay{background:rgba(0,0,0,.7);}
+[data-theme="dark"] .modal{box-shadow:0 -12px 48px rgba(0,0,0,.4);}
+[data-theme="dark"] .tf.a{background:rgba(139,92,246,.15);color:#C084FC;border-color:rgba(139,92,246,.3);}
+[data-theme="dark"] .set{border-color:var(--ink6);}
+[data-theme="dark"] .sr{border-color:var(--ink6);}
+[data-theme="dark"] .signout-btn{background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.2);}
+[data-theme="dark"] .hero{background:linear-gradient(135deg,#1a1040 0%,#0C0C1D 100%);}
+[data-theme="dark"] .sp-track{stroke:rgba(255,255,255,.08);}
+[data-theme="dark"] .trip-map-bg{opacity:.6;}
+[data-theme="dark"] .cls{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:var(--ink3);}
+[data-theme="dark"] input[type="search"]{background:var(--white);color:var(--ink);border-color:var(--ink6);}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
-.phone{width:393px;max-width:100vw;margin:0 auto;background:var(--bg);min-height:100vh;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
-.scroll{padding-bottom:110px;}
+body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;padding:0;color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+.phone{width:100%;max-width:100%;margin:0;background:var(--bg);min-height:100vh;position:relative;overflow-x:hidden;}
+.scroll{padding-bottom:110px;overflow-y:auto;-webkit-overflow-scrolling:touch;height:calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));}
 .tab{display:none;animation:tabIn .35s ease;}.tab.active{display:block;}
 @keyframes tabIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes gp{0%,100%{opacity:1}50%{opacity:.5}}
@@ -50,18 +76,18 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 @keyframes pulse-rec{0%,100%{box-shadow:0 4px 20px rgba(0,168,112,.3)}50%{box-shadow:0 4px 28px rgba(0,168,112,.5),0 0 0 6px rgba(0,168,112,.08)}}
 
 /* HEADER */
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:max(12px,env(safe-area-inset-top)) 20px 10px;position:sticky;top:0;z-index:100;background:rgba(246,247,249,.85);backdrop-filter:blur(24px) saturate(2);}
+.hdr{padding-top:env(safe-area-inset-top);display:flex;align-items:center;justify-content:space-between;padding:max(12px,env(safe-area-inset-top)) 20px 10px;position:sticky;top:0;z-index:100;background:rgba(246,247,249,.85);backdrop-filter:blur(24px) saturate(2);}
 .hdr-l{display:flex;align-items:center;gap:12px;}
 .hdr-av{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#D6006E,#6C3CE0,#00A870);background-size:200% 200%;animation:avGrad 6s ease-in-out infinite;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;box-shadow:0 3px 12px rgba(214,0,110,.25);}
-.hdr-greet{font-size:12px;color:rgba(255,255,255,.5);font-weight:500;}
-.hdr-name{font-family:var(--fd);font-size:18px;font-weight:700;line-height:1.2;letter-spacing:-.3px;color:#fff;-webkit-text-fill-color:#fff;}
+.hdr-greet{font-size:12px;color:var(--ink4);font-weight:500;}
+.hdr-name{font-family:var(--fd);font-size:18px;font-weight:700;line-height:1.2;letter-spacing:-.3px;background:linear-gradient(135deg,var(--ink) 0%,#6C3CE0 50%,var(--mag) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hdr-r{display:flex;gap:8px;}
-.hdr-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .2s;position:relative;color:#fff;}
+.hdr-btn{width:38px;height:38px;border-radius:12px;background:var(--white);border:1px solid var(--ink6);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .2s;box-shadow:var(--s1);position:relative;}
 .hdr-btn:hover{background:var(--ink7);transform:scale(1.05);}
 .hdr-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--mag);border:2px solid var(--white);}
 
 /* HERO */
-.hero{margin:0;border-radius:0;overflow:hidden;position:relative;padding:20px 22px 22px;color:#fff;background:#0C0C1D;box-shadow:none;}
+.hero{margin:10px 16px 0;border-radius:var(--r3);overflow:hidden;position:relative;padding:26px 22px 22px;color:#fff;background:#0C0C1D;box-shadow:0 16px 56px rgba(12,12,29,.4),0 4px 12px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.04);}
 .hero-mesh{position:absolute;inset:0;overflow:hidden;z-index:0;}
 .hero-mesh .m1{position:absolute;width:260px;height:260px;border-radius:50%;filter:blur(60px);opacity:.5;background:radial-gradient(circle,rgba(214,0,110,.4),transparent);top:-30%;right:-10%;animation:ms1 12s ease-in-out infinite;}
 .hero-mesh .m2{position:absolute;width:220px;height:220px;border-radius:50%;filter:blur(55px);opacity:.35;background:radial-gradient(circle,rgba(108,60,224,.45),transparent);bottom:-20%;left:-15%;animation:ms2 14s ease-in-out infinite;}
@@ -77,21 +103,21 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .hero-status.mon .hero-dot{background:#C4B5FD;box-shadow:0 0 10px rgba(196,181,253,.5);animation:gp 3s ease-in-out infinite;}
 .hero-brand{font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.5px;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s ease-in-out infinite;}
 .speedo{display:flex;justify-content:center;margin:12px 0 28px;position:relative;}
-.speedo-wrap{position:relative;width:240px;height:130px;overflow:hidden;}
-.speedo-svg{width:240px;height:130px;overflow:visible;}
+.speedo-wrap{position:relative;width:200px;height:110px;}
+.speedo-svg{width:200px;height:110px;overflow:visible;}
 .sp-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:10;stroke-linecap:round;}
-.sp-fill{fill:none;stroke:url(#spGrad);stroke-width:10;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
-.sp-glow{fill:none;stroke:url(#spGrad);stroke-width:18;stroke-linecap:round;filter:blur(12px);opacity:.4;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
+.sp-fill{fill:none;stroke:url(#spGrad);stroke-width:10;stroke-linecap:round;stroke-dasharray:267;stroke-dashoffset:267;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
+.sp-glow{fill:none;stroke:url(#spGrad);stroke-width:18;stroke-linecap:round;filter:blur(12px);opacity:.35;stroke-dasharray:267;stroke-dashoffset:267;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
 .sp-tick{fill:none;stroke:rgba(255,255,255,.08);stroke-width:1;}
 .speedo-center{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center;}
-.sp-num{font-family:var(--fd);font-size:72px;font-weight:800;letter-spacing:-4px;line-height:1;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sp-num{font-family:var(--fd);font-size:60px;font-weight:800;letter-spacing:-3px;line-height:1;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .sp-unit{font-size:11px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
 .hero-stats{display:flex;gap:3px;}
-.hs{flex:1;padding:14px 6px;text-align:center;background:rgba(255,255,255,.06);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);}
+.hs{flex:1;padding:14px 8px;text-align:center;background:rgba(255,255,255,.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.04);}
 .hs:first-child{border-radius:var(--r) 4px 4px var(--r);}.hs:last-child{border-radius:4px var(--r) var(--r) 4px;}.hs:nth-child(2){border-radius:4px;}
-.hs-v{font-family:var(--fd);font-size:20px;font-weight:700;letter-spacing:-.6px;line-height:1;}
+.hs-v{font-family:var(--fd);font-size:22px;font-weight:700;letter-spacing:-.8px;line-height:1;}
 .hs-v.c1{color:#C084FC}.hs-v.c2{color:#FB7185}.hs-v.c3{color:#6EE7B7}
-.hs-l{font-size:8px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:6px;white-space:nowrap;}
+.hs-l{font-size:9px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px;}
 
 /* LIVE TRACKING */
 .track-live{display:none;margin:10px 16px 0;padding:18px 20px;background:var(--white);border:1.5px solid rgba(239,61,88,.15);border-radius:var(--r3);box-shadow:0 4px 20px rgba(239,61,88,.06),var(--s2);position:relative;overflow:hidden;}
@@ -99,7 +125,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .track-live.show{display:block;animation:tabIn .3s ease;}
 .tl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .tl-badge{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--coral);}
-.tl-badge .rdot{width:9px;height:9px;border-radius:50%;background:var(--coral);box-shadow:0 0 10px rgba(239,61,88,.4);animation:gp 1s ease-in-out infinite;}
+.tl-badge .rdot{width:9px;height:9px;border-radius:50%;background:#666;box-shadow:none;animation:none;transition:all 0.3s;}
 .tl-timer{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.5px;}
 .tl-stats{display:flex;gap:8px;}
 .tls{flex:1;text-align:center;padding:12px 8px;background:var(--ink7);border-radius:var(--r);border:1px solid var(--ink6);}
@@ -222,8 +248,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .add-save:disabled{opacity:.4;pointer-events:none;}
 
 /* QUICK ACTIONS */
-.qa{display:flex;gap:10px;padding:16px 16px 12px;overflow-x:auto;scrollbar-width:none;background:var(--bg);}.qa::-webkit-scrollbar{display:none;}
-.qa-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;background:var(--white);border:1.5px solid var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:var(--f);font-size:13px;font-weight:600;color:var(--ink2);transition:all .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--s1);}
+.qa{display:flex;gap:8px;padding:16px 16px 8px;overflow-x:auto;scrollbar-width:none;}.qa::-webkit-scrollbar{display:none;}
+.qa-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:var(--f);font-size:13px;font-weight:600;color:var(--ink);transition:all .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--s2);}
 .qa-btn:hover{border-color:var(--ink5);transform:translateY(-3px);box-shadow:var(--s3);}
 .qa-btn:active{transform:translateY(0) scale(.97);}
 .qa-btn .i{font-size:17px;}
@@ -231,10 +257,10 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .qa-btn.pri.recording{background:linear-gradient(135deg,#EF3D58,#FF6B6B);border-color:transparent;box-shadow:0 4px 20px rgba(239,61,88,.35),inset 0 1px 0 rgba(255,255,255,.15);animation:pulse-rec 2s ease-in-out infinite;}
 
 /* SECTIONS */
-.sh{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;}
-.sh-t{font-family:var(--fd);font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--ink);}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:26px 20px 12px;}
+.sh-t{font-family:var(--fd);font-size:18px;font-weight:700;letter-spacing:-.3px;background:linear-gradient(135deg,var(--ink) 30%,var(--vi));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .sh-pill{font-size:11px;font-weight:700;color:var(--mag);background:var(--mag-s);padding:4px 11px;border-radius:var(--rpill);}
-.sh-link{font-size:13px;font-weight:700;color:var(--mag);cursor:pointer;}
+.sh-link{font-size:13px;font-weight:600;color:var(--mag);cursor:pointer;}
 .uncl{margin:8px 16px 0;padding:16px 20px;display:flex;align-items:center;gap:14px;background:var(--amber-s);border:1.5px solid var(--amber-s2);border-radius:var(--r2);cursor:pointer;box-shadow:var(--s2);transition:all .3s cubic-bezier(.22,1,.36,1);}
 .uncl:hover{border-color:rgba(224,141,0,.3);transform:translateY(-2px);box-shadow:var(--s3);}
 .uncl-i{font-size:24px;}.uncl-t{font-size:14px;font-weight:700;color:var(--amber);}.uncl-d{font-size:11px;color:var(--ink2);margin-top:2px;font-weight:500;}.uncl-a{margin-left:auto;color:var(--ink5);font-size:20px;}
@@ -246,17 +272,21 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 @keyframes ctaGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 
 /* TRIPS */
-.trips{display:flex;flex-direction:column;gap:12px;padding:0 16px;overflow-x:visible;}.trips::-webkit-scrollbar{display:none;}
-.trip{width:100%;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);overflow:hidden;transition:all .35s;cursor:pointer;box-shadow:var(--s2);}
+.trips{display:flex;gap:14px;padding:0 16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;}.trips::-webkit-scrollbar{display:none;}
+.trip{min-width:310px;max-width:82vw;flex-shrink:0;scroll-snap-align:start;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);overflow:hidden;transition:all .35s;cursor:pointer;box-shadow:var(--s2);}
 .trip:hover{border-color:var(--ink5);box-shadow:var(--s3);transform:translateY(-4px);}
 .trip-list{padding:0 16px;display:flex;flex-direction:column;gap:12px;}
 .trip-list .trip{min-width:auto;max-width:none;flex-shrink:unset;}
+.trip-real-map{width:100%;height:140px;object-fit:cover;border-radius:12px 12px 0 0;display:block;}
+.trip-map.has-rmap{background:none;position:relative;overflow:hidden;}
+.trip-map.has-rmap .trip-map-badge{position:absolute;top:8px;left:8px;z-index:3;}
+.trip-map.has-rmap .trip-map-time{position:absolute;top:8px;right:8px;z-index:3;background:rgba(0,0,0,0.55);color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;}
 .trip-map{height:90px;position:relative;overflow:hidden;}
 .trip-map-bg{position:absolute;inset:0;}
-.trip-map-bg.biz{background:linear-gradient(180deg,rgba(108,60,224,.08),rgba(196,181,253,.18));}
-.trip-map-bg.pers{background:linear-gradient(180deg,rgba(214,0,110,.07),rgba(251,147,185,.15));}
-.trip-map-bg.uncl{background:linear-gradient(180deg,rgba(224,141,0,.07),rgba(251,191,36,.14));}
-.trip-map-grid{display:none;}
+.trip-map-bg.biz{background:linear-gradient(135deg,#F0ECFF,#E8E0FF,#F5F0FF);}
+.trip-map-bg.pers{background:linear-gradient(135deg,#FFF0F5,#FFE0EB,#FFF5F8);}
+.trip-map-bg.uncl{background:linear-gradient(135deg,#FFF8EC,#FFEFCF,#FFF9F0);}
+.trip-map-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(rgba(0,0,0,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.05) 1px,transparent 1px);background-size:24px 24px;}
 .trip-map svg{position:relative;z-index:1;width:100%;height:100%;}
 .trip-map-badge{position:absolute;top:10px;right:10px;padding:5px 13px;border-radius:var(--rpill);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;z-index:2;backdrop-filter:blur(12px);box-shadow:var(--s1);}
 .trip-map-badge.biz{background:rgba(108,60,224,.12);color:var(--vi);border:1px solid rgba(108,60,224,.15);}
@@ -278,6 +308,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .trip-mi-v{font-family:var(--fd);font-size:34px;font-weight:800;letter-spacing:-2px;line-height:1;}
 .trip-mi-v.biz{color:var(--vi)}.trip-mi-v.pers{color:var(--mag)}.trip-mi-v.uncl{color:var(--amber)}
 .trip-mi-u{font-size:10px;font-weight:600;color:var(--ink4);}
+.trip-notes{padding:4px 16px 8px;font-size:11px;color:var(--ink3);font-style:italic;border-top:1px solid var(--ink6);margin:0 4px;}
 .trip-foot{display:flex;align-items:center;padding:6px 16px 12px;font-size:12px;color:var(--ink3);}
 .trip-foot-l{display:flex;gap:6px;font-weight:600;}
 .trip-foot-l span{padding:4px 12px;border-radius:var(--rpill);background:var(--ink7);font-size:11px;font-weight:600;color:var(--ink3);}
@@ -455,7 +486,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .version{text-align:center;padding:20px;font-size:10px;color:var(--ink4);}
 /* TOAST */
 .toast{position:fixed;top:-80px;left:50%;transform:translateX(-50%);width:360px;max-width:90vw;padding:14px 20px;background:rgba(12,12,29,.92);backdrop-filter:blur(20px);color:#fff;border-radius:var(--rpill);font-family:var(--f);font-size:13px;font-weight:600;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:0 12px 40px rgba(12,12,29,.35);transition:top .5s cubic-bezier(.22,1,.36,1);}
-.toast.show{top:20px;}
+.toast.show{top:max(calc(env(safe-area-inset-top, 20px) + 12px), 60px);}
 .toast-icon{font-size:18px;flex-shrink:0;}
 .toast-text{flex:1;line-height:1.3;}
 /* SWIPE CLASSIFY */
@@ -549,15 +580,34 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .ai-send-btn:disabled{opacity:.4;cursor:default;}
 .ai-key-bar{padding:12px 16px;background:rgba(224,141,0,.06);border-bottom:1px solid rgba(224,141,0,.15);font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px;}
 .ai-key-bar a{color:var(--vi);font-weight:700;cursor:pointer;}
+
+/* iOS Phone call / hotspot bar adaptive layout */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .top-bar, .topbar, .header, [class*="top-bar"], [class*="header"] {
+    padding-top: max(env(safe-area-inset-top), 12px) !important;
+    transition: padding-top 0.3s ease;
+  }
+  body {
+    
+    transition: padding-top 0.3s ease;
+  }
+}
+/* Keep header always visible */
+.top-bar, .topbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 999 !important;
+  background: inherit;
+}
 </style>
 </head>
 <body>
-<div class="phone"><div class="scroll">
+<div class="phone" role="application" aria-label="MyMilesAI mileage tracker"><div class="scroll" role="main">
 
   <div class="hdr">
     <div class="hdr-l"><div class="hdr-av" id="hdrAv">S</div><div><div class="hdr-greet" id="hdrGreet"><script>document.write((function(){var h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening';})())</script></div><div class="hdr-name" id="hdrName">Welcome back</div></div></div>
     <div class="hdr-r"><span id="syncStatusDot" title="Synced" style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-flex;align-self:center;transition:background 0.5s;cursor:help;margin-right:2px"></span>
-    <div class="hdr-btn" style="position:relative;display:inline-flex;align-items:center;justify-content:center" onclick="switchTabId('tab-alerts')" id="hdrBellIco"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="hdr-dot"></div></div><div class="hdr-btn" onclick="goToSettings()" style="display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg></div></div>
+    <div class="hdr-btn" style="position:relative;display:inline-flex;align-items:center;justify-content:center" onclick="switchTabId('tab-alerts')" id="hdrBellIco" aria-label="Notifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="hdr-dot"></div></div><div class="hdr-btn" onclick="goToSettings()" aria-label="Settings" style="display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg></div></div>
   </div>
 
   <!-- TAB 1: DRIVE -->
@@ -567,29 +617,30 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="hero-content">
         <div class="hero-top"><div class="hero-status" id="heroStatus"><span class="hero-dot"></span><span id="statusText">GPS Active</span></div><div class="hero-brand">MyMilesAI</div></div>
         <div class="speedo"><div class="speedo-wrap">
-          <svg class="speedo-svg" viewBox="0 0 240 130"><defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="40%" stop-color="#C084FC"/><stop offset="70%" stop-color="#FB7185"/><stop offset="100%" stop-color="#FCA5A5"/></linearGradient></defs>
-            <line x1="18" y1="115" x2="18" y2="107" class="sp-tick"/><line x1="47" y1="72" x2="53" y2="78" class="sp-tick"/><line x1="95" y1="44" x2="97" y2="51" class="sp-tick"/><line x1="145" y1="44" x2="143" y2="51" class="sp-tick"/><line x1="193" y1="72" x2="187" y2="78" class="sp-tick"/><line x1="222" y1="115" x2="222" y2="107" class="sp-tick"/>
-            <path d="M18,117 A102,102 0 0,1 222,117" class="sp-track"/><path d="M18,117 A102,102 0 0,1 222,117" class="sp-glow" id="spGlow"/><path d="M18,117 A102,102 0 0,1 222,117" class="sp-fill" id="spFill"/>
+          <svg class="speedo-svg" viewBox="0 0 200 110"><defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="40%" stop-color="#C084FC"/><stop offset="70%" stop-color="#FB7185"/><stop offset="100%" stop-color="#FCA5A5"/></linearGradient></defs>
+            <line x1="25" y1="95" x2="25" y2="88" class="sp-tick"/><line x1="48" y1="65" x2="53" y2="70" class="sp-tick"/><line x1="80" y1="42" x2="82" y2="48" class="sp-tick"/><line x1="120" y1="42" x2="118" y2="48" class="sp-tick"/><line x1="152" y1="65" x2="147" y2="70" class="sp-tick"/><line x1="175" y1="95" x2="175" y2="88" class="sp-tick"/>
+            <path d="M22,97 A78,78 0 0,1 178,97" class="sp-track"/><path d="M22,97 A78,78 0 0,1 178,97" class="sp-glow" id="spGlow"/><path d="M22,97 A78,78 0 0,1 178,97" class="sp-fill" id="spFill"/>
           </svg>
           <div class="speedo-center"><div class="sp-num" id="speedNum">0</div><div class="sp-unit" id="speedUnit">mph</div></div>
         </div></div>
         <div class="hero-stats">
           <div class="hs"><div class="hs-v c1" id="hsBiz">0</div><div class="hs-l" id="hsBizL">Business mi</div></div>
           <div class="hs"><div class="hs-v c2" id="hsPer">0</div><div class="hs-l" id="hsPerL">Personal mi</div></div>
-          <div class="hs"><div class="hs-v c3" id="hsDed">$0</div><div class="hs-l">Deduction</div></div><div class="hs"><div class="hs-v" id="hsStreak" style="color:#f59e0b">🥇0🔥</div><div class="hs-l">Day streak</div></div>
+          <div class="hs"><div class="hs-v c3" id="hsDed">$0</div><div class="hs-l">Deduction</div></div>
+          <div class="hs"><div class="hs-v" id="hsStreak" style="color:#f59e0b">0</div><div class="hs-l">Day streak</div></div>
         </div>
       </div>
     </div>
 
     <!-- LIVE TRACKING -->
     <div class="track-live" id="trackLive">
-      <div class="tl-top"><div class="tl-badge"><span class="rdot"></span>Recording Trip</div><div class="tl-timer" id="trackTimer">00:00</div></div>
+      <div class="tl-top"><div class="tl-badge" id="gpsBadge"><span class="rdot"></span>Recording Trip</div><div class="tl-timer" id="trackTimer">00:00</div></div>
       <div class="tl-stats">
         <div class="tls"><div class="tls-v" id="trackDist">0.0</div><div class="tls-l" id="trackDistU">miles</div></div>
         <div class="tls"><div class="tls-v" id="trackSpeed">0</div><div class="tls-l" id="trackSpeedU">mph</div></div>
         <div class="tls"><div class="tls-v" id="trackAvg">0</div><div class="tls-l" id="trackAvgU">avg</div></div>
       </div>
-      <button class="track-stop" onclick="stopTracking()"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Stop & Save Trip</button>
+      <button class="track-stop" role="button" onclick="stopTracking()" aria-label="Stop and save trip"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Stop & Save Trip</button>
     </div>
 
     <!-- GPS PERMISSION BANNER -->
@@ -600,14 +651,27 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     </div>
 
     <div class="qa">
-      <button class="qa-btn pri" id="autoBtn" onclick="toggleTracking()"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7L9 11l6.5 6.5a2.12 2.12 0 003-3L12 8"/><path d="M10 11L7.5 8.5a2.12 2.12 0 00-3 3L11 18"/><circle cx="18" cy="4" r="2"/></svg></span><span id="autoText">Auto On</span></button>
-      <button class="qa-btn" onclick="openAddTrip()"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Add Manual</button>
-      <button class="qa-btn" onclick="openMapSheet()"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>Map</button>
+      <button class="qa-btn pri" id="autoBtn" onclick="toggleTracking()" aria-label="Toggle auto tracking"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7L9 11l6.5 6.5a2.12 2.12 0 003-3L12 8"/><path d="M10 11L7.5 8.5a2.12 2.12 0 00-3 3L11 18"/><circle cx="18" cy="4" r="2"/></svg></span><span id="autoText">Auto On</span></button>
+      <button class="qa-btn" onclick="openAddTrip()" aria-label="Add manual trip"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Add Manual</button>
+      <button class="qa-btn" onclick="openMapSheet()" aria-label="Open map"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>Map</button>
       <button class="qa-btn" onclick="switchTabId('tab-stats')"><span class="i" style="display:inline-flex"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Reports</button>
     </div>
 
     <div class="uncl" id="unclBanner" style="display:none" onclick="switchTabId('tab-trips')"><span class="uncl-i" style="display:inline-flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg></span><div><div class="uncl-t" id="unclText"></div><div class="uncl-d">Tap to classify →</div></div><span class="uncl-a">›</span></div>
-    <div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div>
+    <div id="ytdBar" style="margin:8px 16px 0;padding:14px 16px;background:var(--white);border-radius:var(--r2);border:1px solid var(--ink6);display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;font-weight:700;color:var(--ink2)">📅 Year-to-date savings</span>
+    <span style="font-size:12px;color:var(--vi);font-weight:700" id="ytdPct">0%</span>
+  </div>
+  <div style="background:var(--ink6);border-radius:var(--rpill);height:8px;overflow:hidden">
+    <div id="ytdFill" style="height:8px;background:linear-gradient(90deg,var(--vi),var(--mag));border-radius:var(--rpill);width:0%;transition:width .6s ease"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <span style="font-size:11px;font-weight:600;color:var(--vi)" id="ytdSaved">$0 saved</span>
+    <span style="font-size:11px;color:var(--ink4)" id="ytdGoal">Goal: $5,000</span>
+  </div>
+</div>
+<div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div>
     <div class="trips" id="recentTrips"></div>
     <div class="sh"><span class="sh-t">Quick Templates</span></div>
     <div class="tmpl-r">
@@ -626,13 +690,18 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div id="swipeQueue"></div>
       <div style="height:8px"></div>
     </div>
-    <div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclassified</button></div>
+    <div style="padding:0 16px 10px">
+  <input type="search" id="tripSearch" placeholder="🔍 Search trips by address or notes..." 
+    style="width:100%;padding:10px 14px;border:1.5px solid var(--ink6);border-radius:var(--rpill);font-size:14px;background:var(--white);color:var(--ink1);box-sizing:border-box;outline:none;-webkit-appearance:none"
+    oninput="_searchTrips(this.value)">
+</div>
+<div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclass.</button></div>
     <div class="trip-list" id="tripList"></div>
   </div>
 
   <!-- TAB 3: STATS -->
   <div class="tab" id="tab-stats">
-    <div class="sh"><span class="sh-t">Statistics</span><span class="sh-pill" id="statsPeriod">Mar 2026</span></div>
+    <div class="sh"><span class="sh-t">Statistics</span><div style="display:flex;align-items:center;gap:8px"><button onclick="changeStatsMonth(-1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8249;</button><span class="sh-pill" id="statsPeriod">Mar 2026</span><button onclick="changeStatsMonth(1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8250;</button></div></div>
     <div class="tf-row"><button class="tf a" onclick="switchStatsPeriod(this,'day')">Day</button><button class="tf" onclick="switchStatsPeriod(this,'week')">Week</button><button class="tf" onclick="switchStatsPeriod(this,'month')">Month</button><button class="tf" onclick="switchStatsPeriod(this,'year')">Year</button></div>
     <div class="ins-grid">
       <div class="ins-row">
@@ -668,18 +737,19 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set-hdr">Tracking</div>
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
-      <div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
-      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="5" id="threshVal" onchange="saveSettings()"></div>
+      <div class="sr"><div><h4>Appearance</h4><p>App theme</p></div><div style="display:flex;gap:8px"><button onclick="_setTheme('auto')" id="themeAuto" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--vi);background:var(--vi-s);font-size:13px;cursor:pointer;font-weight:700;color:var(--vi)">Auto</button><button onclick="_setTheme('light')" id="themeLight" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);font-size:13px;cursor:pointer">☀️ Light</button><button onclick="_setTheme('dark')" id="themeDark" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);font-size:13px;cursor:pointer">🌙 Dark</button></div></div>
+<div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
+      <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="8" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
-      <div class="sr"><div><h4>Navigation app</h4><p>Opens when you tap Map</p></div><select class="sr-sel" id="mapAppSel" onchange="saveMapAppPref()"><option value="inapp">In-app map</option><option value="apple">Apple Maps</option><option value="google">Google Maps</option><option value="waze">Waze</option></select></div>
+
       <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
-      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--ink2)">$<input type="number" class="sr-n" value="0.70" step="0.01" style="width:60px" id="rateVal" onchange="updateRate()"></div></div>
+      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--vi)" id="rateVal">$0.70/mi</div></div>
     </div>
     <div class="set-hdr">Odometer</div>
     <div class="set">
       <div class="sr"><div><h4>Start of year reading</h4><p id="odoStartLbl">Record Jan 1 odometer</p></div><input type="number" class="sr-n" style="width:80px" id="odoStart" placeholder="0" onchange="saveOdometer()"></div>
       <div class="sr"><div><h4>Current reading</h4><p id="odoCurLbl">Update periodically</p></div><input type="number" class="sr-n" style="width:80px" id="odoCurrent" placeholder="0" onchange="saveOdometer()"></div>
-      <div class="sr"><div><h4>Odometer delta</h4><p>Total driven this year</p></div><span style="font-size:13px;font-weight:700;color:var(--vi)" id="odoDelta">— mi</span></div>
+      <div class="sr"><div><h4>Odometer delta</h4><p>Total driven this year</p></div><span style="font-size:13px;font-weight:700;color:var(--ink3)" id="odoDelta">Not set</span></div>
     </div>
     <div class="set-hdr">Work Hours</div>
     <div class="set">
@@ -693,13 +763,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     <div class="set-hdr">Notifications</div>
     <div class="set">
       <div class="sr"><div><h4>Trip alerts</h4><p>Notify on save</p></div><div class="tgl on" id="notifTripTgl" onclick="toggleNotifSetting(this,'trip')"></div></div>
-      <div class="sr"><div><h4>Weekly summary</h4><p>Sunday recap email</p></div><div class="tgl" id="notifWeeklyTgl" onclick="toggleNotifSetting(this,'weekly')"></div></div>
+
       <div class="sr"><div><h4>Milestone alerts</h4><p>Deduction goal reminders</p></div><div class="tgl on" id="notifMilestoneTgl" onclick="toggleNotifSetting(this,'milestone')"></div></div>
-    </div>
-    <div class="set-hdr">AI Assistant</div>
-    <div class="set">
-      <div class="sr"><div><h4>Claude API key</h4><p>Required for AI chat</p></div><input type="password" class="sr-n" style="width:140px;font-size:11px" id="aiKeyInput" placeholder="sk-ant-..." onchange="saveAIKey(this.value)"></div>
-      <div class="sr"><div><h4>Remove API key</h4><p>Clear stored key</p></div><button class="btn-rd" style="font-size:11px;padding:4px 12px" onclick="removeAIKey()">Remove</button></div>
     </div>
     <div class="set-hdr">Account & Privacy</div>
     <div class="set">
@@ -712,9 +777,9 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.0</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.0.0</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.1</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.0.0</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
-      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 5 mph), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 5 mph threshold reliably detects driving while filtering out walking. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile for 2026)<br>Canada: CRA rate ($0.72/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
+      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
     <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
@@ -722,7 +787,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 
   <!-- TAB 4: ALERTS -->
   <div class="tab" id="tab-alerts">
-    <div class="sh"><span class="sh-t">Notifications</span><span class="sh-pill" id="alertBadge">5 new</span></div>
+    <div class="sh"><span class="sh-t">Notifications</span><span class="sh-pill" id="alertBadge" style="display:none">0 new</span></div>
     <div class="al-section">
       <div class="al-section-hdr">New <span onclick="markAllRead()">Mark all read</span></div>
     </div>
@@ -875,7 +940,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
     </div>
 
     <label class="add-label">Purpose</label>
-    <select class="add-input" id="addPurpose" style="appearance:auto;padding:10px 12px;border:2px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white)"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select>
+    <select class="add-input" id="addPurpose" style="appearance:auto;padding:10px 12px;border:2px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white)"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical Appointment</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select>
 
     <label class="add-label">Date</label>
     <input type="date" class="add-input" id="addDate" style="padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;color:var(--ink2);background:var(--white);font-family:var(--f)">
@@ -897,7 +962,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">To</label><input type="text" class="inp" id="editTo" placeholder="To address..."></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px" id="editDistLabel">Miles</label><input type="number" class="inp" id="editMi" step="0.1"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Category</label><div style="display:flex;gap:8px"><button class="cls ob" id="eBiz" onclick="setEC('biz')" style="flex:1"><span class="cls-d"></span>Business</button><button class="cls" id="ePer" onclick="setEC('pers')" style="flex:1"><span class="cls-d"></span>Personal</button></div></div>
-  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Purpose</label><select class="inp" id="editPurpose" style="appearance:auto;padding-right:8px"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select></div>
+  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Purpose</label><select class="inp" id="editPurpose" style="appearance:auto;padding-right:8px"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical Appointment</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Notes <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><input type="text" class="inp" id="editNotes" placeholder="Add a note..." maxlength="100"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Date</label><input type="date" class="inp" id="editDate" style="padding:10px 16px"></div>
   <div class="modal-row"><button class="modal-cancel" onclick="closeEdit()">Cancel</button><button class="cta" onclick="saveEdit()" style="flex:1">Save</button></div>
@@ -912,10 +977,12 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <div id="clsRoute" style="font-size:13px;color:var(--ink3);margin-bottom:4px"></div>
   <div id="clsDist" style="font-family:var(--fd);font-size:28px;font-weight:800;color:var(--vi);margin-bottom:16px"></div>
   <div id="clsAutoHint" style="font-size:13px;color:var(--ink3);margin-bottom:14px">How would you like to classify this trip?</div>
+  <div id="clsCountdown" style="font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;font-weight:500"></div>
   <div style="display:flex;gap:10px;margin-bottom:12px">
     <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('biz')"><span class="cls-d" style="border-color:var(--vi)"></span><span style="font-size:14px">Business</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div></button>
     <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('pers')"><span class="cls-d" style="border-color:var(--mag)"></span><span style="font-size:14px">Personal</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div></button>
   </div>
+  <button onclick="classifyLastTrip('uncl')" style="width:100%;padding:10px;background:none;border:1px solid var(--ink6);border-radius:var(--rpill);font-size:13px;color:var(--ink4);cursor:pointer;margin-bottom:8px">Save as Unclassified</button>
   <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
 </div></div>
 
@@ -952,7 +1019,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="ob-desc">We'll set the right unit and tax rate for you.</div>
       <div class="ob-unit-row">
         <button class="ob-unit-btn active" data-unit="US" onclick="setObUnit(this,'US')"><span style="font-size:32px">🇺🇸</span><strong>Miles</strong><span class="ob-unit-sub">IRS rate $0.70/mi</span></button>
-        <button class="ob-unit-btn" data-unit="CA" onclick="setObUnit(this,'CA')"><span style="font-size:32px">🇨🇦</span><strong>Kilometers</strong><span class="ob-unit-sub">CRA rate $0.72/km</span></button>
+        <button class="ob-unit-btn" data-unit="CA" onclick="setObUnit(this,'CA')"><span style="font-size:32px">🇨🇦</span><strong>Kilometers</strong><span class="ob-unit-sub">CRA rate $0.73/km</span></button>
       </div>
       <div class="ob-unit-row">
         <button class="ob-unit-btn" data-unit="UK" onclick="setObUnit(this,'UK')"><span style="font-size:32px">🇬🇧</span><strong>Miles</strong><span class="ob-unit-sub">HMRC rate £0.45/mi</span></button>
@@ -1004,7 +1071,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
   <button class="ni a" data-tab="tab-drive" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg><span>Drive</span></button>
   <button class="ni" data-tab="tab-trips" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg><span>Trips</span></button>
   <button class="ni" data-tab="tab-stats" onclick="switchTab(this)"><svg viewBox="0 0 24 24"><path d="M3.5 18.5l6-6.5 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 17z"/><path d="M3.5 18.5l6-6.5 4 4L22 6.92" fill="none" stroke="currentColor" stroke-width="0" /></svg><span>Stats</span></button>
-  <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge">3</div></button>
+  <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge" style="display:none">0</div></button>
 </div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
@@ -1026,7 +1093,10 @@ function _esc(str){
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#x27;')
-    .replace(/\//g,'&#x2F;');
+    .replace(/\//g,'&#x2F;')
+    .replace(/on\w+\s*=/gi,'')
+    .replace(/javascript\s*:/gi,'')
+    .replace(/data\s*:/gi,'');
 }
 /* Sanitize path for SVG d= attribute — allow only valid SVG path chars */
 function _safePath(p){
@@ -1081,8 +1151,8 @@ park:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="curren
 
 /* ===== LOCALE ENGINE ===== */
 var LOCALES={
-  US:{unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.70,med:.22,char:.14}},
-  CA:{unit:'km',label:'kilometers',speed:'km/h',rate:.72,flag:'🇨🇦',country:'CA',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate',rates:{biz:.72,med:.72,char:.72}},
+  US:{unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.70,med:.21,char:.14}},
+  CA:{unit:'km',label:'kilometers',speed:'km/h',rate:.73,flag:'🇨🇦',country:'CA',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate',rates:{biz:.73,med:.73,char:.73}},
   UK:{unit:'mi',label:'miles',speed:'mph',rate:.45,flag:'🇬🇧',country:'UK',conv:1,currency:'£',taxLabel:'HMRC 2026 Rate',rates:{biz:.45,med:0,char:0}},
   AU:{unit:'km',label:'kilometres',speed:'km/h',rate:.88,flag:'🇦🇺',country:'AU',conv:1.60934,currency:'A$',taxLabel:'ATO 2025-26 Rate',rates:{biz:.88,med:0,char:0}}
 };
@@ -1098,6 +1168,16 @@ function detectLocale(){
   try{var l=navigator.language||'';if(l==='en-CA'||l==='fr-CA')return'CA';if(l==='en-GB')return'UK';if(l==='en-AU')return'AU';}catch(e){}
   return'US';
 }
+function _setTheme(t){
+  try{localStorage.setItem('mymilesai_theme',t);}catch(e){}
+  ['Auto','Light','Dark'].forEach(function(n){var b=document.getElementById('theme'+n);if(b){b.style.background='var(--white)';b.style.borderColor='var(--ink6)';b.style.fontWeight='400';b.style.color='var(--ink1)';}});
+  var act=document.getElementById('theme'+t.charAt(0).toUpperCase()+t.slice(1));
+  if(act){act.style.background='var(--vi-s)';act.style.borderColor='var(--vi)';act.style.fontWeight='700';act.style.color='var(--vi)';}
+  if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}
+  else if(t==='light'){document.documentElement.removeAttribute('data-theme');}
+  else{if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');}
+}
+function _initTheme(){try{_setTheme(localStorage.getItem('mymilesai_theme')||'auto');}catch(e){}}
 function setLocale(c){
   LOC=LOCALES[c]||LOCALES.US;
   var sel=document.getElementById('unitSel');
@@ -1115,12 +1195,17 @@ function applyLocale(){
   _set('trackDistU',LOC.label);
   _set('trackSpeedU',s);
   _set('trackAvgU','avg '+s);
-  _set('threshLbl','Min '+s+' to detect');
+  _set('threshLbl','Min speed to auto-detect ('+s+')');
   _set('taxLabel',LOC.taxLabel);
+  // FIX: update tax rate detail display when locale changes
+  var _taxDet=document.getElementById('taxDet');
+  if(_taxDet)_taxDet.textContent=LOC.currency+LOC.rates.biz.toFixed(2)+'/'+LOC.unit+' business · '+LOC.currency+LOC.rates.med.toFixed(2)+'/'+LOC.unit+' medical';
+  var _taxAmt=document.getElementById('taxAmt');
+  if(_taxAmt&&typeof recalcStats==='function')setTimeout(recalcStats,50);
   var _rateLabels={US:'IRS rate',CA:'CRA rate',UK:'HMRC rate',AU:'ATO rate'};
   _set('rateLabel',_rateLabels[LOC.country]||'Tax rate');
   _set('rateDesc','Per '+LOC.unit+' deduction');
-  _setv('rateVal',LOC.rate.toFixed(2));
+  var _rv=document.getElementById('rateVal');if(_rv)_rv.textContent=LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit;
   _set('editDistLabel',_useKm()?'Kilometers':'Miles');
   document.querySelectorAll('.trip-mi-u').forEach(e=>e.textContent=LOC.label);
   document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers|Kilometres/,_useKm()?LOC.label.charAt(0).toUpperCase()+LOC.label.slice(1):'Miles'));
@@ -1171,6 +1256,27 @@ function randomPath(){
 }
 function tripDist(mi){return(LOC.country==='CA'||LOC.country==='AU')?(mi*1.60934).toFixed(1):mi.toFixed(1);}
 function convMi(mi){return(LOC.country==='CA'||LOC.country==='AU')?mi*1.60934:mi;}
+function _encodePolyline(pos){
+  var r='',pLat=0,pLng=0,pts=pos;
+  if(pts.length>50){var st=Math.floor(pts.length/50),sm=[];for(var i=0;i<pts.length;i+=st)sm.push(pts[i]);if(sm[sm.length-1]!==pts[pts.length-1])sm.push(pts[pts.length-1]);pts=sm;}
+  function e(v){v=Math.round(v*1e5);v=v<0?~(v<<1):(v<<1);var s='';while(v>=0x20){s+=String.fromCharCode((0x20|(v&0x1f))+63);v>>=5;}s+=String.fromCharCode(v+63);return s;}
+  for(var j=0;j<pts.length;j++){var la=pts[j].lat,ln=pts[j].lng;r+=e(la-pLat)+e(ln-pLng);pLat=la;pLng=ln;}
+  return r;
+}
+function _tripStaticMap(t,wide){
+  var W=wide?360:310,H=140,K='AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE';
+  var st='&style=feature:poi|visibility:off&style=feature:transit|visibility:off&style=feature:road|element:geometry|color:0xffffff&style=feature:landscape|element:geometry|color:0xf5f5f0&style=feature:water|element:geometry|color:0xcfe8ff';
+  var base='https://maps.googleapis.com/maps/api/staticmap?size='+W+'x'+H+'&scale=2'+st;
+  var url='';
+  if(t.positions&&t.positions.length>=2){
+    var enc=_encodePolyline(t.positions);
+    url=base+'&path=color:0xF72F6Eff|weight:4|enc:'+encodeURIComponent(enc)+'&markers=color:green|size:small|'+t.positions[0].lat+','+t.positions[0].lng+'&markers=color:red|size:small|'+t.positions[t.positions.length-1].lat+','+t.positions[t.positions.length-1].lng+'&key='+K;
+  } else if(t.from&&t.to&&t.from.length>5&&t.to.length>5){
+    url=base+'&markers=color:green|size:small|'+encodeURIComponent(t.from)+'&markers=color:red|size:small|'+encodeURIComponent(t.to)+'&key='+K;
+  }
+  if(!url)return '';
+  return '<img class="trip-real-map" src="'+url+'" onerror="this.style.display=\'none\'" />';
+}
 function tripCard(t,wide){
   const d=tripDist(t.mi),ded=t.ded?`<span class="trip-ded">+${LOC.currency}${(parseFloat(d)*catRate(t.type)).toFixed(2)}</span>`:'';
   const clr={biz:'vi',pers:'mag',uncl:'amber'}[t.type]||'amber';
@@ -1190,7 +1296,11 @@ function tripCard(t,wide){
   const pathStartY=safePath.match(/M\d+,(\d+)/)?safePath.match(/M\d+,(\d+)/)[1]:'45';
   const pathEndXY=safePath.match(/(\d+)$/)?safePath.match(/(\d+)$/)[1]:'45';
   const purposeTag=safePurpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${safePurpose}</span>`:'';
-  var card = `<div class="trip" data-id="${t.id}"><div class="trip-map"><div class="trip-map-bg ${t.type}"></div><div class="trip-map-grid"></div><svg viewBox="${vb}" preserveAspectRatio="none"><path d="${safePath}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round"${dash}/><circle cx="20" cy="${pathStartY}" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="${wide?340:290}" cy="${pathEndXY}" r="5" fill="${dotFill}" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge ${t.type}">${badge}</div><div class="trip-map-time">${safeTime}</div></div><div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div><div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var _rmap=_tripStaticMap(t,wide);
+  var _mapDiv=_rmap
+    ? ('<div class="trip-map has-rmap">'+_rmap+'<div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>')
+    : ('<div class="trip-map"><div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+( wide?340:290 )+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>');
+  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip">📤 Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -1198,7 +1308,7 @@ function tripCard(t,wide){
 }
 function renderTrips(){
   if(TRIPS.length===0){
-    document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--ink3)">'+_i('car',36,'var(--ink4)')+'<div style="margin-top:12px;font-size:15px;font-weight:500">No trips yet</div><div style="font-size:13px;margin-top:4px;color:var(--ink4)">Tap Auto On to start tracking</div></div>';
+    document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px">'+_i('car',48,'var(--vi)')+'<div style="margin-top:16px;font-size:17px;font-weight:700;color:var(--ink1)">Start tracking your miles</div><div style="font-size:13px;margin-top:8px;color:var(--ink3);line-height:1.6">Drive anywhere for work and MyMilesAI will auto-detect and record your trip.</div><div style="margin-top:12px;font-size:13px;background:var(--vi-s);color:var(--vi);font-weight:600;padding:8px 16px;border-radius:var(--rpill);display:inline-block">'+LOC.currency+LOC.rates.biz+'/'+LOC.unit+' tax rate — up to '+LOC.currency+'8,400/yr saved</div></div>';
   } else {
     document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,3).map(t=>tripCard(t,false)).join('');
   }
@@ -1227,11 +1337,28 @@ function renderTrips(){
   document.getElementById('tripList').innerHTML=html;
   recalcStats();
   checkEmptyState();
+  _updateStreak();
+  _updateYTD();
   bindSwipeCards();
   if(_activeFilter!=='all')applyFilter();
 }
 
 /* ===== SWIPE TO CLASSIFY ===== */
+function _searchTrips(q){
+  q=(q||'').trim().toLowerCase();
+  if(!q){renderTrips();return;}
+  var list=document.getElementById('tripList');if(!list)return;
+  var filtered=TRIPS.filter(function(t){
+    return [(t.from||''),(t.to||''),(t.day||''),(t.notes||''),(t.purpose||'')].some(function(v){return v.toLowerCase().includes(q);});
+  });
+  var html='',lastDay='';
+  if(filtered.length===0){list.innerHTML='<div style="text-align:center;padding:30px;color:var(--ink4)">No trips match "'+_esc(q)+'"</div>';return;}
+  filtered.forEach(function(t){
+    if(t.day!==lastDay){lastDay=t.day;html+='<div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:var(--ink4)">'+_esc(t.day)+'</div>';}
+    html+=tripCard(t,true);
+  });
+  list.innerHTML=html;bindSwipeCards();
+}
 function bindSwipeCards(){
   document.querySelectorAll('.swipe-card').forEach(function(card){
     var startX=0,curX=0,dragging=false,tid=parseInt(card.dataset.swipeId);
@@ -1386,12 +1513,7 @@ function renderAlerts(){
     time:ago(195),
     action:'<button class="al-action add" onclick="openAddTrip()">+ Add trip</button>'});
 
-  // New: Weekly summary
-  // New: Weekly summary (controlled by notif setting)
-  if(_ns.weekly) allAlerts.push({id:'weekly_current',isNew:true,ic:IC.chart,bg:BG.chart,
-    title:'Weekly mileage summary',
-    desc:totalBiz.toFixed(1)+' '+u+' business · '+totalPer.toFixed(1)+' '+u+' personal · '+c+(totalBiz*r).toFixed(2)+' earned',
-    time:'Last Sunday'});
+
 
   // New: Tax reminder (Jan-May only)
   var mo=now.getMonth();
@@ -1501,7 +1623,15 @@ function markAllRead(){
 var CAT_LABELS={biz:'Business',pers:'Personal',med:'Medical',char:'Charity',move:'Moving',uncl:'Unclassified'};
 var CAT_DEDUCTIBLE={biz:true,med:true,char:true,move:false,pers:false,uncl:false};
 function catRate(type){return(LOC.rates&&LOC.rates[type])||LOC.rate;}
-function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=!!CAT_DEDUCTIBLE[type];checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(CAT_LABELS[type]||type));}}
+function _shareTrip(id){
+  var t=TRIPS.find(function(x){return x.id===id;});if(!t)return;
+  var dist=tripDist(t.mi);
+  var ded=t.ded?(LOC.currency+(parseFloat(dist)*catRate(t.type)).toFixed(2)+' potential deduction'):'';
+  var txt='Trip Log\n'+t.day+(t.time?' at '+t.time:'')+'\nFrom: '+t.from+'\nTo: '+t.to+'\nDistance: '+dist+' '+LOC.unit+(ded?'\nValue: '+ded:'')+(t.notes?'\nNotes: '+t.notes:'')+'\n\nTracked with MyMilesAI';
+  if(navigator.share){navigator.share({title:'MyMilesAI Trip',text:txt}).catch(function(){});}
+  else{try{navigator.clipboard.writeText(txt).then(function(){showToast('📋','Trip details copied!',2500);});}catch(e){showToast('📤','Share not available on this device',2500);}}
+}
+function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=!!CAT_DEDUCTIBLE[type];checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();_checkReviewPrompt();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(CAT_LABELS[type]||type));}}
 
 /* ===== NAVIGATION ===== */
 var _scrollPositions={};
@@ -1563,7 +1693,7 @@ function updateGreeting(){
   document.getElementById('hdrGreet').textContent=greet;
   // Load user name
   var name='';
-  try{name=localStorage.getItem('mymilesai_name')||'';}catch(e){}
+  try{name=localStorage.getItem('mymilesai_name')||'';if(!name){var _gs=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');name=_gs.userName||'';}}catch(e){}
   if(name){
     document.getElementById('hdrName').textContent=name;
     document.getElementById('hdrAv').textContent=name.charAt(0).toUpperCase();
@@ -1610,7 +1740,7 @@ function editProfileName(){
 }
 function initProfile(){
   var name='';
-  try{name=localStorage.getItem('mymilesai_name')||'';}catch(e){}
+  try{name=localStorage.getItem('mymilesai_name')||'';if(!name){var _gs=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');name=_gs.userName||'';}}catch(e){}
   if(name){
     document.getElementById('profileName').textContent=name;
     document.getElementById('profileEmail').textContent='Tap to edit your name';
@@ -1619,6 +1749,40 @@ function initProfile(){
 }
 
 /* ===== RECALC ALL STATS ===== */
+function _calcStreak(){
+  if(!TRIPS||TRIPS.length===0)return 0;
+  var days=new Set();
+  TRIPS.forEach(function(t){if(t.day){try{var d=new Date(t.day);d.setHours(0,0,0,0);days.add(d.getTime());}catch(e){}}});
+  var streak=0;
+  var cur=new Date();cur.setHours(0,0,0,0);
+  for(var i=0;i<365;i++){
+    if(days.has(cur.getTime())){streak++;}
+    else if(i===0){cur.setDate(cur.getDate()-1);continue;}
+    else break;
+    cur.setDate(cur.getDate()-1);
+  }
+  return streak;
+}
+function _updateStreak(){
+  var s=_calcStreak();
+  var el=document.getElementById('hsStreak');
+  if(el)el.textContent=s>0?String(s):'0';
+}
+function _updateYTD(){
+  var goal=5000;
+  var totalDed=0,yr=new Date().getFullYear();
+  TRIPS.forEach(function(t){
+    if(t.ded&&t.day){try{var d=new Date(t.day);if(d.getFullYear()===yr)totalDed+=(parseFloat(tripDist(t.mi))||0)*catRate(t.type);}catch(e){}}
+  });
+  var pct=Math.min(Math.round((totalDed/goal)*100),100);
+  var bar=document.getElementById('ytdBar');
+  if(bar){
+    bar.style.display=TRIPS.length>0?'block':'none';
+    var f=document.getElementById('ytdFill');if(f)f.style.width=pct+'%';
+    var p=document.getElementById('ytdPct');if(p)p.textContent=pct+'%';
+    var s=document.getElementById('ytdSaved');if(s)s.textContent=LOC.currency+totalDed.toFixed(0)+' saved';
+  }
+}
 function recalcStats(){
   var totalBiz=0,totalPer=0,unclCount=0,totalTrips=TRIPS.length;
   var bizTrips=0,perTrips=0;
@@ -2464,7 +2628,7 @@ function startTracking(){
   } else {
     watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   }
-  tracking=true;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
+  tracking=true;_autoSaveShown=false;_pendingAutoSave=null;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -2503,7 +2667,7 @@ window.__nativeGPS__ = function(coords) {
     updateGPSPermUI();
   }
   var fakePos={ coords: { latitude: coords.lat, longitude: coords.lng,
-                     speed: coords.speed||0, accuracy: coords.accuracy||999 } };
+                     speed: (coords.speed!=null?coords.speed:null), accuracy: coords.accuracy||999 } };
   if(tracking){
     onPos(fakePos);
   } else if(autoDetect){
@@ -2513,6 +2677,88 @@ window.__nativeGPS__ = function(coords) {
   // Always update last known GPS coords for templates etc
   lastGpsLat=coords.lat;lastGpsLng=coords.lng;
 };
+
+
+
+/* Handle iOS dynamic safe area changes (phone call bar, hotspot bar) */
+function _updateSafeArea(){
+  var safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || 
+    getComputedStyle(document.documentElement).paddingTop || '0');
+  document.documentElement.style.setProperty('--safe-top', 
+    'env(safe-area-inset-top)');
+}
+// Listen for visual viewport changes (triggered by iOS call bar)
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', function(){
+    _updateSafeArea();
+    // Redraw header
+    var header = document.querySelector('.top-bar, .topbar, header');
+    if(header) header.style.paddingTop = 'env(safe-area-inset-top)';
+  });
+}
+// Also handle on focus/blur (when returning from call)
+window.addEventListener('focus', _updateSafeArea);
+window.addEventListener('pageshow', _updateSafeArea);
+
+/* SMART LOCATION MEMORY */
+function _loadKnownLocations(){try{var r=localStorage.getItem('mymilesai_kl');return r?JSON.parse(r):{};}catch(e){return {};}}
+function _saveKnownLocations(l){try{localStorage.setItem('mymilesai_kl',JSON.stringify(l));}catch(e){}}
+function _learnLocation(lat,lng,label,cat){
+  if(!lat||!lng||!label)return;
+  var locs=_loadKnownLocations(),key=lat.toFixed(3)+'_'+lng.toFixed(3);
+  locs[key]={lat:lat,lng:lng,label:label,category:cat||'Unclassified',visits:(locs[key]?locs[key].visits:0)+1,lastSeen:Date.now()};
+  _saveKnownLocations(locs);
+}
+function _matchKnownLocation(lat,lng){
+  if(!lat||!lng)return null;
+  var locs=_loadKnownLocations(),best=null,bestD=999;
+  Object.keys(locs).forEach(function(k){var loc=locs[k],d=haversine(lat,lng,loc.lat,loc.lng)*1609;if(d<200&&d<bestD){bestD=d;best=loc;}});
+  return best;
+}
+var _pendingAutoSave=null,_autoSaveShown=false;
+function _promptSmartSave(kd){
+  if(_autoSaveShown)return;_autoSaveShown=true;
+  var dist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
+  var ded=(parseFloat(dist)*LOC.rate).toFixed(2);
+  var dl=kd?kd.label:'',dc=kd?kd.category:'Unclassified',rep=kd&&kd.visits>1;
+  var msg='<div style="text-align:center;margin-bottom:12px;"><div style="font-size:32px;">🚗</div>'
+    +'<div style="font-size:18px;font-weight:700;margin:8px 0;">Trip Completed!</div>'
+    +'<div style="font-size:14px;color:rgba(255,255,255,0.7);">'+dist+' '+LOC.unit+' · '+LOC.currency+ded+' deduction</div></div>';
+  if(rep){
+    msg+='<div style="background:rgba(110,231,183,0.15);border:1px solid rgba(110,231,183,0.4);border-radius:12px;padding:12px;margin-bottom:12px;">'
+      +'<div style="font-size:12px;color:#6EE7B7;font-weight:600;">📍 RECOGNIZED</div>'
+      +'<div style="font-size:15px;font-weight:600;margin-top:4px;">'+dl+'</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,0.6);">'+dc+'</div></div>'
+      +'<div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:12px;">Save as <b>'+dc+'</b> trip to <b>'+dl+'</b>?</div>';
+  } else {
+    msg+='<div style="margin-bottom:10px;"><label style="font-size:12px;color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">Destination</label>'
+      +'<input id="asDest" type="text" value="'+dl+'" placeholder="e.g. Office, Client, Farm" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;outline:none;"></div>'
+      +'<div><label style="font-size:12px;color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">Category</label>'
+      +'<select id="asCat" style="width:100%;box-sizing:border-box;background:rgba(30,30,50,0.95);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;outline:none;">'
+      +'<option value="Business"'+(dc==="Business"?" selected":"")+'>Business</option>'
+      +'<option value="Personal"'+(dc==="Personal"?" selected":"")+'>Personal</option>'
+      +'<option value="Medical"'+(dc==="Medical"?" selected":"")+'>Medical</option>'
+      +'<option value="Charity"'+(dc==="Charity"?" selected":"")+'>Charity</option>'
+      +'</select></div>';
+  }
+  _pendingAutoSave={dist:dist,kd:kd,rep:rep,dl:dl,dc:dc};
+  openInfoModal('💾 Save Trip',msg,rep?'Save as '+dc:'Save Trip',function(){_confirmAutoSave();},'Discard',function(){_autoSaveShown=false;});
+}
+function _confirmAutoSave(){
+  if(!_pendingAutoSave)return;
+  var p=_pendingAutoSave;
+  var dest=p.rep?p.dl:(document.getElementById('asDest')?document.getElementById('asDest').value.trim():p.dl);
+  var cat=p.rep?p.dc:(document.getElementById('asCat')?document.getElementById('asCat').value:'Unclassified');
+  if(!dest){showToast('⚠️','Please enter a destination');return;}
+  if(lastGpsLat&&lastGpsLng)_learnLocation(lastGpsLat,lastGpsLng,dest,cat);
+  var now=new Date(),trip={id:Date.now(),date:now.toISOString().split('T')[0],from:'Current Location',
+    to:dest,distance:parseFloat(p.dist),unit:LOC.unit,category:cat,
+    deduction:parseFloat(p.dist)*LOC.rate,note:'Auto-saved',ts:Date.now()};
+  var trips=loadTrips();trips.unshift(trip);saveTrips(trips);
+  recalcStats();renderTrips();
+  showToast('✅','Saved — '+p.dist+' '+LOC.unit+' ('+cat+')');
+  _pendingAutoSave=null;_autoSaveShown=false;
+}
 
 /* ── GPS DEBUG PANEL UPDATE ── */
 function updateDebugPanel(){
@@ -2564,19 +2810,57 @@ function onPos(p){
     }
   }
   var spdVal=_useKm()?(spdMps*3.6):(spdMps*2.237);
-  var spdDisplay=spdVal.toFixed(0);
+
+  // SMART SPEED FILTER: hide unreliable speed when indoors/poor GPS
+  if(!window._spdBuffer) window._spdBuffer=[];
+  if(accuracy<=80){
+    window._spdBuffer.push(spdVal);
+    if(window._spdBuffer.length>5) window._spdBuffer.shift();
+  } else {
+    // Poor accuracy — clear buffer, don't trust speed
+    window._spdBuffer=[];
+  }
+
+  var spdDisplay;
+  if(accuracy>80){
+    // Poor GPS signal — show signal icon not speed
+    spdDisplay='--';
+    document.getElementById('speedUnit').textContent='poor GPS';
+  } else {
+    var avgSpd=window._spdBuffer.length>=3
+      ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
+      : spdVal;
+    // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent readings
+    var floor=_useKm()?8:5; // Low floor — only kills near-zero drift
+    if(avgSpd<floor){
+      avgSpd=0;
+    } else if(window._spdBuffer.length>=3){
+      // Calculate variance of recent readings
+      var _mean=window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length;
+      var _variance=window._spdBuffer.reduce(function(acc,v){return acc+Math.pow(v-_mean,2);},0)/window._spdBuffer.length;
+      var _stdDev=Math.sqrt(_variance);
+      // High variance at low speed = GPS drift noise (readings jumping randomly)
+      // Real movement at any speed = consistent readings (low variance relative to mean)
+      if(_mean>0&&_stdDev/_mean>0.6&&_mean<(_useKm()?25:15)){
+        avgSpd=0; // Inconsistent low-speed readings = stationary drift
+      }
+    }
+    spdDisplay=avgSpd.toFixed(0);
+    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+  }
   document.getElementById('trackSpeed').textContent=spdDisplay;
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var pct=Math.min(spdVal/maxSpd,1);
-  var off=314-(314*pct);
+  var _dispSpd=(spdDisplay==='--'||spdDisplay==='0')?0:parseFloat(spdDisplay);
+  var pct=Math.min(_dispSpd/maxSpd,1);
+  var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Only update distance with accurate readings
-  if(positions.length>0&&accuracy<=50){
+  if(positions.length>0&&accuracy<=100){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
-    if(d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
+    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi (accuracy<=100)
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
@@ -2607,7 +2891,9 @@ function onPos(p){
     document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
   }
   // === SMART PAUSE: 5 min CONTINUOUS stationary → end trip ===
-  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  var _thEl=document.getElementById('threshVal');
+  var _svT=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
+  var thresh=(_thEl&&parseInt(_thEl.value))||_svT||5;
   var spdRaw=spdVal;
   if(spdRaw>=thresh){
     // Moving — reset stationary timer and end-position collection
@@ -2638,6 +2924,7 @@ function onPos(p){
     // End trip after 5 min CONTINUOUS stationary
     if(stationarySec*1000>=SMART_STOP_MS&&tracking){
       _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
+      try{navigator.vibrate&&navigator.vibrate([50,30,50]);}catch(e){}
       showToast(_i('park'),'Trip ended — stationary for 5 min',4000);
       stopTracking();
       return;
@@ -2663,6 +2950,15 @@ function onPosErr(e){
 }
 
 /* ===== MISSED TRIP DETECTOR (#1 fix) ===== */
+function clearStaleAlerts(){
+  // Clear any hardcoded/stale alerts on fresh load
+  try{
+    var stored=localStorage.getItem('mymilesai_alerts');
+    if(!stored){
+      localStorage.setItem('mymilesai_alerts','[]');
+    }
+  }catch(e){}
+}
 function checkMissedTrips(){
   if(!_lastTripEnd||_missedTripChecked)return;
   var gap=Date.now()-_lastTripEnd;
@@ -2676,6 +2972,28 @@ function checkMissedTrips(){
     },3000);
   }
   _missedTripChecked=true;
+}
+function _checkReviewPrompt(){
+  try{
+    if(localStorage.getItem('mymilesai_reviewed'))return;
+    var n=TRIPS.length;
+    if(n!==3&&n!==10&&n!==25)return;
+    setTimeout(function(){
+      if(window.__MYMILESAI_NATIVE__&&window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.requestReview){
+        window.webkit.messageHandlers.requestReview.postMessage({});
+        localStorage.setItem('mymilesai_reviewed','1');
+        return;
+      }
+      var msg=n===3?'You just saved your 3rd trip! Loving MyMilesAI?':'You\'ve logged '+n+' trips — amazing work! 🎉';
+      showToast('⭐',msg+' Tap to rate us!',6000);
+      setTimeout(function(){
+        if(confirm(msg+'\n\nWould you rate us 5 stars? It keeps the app free and helps us grow!')){
+          window.open('https://apps.apple.com/app/id6760873036','_blank');
+          localStorage.setItem('mymilesai_reviewed','1');
+        }
+      },500);
+    },2500);
+  }catch(e){}
 }
 function recordTripEnd(){
   _lastTripEnd=Date.now();
@@ -2735,7 +3053,14 @@ function stopAutoMonitoring(){
 
 var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
 var _detectCount=0; // consecutive above-threshold readings
-var _detectRequired=3; // readings needed to confirm driving
+var _detectRequired=3;
+var _stillCount=0;
+var _stopRequired=8;
+var _charging=false;
+var _accelMoving=false;
+var _accelBuf=[];
+if(navigator.getBattery){navigator.getBattery().then(function(bat){_charging=bat.charging;bat.addEventListener('chargingchange',function(){_charging=bat.charging;_detectRequired=_charging?2:3;});}).catch(function(){});}
+if(window.DeviceMotionEvent){window.addEventListener('devicemotion',function(e){if(!e.acceleration)return;var mag=Math.sqrt(Math.pow(e.acceleration.x||0,2)+Math.pow(e.acceleration.y||0,2)+Math.pow(e.acceleration.z||0,2));_accelBuf.push(mag);if(_accelBuf.length>10)_accelBuf.shift();var avg=_accelBuf.reduce(function(a,b){return a+b;},0)/(_accelBuf.length||1);_accelMoving=(avg>0.5&&avg<15);},{passive:true});}
 
 function onAutoPos(p){
   // While monitoring (not recording), check if driving
@@ -2743,19 +3068,57 @@ function onAutoPos(p){
   var spd=p.coords.speed;
   // Use GPS speed if available, else calc from last known position
   var spdMps=0;
-  if(typeof spd==='number'&&spd>=0&&spd!==null){spdMps=spd;}
+  var _t2=Date.now();
+  if(typeof spd==='number'&&spd>=0&&spd!==null){spdMps=spd;} // spd=0 means stationary — trust it, skip haversine
   else if(lastGpsLat&&p.coords.latitude){
     var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);
-    spdMps=dMi*1609.34/5; // assume ~5s between readings
+    var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;
+    if(_dt<0.5)_dt=0.5;if(_dt>30)_dt=5;
+    // Layer 3: reject teleportation (>0.1mi in <2s)
+    if(dMi>0.1&&_dt<2){spdMps=0;}
+    else{spdMps=dMi*1609.34/_dt;}
   }
-  var thresh=parseInt(document.getElementById('threshVal').value)||5;
+  window._lastAutoT=_t2;
+  var _threshEl=document.getElementById('threshVal');
+  var _savedThresh=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
+  var thresh=(_threshEl&&parseInt(_threshEl.value))||_savedThresh||5;
   var spdVal=_useKm()?spdMps*3.6:spdMps*2.237;
+  var _acc2=p.coords.accuracy||999;
+  if(!window._autoSpdBuf)window._autoSpdBuf=[];
+  // Layer 1: accuracy gate — only trust readings <=25m
+  if(_acc2<=25){
+    // Layer 2: spike rejection — discard jumps >15mph/24kmh above avg
+    var _prevAvg=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
+    var _spikeMax=_useKm()?24:15;
+    if(window._autoSpdBuf.length<2||spdVal<=_prevAvg+_spikeMax){
+      window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();
+    }
+  } else {
+    window._autoSpdBuf=[];
+  }
+  // Layer 4: require >=3 readings before trusting average
+  // Layer 4: require >=3 readings before trusting average
+  var _avgA=window._autoSpdBuf.length>=3?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
+  // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent
+  var _monFloor=_useKm()?8:5;
+  if(_avgA<_monFloor){
+    _avgA=0;
+  } else if(window._autoSpdBuf.length>=4){
+    var _mMean=window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length;
+    var _mVar=window._autoSpdBuf.reduce(function(acc,v){return acc+Math.pow(v-_mMean,2);},0)/window._autoSpdBuf.length;
+    var _mStd=Math.sqrt(_mVar);
+    // High variance at low speed = drift not real movement
+    if(_mMean>0&&_mStd/_mMean>0.6&&_mMean<(_useKm()?25:15)){_avgA=0;}
+  }
+  spdVal=_acc2>25?0:_avgA;
   // Update speedo even while monitoring
-  var spdDisplay=spdVal.toFixed(0);
+  var spdDisplay;
+  if(_acc2>25||spdVal<=0){spdDisplay=_acc2>25?'--':'0';if(_acc2>25)document.getElementById('speedUnit').textContent='poor GPS';else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
+  else{spdDisplay=spdVal.toFixed(0);document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var pct=Math.min(spdVal/maxSpd,1);
-  var off=314-(314*pct);
+  var pct=spdDisplay==='--'?0:Math.min(spdVal/maxSpd,1);
+  var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Update GPS coords for templates
@@ -2766,8 +3129,9 @@ function onAutoPos(p){
   var gdbCoords=document.getElementById('gdbCoords');if(gdbCoords)gdbCoords.textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4);
   updateDebugPanel();
 
-  // Multi-reading confirmation: require 3 consecutive readings above threshold
+  // Multi-reading confirmation: require 4 consecutive readings above threshold
   if(spdVal>=thresh){
+    _stillCount=0;
     _detectCount++;
     if(_detectCount===1){
       _autoState='DETECTING';
@@ -2776,7 +3140,7 @@ function onAutoPos(p){
     if(_detectCount>=_detectRequired){
       _autoState='RECORDING';
       _detectCount=0;
-      showToast(_i('car'),'Driving confirmed! Auto-recording started',3000);
+      showToast(_i('car'),'Trip detected — recording automatically',3000);
       if(navigator.vibrate)try{navigator.vibrate([50,50,50]);}catch(e){}
       // Notify native app
       if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
@@ -2786,10 +3150,15 @@ function onAutoPos(p){
       startTracking();
     }
   } else {
-    _detectCount=0;
-    if(_autoState==='DETECTING'){
-      _autoState='IDLE';
-      document.getElementById('statusText').textContent='Monitoring...';
+    _stillCount++;
+    var _stopThresh=_accelMoving?(_stopRequired+4):_stopRequired;
+    if(_stillCount>=_stopThresh){
+      _detectCount=0;
+      _stillCount=0;
+      if(_autoState==='DETECTING'){
+        _autoState='IDLE';
+        document.getElementById('statusText').textContent='Monitoring...';
+      }
     }
   }
 }
@@ -2842,6 +3211,8 @@ function stopTracking(){
   }
   // Reset milestone flags
   for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
+  var _tMin=(Date.now()-trackStart)/60000;
+  if(totalDist>0.05&&_tMin>=5){var _kd=_matchKnownLocation(lastGpsLat,lastGpsLng);setTimeout(function(){_promptSmartSave(_kd);},1500);}
   if(totalDist>0.01){
     var mi=totalDist;
     var dist=_useKm()?(mi*1.60934):mi;
@@ -2914,6 +3285,8 @@ function stopTracking(){
 }
 var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
+  var _snapPos=[];
+  if(positions&&positions.length>=2){var _st=Math.max(1,Math.floor(positions.length/80));for(var _pi=0;_pi<positions.length;_pi+=_st)_snapPos.push({lat:positions[_pi].lat,lng:positions[_pi].lng});if(_snapPos[_snapPos.length-1]!==positions[positions.length-1])_snapPos.push({lat:positions[positions.length-1].lat,lng:positions[positions.length-1].lng});}
   if(_gpsTrioSaved)return;
   _gpsTrioSaved=true;
   // Duplicate prevention: reject if a trip with same from/to was saved in last 60s
@@ -2928,7 +3301,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   var freq=getFreqRouteType(fromAddr,toAddr);
   if(freq)type=freq;
   else if(isWorkHours())type='biz';
-  TRIPS.unshift({id:newId,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath()});
+  TRIPS.unshift({id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath()});
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();renderAlerts();saveTripsToStorage();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
@@ -2937,21 +3310,31 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
   _gpsTrioSaved=false;
 }
+var _classifyCountdown=null;
 function showClassifyPrompt(tripId,from,to,dist,autoType){
   document.getElementById('clsRoute').textContent=from.split(',')[0]+' → '+to.split(',')[0];
   document.getElementById('clsDist').textContent=dist.toFixed(1)+' '+LOC.label;
-  // Show auto-classified hint if applicable
   var hint=document.getElementById('clsAutoHint');
-  if(autoType&&autoType!=='uncl'){
-    var label=autoType==='biz'?'Business (work hours)':'Personal';
-    if(hint)hint.textContent='Auto-classified as '+label+' — confirm or change:';
-  } else {
-    if(hint)hint.textContent='How would you like to classify this trip?';
-  }
+  if(hint)hint.textContent='Business or Personal?';
   document.getElementById('classifyModal').classList.add('show');
   window._classifyTripId=tripId;
+  var _secs=15;
+  if(_classifyCountdown)clearInterval(_classifyCountdown);
+  var _timerEl=document.getElementById('clsCountdown');
+  if(_timerEl)_timerEl.textContent='Auto-saves as Unclassified in '+_secs+'s';
+  _classifyCountdown=setInterval(function(){
+    _secs--;
+    if(_timerEl)_timerEl.textContent=_secs>0?'Auto-saves as Unclassified in '+_secs+'s':'Saved as Unclassified';
+    if(_secs<=0){
+      clearInterval(_classifyCountdown);_classifyCountdown=null;
+      document.getElementById('classifyModal').classList.remove('show');
+      window._classifyTripId=null;
+      switchTabId('tab-drive');
+    }
+  },1000);
 }
 function classifyLastTrip(type){
+  if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
   var id=window._classifyTripId;
   if(id){clsTrip(id,type);}
   document.getElementById('classifyModal').classList.remove('show');
@@ -2973,6 +3356,7 @@ function classifyLastTrip(type){
   },150);
 }
 function closeClassifyPrompt(){
+  if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
   document.getElementById('classifyModal').classList.remove('show');
   window._classifyTripId=null;
   switchTabId('tab-drive');
@@ -3386,25 +3770,8 @@ var AIRPORTS=[
   {n:'Phoenix Airport (PHX)',lat:33.437,lng:-112.008},
   {n:'Orlando Airport (MCO)',lat:28.431,lng:-81.308}
 ];
-var OFFICES=[
-  {n:'WeWork, Portage Ave, Winnipeg',lat:49.884,lng:-97.157},
-  {n:'WeWork, King St W, Toronto',lat:43.645,lng:-79.395},
-  {n:'WeWork, 5th Ave, New York',lat:40.749,lng:-73.986},
-  {n:'WeWork, Market St, San Francisco',lat:37.790,lng:-122.399},
-  {n:'WeWork, Wacker Dr, Chicago',lat:41.886,lng:-87.637},
-  {n:'WeWork, Boylston St, Boston',lat:42.350,lng:-71.077},
-  {n:'WeWork, Wilshire Blvd, Los Angeles',lat:34.062,lng:-118.361},
-  {n:'WeWork, Main St, Seattle',lat:47.603,lng:-122.335}
-];
-var CLIENTS=[
-  {n:'Client, 201 Portage Ave, Winnipeg',lat:49.893,lng:-97.145},
-  {n:'Client, Bay St, Toronto',lat:43.650,lng:-79.381},
-  {n:'Client, Park Ave, New York',lat:40.757,lng:-73.972},
-  {n:'Client, Mission St, San Francisco',lat:37.788,lng:-122.396},
-  {n:'Client, Michigan Ave, Chicago',lat:41.889,lng:-87.624},
-  {n:'Client, Brickell Ave, Miami',lat:25.765,lng:-80.190},
-  {n:'Client, Peachtree St, Atlanta',lat:33.782,lng:-84.386}
-];
+var OFFICES=[];
+var CLIENTS=[];
 function findNearest(list,lat,lng){
   var best=null,bestDist=Infinity;
   for(var i=0;i<list.length;i++){var dLat=list[i].lat-lat,dLng=list[i].lng-lng,d=dLat*dLat+dLng*dLng;if(d<bestDist){bestDist=d;best=list[i];}}
@@ -3541,7 +3908,7 @@ function saveManual(){
   var t=document.getElementById('addTo').value.trim();
   if(!f||!t){showToast(_i('warn'),'Please enter both From and To addresses');return;}
 
-  var btn=document.querySelector('.add-save-btn');
+  var btn=document.getElementById('addSaveBtn');
   if(btn){btn.disabled=true;btn.textContent='Calculating...';}
 
   function _geocodeIfNeeded(addr,cb){
@@ -3559,7 +3926,19 @@ function saveManual(){
     fromCoords=fc||fromCoords;
     toCoords=tc||toCoords;
     if(!fromCoords||!toCoords||_manualDistEdit){
-      // Can't route — use haversine or manual value
+      // Use haversine if we have coords, otherwise just save with manual distance
+      if(fromCoords&&toCoords&&!_manualDistEdit&&addDistVal===0){
+        // Calculate haversine distance as fallback
+        var R=6371;
+        var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
+        var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
+        var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(fromCoords.lat*Math.PI/180)*Math.cos(toCoords.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+        var hav=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.2;
+        var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
+        addDistVal=parseFloat(useKm?hav.toFixed(1):(hav/1.60934).toFixed(1));
+        var distInp=document.getElementById('addDistInput');
+        if(distInp){distInp.value=addDistVal;}
+      }
       _doSaveManual();
       if(btn){btn.disabled=false;btn.textContent='Save Trip';}
       return;
@@ -3737,7 +4116,10 @@ function openMapSheet(){
   sheet.style.display='flex';
   mapSheetOpen=true;
   if(!mapReady)setTimeout(initMap,100);
-  else if(map&&google&&google.maps)setTimeout(function(){google.maps.event.trigger(map,'resize');},200);
+  else if(map&&google&&google.maps){
+    setTimeout(function(){google.maps.event.trigger(map,'resize');if(lastGpsLat)map.setCenter({lat:lastGpsLat,lng:lastGpsLng});},200);
+    setTimeout(function(){if(map)google.maps.event.trigger(map,'resize');},600);
+  }
   updateMapTrackBtn();
   if(tracking){
     document.getElementById('mapLiveBadge').classList.add('show');
@@ -3799,6 +4181,8 @@ function initMap(){
       map:map
     });
     mapReady=true;
+    // Trigger resize in case map was init'd while container was hidden
+    setTimeout(function(){if(map)google.maps.event.trigger(map,'resize');},300);
     document.getElementById('mapLoading').classList.add('hidden');
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(function(p){
@@ -3865,14 +4249,14 @@ function saveAIKey(key){
   _aiApiKey=key;
   _updateAIKeyBar();
   // Test call
-  fetch('https://api.anthropic.com/v1/messages',{
+  fetch('https://mymilesai-ai.mymilesai.workers.dev/api/chat',{
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'test'}]})
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({messages:[{role:'user',content:'test'}]})
   }).then(function(r){
-    if(r.ok)showToast(_i('ccheck'),'API key validated');
-    else showToast(_i('warn'),'API key invalid — check and try again');
-  }).catch(function(){showToast(_i('warn'),'Could not validate key — check connection');});
+    if(r.ok){showToast('✅','AI Assistant ready');localStorage.setItem('mymilesai_ai_enabled','true');}
+    else showToast('⚠️','AI unavailable — try again');
+  }).catch(function(){showToast('⚠️','Could not connect to AI');});
 }
 
 function removeAIKey(){
@@ -3886,7 +4270,7 @@ function removeAIKey(){
 
 function _updateAIKeyBar(){
   var bar=document.getElementById('aiKeyBar');
-  if(bar)bar.style.display=_aiApiKey?'none':'flex';
+  if(bar)bar.style.display='none';
 }
 
 function toggleAIChat(){
@@ -3898,7 +4282,6 @@ function toggleAIChat(){
   } else {
     panel.classList.add('show');
     fab.style.display='none';
-    _loadAIKey();
     var inp=document.getElementById('aiInput');
     if(inp)setTimeout(function(){inp.focus();},400);
   }
@@ -3925,7 +4308,7 @@ function _renderAIMessage(role,text){
 }
 
 function _buildAISystemPrompt(){
-  var name='';try{name=localStorage.getItem('mymilesai_name')||'';}catch(e){}
+  var name='';try{name=localStorage.getItem('mymilesai_name')||'';if(!name){var _gs=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');name=_gs.userName||'';}}catch(e){}
   var cats=_tripSummaryByCategory();
   var totalDed=0;
   var catKeys=['biz','med','char'];
@@ -3999,7 +4382,7 @@ function sendAIChat(){
   _aiMessages.push({role:'user',content:text});
 
   // Try offline response first
-  if(!navigator.onLine||!_aiApiKey){
+  if(!navigator.onLine){
     var offline=_tryOfflineResponse(text);
     if(offline){
       _renderAIMessage('bot',offline);
@@ -4007,7 +4390,7 @@ function sendAIChat(){
       return;
     }
     if(!_aiApiKey){
-      _renderAIMessage('bot','Please add your Claude API key in Settings to use AI chat. For basic questions, I can answer offline.');
+      _renderAIMessage('bot','You are offline. Please check your connection and try again.');
       return;
     }
     _renderAIMessage('bot','You are offline. I can only answer basic questions about rates and totals right now.');
@@ -4022,19 +4405,11 @@ function sendAIChat(){
   document.getElementById('aiMsgs').scrollTop=document.getElementById('aiMsgs').scrollHeight;
   document.getElementById('aiSendBtn').disabled=true;
 
-  fetch('https://api.anthropic.com/v1/messages',{
+  fetch('https://mymilesai-ai.mymilesai.workers.dev/api/chat',{
     method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'x-api-key':_aiApiKey,
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true'
-    },
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1024,
-      system:_buildAISystemPrompt(),
-      messages:_aiMessages.slice(-20)
+      messages:[{role:'system',content:_buildAISystemPrompt()},..._aiMessages.slice(-20)]
     })
   })
   .then(function(r){
@@ -4069,42 +4444,89 @@ initProfile();
 setTimeout(animateCounters,600);
 setTimeout(checkMissedTrips,2000); // Check for missed trips on load
 
-/* Fix #9 — Update template distances from GPS */
+/* Fix #9 — Update template distances using FRESH GPS + Google Places */
 function updateTemplateDists(){
-  if(!lastGpsLat)return;
-  var ofc=findNearest(OFFICES,lastGpsLat,lastGpsLng);
-  var cli=findNearest(CLIENTS,lastGpsLat,lastGpsLng);
-  var air=findNearest(AIRPORTS,lastGpsLat,lastGpsLng);
-  var u=LOC.unit;
-  function fetchDist(dest,elId){
-    if(!dest){document.getElementById(elId).textContent='— '+u;return;}
-    _getGoogleDistance({lat:lastGpsLat,lng:lastGpsLng},{lat:dest.lat,lng:dest.lng},function(distMi,err){
-      if(distMi!==null){
-        var useKm=(LOC.country==='CA'||LOC.country==='AU');
-        var val=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
-        document.getElementById(elId).textContent=val+' '+u;
-      } else {
-        // Fallback to Haversine
-        var useKm2=(LOC.country==='CA'||LOC.country==='AU');
-        var R=useKm2?6371:3958.8;
-        var dLat=(dest.lat-lastGpsLat)*Math.PI/180,dLng=(dest.lng-lastGpsLng)*Math.PI/180;
-        var a=Math.sin(dLat/2)**2+Math.cos(lastGpsLat*Math.PI/180)*Math.cos(dest.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-        var d=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-        document.getElementById(elId).textContent=d.toFixed(1)+' '+u;
-      }
+  // Clear stale values immediately
+  ['tmplOffDist','tmplCliDist','tmplAirDist'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.textContent='...';
+  });
+  if(!navigator.geolocation)return;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude,lng=pos.coords.longitude;
+    lastGpsLat=lat;lastGpsLng=lng;
+    var u=LOC.unit;
+    var useKm=(LOC.country==='CA'||LOC.country==='AU');
+    var unitSys=useKm?'metric':'imperial';
+
+    // AIRPORT: Use Google Places to find nearest real airport
+    if(window.google&&window.google.maps&&window.google.maps.places){
+      var dummy=document.createElement('div');
+      var svc=new google.maps.places.PlacesService(dummy);
+      svc.nearbySearch({
+        location:new google.maps.LatLng(lat,lng),
+        rankBy:google.maps.places.RankBy.DISTANCE,
+        keyword:'airport'
+      },function(results,status){
+        var airEl=document.getElementById('tmplAirDist');
+        if(status===google.maps.places.PlacesServiceStatus.OK&&results&&results[0]){
+          var airLat=results[0].geometry.location.lat();
+          var airLng=results[0].geometry.location.lng();
+          var airName=results[0].name;
+          // Update template label to show actual airport name
+          var nameEl=document.querySelector('.tmpl:nth-child(3) .tmpl-n');
+          if(nameEl&&airName)nameEl.textContent=airName.length>15?airName.substring(0,15)+'…':airName;
+          _getGoogleDistance({lat:lat,lng:lng},{lat:airLat,lng:airLng},function(distMi){
+            if(airEl){
+              if(distMi!==null){
+                airEl.textContent=(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u;
+              } else {
+                // Haversine fallback
+                var R=useKm?6371:3958.8;
+                var dLat=(airLat-lat)*Math.PI/180,dLng=(airLng-lng)*Math.PI/180;
+                var a=Math.sin(dLat/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(airLat*Math.PI/180)*Math.sin(dLng/2)**2;
+                airEl.textContent=(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1)+' '+u;
+              }
+            }
+          });
+        } else {if(airEl)airEl.textContent='— '+u;}
+      });
+    } else {
+      var airEl=document.getElementById('tmplAirDist');
+      if(airEl)airEl.textContent='— '+u;
+    }
+
+    // OFFICE & CLIENT: show saved address distance or prompt to set
+    var settings={};try{settings=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');}catch(e){}
+    var offEl=document.getElementById('tmplOffDist');
+    var cliEl=document.getElementById('tmplCliDist');
+    if(settings.officeAddress){
+      _getGoogleDistance({lat:lat,lng:lng},settings.officeAddress,function(distMi){
+        if(offEl)offEl.textContent=distMi!==null?(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u:'— '+u;
+      });
+    } else {if(offEl)offEl.textContent='Tap to set';}
+    if(settings.clientAddress){
+      _getGoogleDistance({lat:lat,lng:lng},settings.clientAddress,function(distMi){
+        if(cliEl)cliEl.textContent=distMi!==null?(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u:'— '+u;
+      });
+    } else {if(cliEl)cliEl.textContent='Tap to set';}
+  },function(){
+    // GPS denied — show dashes
+    ['tmplOffDist','tmplCliDist','tmplAirDist'].forEach(function(id){
+      var el=document.getElementById(id);if(el)el.textContent='— '+LOC.unit;
     });
-  }
-  fetchDist(ofc,'tmplOffDist');
-  fetchDist(cli,'tmplCliDist');
-  fetchDist(air,'tmplAirDist');
+  },{enableHighAccuracy:true,timeout:8000,maximumAge:0});
 }
-// Try to get GPS for template distances
-if(navigator.geolocation){
+// Auto-refresh GPS for template distances
+function _refreshTemplateDists(){
+  if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(function(p){
     lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
     updateTemplateDists();
-  },function(){},{ enableHighAccuracy:false,timeout:3000 });
+  },function(){},{enableHighAccuracy:true,timeout:10000});
 }
+_refreshTemplateDists();
+setInterval(_refreshTemplateDists,300000); // refresh every 5 min
+document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshTemplateDists();});
 
 /* Fix #19 — Persist trips to localStorage */
 /* ===== CLOUD SYNC (JSONBin.io) ===== */
@@ -4383,17 +4805,10 @@ function loadSettings(){
   loadMapAppPref();
 }
 loadSettings();
+_initTheme();
 loadNotifSettings();
-_loadAIKey();
 
-function updateRate(){
-  var newRate=parseFloat(document.getElementById('rateVal').value);
-  if(isNaN(newRate)||newRate<=0)return;
-  LOC.rate=newRate;
-  recalcStats();
-  saveSettings();
-  showToast(_i('dollar'),'Rate updated to '+LOC.currency+newRate.toFixed(2)+'/'+LOC.unit);
-}
+function updateRate(){/* rate is now read-only */}
 
 function getDefaultCat(){
   try{return document.getElementById('defaultCatSel').value||'uncl';}catch(e){return 'uncl';}
@@ -4426,7 +4841,7 @@ function exportJSON(){
 function _showConfirm(title,message,confirmLabel,confirmColor,onConfirm){
   var overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0) 0';
-  overlay.innerHTML='<div style="background:var(--white);border-radius:var(--r2) var(--r2) 0 0;padding:28px 24px 32px;width:100%;max-width:480px;box-shadow:0 -8px 40px rgba(0,0,0,.18)">'
+  overlay.innerHTML='<div style="background:var(--white);border-radius:var(--r2) var(--r2) 0 0;padding:28px 24px 32px;width:100%;max-width:100%;box-shadow:0 -8px 40px rgba(0,0,0,.18)">'
     +'<div style="width:36px;height:4px;background:var(--ink5);border-radius:4px;margin:0 auto 20px"></div>'
     +'<div style="font-size:18px;font-weight:700;margin-bottom:10px;font-family:var(--fd)">'+title+'</div>'
     +'<div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:24px">'+message+'</div>'
@@ -4480,7 +4895,7 @@ function restoreJSON(input){
         // SECURITY: sanitize name — strip all HTML, limit to 100 chars
         if(data.name&&typeof data.name==='string'){
           var safeName=data.name.replace(/<[^>]*>/g,'').trim().slice(0,100);
-          try{localStorage.setItem('mymilesai_name',safeName);}catch(ex){}
+          try{localStorage.setItem('mymilesai_name',safeName);var _os=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');_os.userName=safeName;localStorage.setItem('mymilesai_settings',JSON.stringify(_os));}catch(ex){}
         }
         if(data.settings)try{localStorage.setItem('mymilesai_settings',JSON.stringify(data.settings));}catch(ex){}
         if(data.odometer)try{localStorage.setItem('mymilesai_odometer',JSON.stringify(data.odometer));}catch(ex){}
@@ -4617,7 +5032,7 @@ function setObUnit(btn,unit){
 try{
   var _hasName=false;
   try{_hasName=!!localStorage.getItem('mymilesai_name');}catch(e){}
-  if(!localStorage.getItem('mymilesai_onboarded')||!_hasName)setTimeout(showOnboarding,800);
+  if(!localStorage.getItem('mymilesai_onboarded'))setTimeout(showOnboarding,800);
 }catch(e){}
 
 /* ===== AUTO-DETECT INIT ===== */
@@ -4635,6 +5050,7 @@ if(window.__MYMILESAI_NATIVE__){
 }
 // Check GPS permission on load and request if needed
 checkGPSPermission();
+autoDetect=true; // Always start monitoring
 if(autoDetect){
   if(window.__MYMILESAI_NATIVE__){
     // On native, permissions are handled by the native app (Expo Location).
