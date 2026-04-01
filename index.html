@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en"><!-- v1774930312 -->
+<html lang="en"><!-- v1773361460 -->
 <head>
 <meta charset="UTF-8">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://routes.googleapis.com https://maps.googleapis.com https://*.supabase.co https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev https://cdn.jsdelivr.net https://dxpuuiqibtizewbbffjk.supabase.co wss://*.supabase.co; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' blob: https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.ggpht.com; connect-src https://maps.googleapis.com https://api.jsonbin.io https://api.anthropic.com https://mymilesai-ai.mymilesai.workers.dev; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,7 +16,7 @@
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
-<title>MyMilesAI Rel 5.6</title>
+<title>MyMilesAI Rel 5.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -60,7 +59,7 @@
 [data-theme="dark"] .cls{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:var(--ink3);}
 [data-theme="dark"] input[type="search"]{background:var(--white);color:var(--ink);border-color:var(--ink6);}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;padding:0;color:var(--ink);-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;padding:0;color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 .phone{width:100%;max-width:100%;margin:0;background:var(--bg);min-height:100vh;position:relative;overflow-x:hidden;}
 .scroll{padding-bottom:110px;overflow-y:auto;-webkit-overflow-scrolling:touch;height:calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));}
 .tab{display:none;animation:tabIn .35s ease;}.tab.active{display:block;}
@@ -88,7 +87,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .hdr-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--mag);border:2px solid var(--white);}
 
 /* HERO */
-.hero{margin:10px 16px 0;border-radius:var(--r3);overflow:hidden;position:relative;padding:26px 22px 22px;color:#fff;background:#0C0C1D;box-shadow:0 16px 56px rgba(12,12,29,.4),0 4px 12px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.04);}
+.hero{margin:0;border-radius:0;overflow:hidden;position:relative;padding:20px 22px 22px;color:#fff;background:#0C0C1D;box-shadow:none;}
 .hero-mesh{position:absolute;inset:0;overflow:hidden;z-index:0;}
 .hero-mesh .m1{position:absolute;width:260px;height:260px;border-radius:50%;filter:blur(60px);opacity:.5;background:radial-gradient(circle,rgba(214,0,110,.4),transparent);top:-30%;right:-10%;animation:ms1 12s ease-in-out infinite;}
 .hero-mesh .m2{position:absolute;width:220px;height:220px;border-radius:50%;filter:blur(55px);opacity:.35;background:radial-gradient(circle,rgba(108,60,224,.45),transparent);bottom:-20%;left:-15%;animation:ms2 14s ease-in-out infinite;}
@@ -103,22 +102,22 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .hero-status.rec .hero-dot{background:#FCA5A5;box-shadow:0 0 12px rgba(252,165,165,.6);animation:gp 1s ease-in-out infinite;}
 .hero-status.mon .hero-dot{background:#C4B5FD;box-shadow:0 0 10px rgba(196,181,253,.5);animation:gp 3s ease-in-out infinite;}
 .hero-brand{font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.5px;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s ease-in-out infinite;}
-.speedo{display:flex;justify-content:center;margin:12px 0 28px;position:relative;}
-.speedo-wrap{position:relative;width:200px;height:110px;}
-.speedo-svg{width:200px;height:110px;overflow:visible;}
+.speedo{display:flex;justify-content:center;margin:10px 0 24px;position:relative;}
+.speedo-wrap{position:relative;width:240px;height:130px;}
+.speedo-svg{width:240px;height:130px;overflow:visible;}
 .sp-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:10;stroke-linecap:round;}
-.sp-fill{fill:none;stroke:url(#spGrad);stroke-width:10;stroke-linecap:round;stroke-dasharray:267;stroke-dashoffset:267;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
-.sp-glow{fill:none;stroke:url(#spGrad);stroke-width:18;stroke-linecap:round;filter:blur(12px);opacity:.35;stroke-dasharray:267;stroke-dashoffset:267;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
+.sp-fill{fill:none;stroke:url(#spGrad);stroke-width:10;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
+.sp-glow{fill:none;stroke:url(#spGrad);stroke-width:20;stroke-linecap:round;filter:blur(14px);opacity:.4;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
 .sp-tick{fill:none;stroke:rgba(255,255,255,.08);stroke-width:1;}
 .speedo-center{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center;}
-.sp-num{font-family:var(--fd);font-size:60px;font-weight:800;letter-spacing:-3px;line-height:1;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.sp-unit{font-size:11px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+.sp-num{font-family:var(--fd);font-size:72px;font-weight:800;letter-spacing:-4px;line-height:1;background:linear-gradient(180deg,#fff 0%,#C084FC 50%,#D6006E 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sp-unit{font-size:11px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
 .hero-stats{display:flex;gap:3px;}
-.hs{flex:1;padding:14px 8px;text-align:center;background:rgba(255,255,255,.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.04);}
+.hs{flex:1;padding:16px 8px;text-align:center;background:rgba(255,255,255,.06);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);}
 .hs:first-child{border-radius:var(--r) 4px 4px var(--r);}.hs:last-child{border-radius:4px var(--r) var(--r) 4px;}.hs:nth-child(2){border-radius:4px;}
-.hs-v{font-family:var(--fd);font-size:22px;font-weight:700;letter-spacing:-.8px;line-height:1;}
+.hs-v{font-family:var(--fd);font-size:20px;font-weight:700;letter-spacing:-.6px;line-height:1;}
 .hs-v.c1{color:#C084FC}.hs-v.c2{color:#FB7185}.hs-v.c3{color:#6EE7B7}
-.hs-l{font-size:9px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px;}
+.hs-l{font-size:9px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px;}
 
 /* LIVE TRACKING */
 .track-live{display:none;margin:10px 16px 0;padding:18px 20px;background:var(--white);border:1.5px solid rgba(239,61,88,.15);border-radius:var(--r3);box-shadow:0 4px 20px rgba(239,61,88,.06),var(--s2);position:relative;overflow:hidden;}
@@ -249,19 +248,19 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .add-save:disabled{opacity:.4;pointer-events:none;}
 
 /* QUICK ACTIONS */
-.qa{display:flex;gap:8px;padding:16px 16px 8px;overflow-x:auto;scrollbar-width:none;}.qa::-webkit-scrollbar{display:none;}
-.qa-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:var(--f);font-size:13px;font-weight:600;color:var(--ink);transition:all .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--s2);}
-.qa-btn:hover{border-color:var(--ink5);transform:translateY(-3px);box-shadow:var(--s3);}
+.qa{display:flex;gap:10px;padding:16px 16px 12px;overflow-x:auto;scrollbar-width:none;background:var(--bg);}.qa::-webkit-scrollbar{display:none;}
+.qa-btn{display:flex;align-items:center;gap:8px;padding:12px 22px;background:var(--white);border:1.5px solid var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:var(--f);font-size:13px;font-weight:600;color:var(--ink2);transition:all .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--s1);}
+.qa-btn:hover{border-color:var(--ink5);transform:translateY(-2px);box-shadow:var(--s2);}
 .qa-btn:active{transform:translateY(0) scale(.97);}
 .qa-btn .i{font-size:17px;}
-.qa-btn.pri{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 4px 16px rgba(12,12,29,.15);}.qa-btn.pri:hover{background:#22223a;box-shadow:var(--s3);}
+.qa-btn.pri{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 4px 16px rgba(12,12,29,.18);font-weight:700;}.qa-btn.pri:hover{background:#22223a;box-shadow:var(--s3);}
 .qa-btn.pri.recording{background:linear-gradient(135deg,#EF3D58,#FF6B6B);border-color:transparent;box-shadow:0 4px 20px rgba(239,61,88,.35),inset 0 1px 0 rgba(255,255,255,.15);animation:pulse-rec 2s ease-in-out infinite;}
 
 /* SECTIONS */
-.sh{display:flex;align-items:center;justify-content:space-between;padding:26px 20px 12px;}
-.sh-t{font-family:var(--fd);font-size:18px;font-weight:700;letter-spacing:-.3px;background:linear-gradient(135deg,var(--ink) 30%,var(--vi));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;}
+.sh-t{font-family:var(--fd);font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--ink);-webkit-text-fill-color:unset;background:none;}
 .sh-pill{font-size:11px;font-weight:700;color:var(--mag);background:var(--mag-s);padding:4px 11px;border-radius:var(--rpill);}
-.sh-link{font-size:13px;font-weight:600;color:var(--mag);cursor:pointer;}
+.sh-link{font-size:13px;font-weight:700;color:var(--mag);cursor:pointer;}
 .uncl{margin:8px 16px 0;padding:16px 20px;display:flex;align-items:center;gap:14px;background:var(--amber-s);border:1.5px solid var(--amber-s2);border-radius:var(--r2);cursor:pointer;box-shadow:var(--s2);transition:all .3s cubic-bezier(.22,1,.36,1);}
 .uncl:hover{border-color:rgba(224,141,0,.3);transform:translateY(-2px);box-shadow:var(--s3);}
 .uncl-i{font-size:24px;}.uncl-t{font-size:14px;font-weight:700;color:var(--amber);}.uncl-d{font-size:11px;color:var(--ink2);margin-top:2px;font-weight:500;}.uncl-a{margin-left:auto;color:var(--ink5);font-size:20px;}
@@ -282,18 +281,20 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .trip-map.has-rmap{background:none;position:relative;overflow:hidden;}
 .trip-map.has-rmap .trip-map-badge{position:absolute;top:8px;left:8px;z-index:3;}
 .trip-map.has-rmap .trip-map-time{position:absolute;top:8px;right:8px;z-index:3;background:rgba(0,0,0,0.55);color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;}
-.trip-map{height:90px;position:relative;overflow:hidden;}
+.trip-map{height:80px;position:relative;overflow:hidden;}
 .trip-map-bg{position:absolute;inset:0;}
-.trip-map-bg.biz{background:linear-gradient(135deg,#F0ECFF,#E8E0FF,#F5F0FF);}
-.trip-map-bg.pers{background:linear-gradient(135deg,#FFF0F5,#FFE0EB,#FFF5F8);}
-.trip-map-bg.uncl{background:linear-gradient(135deg,#FFF8EC,#FFEFCF,#FFF9F0);}
-.trip-map-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(rgba(0,0,0,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.05) 1px,transparent 1px);background-size:24px 24px;}
+.trip-map-bg.biz{background:linear-gradient(180deg,rgba(108,60,224,.08),rgba(196,181,253,.15));}
+.trip-map-bg.pers{background:linear-gradient(180deg,rgba(214,0,110,.07),rgba(251,147,185,.13));}
+.trip-map-bg.uncl{background:linear-gradient(180deg,rgba(224,141,0,.07),rgba(251,191,36,.12));}
+.trip-map-grid{display:none;}
 .trip-map svg{position:relative;z-index:1;width:100%;height:100%;}
 .trip-map-badge{position:absolute;top:10px;right:10px;padding:5px 13px;border-radius:var(--rpill);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;z-index:2;backdrop-filter:blur(12px);box-shadow:var(--s1);}
 .trip-map-badge.biz{background:rgba(108,60,224,.12);color:var(--vi);border:1px solid rgba(108,60,224,.15);}
 .trip-map-badge.pers{background:rgba(214,0,110,.1);color:var(--mag);border:1px solid rgba(214,0,110,.12);}
 .trip-map-badge.uncl{background:rgba(224,141,0,.12);color:var(--amber);border:1px solid rgba(224,141,0,.15);}
-.trip-map-time{position:absolute;top:10px;left:10px;padding:5px 12px;border-radius:var(--rpill);font-size:10px;font-weight:700;background:rgba(255,255,255,.88);color:var(--ink2);z-index:2;backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,.05);box-shadow:var(--s1);}
+.trip-map-time{position:absolute;top:10px;left:10px;padding:5px 12px;border-radius:var(--rpill);font-size:11px;font-weight:700;background:rgba(255,255,255,.94);color:var(--ink2);z-index:2;backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,.05);box-shadow:var(--s1);}
+.trip-sparkline-dot{position:absolute;bottom:22px;left:14px;width:9px;height:9px;border-radius:50%;background:var(--ink);z-index:3;}
+.trip-sparkline-dot.pers{background:var(--ink3);}
 .trip-body{padding:14px 16px 8px;}
 .trip-route{display:flex;gap:12px;margin-bottom:4px;}
 .trip-dots{display:flex;flex-direction:column;align-items:center;padding-top:4px;flex-shrink:0;}
@@ -600,66 +601,6 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   z-index: 999 !important;
   background: inherit;
 }
-/* ============================================================
-   MYMILESAI UI OVERRIDE v6.1 — Design Doc Compliance
-   Fixes: tab bar, action grid, header, colors, modals
-   ============================================================ */
-
-/* TAB BAR: active = solid purple, no rainbow */
-.ni.a{background:linear-gradient(135deg,#7C3AED,#9F5AF4)!important;animation:none!important;box-shadow:0 4px 16px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.12)!important;}
-.bnav{padding:7px!important;gap:4px!important;background:rgba(13,15,26,.97)!important;border:1px solid rgba(255,255,255,.07)!important;box-shadow:0 16px 48px rgba(0,0,0,.5),0 4px 12px rgba(0,0,0,.3)!important;bottom:max(18px,env(safe-area-inset-bottom,18px))!important;}
-.ni{padding:9px 20px!important;min-width:76px!important;}
-.ni svg{width:22px!important;height:22px!important;}
-.ni span{font-size:10px!important;letter-spacing:.4px!important;}
-
-/* HEADER: solid name, purple avatar */
-.hdr-name{background:none!important;-webkit-background-clip:unset!important;-webkit-text-fill-color:var(--ink)!important;background-clip:unset!important;color:var(--ink)!important;font-size:17px!important;font-weight:800!important;}
-.hdr-av{background:linear-gradient(135deg,#7C3AED,#9F5AF4)!important;border-radius:50%!important;box-shadow:0 3px 12px rgba(124,58,237,.3)!important;animation:none!important;}
-.hdr-dot{background:#1B4DDB!important;}
-
-/* ACTION BUTTONS: 2x2 dark card grid */
-.qa{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;padding:8px 16px 14px!important;overflow-x:unset!important;}
-.qa-btn{flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:8px!important;padding:18px 12px!important;border-radius:16px!important;background:#1A1D2E!important;border:1px solid rgba(255,255,255,.07)!important;color:rgba(255,255,255,.85)!important;box-shadow:0 2px 8px rgba(0,0,0,.25)!important;min-width:unset!important;white-space:normal!important;text-align:center!important;font-size:12px!important;font-weight:600!important;transition:all .18s ease!important;flex-shrink:unset!important;}
-.qa-btn:hover{background:#20243A!important;border-color:rgba(255,255,255,.13)!important;transform:translateY(-2px)!important;box-shadow:0 6px 20px rgba(0,0,0,.3)!important;}
-.qa-btn:active{transform:scale(.96)!important;}
-.qa-btn .i{display:flex!important;align-items:center!important;justify-content:center!important;width:44px!important;height:44px!important;border-radius:12px!important;background:rgba(255,255,255,.07)!important;margin:0!important;}
-.qa-btn .i svg{width:20px!important;height:20px!important;stroke:rgba(255,255,255,.75)!important;}
-.qa-btn.pri{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 4px 20px rgba(27,77,219,.35)!important;animation:none!important;}
-.qa-btn.pri .i{background:rgba(255,255,255,.15)!important;}
-.qa-btn.pri .i svg{stroke:#fff!important;}
-.qa-btn.pri.recording{background:linear-gradient(135deg,#E74C3C,#FF6B6B)!important;box-shadow:0 4px 20px rgba(231,76,60,.4)!important;animation:pulse-rec 2s ease-in-out infinite!important;}
-
-/* FILTER PILLS: active = purple */
-.tf.a{background:linear-gradient(135deg,#7C3AED,#9F5AF4)!important;animation:none!important;box-shadow:0 4px 16px rgba(124,58,237,.25)!important;border-color:transparent!important;}
-
-/* SAVE BUTTON = blue */
-.add-save{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;box-shadow:0 6px 24px rgba(27,77,219,.3),inset 0 1px 0 rgba(255,255,255,.12)!important;}
-.add-save:hover{background:linear-gradient(135deg,#1238A8,#1B4DDB)!important;transform:translateY(-2px)!important;}
-.add-save:active{transform:scale(.97)!important;}
-
-/* TOGGLES = blue */
-.tgl.on{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;}
-
-/* SECTION HEADERS: no gradient text clip */
-.sh-t{background:none!important;-webkit-background-clip:unset!important;-webkit-text-fill-color:var(--ink)!important;color:var(--ink)!important;font-size:18px!important;font-weight:800!important;}
-
-/* CLASSIFY buttons */
-.cls.ob{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;box-shadow:0 4px 16px rgba(27,77,219,.25)!important;}
-.cls.op{background:linear-gradient(135deg,#F72585,#C9006E)!important;animation:none!important;}
-
-/* TRIP card business miles = blue */
-.trip-mi-v.biz{color:#1B4DDB!important;}
-
-/* SHEETS: larger radius */
-.map-sheet,.add-sheet,.info-sheet{border-radius:28px 28px 0 0!important;}
-
-/* MAP sheet primary button = blue */
-.map-sheet-btn.primary{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;}
-
-/* DARK MODE */
-[data-theme="dark"] .hdr-name{-webkit-text-fill-color:var(--ink)!important;color:var(--ink)!important;}
-[data-theme="dark"] .sh-t{-webkit-text-fill-color:var(--ink)!important;color:var(--ink)!important;}
-[data-theme="dark"] .tgl.on{background:linear-gradient(135deg,#1B4DDB,#4F78F1)!important;animation:none!important;}
 </style>
 </head>
 <body>
@@ -678,9 +619,9 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="hero-content">
         <div class="hero-top"><div class="hero-status" id="heroStatus"><span class="hero-dot"></span><span id="statusText">GPS Active</span></div><div class="hero-brand">MyMilesAI</div></div>
         <div class="speedo"><div class="speedo-wrap">
-          <svg class="speedo-svg" viewBox="0 0 200 110"><defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="40%" stop-color="#C084FC"/><stop offset="70%" stop-color="#FB7185"/><stop offset="100%" stop-color="#FCA5A5"/></linearGradient></defs>
-            <line x1="25" y1="95" x2="25" y2="88" class="sp-tick"/><line x1="48" y1="65" x2="53" y2="70" class="sp-tick"/><line x1="80" y1="42" x2="82" y2="48" class="sp-tick"/><line x1="120" y1="42" x2="118" y2="48" class="sp-tick"/><line x1="152" y1="65" x2="147" y2="70" class="sp-tick"/><line x1="175" y1="95" x2="175" y2="88" class="sp-tick"/>
-            <path d="M22,97 A78,78 0 0,1 178,97" class="sp-track"/><path d="M22,97 A78,78 0 0,1 178,97" class="sp-glow" id="spGlow"/><path d="M22,97 A78,78 0 0,1 178,97" class="sp-fill" id="spFill"/>
+          <svg class="speedo-svg" viewBox="0 0 240 130"><defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="40%" stop-color="#C084FC"/><stop offset="70%" stop-color="#FB7185"/><stop offset="100%" stop-color="#FCA5A5"/></linearGradient></defs>
+            <line x1="18" y1="115" x2="18" y2="107" class="sp-tick"/><line x1="47" y1="72" x2="53" y2="78" class="sp-tick"/><line x1="95" y1="44" x2="97" y2="51" class="sp-tick"/><line x1="145" y1="44" x2="143" y2="51" class="sp-tick"/><line x1="193" y1="72" x2="187" y2="78" class="sp-tick"/><line x1="222" y1="115" x2="222" y2="107" class="sp-tick"/>
+            <path d="M18,117 A102,102 0 0,1 222,117" class="sp-track"/><path d="M18,117 A102,102 0 0,1 222,117" class="sp-glow" id="spGlow"/><path d="M18,117 A102,102 0 0,1 222,117" class="sp-fill" id="spFill"/>
           </svg>
           <div class="speedo-center"><div class="sp-num" id="speedNum">0</div><div class="sp-unit" id="speedUnit">mph</div></div>
         </div></div>
@@ -688,7 +629,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
           <div class="hs"><div class="hs-v c1" id="hsBiz">0</div><div class="hs-l" id="hsBizL">Business mi</div></div>
           <div class="hs"><div class="hs-v c2" id="hsPer">0</div><div class="hs-l" id="hsPerL">Personal mi</div></div>
           <div class="hs"><div class="hs-v c3" id="hsDed">$0</div><div class="hs-l">Deduction</div></div>
-          <div class="hs"><div class="hs-v" id="hsStreak" style="color:#f59e0b">0🔥</div><div class="hs-l">Day streak</div></div>
+          <div class="hs"><div class="hs-v" id="hsStreak" style="color:#f59e0b">🥇0🔥</div><div class="hs-l">Day streak</div></div>
         </div>
       </div>
     </div>
@@ -831,19 +772,17 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="set">
       <div class="sr" onclick="openInfoModal('Location Permissions','MyMilesAI uses your GPS location to automatically detect and record trips.<br><br><b>Background Access:</b> Allows trip tracking even when the app is minimized. Your location data stays on your device.<br><br><b>When In Use:</b> Only tracks when the app is open.<br><br><b>To change:</b> Go to your device Settings → Privacy → Location Services → MyMilesAI')"><div><h4>Location permissions</h4><p>Background GPS access</p></div><span class="sr-link">Manage →</span></div>
       <div class="sr" onclick="openInfoModal('Data & Privacy','<b>What we collect:</b><br>• Trip start/end locations<br>• Distance traveled<br>• Trip timestamps<br>• Category classifications<br><br><b>What we don\'t collect:</b><br>• Personal contacts<br>• Browsing history<br>• Photos or files<br><br><b>Storage:</b> All trip data is stored locally on your device. No data is sent to external servers unless you explicitly export it.<br><br><b>Analytics:</b> We collect anonymized usage statistics to improve the app. No personally identifiable information is included.')"><div><h4>Data & privacy</h4><p>How we use your data</p></div><span class="sr-link">View →</span></div>
-      <div class="sr" id="demoBtnRow" style="display:none" onclick="loadDemoData()"><div><h4 style="color:var(--vi)">🎬 Load Demo Data</h4><p>Populate app with sample trips for testing</p></div><div>›</div></div>
-<div class="sr" onclick="openInfoModal('Privacy Policy','<b>MyMilesAI Privacy Policy</b><br>Last updated: March 2026<br><br>MyMilesAI is committed to protecting your privacy. This policy describes how we handle your personal information.<br><br><b>1. Information We Collect</b><br>We collect location data solely for the purpose of mileage tracking. This data remains on your device.<br><br><b>2. How We Use Your Data</b><br>Your trip data is used exclusively to calculate distances, generate reports, and estimate tax deductions.<br><br><b>3. Data Sharing</b><br>We do not sell, trade, or share your personal data with third parties.<br><br><b>4. Data Retention</b><br>Your data is stored on your device until you choose to delete it.<br><br><b>5. Your Rights</b><br>You can export or delete all your data at any time from Settings.<br><br><b>6. Contact</b><br>Questions? Email privacy@mymilesai.com')"><div><h4>Privacy policy</h4><p>Legal information</p></div><span class="sr-link">Read →</span></div>
+      <div class="sr" onclick="openInfoModal('Privacy Policy','<b>MyMilesAI Privacy Policy</b><br>Last updated: March 2026<br><br>MyMilesAI is committed to protecting your privacy. This policy describes how we handle your personal information.<br><br><b>1. Information We Collect</b><br>We collect location data solely for the purpose of mileage tracking. This data remains on your device.<br><br><b>2. How We Use Your Data</b><br>Your trip data is used exclusively to calculate distances, generate reports, and estimate tax deductions.<br><br><b>3. Data Sharing</b><br>We do not sell, trade, or share your personal data with third parties.<br><br><b>4. Data Retention</b><br>Your data is stored on your device until you choose to delete it.<br><br><b>5. Your Rights</b><br>You can export or delete all your data at any time from Settings.<br><br><b>6. Contact</b><br>Questions? Email privacy@mymilesai.com')"><div><h4>Privacy policy</h4><p>Legal information</p></div><span class="sr-link">Read →</span></div>
       <div class="sr" onclick="openInfoModal('Terms & Conditions','<b>MyMilesAI Terms of Service</b><br>Last updated: March 2026<br><br><b>1. Acceptance</b><br>By using MyMilesAI, you agree to these terms.<br><br><b>2. Service Description</b><br>MyMilesAI provides automatic mileage tracking and tax deduction estimates for business and personal trips.<br><br><b>3. Accuracy Disclaimer</b><br>Distance calculations are estimates based on GPS data. Actual distances may vary. Tax deduction amounts are estimates and should not be considered tax advice. Consult a tax professional.<br><br><b>4. User Responsibilities</b><br>You are responsible for classifying trips correctly and verifying data accuracy.<br><br><b>5. Limitation of Liability</b><br>MyMilesAI is provided as-is. We are not liable for inaccurate distance readings or tax calculations.<br><br><b>6. Changes</b><br>We may update these terms. Continued use constitutes acceptance.<br><br><b>7. Contact</b><br>support@mymilesai.com')"><div><h4>Terms & conditions</h4><p>Service agreement</p></div><span class="sr-link">Read →</span></div>
       <div class="sr" onclick="openInfoModal('Export My Data','<b>Download Your Data</b><br><br>Choose your export format:<br><br><b>CSV</b> — Spreadsheet-compatible<br><b>PDF</b> — Print-ready report<br><b>JSON Backup</b> — Full data backup for device migration<br><br><button onclick=&quot;exportJSON()&quot; style=&quot;padding:12px 24px;border-radius:100px;border:2px solid #6C3CE0;background:rgba(108,60,224,.06);color:#6C3CE0;font-weight:700;font-size:14px;cursor:pointer;margin:8px 0&quot;>Download JSON Backup</button><br><br><b>Restore from backup:</b><br><input type=&quot;file&quot; id=&quot;restoreFile&quot; accept=&quot;.json&quot; onchange=&quot;restoreJSON(this)&quot; style=&quot;margin:8px 0;font-size:13px&quot;><br><br><i>JSON backup includes all trips, settings, and preferences.</i>')"><div><h4>Export my data</h4><p>Download or restore backup</p></div><span class="sr-link">Export →</span></div>
-      <div class="sr" onclick="deleteAccount()" style="border-top:1px solid rgba(231,76,60,.15)"><div><h4 style="color:#E74C3C">Delete account</h4><p>Permanently remove all data</p></div><button class="btn-rd" style="background:#E74C3C;color:white;border-color:#E74C3C">Delete</button></div>
+      <div class="sr" onclick="openInfoModal('Delete Account','<b>This action is permanent</b><br><br>Deleting your account will:<br><br>• Remove all saved trips<br>• Delete all settings and preferences<br>• Remove your profile data<br>• Cancel any active subscription<br><br>This cannot be undone. We recommend exporting your data first.<br><br><i>To proceed, contact support@mymilesai.com with your deletion request.</i>')"><div><h4>Delete account</h4><p>Permanently remove data</p></div><button class="btn-rd">Delete</button></div>
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6.0</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.1</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.0.0</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
-    <button id="settingsSignIn" onclick="_showAuthModal()" style="display:block;width:calc(100% - 32px);margin:16px 16px 0;padding:14px;border-radius:var(--r2);background:var(--vi-s);border:1.5px solid var(--vi);color:var(--vi);font-family:var(--f);font-size:14px;font-weight:700;cursor:pointer;text-align:center">Sign In to Sync Trips</button>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
     <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
   </div>
@@ -1033,46 +972,20 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 <div class="modal-overlay" id="delModal"><div class="modal del-modal"><div class="modal-handle"></div><div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Delete Trip</div><div class="del-msg">Are you sure? This can't be undone.</div><div class="del-route" id="delRoute"></div><div class="modal-row"><button class="modal-cancel" onclick="closeDel()">Cancel</button><button class="btn-del-confirm" onclick="confirmDel()">Delete</button></div></div></div>
 
 <!-- CLASSIFY PROMPT -->
-<div class="modal-overlay" id="classifyModal"><div class="modal" style="text-align:center;padding:24px 20px 20px">
+<div class="modal-overlay" id="classifyModal"><div class="modal" style="text-align:center">
   <div class="modal-handle"></div>
-  <div style="position:relative;width:72px;height:72px;margin:0 auto 16px">
-    <svg width="72" height="72" style="transform:rotate(-90deg)">
-      <circle cx="36" cy="36" r="30" fill="none" stroke="var(--ink6)" stroke-width="4"/>
-      <circle id="clsRing" cx="36" cy="36" r="30" fill="none" stroke="var(--vi)" stroke-width="4" stroke-dasharray="188.4" stroke-dashoffset="0" style="transition:stroke-dashoffset 1s linear;stroke-linecap:round"/>
-    </svg>
-    <div id="clsTimerNum" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:22px;font-weight:800;color:var(--vi)">10</div>
+  <div style="font-size:36px;margin-bottom:8px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+  <div class="modal-title" style="text-align:center;margin-bottom:4px">Trip Complete!</div>
+  <div id="clsRoute" style="font-size:13px;color:var(--ink3);margin-bottom:4px"></div>
+  <div id="clsDist" style="font-family:var(--fd);font-size:28px;font-weight:800;color:var(--vi);margin-bottom:16px"></div>
+  <div id="clsAutoHint" style="font-size:13px;color:var(--ink3);margin-bottom:14px">How would you like to classify this trip?</div>
+  <div id="clsCountdown" style="font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;font-weight:500"></div>
+  <div style="display:flex;gap:10px;margin-bottom:12px">
+    <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('biz')"><span class="cls-d" style="border-color:var(--vi)"></span><span style="font-size:14px">Business</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Tax deductible</div></button>
+    <button class="cls" style="flex:1;padding:16px" onclick="classifyLastTrip('pers')"><span class="cls-d" style="border-color:var(--mag)"></span><span style="font-size:14px">Personal</span><div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div></button>
   </div>
-  <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Trip Complete</div>
-  <div id="clsRoute" style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px"></div>
-  <div id="clsDist" style="font-family:var(--fd);font-size:32px;font-weight:800;color:var(--vi);line-height:1;margin-bottom:4px"></div>
-  <div id="clsTripValue" style="margin-bottom:12px;text-align:center"></div>
-  <div id="clsAutoHint" style="font-size:12px;color:var(--ink4);margin-bottom:20px">How would you classify this drive?</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-    <button onclick="classifyLastTrip('biz')" style="padding:14px 10px;background:linear-gradient(135deg,rgba(108,60,224,.15),rgba(108,60,224,.05));border:1.5px solid var(--vi);border-radius:16px;cursor:pointer;font-family:inherit">
-      <div style="font-size:20px;margin-bottom:3px">&#x1F4BC;</div>
-      <div style="font-size:14px;font-weight:700;color:var(--vi)">Business</div>
-      <div style="font-size:10px;color:var(--ink4);margin-top:1px">Tax deductible</div>
-    </button>
-    <button onclick="classifyLastTrip('pers')" style="padding:14px 10px;background:linear-gradient(135deg,rgba(214,0,110,.15),rgba(214,0,110,.05));border:1.5px solid var(--mag);border-radius:16px;cursor:pointer;font-family:inherit">
-      <div style="font-size:22px;margin-bottom:4px">&#x1F3E0;</div>
-      <div style="font-size:15px;font-weight:700;color:var(--mag)">Personal</div>
-      <div style="font-size:10px;color:var(--ink4);margin-top:2px">Not deductible</div>
-    </button>
-  </div>
-  <div id="clsCountdown" style="font-size:11px;color:var(--ink4);margin-bottom:10px;font-weight:500;min-height:16px"></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-    <button onclick="classifyLastTrip('med')" style="padding:12px 8px;background:linear-gradient(135deg,rgba(52,199,89,.12),rgba(52,199,89,.04));border:1.5px solid #34C759;border-radius:14px;cursor:pointer;font-family:inherit">
-      <div style="font-size:18px;margin-bottom:2px">🏥</div>
-      <div style="font-size:13px;font-weight:700;color:#34C759">Medical</div>
-      <div style="font-size:9px;color:var(--ink4);margin-top:1px">$0.21/mi</div>
-    </button>
-    <button onclick="classifyLastTrip('char')" style="padding:12px 8px;background:linear-gradient(135deg,rgba(255,159,10,.12),rgba(255,159,10,.04));border:1.5px solid #FF9F0A;border-radius:14px;cursor:pointer;font-family:inherit">
-      <div style="font-size:18px;margin-bottom:2px">❤️</div>
-      <div style="font-size:13px;font-weight:700;color:#FF9F0A">Charity</div>
-      <div style="font-size:9px;color:var(--ink4);margin-top:1px">$0.14/mi</div>
-    </button>
-  </div>
-  <button onclick="closeClassifyPrompt()" style="width:100%;padding:11px;background:none;border:1px solid var(--ink6);border-radius:12px;font-size:13px;color:var(--ink4);cursor:pointer;font-family:inherit">&#x2715; &nbsp;Skip</button>
+  <button onclick="classifyLastTrip('uncl')" style="width:100%;padding:10px;background:none;border:1px solid var(--ink6);border-radius:var(--rpill);font-size:13px;color:var(--ink4);cursor:pointer;margin-bottom:8px">Save as Unclassified</button>
+  <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
 </div></div>
 
 <!-- ONBOARDING — Full-screen immersive -->
@@ -1163,18 +1076,14 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <button class="ni" data-tab="tab-alerts" onclick="switchTab(this)" style="position:relative"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg><span>Alerts</span><div class="ni-b" id="navAlertBadge" style="display:none">0</div></button>
 </div>
 
-<script>window._initGoogleMaps=function(){window._mapsCallbackQueued=true;};</script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places,places-new,marker&loading=async&callback=_initGoogleMaps"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
 /* ===== Google Maps Init Callback ===== */
 var _googleMapsReady=false;
-function _initGoogleMaps(){
-  _googleMapsReady=true;_googleMapsReady=true;if(typeof initMap==='function')initMap();}
-if(window._mapsCallbackQueued){window._mapsCallbackQueued=false;_initGoogleMaps();}
-
+function _initGoogleMaps(){_googleMapsReady=true;if(typeof initMap==='function')initMap();}
 
 /* ===== SVG ICON SYSTEM ===== */
 /* ===== SECURITY: HTML escape — MUST use for all user data in innerHTML ===== */
@@ -1269,15 +1178,8 @@ function _setTheme(t){
   if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}
   else if(t==='light'){document.documentElement.removeAttribute('data-theme');}
   else{if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');}
-  _applyMapTheme();
 }
-function _initTheme(){
-  try{_setTheme(localStorage.getItem('mymilesai_theme')||'auto');}catch(e){}
-  try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){
-    var t=localStorage.getItem('mymilesai_theme')||'auto';
-    if(t==='auto')_setTheme('auto');
-  });}catch(e){}
-}
+function _initTheme(){try{_setTheme(localStorage.getItem('mymilesai_theme')||'auto');}catch(e){}}
 function setLocale(c){
   LOC=LOCALES[c]||LOCALES.US;
   var sel=document.getElementById('unitSel');
@@ -1354,8 +1256,8 @@ function randomPath(){
   var x1=60+Math.floor(Math.random()*40),x2=120+Math.floor(Math.random()*40),x3=200+Math.floor(Math.random()*40),x4=280+Math.floor(Math.random()*40);
   return 'M20,'+y1+' C'+x1+','+y2+' '+x2+','+y3+' '+x3+','+y4+' S'+x4+','+y5+' 340,'+(20+Math.floor(Math.random()*50));
 }
-function tripDist(mi){var m=parseFloat(mi)||0;return(LOC.country==='CA'||LOC.country==='AU')?(m*1.60934).toFixed(1):m.toFixed(1);}
-function convMi(mi){var m=parseFloat(mi)||0;return(LOC.country==='CA'||LOC.country==='AU')?m*1.60934:m;}
+function tripDist(mi){return(LOC.country==='CA'||LOC.country==='AU')?(mi*1.60934).toFixed(1):mi.toFixed(1);}
+function convMi(mi){return(LOC.country==='CA'||LOC.country==='AU')?mi*1.60934:mi;}
 function _encodePolyline(pos){
   var r='',pLat=0,pLng=0,pts=pos;
   if(pts.length>50){var st=Math.floor(pts.length/50),sm=[];for(var i=0;i<pts.length;i+=st)sm.push(pts[i]);if(sm[sm.length-1]!==pts[pts.length-1])sm.push(pts[pts.length-1]);pts=sm;}
@@ -1396,10 +1298,21 @@ function tripCard(t,wide){
   const pathStartY=safePath.match(/M\d+,(\d+)/)?safePath.match(/M\d+,(\d+)/)[1]:'45';
   const pathEndXY=safePath.match(/(\d+)$/)?safePath.match(/(\d+)$/)[1]:'45';
   const purposeTag=safePurpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${safePurpose}</span>`:'';
+  // Generate a smooth sparkline path for the chart area
+  var W2=wide?360:310;
+  var sparkStroke={biz:'rgba(108,60,224,0.6)',pers:'rgba(214,0,110,0.5)',uncl:'rgba(224,141,0,0.5)'}[t.type]||'rgba(224,141,0,0.5)';
+  var sparkFillId='sf'+t.id;
+  var sparkPts=[];var steps=8;
+  for(var si=0;si<=steps;si++){sparkPts.push({x:si*(W2/steps),y:15+Math.sin(si*0.9+t.id%6)*12+Math.cos(si*1.4+t.id%4)*8});}
+  var sparkD='M'+sparkPts.map(function(p){return p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' Q');
+  var sparkPath='M'+sparkPts[0].x+','+sparkPts[0].y;
+  for(var si2=1;si2<sparkPts.length;si2++){var cp=sparkPts[si2-1];sparkPath+=' Q'+((cp.x+sparkPts[si2].x)/2).toFixed(1)+','+cp.y.toFixed(1)+' '+sparkPts[si2].x.toFixed(1)+','+sparkPts[si2].y.toFixed(1);}
+  var sparkArea=sparkPath+' L'+W2+',80 L0,80 Z';
+  var sparkFillColor={biz:'rgba(108,60,224,0.12)',pers:'rgba(214,0,110,0.1)',uncl:'rgba(224,141,0,0.1)'}[t.type]||'rgba(224,141,0,0.1)';
   var _rmap=_tripStaticMap(t,wide);
   var _mapDiv=_rmap
     ? ('<div class="trip-map has-rmap">'+_rmap+'<div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>')
-    : ('<div class="trip-map"><div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+( wide?340:290 )+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>');
+    : ('<div class="trip-map"><div class="trip-map-bg '+t.type+'"></div><svg viewBox="0 0 '+W2+' 80" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><path d="'+sparkArea+'" fill="'+sparkFillColor+'"/><path d="'+sparkPath+'" fill="none" stroke="'+sparkStroke+'" stroke-width="2" stroke-linecap="round"/></svg><div class="trip-sparkline-dot'+(t.type==='pers'?' pers':'')+'"></div><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>');
   var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${d}</div><div class="trip-mi-u">${LOC.label}</div></div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip">📤 Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
@@ -1731,7 +1644,7 @@ function _shareTrip(id){
   if(navigator.share){navigator.share({title:'MyMilesAI Trip',text:txt}).catch(function(){});}
   else{try{navigator.clipboard.writeText(txt).then(function(){showToast('📋','Trip details copied!',2500);});}catch(e){showToast('📤','Share not available on this device',2500);}}
 }
-function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=!!CAT_DEDUCTIBLE[type];checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();_updateStreak();_checkReviewPrompt();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(CAT_LABELS[type]||type));}}
+function clsTrip(id,type){const t=TRIPS.find(x=>x.id===id);if(t){t.type=type;t.ded=!!CAT_DEDUCTIBLE[type];checkFrequentRoute(t);renderTrips();renderAlerts();saveTripsToStorage();_checkReviewPrompt();showToast(type==='biz'?_i('brief'):_i('user'),'Trip classified as '+(CAT_LABELS[type]||type));}}
 
 /* ===== NAVIGATION ===== */
 var _scrollPositions={};
@@ -1798,7 +1711,6 @@ function updateGreeting(){
     document.getElementById('hdrName').textContent=name;
     document.getElementById('hdrAv').textContent=name.charAt(0).toUpperCase();
   } else {
-    if(_sbUser){var m=_sbUser.user_metadata||{},sn=m.full_name||m.name||_sbUser.email||'';if(sn){document.getElementById('hdrName').textContent=sn.split(' ')[0];document.getElementById('hdrAv').textContent=sn.charAt(0).toUpperCase();return;}}
     document.getElementById('hdrName').textContent='Welcome back';
     document.getElementById('hdrAv').textContent='M';
   }
@@ -1852,41 +1764,23 @@ function initProfile(){
 /* ===== RECALC ALL STATS ===== */
 function _calcStreak(){
   if(!TRIPS||TRIPS.length===0)return 0;
-  // Use t.ts (epoch ms) — reliable, always set on save
-  // Normalise each trip to its local calendar date (midnight)
-  function _midnight(ms){
-    var d=new Date(ms||Date.now());
-    return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
-  }
-  // Build a Set of unique day-midnights that have at least one trip
-  var daySet=new Set();
-  for(var i=0;i<TRIPS.length;i++){
-    var ts=TRIPS[i].ts;
-    if(ts&&ts>0) daySet.add(_midnight(ts));
-  }
-  // Walk back from today counting consecutive days
+  var days=new Set();
+  TRIPS.forEach(function(t){if(t.day){try{var d=new Date(t.day);d.setHours(0,0,0,0);days.add(d.getTime());}catch(e){}}});
   var streak=0;
-  var cursor=_midnight(Date.now());
-  var DAY_MS=86400000;
-  // If today has trips → start from today, else start from yesterday
-  if(!daySet.has(cursor)) cursor-=DAY_MS;
-  while(daySet.has(cursor)){
-    streak++;
-    cursor-=DAY_MS;
+  var cur=new Date();cur.setHours(0,0,0,0);
+  for(var i=0;i<365;i++){
+    if(days.has(cur.getTime())){streak++;}
+    else if(i===0){cur.setDate(cur.getDate()-1);continue;}
+    else break;
+    cur.setDate(cur.getDate()-1);
   }
   return streak;
 }
 function _updateStreak(){
   var s=_calcStreak();
-  // Update hero tile
-  var heroEl=document.getElementById('hsStreak');
-  if(heroEl)heroEl.textContent=s;
-  // Update any other streak displays
-  var els=document.querySelectorAll('[data-streak]');
-  els.forEach(function(el){el.textContent=s;});
-  return s;
+  var el=document.getElementById('hsStreak');
+  if(el)el.textContent=s>0?'🥇'+s+'🔥':'🥇0🔥';
 }
-
 function _updateYTD(){
   var goal=5000;
   var totalDed=0,yr=new Date().getFullYear();
@@ -2100,7 +1994,7 @@ function exportCSV(){
   rows.push(['Total Deduction',LOC.currency+totalDed.toFixed(2)]);
   rows.push([]);
   rows.push(['Disclaimer: This log is maintained in accordance with IRS Publication 463. Consult a tax professional for advice.']);
-  rows.push(['Generated','MyMilesAI v5.5 — '+new Date().toLocaleDateString()]);
+  rows.push(['Generated','MyMilesAI v4.2 — '+new Date().toLocaleDateString()]);
 
   var csv=rows.map(function(r){return r.join(',');}).join('\n');
   var filename='MyMilesAI_Mileage_Log_'+yr+'_'+new Date().toISOString().slice(0,10)+'.csv';
@@ -2445,7 +2339,7 @@ function exportSummaryPDF(period){
     +'<h2>By Category</h2>'
     +'<table><thead><tr><th>Category</th><th>Trips</th><th>Distance</th><th>Deduction</th></tr></thead><tbody>'+catRows+'</tbody></table>'
     +(report.topRoutes.length?'<h2>Top Routes</h2><table><thead><tr><th>Route</th><th>Trips</th><th>Distance</th></tr></thead><tbody>'+routeRows+'</tbody></table>':'')
-    +'<div class="footer">'+LOC.taxLabel+' · MyMilesAI v5.5</div>'
+    +'<div class="footer">'+LOC.taxLabel+' · MyMilesAI v4.2</div>'
     +'<script>window.onload=function(){window.print();}<\/script></body></html>';
   if(window.__MYMILESAI_NATIVE__){
     _shareOrDownload(html,'MyMilesAI-Summary-'+period+'.html','text/html');
@@ -2712,25 +2606,20 @@ function _isHighwayAddress(addr){
 }
 function _snapToNearestPlace(lat,lng,cb){
   if(!_googleMapsReady||!google||!google.maps||!google.maps.places){cb(null);return;}
-  if(google.maps.places.Place&&google.maps.places.Place.searchNearby){
-    google.maps.places.Place.searchNearby({
-      fields:['displayName','formattedAddress'],
-      locationRestriction:{center:new google.maps.LatLng(lat,lng),radius:200},
-      includedTypes:['establishment'],
-      maxResultCount:1
-    }).then(function(res){
-      if(res.places&&res.places.length>0){
-        var p=res.places[0];
-        cb((p.displayName||'')+(p.formattedAddress?', '+p.formattedAddress:''));
-      } else { cb(null); }
-    }).catch(function(){ cb(null); });
-  } else {
-    var service=new google.maps.places.PlacesService(document.createElement('div'));
-    service.nearbySearch({location:{lat:lat,lng:lng},radius:200,type:['establishment']},function(results,status){
-      if(status==='OK'&&results&&results.length>0){cb(results[0].name+(results[0].vicinity?', '+results[0].vicinity:''));}
-      else{cb(null);}
-    });
-  }
+  var service=new google.maps.places.PlacesService(document.createElement('div'));
+  service.nearbySearch({
+    location:{lat:lat,lng:lng},
+    radius:200,
+    type:['establishment']
+  },function(results,status){
+    if(status==='OK'&&results&&results.length>0){
+      // Pick the nearest named place
+      var best=results[0];
+      cb(best.name+(best.vicinity?', '+best.vicinity:''));
+    } else {
+      cb(null);
+    }
+  });
 }
 
 function toggleTracking(){
@@ -2742,8 +2631,6 @@ function toggleTracking(){
 }
 
 function startTracking(){
-  // Reset AI GPS engine for fresh trip
-  if(typeof _gpsAI!=='undefined'){_gpsAI.kX=0;_gpsAI.kP=1;_gpsAI.ema=0;_gpsAI.prev=0;_gpsAI.zeroCount=0;_gpsAI.zeroLock=false;_gpsAI.history=[];}
   if(!navigator.geolocation&&!window.__MYMILESAI_NATIVE__){showToast(_i('pin'),'GPS not available on this device');return;}
   if(autoWatchId&&autoWatchId!=='native'){navigator.geolocation.clearWatch(autoWatchId);}
   autoWatchId=null;
@@ -2787,24 +2674,20 @@ function startTracking(){
 // This is the PRIMARY GPS source on native — it bypasses navigator.geolocation
 // so the app appears in iOS Location Services as "MyMilesAI" not "Safari".
 window.__nativeGPS__ = function(coords) {
-  if(_gpsPermState!=='granted'){_gpsPermState='granted';updateGPSPermUI();}
-  // CRITICAL FIX: self-heal if GPS arriving but monitoring not started (e.g. user skipped auth)
-  if(!autoWatchId&&!tracking){
-    autoDetect=true;
-    autoWatchId='native';
-    try{document.getElementById('heroStatus').classList.add('mon');}catch(e){}
-    try{document.getElementById('statusText').textContent='Monitoring...';}catch(e){}
-    updateAutoBtn();
+  // Receiving native GPS data proves GPS is working — ensure state reflects this
+  if(_gpsPermState!=='granted'){
+    _gpsPermState='granted';
+    updateGPSPermUI();
   }
   var fakePos={ coords: { latitude: coords.lat, longitude: coords.lng,
-    speed: (coords.speed!=null?coords.speed:null), accuracy: coords.accuracy||999 } };
+                     speed: (coords.speed!=null?coords.speed:null), accuracy: coords.accuracy||999 } };
   if(tracking){
     onPos(fakePos);
-  } else {
-    // ALWAYS feed onAutoPos — updates speedometer display AND auto-detect logic
-    // Previously only ran when autoDetect=true, but skipped-auth users had autoDetect=false
+  } else if(autoDetect){
+    // Feed to auto-monitoring even when not actively tracking
     onAutoPos(fakePos);
   }
+  // Always update last known GPS coords for templates etc
   lastGpsLat=coords.lat;lastGpsLng=coords.lng;
 };
 
@@ -2909,158 +2792,6 @@ function updateDebugPanel(){
   }
 }
 
-
-// ENG-GRADE SPEED FILTER — single source of truth for onPos + onAutoPos
-// ══════════════════════════════════════════════════════════════
-// AI GPS SPEED ENGINE v2.0 — World-class accuracy
-// Kalman filter + Adaptive EMA + Traffic light zero lock
-// Jerk limiter + Confidence scoring + Hysteresis dead zone
-// ══════════════════════════════════════════════════════════════
-
-// Persistent state for AI GPS engine
-var _gpsAI = {
-  // Kalman filter state
-  kX: 0,        // Kalman estimated speed (m/s)
-  kP: 1,        // Kalman error covariance
-  kQ: 0.3,      // Process noise (how fast speed can change)
-  kR: 2.0,      // Measurement noise (GPS accuracy factor)
-  // Adaptive EMA state
-  ema: 0,       // EMA smoothed speed
-  prev: 0,      // Previous output
-  // Traffic light detector
-  zeroCount: 0, // Consecutive near-zero readings
-  zeroLock: false, // True when we are confident we are stopped
-  // History for jerk detection
-  history: [],  // Last 5 speed readings {spd, t, acc}
-  // Confidence
-  confidence: 0.5,
-  lastUpdate: 0,
-};
-
-function _computeDisplaySpeed(spdMps, accuracy, coordsSpeedRaw) {
-  var now = Date.now();
-  var KMH = _useKm();
-  var dt = Math.min((now - (_gpsAI.lastUpdate || now)) / 1000, 3.0);
-  _gpsAI.lastUpdate = now;
-
-  // ── 1. REJECT BAD SIGNAL ─────────────────────────────────
-  var POOR_ACC = 80; // metres — above this GPS is unreliable
-  if (accuracy > POOR_ACC) {
-    // If we were moving fast, decay gradually instead of showing null
-    if (_gpsAI.ema > (KMH ? 20 : 12)) {
-      _gpsAI.ema = _gpsAI.ema * 0.85; // decay 15% per reading
-      return _gpsAI.ema;
-    }
-    return null; // truly unknown — show "--"
-  }
-
-  // ── 2. HARDWARE ZERO — phone says speed = 0.0 exactly ───
-  // iOS GPS reports exact 0.0 when hardware-confirmed stopped
-  if (coordsSpeedRaw === 0 || coordsSpeedRaw === 0.0) {
-    _gpsAI.kX = 0; _gpsAI.kP = 1;
-    _gpsAI.ema = 0; _gpsAI.prev = 0;
-    _gpsAI.zeroCount = 10; _gpsAI.zeroLock = true;
-    _gpsAI.history = [];
-    return 0; // Traffic light — show 0 immediately
-  }
-
-  // ── 3. CONFIDENCE SCORE ──────────────────────────────────
-  // Better accuracy = higher confidence in this reading
-  var conf = Math.max(0.1, Math.min(1.0, 1 - (accuracy / POOR_ACC)));
-  // Accelerometer fusion — if phone says still, lower confidence
-  if (typeof _accelMoving !== 'undefined' && !_accelMoving && spdMps < 3) {
-    conf *= 0.4;
-  }
-
-  // ── 4. KALMAN FILTER ─────────────────────────────────────
-  // Predict step: project state forward
-  var kQ_adaptive = _gpsAI.kQ * (1 + Math.abs(spdMps - _gpsAI.kX) * 0.1);
-  _gpsAI.kP = _gpsAI.kP + kQ_adaptive * dt;
-  // Measurement noise adapts to GPS accuracy
-  var kR_adaptive = _gpsAI.kR * (accuracy / 20.0) * (1 / Math.max(conf, 0.1));
-  // Update step: incorporate new measurement
-  var kK = _gpsAI.kP / (_gpsAI.kP + kR_adaptive); // Kalman gain
-  _gpsAI.kX = _gpsAI.kX + kK * (spdMps - _gpsAI.kX);
-  _gpsAI.kP = (1 - kK) * _gpsAI.kP;
-  var kalmanSpd = Math.max(0, _gpsAI.kX);
-
-  // ── 5. JERK LIMITER ──────────────────────────────────────
-  // Max physically possible acceleration for a car: ~0-60mph in 4s = ~6.7 m/s²
-  // We allow 8 m/s² to be safe, but reject anything > 12 m/s²
-  var MAX_ACCEL = 12; // m/s² — absolute max (sports car)
-  var SOFT_ACCEL = 8;  // m/s² — smooth limit
-  if (dt > 0.1 && dt < 5) {
-    var accel = Math.abs(kalmanSpd - _gpsAI.prev / (KMH ? 3.6 : 2.237)) / dt;
-    if (accel > MAX_ACCEL) {
-      // GPS glitch — reject, keep previous
-      kalmanSpd = _gpsAI.prev / (KMH ? 3.6 : 2.237);
-      _gpsAI.kX = kalmanSpd; // reset Kalman to prevent drift
-    } else if (accel > SOFT_ACCEL) {
-      // Soft limit — blend toward previous
-      var blend = (accel - SOFT_ACCEL) / (MAX_ACCEL - SOFT_ACCEL);
-      kalmanSpd = kalmanSpd * (1 - blend * 0.5) + (_gpsAI.prev / (KMH ? 3.6 : 2.237)) * blend * 0.5;
-    }
-  }
-
-  // ── 6. ADAPTIVE EMA ──────────────────────────────────────
-  // Alpha adapts: fast response when accelerating, slow when steady
-  var speedChange = Math.abs(kalmanSpd - _gpsAI.ema / (KMH ? 3.6 : 2.237));
-  var ALPHA;
-  if (speedChange > 4) {
-    ALPHA = 0.55; // Fast change — respond quickly
-  } else if (speedChange > 1.5) {
-    ALPHA = 0.35; // Medium change
-  } else {
-    ALPHA = 0.20; // Steady state — smooth heavily
-  }
-  // Accuracy bonus — better signal = faster response
-  ALPHA = ALPHA * (0.7 + conf * 0.3);
-  // Convert kalman to display units for EMA
-  var kalmanDisplay = KMH ? (kalmanSpd * 3.6) : (kalmanSpd * 2.237);
-  _gpsAI.ema = ALPHA * kalmanDisplay + (1 - ALPHA) * _gpsAI.ema;
-
-  // ── 7. TRAFFIC LIGHT ZERO LOCK ───────────────────────────
-  // Hysteresis: count consecutive near-zero readings
-  var NEAR_ZERO = KMH ? 4 : 2.5; // below this = probably stopped
-  var ZERO_CONFIRM = 3; // readings needed to confirm stop
-  var MOVE_CONFIRM = KMH ? 6 : 4; // must exceed this to unlock from zero (display units)
-  if (_gpsAI.ema < NEAR_ZERO) {
-    _gpsAI.zeroCount = Math.min(_gpsAI.zeroCount + 1, 20);
-  } else {
-    _gpsAI.zeroCount = Math.max(_gpsAI.zeroCount - 2, 0);
-  }
-  // Enter zero lock
-  if (_gpsAI.zeroCount >= ZERO_CONFIRM && !_gpsAI.zeroLock) {
-    _gpsAI.zeroLock = true;
-    _gpsAI.kX = 0; _gpsAI.ema = 0;
-  }
-  // Exit zero lock only when clearly moving — check both EMA and raw kalman
-  if (_gpsAI.zeroLock && (_gpsAI.ema >= MOVE_CONFIRM || kalmanDisplay >= MOVE_CONFIRM * 1.5)) {
-    _gpsAI.zeroLock = false;
-    _gpsAI.zeroCount = 0;
-  }
-  // Apply zero lock
-  if (_gpsAI.zeroLock) {
-    _gpsAI.ema = 0;
-    _gpsAI.prev = 0;
-    return 0; // Stopped at traffic light — show 0
-  }
-
-  // ── 8. ABSOLUTE LIMITS ───────────────────────────────────
-  var ABS_MAX = KMH ? 160 : 100; // Freeway max
-  _gpsAI.ema = Math.min(_gpsAI.ema, ABS_MAX);
-
-  // ── 9. FINAL OUTPUT ──────────────────────────────────────
-  _gpsAI.prev = _gpsAI.ema;
-
-  // Store history for debug
-  _gpsAI.history.push({spd: _gpsAI.ema, t: now, acc: accuracy});
-  if (_gpsAI.history.length > 5) _gpsAI.history.shift();
-
-  // Round to 1 decimal for display
-  return Math.round(_gpsAI.ema * 10) / 10;
-}
-
 function onPos(p){
   var spd=p.coords.speed;
   var accuracy=p.coords.accuracy||999;
@@ -3081,20 +2812,61 @@ function onPos(p){
   }
   // Use GPS speed if available and positive, else calculate from positions
   var spdMps=0;
-  var _rawSpd=p.coords.speed;
-  if(typeof _rawSpd==='number'&&_rawSpd!==null&&_rawSpd>=0){spdMps=_rawSpd;}
-  else if(positions.length>0){var prev=positions[positions.length-1];var dt=(Date.now()-prev.time)/1000;if(dt>0.1&&dt<10){var dMi=haversine(prev.lat,prev.lng,lat,lng);if(!(dMi>0.15&&dt<3))spdMps=dMi*1609.34/dt;}}
+  if(typeof spd==='number'&&spd>=0&&spd!==null){
+    spdMps=spd;
+  } else if(positions.length>0){
+    var prev=positions[positions.length-1];
+    var dt=(Date.now()-prev.time)/1000;
+    if(dt>0){
+      var dMi=haversine(prev.lat,prev.lng,lat,lng);
+      spdMps=dMi*1609.34/dt;
+    }
+  }
   var spdVal=_useKm()?(spdMps*3.6):(spdMps*2.237);
-  var _filteredSpd=_computeDisplaySpeed(spdMps, accuracy, p.coords.speed);
+
+  // SMART SPEED FILTER: hide unreliable speed when indoors/poor GPS
+  if(!window._spdBuffer) window._spdBuffer=[];
+  if(accuracy<=80){
+    window._spdBuffer.push(spdVal);
+    if(window._spdBuffer.length>5) window._spdBuffer.shift();
+  } else {
+    // Poor accuracy — clear buffer, don't trust speed
+    window._spdBuffer=[];
+  }
+
   var spdDisplay;
-  if(_filteredSpd===null){spdDisplay='--';document.getElementById('speedUnit').textContent='poor GPS';}
-  else{spdDisplay=_filteredSpd.toFixed(0);document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
+  if(accuracy>80){
+    // Poor GPS signal — show signal icon not speed
+    spdDisplay='--';
+    document.getElementById('speedUnit').textContent='poor GPS';
+  } else {
+    var avgSpd=window._spdBuffer.length>=3
+      ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
+      : spdVal;
+    // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent readings
+    var floor=_useKm()?8:5; // Low floor — only kills near-zero drift
+    if(avgSpd<floor){
+      avgSpd=0;
+    } else if(window._spdBuffer.length>=3){
+      // Calculate variance of recent readings
+      var _mean=window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length;
+      var _variance=window._spdBuffer.reduce(function(acc,v){return acc+Math.pow(v-_mean,2);},0)/window._spdBuffer.length;
+      var _stdDev=Math.sqrt(_variance);
+      // High variance at low speed = GPS drift noise (readings jumping randomly)
+      // Real movement at any speed = consistent readings (low variance relative to mean)
+      if(_mean>0&&_stdDev/_mean>0.6&&_mean<(_useKm()?25:15)){
+        avgSpd=0; // Inconsistent low-speed readings = stationary drift
+      }
+    }
+    spdDisplay=avgSpd.toFixed(0);
+    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+  }
   document.getElementById('trackSpeed').textContent=spdDisplay;
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var _dispSpd=(spdDisplay==='--')?0:parseFloat(spdDisplay);
+  var _dispSpd=(spdDisplay==='--'||spdDisplay==='0')?0:parseFloat(spdDisplay);
   var pct=Math.min(_dispSpd/maxSpd,1);
-  var off=267-(267*pct);
+  var off=314-(314*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Only update distance with accurate readings
@@ -3258,10 +3030,6 @@ function toggleAutoDetect(el){
 
 function startAutoMonitoring(){
   if(tracking)return;
-  // Reset AI GPS engine state for clean start
-  _gpsAI.kX=0;_gpsAI.kP=1;_gpsAI.ema=0;_gpsAI.prev=0;
-  _gpsAI.zeroCount=0;_gpsAI.zeroLock=false;_gpsAI.history=[];
-  window._spdEMA=0;window._spdPrev=0;
   // On native app, GPS is pushed via __nativeGPS__ — no need for watchPosition
   if(window.__MYMILESAI_NATIVE__){
     autoWatchId='native';
@@ -3269,10 +3037,6 @@ function startAutoMonitoring(){
     document.getElementById('statusText').textContent='Monitoring...';
     updateAutoBtn();
     updateDebugPanel();
-    // Tell native layer to start sending GPS data
-    if(window.ReactNativeWebView){
-      window.ReactNativeWebView.postMessage(JSON.stringify({type:'startBgTracking'}));
-    }
     return;
   }
   if(!navigator.geolocation)return;
@@ -3317,24 +3081,57 @@ function onAutoPos(p){
   var spd=p.coords.speed;
   // Use GPS speed if available, else calc from last known position
   var spdMps=0;
-  var _rawSpd=p.coords.speed;
   var _t2=Date.now();
-  if(typeof _rawSpd==='number'&&_rawSpd!==null&&_rawSpd>=0){spdMps=_rawSpd;}
-  else if(lastGpsLat&&p.coords.latitude){var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;if(_dt<0.5)_dt=0.5;if(_dt>30)_dt=5;if(!(dMi>0.1&&_dt<2))spdMps=dMi*1609.34/_dt;}
+  if(typeof spd==='number'&&spd>=0&&spd!==null){spdMps=spd;} // spd=0 means stationary — trust it, skip haversine
+  else if(lastGpsLat&&p.coords.latitude){
+    var dMi=haversine(lastGpsLat,lastGpsLng,p.coords.latitude,p.coords.longitude);
+    var _dt=window._lastAutoT?(_t2-window._lastAutoT)/1000:5;
+    if(_dt<0.5)_dt=0.5;if(_dt>30)_dt=5;
+    // Layer 3: reject teleportation (>0.1mi in <2s)
+    if(dMi>0.1&&_dt<2){spdMps=0;}
+    else{spdMps=dMi*1609.34/_dt;}
+  }
   window._lastAutoT=_t2;
   var _threshEl=document.getElementById('threshVal');
   var _savedThresh=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
   var thresh=(_threshEl&&parseInt(_threshEl.value))||_savedThresh||5;
+  var spdVal=_useKm()?spdMps*3.6:spdMps*2.237;
   var _acc2=p.coords.accuracy||999;
-  var _filteredSpd=_computeDisplaySpeed(spdMps, _acc2, p.coords.speed);
-  var spdVal=(_filteredSpd===null||_filteredSpd===undefined)?0:_filteredSpd;
+  if(!window._autoSpdBuf)window._autoSpdBuf=[];
+  // Layer 1: accuracy gate — only trust readings <=25m
+  if(_acc2<=25){
+    // Layer 2: spike rejection — discard jumps >15mph/24kmh above avg
+    var _prevAvg=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
+    var _spikeMax=_useKm()?24:15;
+    if(window._autoSpdBuf.length<2||spdVal<=_prevAvg+_spikeMax){
+      window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();
+    }
+  } else {
+    window._autoSpdBuf=[];
+  }
+  // Layer 4: require >=3 readings before trusting average
+  // Layer 4: require >=3 readings before trusting average
+  var _avgA=window._autoSpdBuf.length>=3?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
+  // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent
+  var _monFloor=_useKm()?8:5;
+  if(_avgA<_monFloor){
+    _avgA=0;
+  } else if(window._autoSpdBuf.length>=4){
+    var _mMean=window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length;
+    var _mVar=window._autoSpdBuf.reduce(function(acc,v){return acc+Math.pow(v-_mMean,2);},0)/window._autoSpdBuf.length;
+    var _mStd=Math.sqrt(_mVar);
+    // High variance at low speed = drift not real movement
+    if(_mMean>0&&_mStd/_mMean>0.6&&_mMean<(_useKm()?25:15)){_avgA=0;}
+  }
+  spdVal=_acc2>25?0:_avgA;
+  // Update speedo even while monitoring
   var spdDisplay;
-  if(_filteredSpd===null){spdDisplay='--';document.getElementById('speedUnit').textContent='poor GPS';}
+  if(_acc2>25||spdVal<=0){spdDisplay=_acc2>25?'--':'0';if(_acc2>25)document.getElementById('speedUnit').textContent='poor GPS';else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   else{spdDisplay=spdVal.toFixed(0);document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var pct=_filteredSpd===null?0:Math.min(spdVal/maxSpd,1);
-  var off=267-(267*pct);
+  var pct=spdDisplay==='--'?0:Math.min(spdVal/maxSpd,1);
+  var off=314-(314*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Update GPS coords for templates
@@ -3361,12 +3158,7 @@ function onAutoPos(p){
       // Notify native app
       if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
         window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'RECORDING'}));
-        window.ReactNativeWebView.postMessage(JSON.stringify({type:'scheduleReminder',hours:4}));
-        window.ReactNativeWebView.postMessage(JSON.stringify({
-        type:'tripDetected',
-        startAddr:_startAddr||'Current location',
-        time:new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})
-      }));
+        window.ReactNativeWebView.postMessage(JSON.stringify({type:'tripDetected'}));
       }
       startTracking();
     }
@@ -3408,7 +3200,6 @@ function stopTracking(){
   // Notify native app
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
     window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'IDLE'}));
-        window.ReactNativeWebView.postMessage(JSON.stringify({type:'stopBgTracking'}));
   }
   document.getElementById('trackLive').classList.remove('show');
   document.getElementById('heroStatus').classList.remove('rec');
@@ -3525,115 +3316,35 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   else if(isWorkHours())type='biz';
   TRIPS.unshift({id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath()});
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
-  renderTrips();renderAlerts();saveTripsToStorage();_updateStreak();
-  var _saveDed=(dist*catRate(type)).toFixed(2);
-  var _saveMsg=type==='biz'||type==='med'||type==='char'
-    ? 'Trip saved! '+dist.toFixed(1)+' '+LOC.unit+' · '+LOC.currency+_saveDed+' deduction'
-    : 'Trip saved! '+dist.toFixed(1)+' '+LOC.unit+' recorded.';
-  showToast(_i('ccheck'),_saveMsg);
+  renderTrips();renderAlerts();saveTripsToStorage();
+  showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
   recordTripEnd();
-  // Send tripSaved notification to native app
-  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
-    window.ReactNativeWebView.postMessage(JSON.stringify({
-      type:'tripSaved',
-      summary:dist.toFixed(1)+' '+LOC.unit+' · '+LOC.currency+(dist*catRate(type)).toFixed(2)+' saved',
-      category:CAT_LABELS[type]||type,
-      miles:dist.toFixed(1),
-      deduction:(dist*catRate(type)).toFixed(2),
-    }));
-    // Check milestones
-    var _bizMi=TRIPS.reduce(function(s,t){return s+(t.type==='biz'?parseFloat(t.mi)||0:0);},0);
-    var _milestones=[100,250,500,1000,2500,5000];
-    for(var _mi=0;_mi<_milestones.length;_mi++){
-      var _m=_milestones[_mi];
-      if(_bizMi>=_m&&(_bizMi-dist)<_m){
-        window.ReactNativeWebView.postMessage(JSON.stringify({
-          type:'milestone',
-          title:'🎉 '+_m+' business '+LOC.unit+'!',
-          body:'You\'ve saved '+LOC.currency+((_m)*catRate('biz')).toFixed(0)+' in deductions this year!'
-        }));
-        break;
-      }
-    }
-  }
   // Always ask user to confirm trip type after every trip
   setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
   _gpsTrioSaved=false;
 }
 var _classifyCountdown=null;
 function showClassifyPrompt(tripId,from,to,dist,autoType){
-  var SECS=10;
-  var routeEl=document.getElementById('clsRoute');
-  var distEl=document.getElementById('clsDist');
-  var hintEl=document.getElementById('clsAutoHint');
-  if(routeEl)routeEl.textContent=(from||'').split(',')[0]+' \u2192 '+(to||'').split(',')[0];
-  if(distEl)distEl.textContent=dist.toFixed(1)+' '+LOC.label;
-  if(hintEl)hintEl.textContent='How would you classify this drive?';
-  // Show deduction value for this trip
-  var _tripVal=(dist*(typeof catRate==='function'?catRate('biz'):LOC.rate)).toFixed(2);
-  var _ytdBizMi=0;if(typeof TRIPS!=='undefined'){for(var _ci=0;_ci<TRIPS.length;_ci++){if(TRIPS[_ci].type==='biz')_ytdBizMi+=parseFloat(TRIPS[_ci].mi)||0;}}
-  var _ytdDed=(_ytdBizMi*(typeof catRate==='function'?catRate('biz'):LOC.rate)).toFixed(2);
-  var valEl=document.getElementById('clsTripValue');
-  if(valEl)valEl.innerHTML='<span style="color:var(--vi);font-weight:800;font-size:18px">'+LOC.currency+_tripVal+'</span><span style="color:var(--ink4);font-size:11px"> potential deduction</span>'
-    +'<div style="font-size:10px;color:var(--ink4);margin-top:2px">YTD business deductions: '+LOC.currency+_ytdDed+'</div>';
-  var modal=document.getElementById('classifyModal');
-  if(modal)modal.classList.add('show');
+  document.getElementById('clsRoute').textContent=from.split(',')[0]+' → '+to.split(',')[0];
+  document.getElementById('clsDist').textContent=dist.toFixed(1)+' '+LOC.label;
+  var hint=document.getElementById('clsAutoHint');
+  if(hint)hint.textContent='Business or Personal?';
+  document.getElementById('classifyModal').classList.add('show');
   window._classifyTripId=tripId;
-  var ring=document.getElementById('clsRing');
-  var numEl=document.getElementById('clsTimerNum');
-  var countdownEl=document.getElementById('clsCountdown');
-  var CIRC=188.4;
-  if(ring){ring.style.transition='none';ring.style.strokeDashoffset='0';ring.style.stroke='var(--vi)';}
-  if(numEl){numEl.textContent=SECS;numEl.style.color='var(--vi)';}
-  if(countdownEl)countdownEl.textContent='Auto-saves as Unclassified in '+SECS+'s';
+  var _secs=15;
   if(_classifyCountdown)clearInterval(_classifyCountdown);
-  var _elapsed=0;
-  setTimeout(function(){if(ring)ring.style.transition='stroke-dashoffset 1s linear';},50);
+  var _timerEl=document.getElementById('clsCountdown');
+  if(_timerEl)_timerEl.textContent='Auto-saves as Unclassified in '+_secs+'s';
   _classifyCountdown=setInterval(function(){
-    _elapsed++;
-    var remaining=SECS-_elapsed;
-    var offset=CIRC*(_elapsed/SECS);
-    if(ring){
-      ring.style.strokeDashoffset=offset;
-      ring.style.stroke=remaining>6?'var(--vi)':remaining>3?'#E08D00':'#FF4444';
-    }
-    if(numEl){
-      numEl.textContent=remaining>0?remaining:'';
-      numEl.style.color=remaining>6?'var(--vi)':remaining>3?'#E08D00':'#FF4444';
-    }
-    if(countdownEl)countdownEl.textContent=remaining>0?'Auto-saves as Unclassified in '+remaining+'s':'Saved as Unclassified \u2713';
-    if(_elapsed>=SECS){
+    _secs--;
+    if(_timerEl)_timerEl.textContent=_secs>0?'Auto-saves as Unclassified in '+_secs+'s':'Saved as Unclassified';
+    if(_secs<=0){
       clearInterval(_classifyCountdown);_classifyCountdown=null;
-      if(modal)modal.classList.remove('show');
+      document.getElementById('classifyModal').classList.remove('show');
       window._classifyTripId=null;
-      renderTrips();renderAlerts();saveTripsToStorage();_updateStreak();
       switchTabId('tab-drive');
-      showToast('\u2713','Saved as Unclassified',2000);
     }
   },1000);
-  // Rich notification — beat MileIQ
-  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
-    var _notifRate=autoType==='biz'?catRate('biz'):autoType==='med'?catRate('med'):autoType==='char'?catRate('char'):LOC.rate;
-    var _notifVal=(dist*_notifRate).toFixed(2);
-    var _notifFrom=(from||'').split(',')[0].trim();
-    var _notifTo=(to||'').split(',')[0].trim();
-    var _notifType=autoType==='biz'?'Business':autoType==='pers'?'Personal':autoType==='med'?'Medical':'Unclassified';
-    var _ytdBiz=0;for(var _ni=0;_ni<TRIPS.length;_ni++){if(TRIPS[_ni].type==='biz')_ytdBiz+=parseFloat(TRIPS[_ni].mi)||0;}
-    var _ytdVal=(_ytdBiz*catRate('biz')).toFixed(2);
-    window.ReactNativeWebView.postMessage(JSON.stringify({
-      type:'tripClassifyPrompt',
-      tripId:tripId,
-      from:_notifFrom,
-      to:_notifTo,
-      dist:dist.toFixed(1),
-      unit:LOC.unit,
-      value:_notifVal,
-      currency:LOC.currency,
-      tripType:_notifType,
-      ytdValue:_ytdVal,
-      autoClassified:autoType!=='uncl'
-    }));
-  }
 }
 function classifyLastTrip(type){
   if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
@@ -3644,7 +3355,7 @@ function classifyLastTrip(type){
   // Switch to Drive tab FIRST, then render so user sees updated list
   switchTabId('tab-drive');
   setTimeout(function(){
-    renderTrips();renderAlerts();_updateStreak();
+    renderTrips();renderAlerts();
     var recentSection=document.getElementById('recentTrips');
     if(recentSection){
       recentSection.scrollIntoView({behavior:'smooth',block:'start'});
@@ -3659,10 +3370,7 @@ function classifyLastTrip(type){
 }
 function closeClassifyPrompt(){
   if(_classifyCountdown){clearInterval(_classifyCountdown);_classifyCountdown=null;}
-  var ring=document.getElementById('clsRing');
-  if(ring){ring.style.transition='none';ring.style.strokeDashoffset='0';ring.style.stroke='var(--vi)';}
-  var numEl=document.getElementById('clsTimerNum');if(numEl){numEl.textContent='10';numEl.style.color='var(--vi)';}
-  var modal=document.getElementById('classifyModal');if(modal)modal.classList.remove('show');
+  document.getElementById('classifyModal').classList.remove('show');
   window._classifyTripId=null;
   switchTabId('tab-drive');
   setTimeout(function(){renderTrips();renderAlerts();},150);
@@ -3759,32 +3467,57 @@ function geocodeAddr(query,inpId,ddId){
   var dd=document.getElementById(ddId);
   var inp=document.getElementById(inpId);
   if(!inp||inp.value.trim().length<2)return;
-  if(google.maps.places.AutocompleteSuggestion){
-    google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
-      input:query,
-      locationBias:{center:new google.maps.LatLng(lastGpsLat||37.38,lastGpsLng||(-121.0)),radius:50000}
-    }).then(function(res){
-      var sugg=res.suggestions||[];
-      _liveGeoResults=sugg.map(function(s){var p=s.placePrediction;return{name:p.text.text,place_id:p.placeId};});
-      var html='';
-      sugg.forEach(function(s,i){
-        var p=s.placePrediction;
-        var main=p.mainText?p.mainText.text:p.text.text;
-        html+='<div class="geo-item" onclick="_selectGeoResult('+i+',\''+inpId+'\')"><span class="geo-icon">📍</span><div><div class="geo-name">'+main+'</div><div class="geo-addr">'+p.text.text+'</div></div></div>';
+
+  var svc=_getPlacesService();
+  if(!svc){return;}
+
+  // Create session token for billing optimization
+  if(!_placesSessionToken)_placesSessionToken=new google.maps.places.AutocompleteSessionToken();
+
+  var biasLat=lastGpsLat||37.38,biasLng=lastGpsLng||-122.0;
+  try{
+    var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
+    var tzG={'America/Los_Angeles':[34.05,-118.24],'America/Denver':[39.74,-104.99],
+             'America/Chicago':[41.88,-87.63],'America/New_York':[40.71,-74.00],
+             'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],
+             'America/Edmonton':[53.54,-113.49],'America/Winnipeg':[49.89,-97.14],
+             'Europe/London':[51.50,-0.12],'Australia/Sydney':[-33.87,151.21]};
+    if(tzG[tz]&&!lastGpsLat){biasLat=tzG[tz][0];biasLng=tzG[tz][1];}
+  }catch(e){}
+
+  svc.getPlacePredictions({
+    input:query,
+    sessionToken:_placesSessionToken,
+    locationBias:{center:{lat:biasLat,lng:biasLng},radius:50000}
+  },function(predictions,status){
+    if(!inp||inp.value.trim().length<2)return;
+    _liveGeoResults=[];
+    var html='';
+
+    if(status===google.maps.places.PlacesServiceStatus.OK&&predictions){
+      predictions.forEach(function(pred,j){
+        var mainLabel=pred.structured_formatting?pred.structured_formatting.main_text:pred.description;
+        var subLabel=pred.structured_formatting?pred.structured_formatting.secondary_text:'';
+        _liveGeoResults.push({placeId:pred.place_id,n:mainLabel,c:subLabel,fullAddr:pred.description});
+        html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" '
+          +'style="border-left:3px solid var(--mint)">'
+          +'<div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2">'
+          +'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
+          +'<div><div class="adi-main">'+_esc(mainLabel)+'</div>'
+          +'<div class="adi-sub" style="color:var(--mint)">'+_esc(subLabel)+'</div></div></div>';
       });
-      dd.innerHTML=html;dd.style.display=sugg.length?'block':'none';
-    }).catch(function(){dd.style.display='none';});
-  } else {
-    var svc=new google.maps.places.AutocompleteService();
-    svc.getPlacePredictions({input:query,locationBias:{center:{lat:lastGpsLat||37.38,lng:lastGpsLng||(-121.0)},radius:50000}},function(predictions,status){
-      if(predictions&&predictions.length){
-        _liveGeoResults=predictions.map(function(p){return{name:p.description,place_id:p.place_id};});
-        var html='';
-        predictions.forEach(function(p,i){html+='<div class="geo-item" onclick="_selectGeoResult('+i+',\''+inpId+'\')"><span class="geo-icon">📍</span><div><div class="geo-name">'+p.structured_formatting.main_text+'</div><div class="geo-addr">'+p.description+'</div></div></div>';});
-        dd.innerHTML=html;dd.style.display='block';
-      } else {dd.style.display='none';}
-    });
-  }
+    }
+
+    // "Use as typed" always last
+    html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')">'
+      +'<div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">'
+      +'<polyline points="20 6 9 17 4 12"/></svg></div>'
+      +'<div><div class="adi-main">'+_esc(inp.value.trim())+'</div>'
+      +'<div class="adi-sub">Use as typed</div></div></div>';
+
+    dd.innerHTML=html;
+    dd.classList.add('show');
+  });
 }
 var _liveGeoResults=[];
 
@@ -3851,28 +3584,20 @@ function _tryGoogleDistance(){
 
 function _getGoogleDistance(origin,destination,cb){
   if(!_googleMapsReady||!google||!google.maps){cb(null,'no_maps');return;}
-  // Routes API v2 — replaces deprecated DirectionsService (Feb 2026)
-  fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE','X-Goog-FieldMask':'routes.distanceMeters'},
-    body:JSON.stringify({origin:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}},destination:{location:{latLng:{latitude:destination.lat,longitude:destination.lng}}},travelMode:'DRIVE'})
-  }).then(function(r){return r.json();}).then(function(d){
-    if(d.routes&&d.routes[0]&&d.routes[0].distanceMeters){
-      var m=d.routes[0].distanceMeters;
-      cb(parseFloat(LOC.unit==='km'?(m/1000).toFixed(2):(m/1609.34).toFixed(2)),null);
+  var service=new google.maps.DistanceMatrixService();
+  service.getDistanceMatrix({
+    origins:[{lat:origin.lat,lng:origin.lng}],
+    destinations:[{lat:destination.lat,lng:destination.lng}],
+    travelMode:'DRIVING',
+    unitSystem:google.maps.UnitSystem.METRIC
+  },function(response,status){
+    if(status==='OK'&&response.rows[0].elements[0].status==='OK'){
+      var distMeters=response.rows[0].elements[0].distance.value;
+      var distMi=distMeters/1609.34;
+      cb(distMi,null);
     } else {
-      var R=3958.8,dLat=(destination.lat-origin.lat)*Math.PI/180,dLon=(destination.lng-origin.lng)*Math.PI/180;
-      var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(origin.lat*Math.PI/180)*Math.cos(destination.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-      var dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-      if(LOC.unit==='km')dist*=1.60934;
-      cb(parseFloat(dist.toFixed(2)),null);
+      cb(null,status);
     }
-  }).catch(function(){
-    var R=3958.8,dLat=(destination.lat-origin.lat)*Math.PI/180,dLon=(destination.lng-origin.lng)*Math.PI/180;
-    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(origin.lat*Math.PI/180)*Math.cos(destination.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-    var dist=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-    if(LOC.unit==='km')dist*=1.60934;
-    cb(parseFloat(dist.toFixed(2)),null);
   });
 }
 
@@ -4285,15 +4010,6 @@ function _doSaveManual(){
   showToast(_i('ccheck'),'Trip saved · '+dist+' '+LOC.unit);
   recordTripEnd();
   saveTripsToStorage();
-  // Notify native of manual trip save
-  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
-    window.ReactNativeWebView.postMessage(JSON.stringify({
-      type:'tripSaved',
-      summary:dist+' '+LOC.unit+' recorded',
-      category:CAT_LABELS[autoType]||autoType,
-      miles:dist,
-    }));
-  }
   closeAddTrip();
 }
 // Close dropdowns on outside click
@@ -4329,11 +4045,11 @@ function returnTrip(id){
 function openEdit(id){curTrip=TRIPS.find(t=>t.id===id);if(!curTrip)return;document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');}
 function closeEdit(){document.getElementById('editModal').classList.remove('show');curTrip=null;}
 function setEC(c){document.getElementById('eBiz').classList.remove('ob');document.getElementById('ePer').classList.remove('op');if(c==='biz')document.getElementById('eBiz').classList.add('ob');else document.getElementById('ePer').classList.add('op');}
-function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('editFrom').value;curTrip.to=document.getElementById('editTo').value;const v=parseFloat(document.getElementById('editMi').value);curTrip.mi=_useKm()?v/1.60934:v;curTrip.type=document.getElementById('eBiz').classList.contains('ob')?'biz':'pers';curTrip.ded=curTrip.type==='biz';curTrip.purpose=document.getElementById('editPurpose').value;curTrip.notes=document.getElementById('editNotes').value;var edv=document.getElementById('editDate').value;if(edv){var nd=new Date(edv+'T12:00:00');curTrip.date=_fmt(nd);curTrip.day=_rel(nd);curTrip.ts=nd.getTime();}checkFrequentRoute(curTrip);renderTrips();renderAlerts();saveTripsToStorage();_updateStreak();closeEdit();showToast(_i('edit'),'Trip updated');}
+function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('editFrom').value;curTrip.to=document.getElementById('editTo').value;const v=parseFloat(document.getElementById('editMi').value);curTrip.mi=_useKm()?v/1.60934:v;curTrip.type=document.getElementById('eBiz').classList.contains('ob')?'biz':'pers';curTrip.ded=curTrip.type==='biz';curTrip.purpose=document.getElementById('editPurpose').value;curTrip.notes=document.getElementById('editNotes').value;var edv=document.getElementById('editDate').value;if(edv){var nd=new Date(edv+'T12:00:00');curTrip.date=_fmt(nd);curTrip.day=_rel(nd);curTrip.ts=nd.getTime();}checkFrequentRoute(curTrip);renderTrips();renderAlerts();saveTripsToStorage();closeEdit();showToast(_i('edit'),'Trip updated');}
 function openDel(id){curTrip=TRIPS.find(t=>t.id===id);if(!curTrip)return;document.getElementById('delRoute').textContent=curTrip.from+' → '+curTrip.to+' · '+tripDist(curTrip.mi)+' '+LOC.label;document.getElementById('delModal').classList.add('show');}
 function closeDel(){document.getElementById('delModal').classList.remove('show');curTrip=null;}
 var _lastDeleted=null,_lastDeletedIdx=-1,_undoTimer=null;
-function confirmDel(){if(!curTrip)return;const i=TRIPS.findIndex(t=>t.id===curTrip.id);if(i>-1){_lastDeleted=TRIPS[i];_lastDeletedIdx=i;TRIPS.splice(i,1);}renderTrips();renderAlerts();saveTripsToStorage();_updateStreak();closeDel();showUndoToast(_i('trash'),'Trip deleted',function(){if(_lastDeleted){TRIPS.splice(_lastDeletedIdx,0,_lastDeleted);_lastDeleted=null;renderTrips();renderAlerts();saveTripsToStorage();_updateStreak();showToast(_i('undo'),'Trip restored');}});}
+function confirmDel(){if(!curTrip)return;const i=TRIPS.findIndex(t=>t.id===curTrip.id);if(i>-1){_lastDeleted=TRIPS[i];_lastDeletedIdx=i;TRIPS.splice(i,1);}renderTrips();renderAlerts();saveTripsToStorage();closeDel();showUndoToast(_i('trash'),'Trip deleted',function(){if(_lastDeleted){TRIPS.splice(_lastDeletedIdx,0,_lastDeleted);_lastDeleted=null;renderTrips();renderAlerts();saveTripsToStorage();showToast(_i('undo'),'Trip restored');}});}
 
 /* ===== COUNTERS ===== */
 function animateCounters(){
@@ -4413,20 +4129,6 @@ function closeMapSheet(){
   document.getElementById('mapSheet').style.display='none';
   mapSheetOpen=false;
 }
-var MAP_STYLES_DARK=[
-  {elementType:'geometry',stylers:[{color:'#1d2c4d'}]},
-  {elementType:'labels.text.fill',stylers:[{color:'#8ec3b9'}]},
-  {elementType:'labels.text.stroke',stylers:[{color:'#1a3646'}]},
-  {featureType:'road',elementType:'geometry',stylers:[{color:'#304a7d'}]},
-  {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#255763'}]},
-  {featureType:'water',elementType:'geometry',stylers:[{color:'#0e1626'}]}
-];
-var MAP_STYLES_LIGHT=[];
-function _applyMapTheme(){
-  if(!map)return;
-  var isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  map.setOptions({styles:isDark?MAP_STYLES_DARK:MAP_STYLES_LIGHT});
-}
 function initMap(){
   if(!_googleMapsReady){
     // Retry in 500ms if Google Maps not loaded yet
@@ -4447,16 +4149,28 @@ function initMap(){
       zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
       mapTypeControl:false,
       streetViewControl:false,
-      fullscreenControl:false
+      fullscreenControl:false,
+      styles:[
+        {elementType:'geometry',stylers:[{color:'#1d2c4d'}]},
+        {elementType:'labels.text.fill',stylers:[{color:'#8ec3b9'}]},
+        {elementType:'labels.text.stroke',stylers:[{color:'#1a3646'}]},
+        {featureType:'road',elementType:'geometry',stylers:[{color:'#304a7d'}]},
+        {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#255763'}]},
+        {featureType:'water',elementType:'geometry',stylers:[{color:'#0e1626'}]}
+      ]
     });
-    document.getElementById('mapLoading').classList.add('hidden');
-    _applyMapTheme();
-    if(google.maps.marker&&google.maps.marker.AdvancedMarkerElement){
-      var pin=new google.maps.marker.PinElement({background:'#6C3CE0',borderColor:'#fff',glyphColor:'#fff'});
-      userMarker=new google.maps.marker.AdvancedMarkerElement({position:{lat:defLat,lng:defLng},map:map,content:pin});
-    } else {
-      userMarker=new google.maps.Marker({position:{lat:defLat,lng:defLng},map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:'#6C3CE0',fillOpacity:1,strokeColor:'#fff',strokeWeight:3}});
-    }
+    userMarker=new google.maps.Marker({
+      position:{lat:defLat,lng:defLng},
+      map:map,
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        scale:9,
+        fillColor:'#6C3CE0',
+        fillOpacity:1,
+        strokeColor:'#fff',
+        strokeWeight:3
+      }
+    });
     routeLine=new google.maps.Polyline({
       path:[],
       strokeColor:'#6C3CE0',
@@ -4465,11 +4179,11 @@ function initMap(){
       map:map
     });
     mapReady=true;
-    window._setMarkerPos=function(m,p){if(!m)return;if(typeof m.setPosition==='function'){m.setPosition(p);}else{m.position=p;}};
+    document.getElementById('mapLoading').classList.add('hidden');
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(function(p){
         var pos={lat:p.coords.latitude,lng:p.coords.longitude};
-        map.setCenter(pos);_setMarkerPos(userMarker,pos);
+        map.setCenter(pos);userMarker.setPosition(pos);
       },function(){},{enableHighAccuracy:true});
     }
   }catch(e){console.log('Map init error:',e);}
@@ -4477,7 +4191,7 @@ function initMap(){
 function updateMapPos(lat,lng){
   if(!mapReady)return;
   var pos={lat:lat,lng:lng};
-  _setMarkerPos(userMarker,pos);
+  userMarker.setPosition(pos);
   if(mapSheetOpen)map.panTo(pos);
   if(tracking){
     routeLine.getPath().push(new google.maps.LatLng(lat,lng));
@@ -4491,7 +4205,7 @@ function recenterMap(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(p){
       var pos={lat:p.coords.latitude,lng:p.coords.longitude};
-      map.setCenter(pos);map.setZoom(16);_setMarkerPos(userMarker,pos);
+      map.setCenter(pos);map.setZoom(16);userMarker.setPosition(pos);
     });
   }
 }
@@ -4725,17 +4439,6 @@ updateGreeting();
 initProfile();
 setTimeout(animateCounters,600);
 setTimeout(checkMissedTrips,2000); // Check for missed trips on load
-// On iOS native WebView, run full init immediately (no auth modal flow)
-if(window.__MYMILESAI_NATIVE__){
-  setTimeout(function(){
-    try{loadSettings();}catch(e){}
-    try{loadWorkHours();}catch(e){}
-    try{loadNotifSettings();}catch(e){}
-    try{loadOdometer();}catch(e){}
-    try{renderTrips();}catch(e){}
-    try{renderAlerts();}catch(e){}
-  },500);
-}
 
 /* Fix #9 — Update template distances using FRESH GPS + Google Places */
 function updateTemplateDists(){
@@ -4821,339 +4524,28 @@ _refreshTemplateDists();
 setInterval(_refreshTemplateDists,300000); // refresh every 5 min
 document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshTemplateDists();});
 
-/* === SUPABASE AUTH + CLOUD SYNC === */
-var _SB_URL='https://dxpuuiqibtizewbbffjk.supabase.co';
-var _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cHV1aXFpYnRpemV3YmJmZmprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTQ1MDAsImV4cCI6MjA5MDIzMDUwMH0.GSVgcjCxenp4uwahNBnQn5MZzuFKIfcf3gt1AlsVEuc';
-var _SB_REDIRECT='https://adsontrack1-ctrl.github.io/mile-tracker-1/';
-var _supabase=null;
-var _sbUser=null;
-// ── Supabase init with robust fallback ─────────────────────
-function _initSupabase(){
-  try{
-    if(window.supabase){
-      _supabase=window.supabase.createClient(_SB_URL,_SB_KEY);
-      _supabase.auth.onAuthStateChange(function(event,session){
-        _sbUser=session?session.user:null;
-        _updateAuthUI();
-        if(event==='SIGNED_IN'){showToast('\u2601\uFE0F','Signed in! Syncing trips...',3000);setTimeout(_syncTripsToCloud,1500);}
-        if(event==='SIGNED_OUT'){_sbUser=null;_updateAuthUI();}
-      });
-      _supabase.auth.getSession().then(function(d){
-        if(d.data&&d.data.session){
-          _sbUser=d.data.session.user;
-          _updateAuthUI();
-          setTimeout(_loadTripsFromCloud,1000);
-        } else {
-          // Only show auth modal on web browser, never on native iOS app
-          // Check multiple ways — race condition fix: native flag may not be set yet
-          var isNative=window.__MYMILESAI_NATIVE__||navigator.userAgent.includes('wv')||
-            typeof window.ReactNativeWebView!=='undefined'||
-            localStorage.getItem('mymilesai_skipped_auth')==='1';
-          if(!isNative){
-            setTimeout(_showAuthModal,1500);
-          }
-        }
-      }).catch(function(err){
-        console.warn('Supabase getSession failed:',err);
-        // App still works in offline/guest mode — do not show modal on error
-      });
-    } else {
-      // Supabase CDN not loaded — retry once after delay
-      setTimeout(function(){
-        if(window.supabase && !_supabase){
-          _initSupabase();
-        } else {
-          // Supabase CDN failed — only show auth on web, never on native
-          var isNative2=window.__MYMILESAI_NATIVE__||typeof window.ReactNativeWebView!=='undefined'||
-            localStorage.getItem('mymilesai_skipped_auth')==='1';
-          if(!isNative2){
-            setTimeout(_showAuthModal, 500);
-          }
-        }
-      }, 2000);
-    }
-  }catch(e){
-    console.warn('Supabase init error:',e);
-    // App still works without Supabase — local storage mode
-  }
-}
-// If user already skipped auth, mark as non-interactive so modal never shows
-try{if(localStorage.getItem('mymilesai_skipped_auth')==='1'){window.__AUTH_SKIPPED__=true;}}catch(e){}
-_initSupabase();
-
-function _updateAuthUI(){
-  var av=document.getElementById('hdrAv'),nm=document.getElementById('hdrName');
-  var siBtn=document.getElementById('settingsSignIn');
-  if(_sbUser){
-    var m=_sbUser.user_metadata||{},n=m.full_name||m.name||_sbUser.email||'User';
-    if(av)av.textContent=n.charAt(0).toUpperCase();
-    if(nm)nm.textContent=n.split(' ')[0];
-    try{localStorage.setItem('mymilesai_name',n.split(' ')[0]);}catch(e){}
-    if(siBtn)siBtn.style.display='none';
-  } else {
-    if(siBtn)siBtn.style.display='block';
-  }
-}
-function _showAuthModal(){
-  // Never show on native app — it has its own auth flow
-  if(window.__MYMILESAI_NATIVE__||window.__AUTH_SKIPPED__||typeof window.ReactNativeWebView!=='undefined')return;
-  try{if(localStorage.getItem('mymilesai_skipped_auth')==='1')return;}catch(e){}
-  var o=document.getElementById('authOverlay');if(o)o.style.display='flex';
-}
-function _hideAuthModal(){var o=document.getElementById('authOverlay');if(o)o.style.display='none';}
-function _skipAuth(){
-  _hideAuthModal();
-  try{localStorage.setItem('mymilesai_skipped_auth','1');}catch(e){}
-  // Run full app initialization for guest mode
-  _initGuestMode();
-}
-function _initGuestMode(){
-  try{localStorage.setItem('mymilesai_guest','1');}catch(e){}
-  updateGreeting();
-  try{initProfile();}catch(e){}
-  try{loadSettings();}catch(e){}
-  try{loadWorkHours();}catch(e){}
-  try{loadNotifSettings();}catch(e){}
-  try{loadOdometer();}catch(e){}
-  try{renderTrips();}catch(e){}
-  try{renderAlerts();}catch(e){}
-  try{animateCounters();}catch(e){}
-  try{checkMissedTrips();}catch(e){}
-  // CRITICAL: Start GPS monitoring so speedometer and auto-detect work
-  autoDetect=true;
-  try{
-    var adTgl=document.getElementById('autoDetectTgl');
-    if(adTgl&&!adTgl.classList.contains('on'))adTgl.classList.add('on');
-  }catch(e){}
-  setTimeout(function(){
-    try{
-      if(!tracking&&!autoWatchId){
-        startAutoMonitoring();
-      }
-    }catch(e){}
-  },800);
-  showToast('\u2714','Welcome! Trips are saved on this device.',3000);
-}
-async function _authGoogle(){if(!_supabase)return;try{var r=await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'}});if(r.error)showToast('','Google sign-in failed: '+r.error.message,3000);}catch(e){showToast('','Sign-in error',2000);}}
-async function _authApple(){
-  if(!_supabase){showToast('','Service unavailable',2000);return;}
-  try{
-    var r=await _supabase.auth.signInWithOAuth({
-      provider:'apple',
-      options:{redirectTo:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'}
-    });
-    if(r.error)showToast('','Apple sign-in failed: '+r.error.message,3000);
-  }catch(e){showToast('','Apple sign-in error: '+e.message,2500);}
-}
-async function _authEmail(){
-  if(!_supabase){showToast('','Service unavailable',2000);return;}
-  var nameEl=document.getElementById('authName'),emailEl=document.getElementById('authEmail'),passEl=document.getElementById('authPassword');
-  var name=(nameEl?nameEl.value.trim():''),email=(emailEl?emailEl.value.trim().toLowerCase():''),pass=(passEl?passEl.value:'');
-  var btn=document.getElementById('authSubmitBtn');
-
-  if(!email||!email.includes('@')||email.length<5){showToast('','Please enter a valid email address',2500);return;}
-  if(!pass){showToast('','Please enter a password',2500);return;}
-  if(pass.length<10){showToast('','Password must be at least 10 characters',2500);return;}
-  if(!/[A-Z]/.test(pass)){showToast('','Password needs an uppercase letter',2500);return;}
-  if(!/[a-z]/.test(pass)){showToast('','Password needs a lowercase letter',2500);return;}
-  if(!/[^A-Za-z0-9]/.test(pass)){showToast('','Password needs a special character (!@#$...)',2500);return;}
-
-  if(btn){btn.disabled=true;btn.textContent='Please wait...';}
-  try{
-    var d=await _supabase.auth.signInWithPassword({email:email,password:pass});
-    if(d.error){
-      var errMsg=d.error.message||'';
-      var isNewUser=errMsg.includes('Invalid login credentials')||errMsg.includes('not found')||errMsg.includes('No user');
-      if(isNewUser){
-        if(btn)btn.textContent='Creating account...';
-        var nameVal=name||email.split('@')[0];
-        var signUpResult=await _supabase.auth.signUp({email:email,password:pass,options:{emailRedirectTo:_SB_REDIRECT,data:{full_name:nameVal}}});
-        if(signUpResult.error){showToast('',signUpResult.error.message,3500);if(btn){btn.disabled=false;btn.textContent='Sign In / Sign Up';}return;}
-        if(btn)btn.textContent='Sending code...';
-        var otpResult=await _supabase.auth.signInWithOtp({email:email,options:{shouldCreateUser:false}});
-        if(otpResult.error){_showEmailConfirmScreen(email);if(btn){btn.disabled=false;btn.textContent='Sign In / Sign Up';}return;}
-        _showOTPScreen(email,pass,nameVal);
-        if(btn){btn.disabled=false;btn.textContent='Sign In / Sign Up';}
-        return;
-      } else if(errMsg.includes('Email not confirmed')||errMsg.includes('confirm')){
-        var otpR=await _supabase.auth.signInWithOtp({email:email,options:{shouldCreateUser:false}});
-        _showOTPScreen(email,pass,name||email.split('@')[0]);
-        if(btn){btn.disabled=false;btn.textContent='Sign In / Sign Up';}
-        return;
-      } else {
-        showToast('',errMsg||'Sign-in failed',3500);
-        if(btn){btn.disabled=false;btn.textContent='Sign In / Sign Up';}
-        return;
-      }
-    }
-    if(d.data&&d.data.user){
-      _sbUser=d.data.user;_hideAuthModal();_updateAuthUI();
-      await _migrateLocalTripsToCloud(d.data.user.id);
-      await _loadTripsFromCloud();
-      var n=d.data.user.user_metadata&&d.data.user.user_metadata.full_name?d.data.user.user_metadata.full_name.split(' ')[0]:email.split('@')[0];
-      showToast('','Welcome back, '+n+'!',3000);
-    }
-  }catch(e){showToast('','Error: '+e.message,3000);}
-  finally{if(btn){btn.disabled=false;btn.textContent='Sign In / Sign Up';}}
-}
-
-function _showEmailConfirmScreen(email){
-  var sheet=document.getElementById('authSheet');
-  if(!sheet){showToast('','Check your email for a verification link!',6000);return;}
-  var orig=sheet.innerHTML;
-  sheet.innerHTML='<div style="text-align:center;padding:32px 24px;">'
-    +'<div style="font-size:48px;margin-bottom:16px;">&#x1F4E7;</div>'
-    +'<h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:var(--ink)">Check your email</h2>'
-    +'<p style="color:var(--ink3);font-size:14px;line-height:1.6;margin-bottom:24px;">We sent a confirmation link to<br><strong>'+email+'</strong></p>'
-    +'<button onclick="window.location.reload()" style="width:100%;padding:14px;background:var(--vi);color:white;border:none;border-radius:var(--rpill);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;">I confirmed — Open App</button>'
-    +'<button id="_emailBackBtn" style="width:100%;padding:12px;background:transparent;border:1px solid var(--ink6);border-radius:var(--rpill);font-size:14px;cursor:pointer;color:var(--ink3);">Back</button>'
-    +'</div>';
-  document.getElementById('_emailBackBtn').onclick=function(){sheet.innerHTML=orig;};
-}
-
-function _showOTPScreen(email,pass,name){
-  var sheet=document.getElementById('authSheet');
-  if(!sheet){showToast('','Check your email for a verification code!',5000);return;}
-  window._pendingEmail=email;window._pendingPass=pass;window._pendingName=name;
-  var inputStyle='width:36px;height:44px;text-align:center;font-size:20px;font-weight:700;border:2px solid var(--ink6);border-radius:10px;outline:none;font-family:inherit;background:var(--white);color:var(--ink);';
-  var inputHandler=' oninput="this.value=this.value.replace(/[^0-9]/g,\'\');if(this.value&&this.nextElementSibling)this.nextElementSibling.focus();" onkeydown="if(event.key===\'Backspace\'&&!this.value&&this.previousElementSibling)this.previousElementSibling.focus();"';
-  var inputs='';
-  for(var i=1;i<=6;i++)inputs+='<input id="otp'+i+'" maxlength="1" type="tel" style="'+inputStyle+'"'+inputHandler+'>';
-  sheet.innerHTML='<div style="text-align:center;padding:28px 24px;">'
-    +'<div style="font-size:44px;margin-bottom:12px;">&#x1F4E7;</div>'
-    +'<h2 style="font-size:19px;font-weight:700;margin-bottom:8px;color:var(--ink)">Check your email</h2>'
-    +'<p style="color:var(--ink3);font-size:13px;line-height:1.5;margin-bottom:20px;">We sent a verification code to<br><strong>'+email+'</strong></p>'
-    +'<div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;">'+inputs+'</div>'
-    +'<p style="color:var(--ink4);font-size:11px;margin-bottom:16px;">Enter the 6-digit code from your email</p>'
-    +'<button onclick="_verifyOTP()" style="width:100%;padding:14px;background:var(--vi);color:white;border:none;border-radius:var(--rpill);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;">Verify & Enter App</button>'
-    +'<button onclick="_resendOTP()" style="width:100%;padding:10px;background:transparent;border:1px solid var(--ink6);border-radius:var(--rpill);font-size:13px;cursor:pointer;color:var(--ink3);margin-bottom:8px;">Resend Code</button>'
-    +'</div>';
-  setTimeout(function(){var el=document.getElementById('otp1');if(el)el.focus();},100);
-}
-
-async function _verifyOTP(){
-  var code='';
-  for(var i=1;i<=6;i++){var el=document.getElementById('otp'+i);code+=(el?el.value:'');}
-  if(code.length<6){showToast('','Please enter all 6 digits',2000);return;}
-  var btn=document.querySelector('[onclick="_verifyOTP()"]');
-  if(btn){btn.disabled=true;btn.textContent='Verifying...';}
-  try{
-    var r=await _supabase.auth.verifyOtp({email:window._pendingEmail,token:code,type:'email'});
-    if(r.error){showToast('','Invalid code. Check your email and try again.',3000);if(btn){btn.disabled=false;btn.textContent='Verify & Enter App';}return;}
-    if(r.data&&r.data.user){
-      _sbUser=r.data.user;_hideAuthModal();_updateAuthUI();
-      await _migrateLocalTripsToCloud(r.data.user.id);
-      await _loadTripsFromCloud();
-      var n=r.data.user.user_metadata&&r.data.user.user_metadata.full_name?r.data.user.user_metadata.full_name.split(' ')[0]:window._pendingEmail.split('@')[0];
-      showToast('','Welcome, '+n+'! Email verified.',3500);
-      window._pendingEmail=null;window._pendingPass=null;window._pendingName=null;
-    }
-  }catch(e){showToast('','Verification error: '+e.message,3000);}
-  finally{if(btn){btn.disabled=false;btn.textContent='Verify & Enter App';}}
-}
-
-async function _resendOTP(){
-  var email=window._pendingEmail;
-  if(!email)return;
-  var r=await _supabase.auth.signInWithOtp({email:email,options:{shouldCreateUser:false}});
-  if(!r.error)showToast('','New code sent to '+email,3000);
-  else showToast('','Could not resend: '+r.error.message,3000);
-}
-
-async function _signOut(){if(!_supabase)return;await _supabase.auth.signOut();_sbUser=null;showToast('','Signed out',2000);}
-async function _migrateLocalTripsToCloud(userId){
-  if(!_supabase||!userId||!TRIPS||TRIPS.length===0)return;
-  try{var rows=TRIPS.map(function(t){return{user_id:userId,from_addr:t.from||'',to_addr:t.to||'',miles:parseFloat(t.mi)||0,type:t.type||'uncl',purpose:t.purpose||'',notes:t.notes||'',trip_date:t.date||'',trip_time:t.time||'',deductible:!!t.ded};});
-  await _supabase.from('trips').upsert(rows,{ignoreDuplicates:true});}catch(e){console.warn('Migration:',e);}
-}
-async function _syncTripsToCloud(){
-  if(!_supabase)return;
-  var sess=await _supabase.auth.getSession();
-  var userId=sess&&sess.data&&sess.data.session&&sess.data.session.user&&sess.data.session.user.id;
-  if(!userId)return;
-  var trips=_decStore('mymilesai_trips');
-  if(!trips)return;
-  try{trips=JSON.parse(trips);}catch(e){return;}
-  if(!Array.isArray(trips)||trips.length===0)return;
-  try{
-    var rows=trips.map(function(t){return{
-      user_id:userId,
-      trip_id:String(t.id||Date.now()),
-      from_addr:t.from||'',
-      to_addr:t.to||'',
-      miles:parseFloat(t.mi)||0,
-      type:t.type||'uncl',
-      time_label:t.time||'',
-      trip_date:t.date||'',
-      ts:t.ts||Date.now(),
-      deductible:!!t.ded,
-      purpose:t.purpose||'',
-      notes:t.notes||'',
-      path:t.path||'',
-      positions:t.positions?JSON.stringify(t.positions):null
-    };});
-    var r=await _supabase.from('trips').upsert(rows,{onConflict:'trip_id,user_id',ignoreDuplicates:false});
-    if(r.error){
-      var minRows=trips.map(function(t){return{
-        user_id:userId,
-        trip_id:String(t.id||Date.now()),
-        from_addr:t.from||'',
-        to_addr:t.to||'',
-        miles:parseFloat(t.mi)||0,
-        type:t.type||'uncl',
-        ts:t.ts||Date.now(),
-        deductible:!!t.ded
-      };});
-      await _supabase.from('trips').upsert(minRows,{onConflict:'trip_id,user_id',ignoreDuplicates:false});
-    }
-      }catch(e){}
-}
-async function _loadTripsFromCloud(){
-  if(!_supabase)return;
-  var sess=await _supabase.auth.getSession();
-  var userId=sess&&sess.data&&sess.data.session&&sess.data.session.user&&sess.data.session.user.id;
-  if(!userId)return;
-  try{
-    var r=await _supabase.from('trips')
-      .select('trip_id,from_addr,to_addr,miles,type,time_label,trip_date,ts,deductible,purpose,notes,path,positions,created_at')
-      .eq('user_id',userId)
-      .order('ts',{ascending:false})
-      .limit(500);
-    if(r.error||!r.data||r.data.length===0)return;
-    var loaded=r.data.map(function(t,i){
-      var pos=null;
-      try{pos=t.positions?JSON.parse(t.positions):null;}catch(e){}
-      return{
-        id:parseInt(t.trip_id)||Date.now()+i,
-        from:t.from_addr||'',
-        to:t.to_addr||'',
-        mi:parseFloat(t.miles)||0,
-        type:t.type||'uncl',
-        time:t.time_label||'',
-        date:t.trip_date||new Date(t.ts||t.created_at).toLocaleDateString(),
-        day:_fmt(new Date(t.ts||t.created_at||Date.now())),
-        ts:t.ts||new Date(t.created_at).getTime()||Date.now(),
-        ded:!!t.deductible,
-        purpose:t.purpose||'',
-        notes:t.notes||'',
-        path:t.path||randomPath(),
-        positions:pos||[]
-      };
-    });
-    var cloudIds=new Set(loaded.map(function(t){return String(t.id);}));
-    var localOnly=(typeof TRIPS!=='undefined'?TRIPS:[]).filter(function(t){return!cloudIds.has(String(t.id));});
-    while(TRIPS.length)TRIPS.pop();
-    loaded.concat(localOnly).forEach(function(t){TRIPS.push(t);});
-    TRIPS.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
-    saveTripsToStorage();
-    renderTrips();renderAlerts();recalcStats();_updateStreak();
-    showToast('\u2601\ufe0f','Trips synced from cloud \u2014 '+loaded.length+' trips loaded',3000);
-  }catch(e){}
-}
-
 /* Fix #19 — Persist trips to localStorage */
-/* ===== CLOUD SYNC (Supabase) ===== */
+/* ===== CLOUD SYNC (JSONBin.io) ===== */
+var _JSONBIN_KEY='$2a$10$MyMilesAI_PLACEHOLDER_KEY'; // set via setupCloudSync()
+var _JSONBIN_BIN=''; // bin ID stored in localStorage per user
+var _syncPending=false;
 var _syncTimer=null;
+
+function _getSyncId(){
+  // Use device-unique ID derived from localStorage — same user = same bin
+  try{
+    var sid=localStorage.getItem('mymilesai_syncid');
+    if(!sid){sid='mmai_'+(Date.now().toString(36))+(Math.random().toString(36).slice(2));localStorage.setItem('mymilesai_syncid',sid);}
+    return sid;
+  }catch(e){return 'mmai_default';}
+}
+
+function _showSyncStatus(msg,ok){
+  var el=document.getElementById('syncStatusDot');
+  if(!el)return;
+  el.title=msg;
+  el.style.background=ok?'#22c55e':'#f59e0b';
+}
 
 /* ===== ENCRYPTED STORAGE (client-side obfuscation) ===== */
 var _encKey=(function(){
@@ -5183,15 +4575,51 @@ function _decStore(key){
 }
 
 function saveTripsToStorage(){
-  try{
-    _encStore('mymilesai_trips',JSON.stringify(TRIPS));
-    localStorage.setItem('mymilesai_last_save',Date.now().toString());
-  }catch(e){}
-  if(window._syncTimer)clearTimeout(window._syncTimer);
-  window._syncTimer=setTimeout(function(){_syncTripsToCloud();},1000);
+  
+  try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
+  // Debounce cloud sync — wait 2s after last change
+  if(_syncTimer)clearTimeout(_syncTimer);
+  _syncTimer=setTimeout(function(){_pushToCloud();},2000);
+}
+
+function _pushToCloud(){
+  var binId=localStorage.getItem('mymilesai_bin_id');
+  var payload={trips:TRIPS,updated:Date.now(),version:'4.2'};
+  var apiKey='$2a$10$8QxhDcU6bLmNJvKpXwYrZeWqA9nF3dTsE7gHmP2jRcVuB4kL6oNy';
+  if(!binId){
+    // Create new bin
+    fetch('https://api.jsonbin.io/v3/b',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Master-Key':apiKey,'X-Bin-Name':_getSyncId(),'X-Bin-Private':'true'},
+      body:JSON.stringify(payload)
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.metadata&&d.metadata.id){
+        localStorage.setItem('mymilesai_bin_id',d.metadata.id);
+        _showSyncStatus('Synced to cloud ✓',true);
+      }
+    }).catch(function(){_showSyncStatus('Sync failed — saved locally',false);});
+  } else {
+    // Update existing bin
+    fetch('https://api.jsonbin.io/v3/b/'+binId,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':apiKey},
+      body:JSON.stringify(payload)
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.metadata)_showSyncStatus('Synced ✓ '+new Date().toLocaleTimeString(),true);
+    }).catch(function(){_showSyncStatus('Sync failed — saved locally',false);});
+  }
+}
+
+function _mergeTrips(local,cloud){
+  var byId={};
+  local.forEach(function(t){byId[t.id]=t;});
+  cloud.forEach(function(t){
+    if(!byId[t.id]||(t.ts&&t.ts>(byId[t.id].ts||0))){byId[t.id]=t;}
+  });
+  return Object.values(byId).sort(function(a,b){return(b.ts||0)-(a.ts||0);});
 }
 function loadTripsFromStorage(){
-  // Load from localStorage immediately
+  // First load from localStorage immediately (fast)
   var loadedFromLocal=false;
   try{
     var stored=_decStore('mymilesai_trips');
@@ -5206,14 +4634,43 @@ function loadTripsFromStorage(){
           TRIPS.push(parsed[i]);
         }
         TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+        
         loadedFromLocal=true;
         renderTrips();renderAlerts();
       }
     }
   }catch(e){}
-  // Then try Supabase cloud if signed in
-  if(_sbUser){setTimeout(_loadTripsFromCloud,1000);}
-  else if(!loadedFromLocal){renderTrips();renderAlerts();}
+
+  // Then try to pull fresher data from cloud
+  var binId=localStorage.getItem('mymilesai_bin_id');
+  var apiKey='$2a$10$8QxhDcU6bLmNJvKpXwYrZeWqA9nF3dTsE7gHmP2jRcVuB4kL6oNy';
+  if(binId){
+    _showSyncStatus('Syncing...',true);
+    fetch('https://api.jsonbin.io/v3/b/'+binId+'/latest',{
+      headers:{'X-Master-Key':apiKey}
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.record&&d.record.trips&&d.record.trips.length>0){
+        var cloud=d.record.trips;
+        // Per-trip merge: keep newer version of each trip by ID
+        var merged=_mergeTrips(TRIPS,cloud);
+        TRIPS.length=0;
+        for(var i=0;i<merged.length;i++){
+          if(!merged[i].purpose)merged[i].purpose='';
+          if(!merged[i].notes)merged[i].notes='';
+          if(!merged[i].ts){var d2=merged[i].date?new Date(merged[i].date):new Date();merged[i].ts=isNaN(d2.getTime())?Date.now():d2.getTime();}
+          TRIPS.push(merged[i]);
+        }
+        TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+        try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
+        renderTrips();renderAlerts();
+        _showSyncStatus('Synced from cloud',true);
+      }
+    }).catch(function(){_showSyncStatus('Offline — using local data',false);});
+  } else if(!loadedFromLocal){
+    // No local, no cloud — show empty state
+    renderTrips();renderAlerts();
+  }
+  if(!binId&&!loadedFromLocal){renderTrips();renderAlerts();}
 }
 
 /* Fix #24 — Haptic feedback on buttons */
@@ -5251,7 +4708,7 @@ function updateOdoDelta(){
 loadOdometer();
 
 /* ===== FEATURE 4: WORK HOURS AUTO-CLASSIFY ===== */
-var _workHours={enabled:false,start:'09:00',end:'17:00',days:[0,1,1,1,1,1,0]};
+var _workHours={enabled:false,start:'08:00',end:'18:00',days:[0,1,1,1,1,1,0]};
 function loadWorkHours(){
   try{
     var wh=JSON.parse(localStorage.getItem('mymilesai_workhours')||'null');
@@ -5649,124 +5106,6 @@ if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
     });
   }
 }
-
-
-// ── ACCOUNT DELETION (App Store Guideline 5.1.1) ─────────────
-function deleteAccount(){
-  openInfoModal('Delete Account',
-    '<div style="text-align:center;padding:8px 0">'
-    +'<div style="font-size:40px;margin-bottom:12px">&#9888;&#65039;</div>'
-    +'<div style="font-weight:700;font-size:17px;color:#E74C3C;margin-bottom:8px">Permanently Delete Account</div>'
-    +'<div style="font-size:13px;color:var(--ink3);margin-bottom:12px">This will permanently delete <b>all your trips, settings, and account data</b>. This action <b>cannot be undone</b>.</div>'
-    +'<div style="font-size:12px;color:var(--ink3);margin-bottom:8px">Type <b>DELETE</b> to confirm:</div>'
-    +`<input id="_deleteConfirmInput" type="text" placeholder="Type DELETE here" style="width:100%;padding:12px;border:1.5px solid #E74C3C;border-radius:10px;font-size:15px;text-align:center;margin-bottom:12px;box-sizing:border-box;font-family:inherit" oninput="document.getElementById('_deleteConfirmBtn').style.opacity=this.value==='DELETE'?'1':'0.4';document.getElementById('_deleteConfirmBtn').disabled=this.value!=='DELETE'">`
-    +'<button id="_deleteConfirmBtn" onclick="deleteAccount()" disabled style="width:100%;padding:14px;background:#E74C3C;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;opacity:0.4">Delete My Account</button>'
-    +'</div>'
-  );
-}
-async function confirmDeleteAccount(){
-  closeInfoModal();
-  showToast('\u231B','Deleting your account...', 3000);
-  try{
-    // Clear all local data
-    TRIPS=[];
-    saveTripsToStorage();
-    try{localStorage.clear();}catch(e){}
-    // Sign out from Supabase if available
-    if(window._sb){
-      try{await window._sb.auth.signOut();}catch(e){}
-    }
-    // Show confirmation
-    setTimeout(function(){
-      document.body.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:40px;text-align:center">'
-        +'<div style="font-size:48px;margin-bottom:16px">✓</div>'
-        +'<div style="font-size:20px;font-weight:700;margin-bottom:8px">Account Deleted</div>'
-        +'<div style="font-size:14px;color:#888;margin-bottom:24px">All your data has been permanently removed.</div>'
-        +'<button onclick="location.reload()" style="padding:14px 28px;background:#1B4DDB;color:white;border:none;border-radius:12px;font-size:15px;cursor:pointer">Start Fresh</button>'
-        +'</div>';
-    }, 1500);
-  }catch(e){
-    showToast('\u26A0','Error deleting account. Please try again.',3000);
-  }
-}
-
-
-// ── DEMO DATA for App Store reviewer / TestFlight testers ──────
-function loadDemoData(){
-  if(!confirm('Add 15 sample trips to demonstrate the app?'))return;
-  var today=new Date();
-  var categories=['biz','biz','biz','pers','biz','biz','pers','biz','med','biz','biz','pers','biz','char','biz'];
-  var routes=[
-    {from:'123 Main St, Manteca, CA',to:'Client Office, Stockton, CA',mi:12.4},
-    {from:'Home, Manteca, CA',to:'Downtown Office, Sacramento, CA',mi:45.2},
-    {from:'Office, Stockton, CA',to:'Airport, Sacramento, CA',mi:38.1},
-    {from:'Home, Manteca, CA',to:'Grocery Store, Manteca, CA',mi:3.2},
-    {from:'Office, Stockton, CA',to:'Client Site, Modesto, CA',mi:28.7},
-    {from:'Home, Manteca, CA',to:'Bank, Tracy, CA',mi:8.9},
-    {from:'Home, Manteca, CA',to:'Gym, Manteca, CA',mi:2.1},
-    {from:'Client Site, Modesto, CA',to:'Office, Stockton, CA',mi:28.5},
-    {from:'Home, Manteca, CA',to:'Medical Center, Stockton, CA',mi:15.3},
-    {from:'Office, Stockton, CA',to:'Client Meeting, Lodi, CA',mi:22.6},
-    {from:'Home, Manteca, CA',to:'Office, Stockton, CA',mi:18.4},
-    {from:'Office, Stockton, CA',to:'Home, Manteca, CA',mi:18.4},
-    {from:'Home, Manteca, CA',to:'Supplier, Tracy, CA',mi:11.2},
-    {from:'Office, Stockton, CA',to:'Food Bank, Stockton, CA',mi:4.8},
-    {from:'Home, Manteca, CA',to:'Client HQ, San Jose, CA',mi:78.3},
-  ];
-  var newTrips=[];
-  for(var i=0;i<15;i++){
-    var d=new Date(today);d.setDate(d.getDate()-(i*2+1));
-    var dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    var type=categories[i];
-    newTrips.push({
-      id:'demo_'+i+'_'+Date.now(),date:dateStr,day:dateStr,
-      from:routes[i].from,to:routes[i].to,mi:String(routes[i].mi),
-      type:type,ded:type==='biz'||type==='med'||type==='char',
-      purpose:type==='biz'?'Client meeting':'',notes:'',
-      startTime:'09:'+String(i*3+10).padStart(2,'0'),
-      time:'09:'+String(i*3+10).padStart(2,'0'),
-    });
-  }
-  TRIPS=newTrips.concat(TRIPS);
-  saveTripsToStorage();
-  renderTrips();
-  if(typeof renderStats==='function')renderStats();
-  renderAlerts();_updateStreak();
-  showToast('\u2713','15 sample trips loaded! Browse Trips and Stats tabs.',3500);
-  closeSettings();switchTabId('tab-trips');
-}
-// Show demo button on GitHub Pages and in TestFlight builds
-(function(){
-  try{
-    var show=window.location.href.includes('github.io')||
-             window.location.href.includes('localhost')||
-             window.__MYMILESAI_TESTFLIGHT__;
-    if(show){var b=document.getElementById('demoBtnRow');if(b)b.style.display='';}
-  }catch(e){}
-})();
-
 </script>
-<!-- SUPABASE AUTH MODAL -->
-<div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center">
-  <div id="authSheet" style="background:var(--white);border-radius:24px;padding:32px 24px;width:90%;max-width:380px;text-align:center">
-    <div style="font-family:var(--fd);font-size:24px;font-weight:800;color:var(--ink);margin-bottom:8px">MyMilesAI</div>
-    <div style="font-size:13px;color:var(--ink3);margin-bottom:28px">Sign in to sync your trips across devices</div>
-    <button onclick="_authGoogle()" style="width:100%;padding:14px;border:1.5px solid var(--ink6);border-radius:var(--rpill);background:var(--white);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;color:var(--ink)">
-      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.6 2.5 30.1 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.8 6.1C12.4 13.1 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17z"/><path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 019.5 24c0-1.6.3-3.2.8-4.6l-7.8-6.1A23.9 23.9 0 000 24c0 3.9.9 7.5 2.7 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.2-2 14.9-5.4l-7.5-5.8c-2 1.4-4.6 2.2-7.4 2.2-6.3 0-11.6-3.6-13.5-8.8l-7.8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
-      Continue with Google
-    </button>
-    <button onclick="_authApple()" style="width:100%;padding:14px;border:none;border-radius:var(--rpill);background:#000;color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px">
-      <svg width="16" height="18" viewBox="0 0 814 1000" fill="#fff"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.9 135.4-317.8 268.3-317.8 98.9 0 181.4 65.2 241.9 65.2 57.2 0 147.5-69.3 261.1-69.3z"/></svg>
-      Continue with Apple
-    </button>
-    <div style="display:flex;align-items:center;gap:8px;margin:16px 0"><div style="flex:1;height:1px;background:var(--ink6)"></div><span style="font-size:12px;color:var(--ink4)">or</span><div style="flex:1;height:1px;background:var(--ink6)"></div></div>
-    <input id="authName" type="text" placeholder="Your name" autocomplete="name" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:10px;outline:none;background:var(--white);color:var(--ink)">
-    <input id="authEmail" type="email" placeholder="Email address" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:10px;outline:none;background:var(--white);color:var(--ink)">
-    <input id="authPassword" type="password" placeholder="Password (10+ chars, Aa!)" oninput="var p=this.value,s=document.getElementById('passStrength');if(!s)return;var b=[];if(p.length<10)b.push('10+ chars');if(!/[A-Z]/.test(p))b.push('uppercase');if(!/[a-z]/.test(p))b.push('lowercase');if(!/[^A-Za-z0-9]/.test(p))b.push('special char');s.textContent=b.length?'Need: '+b.join(', '):'Strong password!';s.style.color=b.length?'var(--coral)':'var(--mint)';" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;margin-bottom:14px;outline:none;background:var(--white);color:var(--ink)">
-    <div id="passStrength" style="font-size:11px;margin:4px 0 10px 4px;color:var(--ink4)"></div>
-    <button id="authSubmitBtn" onclick="_authEmail()" style="width:100%;padding:14px;border:none;border-radius:var(--rpill);background:var(--vi);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Sign In / Sign Up</button>
-    <button onclick="_skipAuth()" style="width:100%;padding:10px;border:none;background:none;font-size:13px;color:var(--ink4);cursor:pointer">Skip for now</button>
-  </div>
-</div>
 </body>
 </html>
