@@ -16,7 +16,7 @@
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
-<title>MyMilesAI Rel 5.0</title>
+<title>MyMilesAI Rel 5.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -61,7 +61,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .hdr-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--mag);border:2px solid var(--white);}
 
 /* HERO */
-.hero{margin:10px 16px 0;border-radius:var(--r3);overflow:hidden;position:relative;padding:26px 22px 22px;color:#fff;background:#0C0C1D;box-shadow:0 16px 56px rgba(12,12,29,.4),0 4px 12px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.04);}
+.hero{margin:0;border-radius:0;overflow:hidden;position:relative;padding:20px 22px 22px;color:#fff;background:#0C0C1D;box-shadow:none;}
 .hero-mesh{position:absolute;inset:0;overflow:hidden;z-index:0;}
 .hero-mesh .m1{position:absolute;width:260px;height:260px;border-radius:50%;filter:blur(60px);opacity:.5;background:radial-gradient(circle,rgba(214,0,110,.4),transparent);top:-30%;right:-10%;animation:ms1 12s ease-in-out infinite;}
 .hero-mesh .m2{position:absolute;width:220px;height:220px;border-radius:50%;filter:blur(55px);opacity:.35;background:radial-gradient(circle,rgba(108,60,224,.45),transparent);bottom:-20%;left:-15%;animation:ms2 14s ease-in-out infinite;}
@@ -77,19 +77,19 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .hero-status.mon .hero-dot{background:#C4B5FD;box-shadow:0 0 10px rgba(196,181,253,.5);animation:gp 3s ease-in-out infinite;}
 .hero-brand{font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.5px;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s ease-in-out infinite;}
 .speedo{display:flex;justify-content:center;margin:12px 0 28px;position:relative;}
-.speedo-wrap{position:relative;width:200px;height:110px;}
-.speedo-svg{width:200px;height:110px;overflow:visible;}
+.speedo-wrap{position:relative;width:240px;height:130px;}
+.speedo-svg{width:240px;height:130px;overflow:visible;}
 .sp-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:10;stroke-linecap:round;}
-.sp-fill{fill:none;stroke:url(#spGrad);stroke-width:10;stroke-linecap:round;stroke-dasharray:267;stroke-dashoffset:267;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
-.sp-glow{fill:none;stroke:url(#spGrad);stroke-width:18;stroke-linecap:round;filter:blur(12px);opacity:.35;stroke-dasharray:267;stroke-dashoffset:267;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
+.sp-fill{fill:none;stroke:url(#spGrad);stroke-width:10;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
+.sp-glow{fill:none;stroke:url(#spGrad);stroke-width:18;stroke-linecap:round;filter:blur(12px);opacity:.4;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
 .sp-tick{fill:none;stroke:rgba(255,255,255,.08);stroke-width:1;}
 .speedo-center{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center;}
-.sp-num{font-family:var(--fd);font-size:60px;font-weight:800;letter-spacing:-3px;line-height:1;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sp-num{font-family:var(--fd);font-size:72px;font-weight:800;letter-spacing:-4px;line-height:1;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .sp-unit{font-size:11px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
 .hero-stats{display:flex;gap:3px;}
-.hs{flex:1;padding:14px 8px;text-align:center;background:rgba(255,255,255,.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.04);}
+.hs{flex:1;padding:14px 6px;text-align:center;background:rgba(255,255,255,.06);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);}
 .hs:first-child{border-radius:var(--r) 4px 4px var(--r);}.hs:last-child{border-radius:4px var(--r) var(--r) 4px;}.hs:nth-child(2){border-radius:4px;}
-.hs-v{font-family:var(--fd);font-size:22px;font-weight:700;letter-spacing:-.8px;line-height:1;}
+.hs-v{font-family:var(--fd);font-size:20px;font-weight:700;letter-spacing:-.6px;line-height:1;}
 .hs-v.c1{color:#C084FC}.hs-v.c2{color:#FB7185}.hs-v.c3{color:#6EE7B7}
 .hs-l{font-size:9px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px;}
 
@@ -222,8 +222,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .add-save:disabled{opacity:.4;pointer-events:none;}
 
 /* QUICK ACTIONS */
-.qa{display:flex;gap:8px;padding:16px 16px 8px;overflow-x:auto;scrollbar-width:none;}.qa::-webkit-scrollbar{display:none;}
-.qa-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;background:var(--white);border:1px solid var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:var(--f);font-size:13px;font-weight:600;color:var(--ink);transition:all .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--s2);}
+.qa{display:flex;gap:10px;padding:16px 16px 12px;overflow-x:auto;scrollbar-width:none;background:var(--bg);}.qa::-webkit-scrollbar{display:none;}
+.qa-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;background:var(--white);border:1.5px solid var(--ink6);border-radius:var(--rpill);white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:var(--f);font-size:13px;font-weight:600;color:var(--ink2);transition:all .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--s1);}
 .qa-btn:hover{border-color:var(--ink5);transform:translateY(-3px);box-shadow:var(--s3);}
 .qa-btn:active{transform:translateY(0) scale(.97);}
 .qa-btn .i{font-size:17px;}
@@ -231,10 +231,10 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .qa-btn.pri.recording{background:linear-gradient(135deg,#EF3D58,#FF6B6B);border-color:transparent;box-shadow:0 4px 20px rgba(239,61,88,.35),inset 0 1px 0 rgba(255,255,255,.15);animation:pulse-rec 2s ease-in-out infinite;}
 
 /* SECTIONS */
-.sh{display:flex;align-items:center;justify-content:space-between;padding:26px 20px 12px;}
-.sh-t{font-family:var(--fd);font-size:18px;font-weight:700;letter-spacing:-.3px;background:linear-gradient(135deg,var(--ink) 30%,var(--vi));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;}
+.sh-t{font-family:var(--fd);font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--ink);}
 .sh-pill{font-size:11px;font-weight:700;color:var(--mag);background:var(--mag-s);padding:4px 11px;border-radius:var(--rpill);}
-.sh-link{font-size:13px;font-weight:600;color:var(--mag);cursor:pointer;}
+.sh-link{font-size:13px;font-weight:700;color:var(--mag);cursor:pointer;}
 .uncl{margin:8px 16px 0;padding:16px 20px;display:flex;align-items:center;gap:14px;background:var(--amber-s);border:1.5px solid var(--amber-s2);border-radius:var(--r2);cursor:pointer;box-shadow:var(--s2);transition:all .3s cubic-bezier(.22,1,.36,1);}
 .uncl:hover{border-color:rgba(224,141,0,.3);transform:translateY(-2px);box-shadow:var(--s3);}
 .uncl-i{font-size:24px;}.uncl-t{font-size:14px;font-weight:700;color:var(--amber);}.uncl-d{font-size:11px;color:var(--ink2);margin-top:2px;font-weight:500;}.uncl-a{margin-left:auto;color:var(--ink5);font-size:20px;}
@@ -253,10 +253,10 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .trip-list .trip{min-width:auto;max-width:none;flex-shrink:unset;}
 .trip-map{height:90px;position:relative;overflow:hidden;}
 .trip-map-bg{position:absolute;inset:0;}
-.trip-map-bg.biz{background:linear-gradient(135deg,#F0ECFF,#E8E0FF,#F5F0FF);}
-.trip-map-bg.pers{background:linear-gradient(135deg,#FFF0F5,#FFE0EB,#FFF5F8);}
-.trip-map-bg.uncl{background:linear-gradient(135deg,#FFF8EC,#FFEFCF,#FFF9F0);}
-.trip-map-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(rgba(0,0,0,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.05) 1px,transparent 1px);background-size:24px 24px;}
+.trip-map-bg.biz{background:linear-gradient(180deg,rgba(108,60,224,.08),rgba(196,181,253,.18));}
+.trip-map-bg.pers{background:linear-gradient(180deg,rgba(214,0,110,.07),rgba(251,147,185,.15));}
+.trip-map-bg.uncl{background:linear-gradient(180deg,rgba(224,141,0,.07),rgba(251,191,36,.14));}
+.trip-map-grid{display:none;}
 .trip-map svg{position:relative;z-index:1;width:100%;height:100%;}
 .trip-map-badge{position:absolute;top:10px;right:10px;padding:5px 13px;border-radius:var(--rpill);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;z-index:2;backdrop-filter:blur(12px);box-shadow:var(--s1);}
 .trip-map-badge.biz{background:rgba(108,60,224,.12);color:var(--vi);border:1px solid rgba(108,60,224,.15);}
@@ -567,16 +567,16 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
       <div class="hero-content">
         <div class="hero-top"><div class="hero-status" id="heroStatus"><span class="hero-dot"></span><span id="statusText">GPS Active</span></div><div class="hero-brand">MyMilesAI</div></div>
         <div class="speedo"><div class="speedo-wrap">
-          <svg class="speedo-svg" viewBox="0 0 200 110"><defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="40%" stop-color="#C084FC"/><stop offset="70%" stop-color="#FB7185"/><stop offset="100%" stop-color="#FCA5A5"/></linearGradient></defs>
-            <line x1="25" y1="95" x2="25" y2="88" class="sp-tick"/><line x1="48" y1="65" x2="53" y2="70" class="sp-tick"/><line x1="80" y1="42" x2="82" y2="48" class="sp-tick"/><line x1="120" y1="42" x2="118" y2="48" class="sp-tick"/><line x1="152" y1="65" x2="147" y2="70" class="sp-tick"/><line x1="175" y1="95" x2="175" y2="88" class="sp-tick"/>
-            <path d="M22,97 A78,78 0 0,1 178,97" class="sp-track"/><path d="M22,97 A78,78 0 0,1 178,97" class="sp-glow" id="spGlow"/><path d="M22,97 A78,78 0 0,1 178,97" class="sp-fill" id="spFill"/>
+          <svg class="speedo-svg" viewBox="0 0 240 130"><defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="40%" stop-color="#C084FC"/><stop offset="70%" stop-color="#FB7185"/><stop offset="100%" stop-color="#FCA5A5"/></linearGradient></defs>
+            <line x1="18" y1="115" x2="18" y2="107" class="sp-tick"/><line x1="47" y1="72" x2="53" y2="78" class="sp-tick"/><line x1="95" y1="44" x2="97" y2="51" class="sp-tick"/><line x1="145" y1="44" x2="143" y2="51" class="sp-tick"/><line x1="193" y1="72" x2="187" y2="78" class="sp-tick"/><line x1="222" y1="115" x2="222" y2="107" class="sp-tick"/>
+            <path d="M18,117 A102,102 0 0,1 222,117" class="sp-track"/><path d="M18,117 A102,102 0 0,1 222,117" class="sp-glow" id="spGlow"/><path d="M18,117 A102,102 0 0,1 222,117" class="sp-fill" id="spFill"/>
           </svg>
           <div class="speedo-center"><div class="sp-num" id="speedNum">0</div><div class="sp-unit" id="speedUnit">mph</div></div>
         </div></div>
         <div class="hero-stats">
           <div class="hs"><div class="hs-v c1" id="hsBiz">0</div><div class="hs-l" id="hsBizL">Business mi</div></div>
           <div class="hs"><div class="hs-v c2" id="hsPer">0</div><div class="hs-l" id="hsPerL">Personal mi</div></div>
-          <div class="hs"><div class="hs-v c3" id="hsDed">$0</div><div class="hs-l">Deduction</div></div>
+          <div class="hs"><div class="hs-v c3" id="hsDed">$0</div><div class="hs-l">Deduction</div></div><div class="hs"><div class="hs-v" id="hsStreak" style="color:#f59e0b">🥇0🔥</div><div class="hs-l">Day streak</div></div>
         </div>
       </div>
     </div>
@@ -2569,7 +2569,7 @@ function onPos(p){
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
   var pct=Math.min(spdVal/maxSpd,1);
-  var off=267-(267*pct);
+  var off=314-(314*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Only update distance with accurate readings
@@ -2755,7 +2755,7 @@ function onAutoPos(p){
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
   var pct=Math.min(spdVal/maxSpd,1);
-  var off=267-(267*pct);
+  var off=314-(314*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Update GPS coords for templates
