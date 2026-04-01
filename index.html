@@ -16,7 +16,7 @@
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
-<title>MyMilesAI Rel 5.3</title>
+<title>MyMilesAI Rel 5.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -53,10 +53,10 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:max(12px,env(safe-area-inset-top)) 20px 10px;position:sticky;top:0;z-index:100;background:rgba(246,247,249,.85);backdrop-filter:blur(24px) saturate(2);}
 .hdr-l{display:flex;align-items:center;gap:12px;}
 .hdr-av{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#D6006E,#6C3CE0,#00A870);background-size:200% 200%;animation:avGrad 6s ease-in-out infinite;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;box-shadow:0 3px 12px rgba(214,0,110,.25);}
-.hdr-greet{font-size:12px;color:var(--ink4);font-weight:500;}
-.hdr-name{font-family:var(--fd);font-size:18px;font-weight:700;line-height:1.2;letter-spacing:-.3px;background:linear-gradient(135deg,var(--ink) 0%,#6C3CE0 50%,var(--mag) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-greet{font-size:12px;color:rgba(255,255,255,.5);font-weight:500;}
+.hdr-name{font-family:var(--fd);font-size:18px;font-weight:700;line-height:1.2;letter-spacing:-.3px;color:#fff;-webkit-text-fill-color:#fff;}
 .hdr-r{display:flex;gap:8px;}
-.hdr-btn{width:38px;height:38px;border-radius:12px;background:var(--white);border:1px solid var(--ink6);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .2s;box-shadow:var(--s1);position:relative;}
+.hdr-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .2s;position:relative;color:#fff;}
 .hdr-btn:hover{background:var(--ink7);transform:scale(1.05);}
 .hdr-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--mag);border:2px solid var(--white);}
 
@@ -77,7 +77,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .hero-status.mon .hero-dot{background:#C4B5FD;box-shadow:0 0 10px rgba(196,181,253,.5);animation:gp 3s ease-in-out infinite;}
 .hero-brand{font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.5px;background:linear-gradient(135deg,#fff 0%,#C084FC 40%,#D6006E 70%,#6EE7B7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s ease-in-out infinite;}
 .speedo{display:flex;justify-content:center;margin:12px 0 28px;position:relative;}
-.speedo-wrap{position:relative;width:240px;height:130px;}
+.speedo-wrap{position:relative;width:240px;height:130px;overflow:hidden;}
 .speedo-svg{width:240px;height:130px;overflow:visible;}
 .sp-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:10;stroke-linecap:round;}
 .sp-fill{fill:none;stroke:url(#spGrad);stroke-width:10;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);}
@@ -91,7 +91,7 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 .hs:first-child{border-radius:var(--r) 4px 4px var(--r);}.hs:last-child{border-radius:4px var(--r) var(--r) 4px;}.hs:nth-child(2){border-radius:4px;}
 .hs-v{font-family:var(--fd);font-size:20px;font-weight:700;letter-spacing:-.6px;line-height:1;}
 .hs-v.c1{color:#C084FC}.hs-v.c2{color:#FB7185}.hs-v.c3{color:#6EE7B7}
-.hs-l{font-size:9px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px;}
+.hs-l{font-size:8px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:6px;white-space:nowrap;}
 
 /* LIVE TRACKING */
 .track-live{display:none;margin:10px 16px 0;padding:18px 20px;background:var(--white);border:1.5px solid rgba(239,61,88,.15);border-radius:var(--r3);box-shadow:0 4px 20px rgba(239,61,88,.06),var(--s2);position:relative;overflow:hidden;}
@@ -246,8 +246,8 @@ body{font-family:var(--f);background:#0C0C1D;color:var(--ink);-webkit-font-smoot
 @keyframes ctaGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 
 /* TRIPS */
-.trips{display:flex;gap:14px;padding:0 16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;}.trips::-webkit-scrollbar{display:none;}
-.trip{min-width:310px;max-width:82vw;flex-shrink:0;scroll-snap-align:start;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);overflow:hidden;transition:all .35s;cursor:pointer;box-shadow:var(--s2);}
+.trips{display:flex;flex-direction:column;gap:12px;padding:0 16px;overflow-x:visible;}.trips::-webkit-scrollbar{display:none;}
+.trip{width:100%;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);overflow:hidden;transition:all .35s;cursor:pointer;box-shadow:var(--s2);}
 .trip:hover{border-color:var(--ink5);box-shadow:var(--s3);transform:translateY(-4px);}
 .trip-list{padding:0 16px;display:flex;flex-direction:column;gap:12px;}
 .trip-list .trip{min-width:auto;max-width:none;flex-shrink:unset;}
