@@ -1164,7 +1164,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 </div>
 
 <script>window._initGoogleMaps=function(){window._mapsCallbackQueued=true;};</script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places,places-new,marker&callback=_initGoogleMaps" async ></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places,places-new,marker&loading=async&callback=_initGoogleMaps"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
@@ -2712,20 +2712,25 @@ function _isHighwayAddress(addr){
 }
 function _snapToNearestPlace(lat,lng,cb){
   if(!_googleMapsReady||!google||!google.maps||!google.maps.places){cb(null);return;}
-  var service=new google.maps.places.PlacesService(document.createElement('div'));
-  service.nearbySearch({
-    location:{lat:lat,lng:lng},
-    radius:200,
-    type:['establishment']
-  },function(results,status){
-    if(status==='OK'&&results&&results.length>0){
-      // Pick the nearest named place
-      var best=results[0];
-      cb(best.name+(best.vicinity?', '+best.vicinity:''));
-    } else {
-      cb(null);
-    }
-  });
+  if(google.maps.places.Place&&google.maps.places.Place.searchNearby){
+    google.maps.places.Place.searchNearby({
+      fields:['displayName','formattedAddress'],
+      locationRestriction:{center:new google.maps.LatLng(lat,lng),radius:200},
+      includedTypes:['establishment'],
+      maxResultCount:1
+    }).then(function(res){
+      if(res.places&&res.places.length>0){
+        var p=res.places[0];
+        cb((p.displayName||'')+(p.formattedAddress?', '+p.formattedAddress:''));
+      } else { cb(null); }
+    }).catch(function(){ cb(null); });
+  } else {
+    var service=new google.maps.places.PlacesService(document.createElement('div'));
+    service.nearbySearch({location:{lat:lat,lng:lng},radius:200,type:['establishment']},function(results,status){
+      if(status==='OK'&&results&&results.length>0){cb(results[0].name+(results[0].vicinity?', '+results[0].vicinity:''));}
+      else{cb(null);}
+    });
+  }
 }
 
 function toggleTracking(){
@@ -4448,7 +4453,7 @@ function initMap(){
     _applyMapTheme();
     if(google.maps.marker&&google.maps.marker.AdvancedMarkerElement){
       var pin=new google.maps.marker.PinElement({background:'#6C3CE0',borderColor:'#fff',glyphColor:'#fff'});
-      userMarker=new google.maps.marker.AdvancedMarkerElement({position:{lat:defLat,lng:defLng},map:map,content:pin.element});
+      userMarker=new google.maps.marker.AdvancedMarkerElement({position:{lat:defLat,lng:defLng},map:map,content:pin});
     } else {
       userMarker=new google.maps.Marker({position:{lat:defLat,lng:defLng},map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:'#6C3CE0',fillOpacity:1,strokeColor:'#fff',strokeWeight:3}});
     }
