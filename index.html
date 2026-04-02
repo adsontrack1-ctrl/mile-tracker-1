@@ -2654,6 +2654,18 @@ function startTracking(){
   if(mapSheetOpen){document.getElementById('mapLiveBadge').classList.add('show');}
   updateMapTrackBtn();
   timerInt=setInterval(updateTimer,1000);
+  // Realtime hero stat refresh every 2s during tracking
+  window._liveStatInt=setInterval(function(){
+    if(!tracking)return;
+    var liveDist=_useKm()?totalDist*1.60934:totalDist;
+    var liveDed=liveDist*catRate('biz');
+    var hb=document.getElementById('hsBiz');
+    var hd=document.getElementById('hsDed');
+    var hp=document.getElementById('hsPer');
+    if(hb)hb.textContent=liveDist.toFixed(1);
+    if(hd)hd.textContent=LOC.currency+liveDed.toFixed(2);
+    if(hp)hp.textContent=((Date.now()-trackStart-_totalPauseMs-(_paused?(Date.now()-_pauseStart):0))/60000).toFixed(0);
+  },2000);
   updateDebugPanel();
 }
 
@@ -2859,10 +2871,10 @@ function onPos(p){
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Only update distance with accurate readings
-  if(positions.length>0&&accuracy<=100){
+  if(positions.length>0&&(accuracy<=100||(window.__MYMILESAI_NATIVE__&&accuracy<=200))){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
-    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi (accuracy<=100)
+    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
@@ -3055,7 +3067,7 @@ function stopAutoMonitoring(){
 
 var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
 var _detectCount=0; // consecutive above-threshold readings
-var _detectRequired=3;
+var _detectRequired=2;
 var _stillCount=0;
 var _stopRequired=8;
 var _charging=false;
@@ -3088,14 +3100,14 @@ function onAutoPos(p){
   var _acc2=p.coords.accuracy||999;
   if(!window._autoSpdBuf)window._autoSpdBuf=[];
   // Layer 1: accuracy gate — only trust readings <=25m
-  if(_acc2<=25){
+  if(_acc2<=65){
     // Layer 2: spike rejection — discard jumps >15mph/24kmh above avg
     var _prevAvg=window._autoSpdBuf.length>=2?window._autoSpdBuf.reduce(function(a,b){return a+b;},0)/window._autoSpdBuf.length:0;
     var _spikeMax=_useKm()?24:15;
     if(window._autoSpdBuf.length<2||spdVal<=_prevAvg+_spikeMax){
       window._autoSpdBuf.push(spdVal);if(window._autoSpdBuf.length>5)window._autoSpdBuf.shift();
     }
-  } else {
+  } else if(_acc2>100) {
     window._autoSpdBuf=[];
   }
   // Layer 4: require >=3 readings before trusting average
@@ -3185,6 +3197,7 @@ function stopTracking(){
   watchId=null;
   clearInterval(timerInt);clearTimeout(_pauseTimeout);
   tracking=false;_paused=false;_autoState='IDLE';_stationaryStart=0;
+  if(window._liveStatInt){clearInterval(window._liveStatInt);window._liveStatInt=null;}
   releaseWakeLock();
   // Notify native app
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
@@ -4095,7 +4108,10 @@ function loadMapAppPref(){
 }
 function openMapSheet(){
   var pref='inapp';
-  try{pref=localStorage.getItem('mymilesai_map_app')||'inapp';}catch(e){}
+  // On native app, always use in-app map — ignore any saved preference
+  if(!window.__MYMILESAI_NATIVE__){
+    try{pref=localStorage.getItem('mymilesai_map_app')||'inapp';}catch(e){}
+  }
   var lat=lastGpsLat||0, lng=lastGpsLng||0;
   if(pref==='apple'){
     // Apple Maps — works on iOS, falls back to maps.apple.com on other platforms
