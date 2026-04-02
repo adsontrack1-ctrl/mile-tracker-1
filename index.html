@@ -3269,109 +3269,13 @@ function stopTracking(){
       finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
     }
 
-    // Step 1: Get road distance via Routes API using start+end GPS coords
+    // Step 1: Use haversine accumulation as the trip distance
     function _getRoadDistanceThenSave(fromA,toA){
-      // Need at least start + end positions and online connectivity
-      if(positions.length<2||!endPos||!navigator.onLine){
-        _geocodeEndThenSave(_haversineMi,fromA,toA);
-        return;
-      }
-
-      // Pick the best GPS origin: most accurate reading from first 10% of trip
-      // (avoids cold GPS inaccuracy at trip start)
-      var goodPos=positions.filter(function(p){return p.accuracy<=80;});
-      if(goodPos.length<2){goodPos=positions;}
-      var firstSegEnd=Math.max(3,Math.floor(goodPos.length*0.10));
-      var firstSeg=goodPos.slice(0,firstSegEnd);
-      var origin=firstSeg.reduce(function(best,p){return p.accuracy<best.accuracy?p:best;},firstSeg[0]);
-
-      // Best stationary end reading (already selected by _getBestEndPosition)
-      var dest=endPos;
-
-      // Build request body — origin+destination only, no via waypoints
-      // via:true waypoints cause distance inflation because GPS points sit off the road
-      // The Routes API road-snaps origin+destination automatically giving accurate results
-      var routeBody={
-        origin:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}},
-        destination:{location:{latLng:{latitude:dest.lat,longitude:dest.lng}}},
-        travelMode:'DRIVE',
-        routingPreference:'TRAFFIC_UNAWARE',
-        computeAlternativeRoutes:false,
-        routeModifiers:{avoidTolls:false,avoidHighways:false,avoidFerries:false}
-      };
-
-      var _routesDone=false;
-      // 8s timeout — computeRoutes with waypoints can take longer than matrix
-      var _routesTimeout=setTimeout(function(){
-        if(!_routesDone){
-          _routesDone=true;
-          _geocodeEndThenSave(_haversineMi,fromA,toA);
-        }
-      },8000);
-
-      fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE',
-          'X-Goog-FieldMask':'routes.distanceMeters,routes.duration'
-        },
-        body:JSON.stringify(routeBody)
-      }).then(function(r){return r.json();}).then(function(data){
-        if(_routesDone)return;
-        _routesDone=true;
-        clearTimeout(_routesTimeout);
-        // computeRoutes returns routes[0].distanceMeters
-        if(data&&data.routes&&data.routes[0]&&data.routes[0].distanceMeters>0){
-          var roadMi=data.routes[0].distanceMeters/1609.34;
-          // Sanity: road distance must be 0.9x–2.0x haversine
-          // Tighter bounds than before because waypoints make this much more accurate
-          if(roadMi>=_haversineMi*0.9&&roadMi<=_haversineMi*2.0){
-            _geocodeEndThenSave(roadMi,fromA,toA);
-          } else {
-            _geocodeEndThenSave(_haversineMi,fromA,toA);
-          }
-        } else {
-          // computeRoutes failed — try fallback with just origin+destination via computeRouteMatrix
-          _fallbackRouteMatrix(fromA,toA);
-        }
-      }).catch(function(){
-        if(_routesDone)return;
-        _routesDone=true;
-        clearTimeout(_routesTimeout);
-        _fallbackRouteMatrix(fromA,toA);
-      });
-
-      // Fallback: computeRouteMatrix with just start→end (no waypoints)
-      // Used when computeRoutes fails or returns bad data
-      function _fallbackRouteMatrix(fromA,toA){
-        fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE',
-            'X-Goog-FieldMask':'originIndex,destinationIndex,distanceMeters,status'
-          },
-          body:JSON.stringify({
-            origins:[{waypoint:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}}}],
-            destinations:[{waypoint:{location:{latLng:{latitude:dest.lat,longitude:dest.lng}}}}],
-            travelMode:'DRIVE'
-          })
-        }).then(function(r){return r.json();}).then(function(data){
-          if(data&&data[0]&&data[0].distanceMeters&&data[0].distanceMeters>0){
-            var mi=data[0].distanceMeters/1609.34;
-            if(mi>=_haversineMi*0.8&&mi<=_haversineMi*3.0){
-              _geocodeEndThenSave(mi,fromA,toA);
-            } else {
-              _geocodeEndThenSave(_haversineMi,fromA,toA);
-            }
-          } else {
-            _geocodeEndThenSave(_haversineMi,fromA,toA);
-          }
-        }).catch(function(){
-          _geocodeEndThenSave(_haversineMi,fromA,toA);
-        });
-      }
+      // GPS haversine accumulation (totalDist) IS the actual miles driven.
+      // It correctly measures detours, road closures, and the real path taken.
+      // Do NOT override with routing APIs — they calculate the shortest theoretical
+      // path, not the actual path driven.
+      _geocodeEndThenSave(_haversineMi,fromA,toA);
     }
 
     // Step 2: Geocode end position, then save
@@ -4115,35 +4019,54 @@ function saveManual(){
   function _withCoords(fc,tc){
     fromCoords=fc||fromCoords;
     toCoords=tc||toCoords;
-    if(!fromCoords||!toCoords||_manualDistEdit){
-      // Use haversine if we have coords, otherwise just save with manual distance
-      if(fromCoords&&toCoords&&!_manualDistEdit&&addDistVal===0){
-        // Calculate haversine distance as fallback
-        var R=6371;
-        var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
-        var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
-        var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(fromCoords.lat*Math.PI/180)*Math.cos(toCoords.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
-        var hav=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.2;
-        var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
-        addDistVal=parseFloat(useKm?hav.toFixed(1):(hav/1.60934).toFixed(1));
-        var distInp=document.getElementById('addDistInput');
-        if(distInp){distInp.value=addDistVal;}
-      }
+
+    // If user manually typed a distance, respect it and save immediately
+    if(_manualDistEdit){
       _doSaveManual();
       if(btn){btn.disabled=false;btn.textContent='Save Trip';}
       return;
     }
-    // Get driving distance then save
-    _getGoogleDistance(fromCoords,toCoords,function(distMi,err){
-      if(distMi!==null){
-        var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
-        addDistVal=useKm?parseFloat((distMi*1.60934).toFixed(1)):parseFloat(distMi.toFixed(1));
-        var distInp=document.getElementById('addDistInput');
-        if(distInp){distInp.value=addDistVal;distInp.classList.add('filled');}
-      }
-      _doSaveManual();
-      if(btn){btn.disabled=false;btn.textContent='Save Trip';}
-    });
+
+    // Always get exact Google driving distance when we have both addresses
+    // This gives the same distance Google Maps shows — regardless of whether
+    // coords were pre-set or just geocoded
+    if(fromCoords&&toCoords){
+      var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
+      var status=document.getElementById('addDistStatus');
+      if(status){status.textContent='Getting exact distance from Google Maps...';}
+      _getGoogleDistance(fromCoords,toCoords,function(distMi,err){
+        if(distMi!==null){
+          addDistVal=useKm?parseFloat((distMi*1.60934).toFixed(1)):parseFloat(distMi.toFixed(1));
+          var distInp=document.getElementById('addDistInput');
+          if(distInp){
+            distInp.value=addDistVal;
+            distInp.classList.add('filled');
+          }
+          var badge=document.getElementById('addDistBadge');
+          if(badge){badge.classList.add('active');badge.textContent=LOC.unit;}
+          if(status){status.textContent='Exact driving distance (Google Maps)';}
+          status&&status.classList.add('calculated');
+        } else if(addDistVal===0){
+          // Google failed — use haversine as last resort
+          var R=6371;
+          var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
+          var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
+          var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(fromCoords.lat*Math.PI/180)*Math.cos(toCoords.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+          var hav=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.2;
+          addDistVal=parseFloat(useKm?hav.toFixed(1):(hav/1.60934).toFixed(1));
+          var distInp=document.getElementById('addDistInput');
+          if(distInp){distInp.value=addDistVal;}
+          if(status){status.textContent='Estimated distance (Google unavailable)';}
+        }
+        _doSaveManual();
+        if(btn){btn.disabled=false;btn.textContent='Save Trip';}
+      });
+      return;
+    }
+
+    // No coordinates at all — save with whatever distance is in the input
+    _doSaveManual();
+    if(btn){btn.disabled=false;btn.textContent='Save Trip';}
   }
 
   var needFrom=!fromCoords, needTo=!toCoords;
