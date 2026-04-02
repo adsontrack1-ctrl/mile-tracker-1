@@ -3497,7 +3497,7 @@ function _geocodeWhenReady(query,inpId,ddId,attempt){
     if(currentVal.length>=3) geocodeAddr(currentVal,inpId,ddId);
     return;
   }
-  if(attempt<15){
+  if(attempt<40){
     setTimeout(function(){_geocodeWhenReady(query,inpId,ddId,attempt+1);},250);
   }
 }
@@ -3951,6 +3951,7 @@ function openAddTrip(){
   var _emm=String(_eh.getMinutes()).padStart(2,'0');
   document.getElementById('addStartTime').value=_hh+':'+_mm;
   document.getElementById('addEndTime').value=_ehh+':'+_emm;
+  _ensureMapsLoaded();
   fromCoords=null;toCoords=null;clearTimeout(_autoGeoFrom);clearTimeout(_autoGeoTo);
   var defCat=getDefaultCat();
   setAddCat(defCat==='uncl'?'biz':defCat);
