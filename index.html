@@ -4188,7 +4188,7 @@ function openMapSheet(){
   const sheet=document.getElementById('mapSheet');
   sheet.style.display='flex';
   mapSheetOpen=true;
-  if(!mapReady)setTimeout(initMap,100);
+  if(!mapReady)setTimeout(initMap,300);
   else if(map&&google&&google.maps){
     setTimeout(function(){google.maps.event.trigger(map,'resize');if(lastGpsLat)map.setCenter({lat:lastGpsLat,lng:lastGpsLng});},200);
     setTimeout(function(){if(map)google.maps.event.trigger(map,'resize');},600);
@@ -4249,8 +4249,8 @@ function initMap(){
       map:map
     });
     mapReady=true;
-    // Trigger resize in case map was init'd while container was hidden
-    setTimeout(function(){if(map)google.maps.event.trigger(map,'resize');},300);
+    // Trigger resize + re-center in case map was init'd while container was hidden (iOS WKWebView fix)
+    setTimeout(function(){if(map){google.maps.event.trigger(map,'resize');map.setCenter({lat:defLat,lng:defLng});}},300);
     document.getElementById('mapLoading').classList.add('hidden');
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(function(p){
