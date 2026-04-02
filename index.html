@@ -2645,6 +2645,10 @@ function startTracking(){
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
   _lastGoodPos=null;_lastPosTime=0;_signalLost=false;
+  // Signal native app to start background location task
+  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'RECORDING'}));
+  }
   acquireWakeLock();
   clearRoute();
   document.getElementById('trackLive').classList.add('show');
@@ -3048,6 +3052,10 @@ function startAutoMonitoring(){
     document.getElementById('statusText').textContent='Monitoring...';
     updateAutoBtn();
     updateDebugPanel();
+    // Signal native to keep continuous GPS alive during auto-monitoring
+    if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+      window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'MONITORING'}));
+    }
     return;
   }
   if(!navigator.geolocation)return;
