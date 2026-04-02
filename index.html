@@ -3277,44 +3277,28 @@ function stopTracking(){
         return;
       }
 
-      // ── WAYPOINT SAMPLING ──────────────────────────────────────────────
-      // Google computeRoutes allows max 25 intermediate waypoints (27 total incl origin+dest).
-      // Sample up to 23 intermediate points evenly from positions[] to reconstruct actual path.
-      // Filter to only accurate readings (accuracy<=50m) to avoid GPS drift points.
-      // This makes our distance match Google Maps because we trace the actual road taken.
+      // Pick the best GPS origin: most accurate reading from first 10% of trip
+      // (avoids cold GPS inaccuracy at trip start)
       var goodPos=positions.filter(function(p){return p.accuracy<=80;});
-      if(goodPos.length<2){goodPos=positions;} // fallback: use all positions
+      if(goodPos.length<2){goodPos=positions;}
+      var firstSegEnd=Math.max(3,Math.floor(goodPos.length*0.10));
+      var firstSeg=goodPos.slice(0,firstSegEnd);
+      var origin=firstSeg.reduce(function(best,p){return p.accuracy<best.accuracy?p:best;},firstSeg[0]);
 
-      var origin=goodPos[0];
-      var dest=endPos; // best stationary end reading
+      // Best stationary end reading (already selected by _getBestEndPosition)
+      var dest=endPos;
 
-      // Build intermediate waypoints — evenly sample from between first and last
-      var intermediates=[];
-      if(goodPos.length>2){
-        var inner=goodPos.slice(1,goodPos.length-1); // exclude first and last
-        var maxInter=23; // max 23 intermediates (25 total with origin+dest = Google limit)
-        var step=Math.max(1,Math.floor(inner.length/maxInter));
-        for(var i=0;i<inner.length&&intermediates.length<maxInter;i+=step){
-          intermediates.push({
-            via:true, // via=true = waypoint must be passed through but not displayed as stop
-            location:{latLng:{latitude:inner[i].lat,longitude:inner[i].lng}}
-          });
-        }
-      }
-
-      // Build request body for computeRoutes (Directions API)
-      // computeRoutes traces the actual path — much more accurate than computeRouteMatrix
+      // Build request body — origin+destination only, no via waypoints
+      // via:true waypoints cause distance inflation because GPS points sit off the road
+      // The Routes API road-snaps origin+destination automatically giving accurate results
       var routeBody={
         origin:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}},
         destination:{location:{latLng:{latitude:dest.lat,longitude:dest.lng}}},
         travelMode:'DRIVE',
-        routingPreference:'TRAFFIC_UNAWARE', // fastest, no traffic data needed for distance
+        routingPreference:'TRAFFIC_UNAWARE',
         computeAlternativeRoutes:false,
         routeModifiers:{avoidTolls:false,avoidHighways:false,avoidFerries:false}
       };
-      if(intermediates.length>0){
-        routeBody.intermediates=intermediates;
-      }
 
       var _routesDone=false;
       // 8s timeout — computeRoutes with waypoints can take longer than matrix
