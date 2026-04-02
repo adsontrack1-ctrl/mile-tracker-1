@@ -3124,10 +3124,10 @@ function onAutoPos(p){
     // High variance at low speed = drift not real movement
     if(_mMean>0&&_mStd/_mMean>0.6&&_mMean<(_useKm()?25:15)){_avgA=0;}
   }
-  spdVal=_acc2>25?0:_avgA;
+  spdVal=_acc2>65?0:_avgA;
   // Update speedo even while monitoring
   var spdDisplay;
-  if(_acc2>25||spdVal<=0){spdDisplay=_acc2>25?'--':'0';if(_acc2>25)document.getElementById('speedUnit').textContent='poor GPS';else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
+  if(_acc2>65||spdVal<=0){spdDisplay=_acc2>65?'--':'0';if(_acc2>65)document.getElementById('speedUnit').textContent='poor GPS';else document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   else{spdDisplay=spdVal.toFixed(0);document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';}
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
