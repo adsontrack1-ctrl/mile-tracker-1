@@ -3522,23 +3522,14 @@ function geocodeAddr(query,inpId,ddId){
     if(tzG[tz]&&!lastGpsLat){biasLat=tzG[tz][0];biasLng=tzG[tz][1];}
   }catch(e){}
 
-  google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
-    input:query,
-    sessionToken:_placesSessionToken,
-    locationBias:{center:{lat:biasLat,lng:biasLng},radius:50000}
-  }).then(function(result){
+  function _renderSuggestions(suggestions){
     if(!inp||inp.value.trim().length<2)return;
     _liveGeoResults=[];
     var html='';
-    var suggestions=result.suggestions||[];
-
-    suggestions.forEach(function(s,j){
-      var pred=s.placePrediction;
-      if(!pred)return;
-      var mainLabel=pred.mainText?pred.mainText.text:(pred.text?pred.text.text:'');
-      var subLabel=pred.secondaryText?pred.secondaryText.text:'';
-      var fullAddr=pred.text?pred.text.text:mainLabel;
-      _liveGeoResults.push({placeId:pred.placeId,n:mainLabel,c:subLabel,fullAddr:fullAddr});
+    suggestions.forEach(function(item,j){
+      var mainLabel=item.n||'';
+      var subLabel=item.c||'';
+      _liveGeoResults.push(item);
       html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" '
         +'style="border-left:3px solid var(--mint)">'
         +'<div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2">'
@@ -3546,17 +3537,58 @@ function geocodeAddr(query,inpId,ddId){
         +'<div><div class="adi-main">'+_esc(mainLabel)+'</div>'
         +'<div class="adi-sub" style="color:var(--mint)">'+_esc(subLabel)+'</div></div></div>';
     });
-
-    // "Use as typed" always last
     html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')">'
       +'<div class="adi-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">'
       +'<polyline points="20 6 9 17 4 12"/></svg></div>'
       +'<div><div class="adi-main">'+_esc(inp.value.trim())+'</div>'
       +'<div class="adi-sub">Use as typed</div></div></div>';
-
-    dd.innerHTML=html;
-    dd.classList.add('show');
-  }).catch(function(e){});
+    if(html){dd.innerHTML=html;dd.classList.add('show');}
+  }
+  function _tryNewPlacesAPI(){
+    return google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      input:query,
+      sessionToken:_placesSessionToken,
+      locationBias:{center:{lat:biasLat,lng:biasLng},radius:50000}
+    }).then(function(result){
+      var suggestions=(result.suggestions||[]).map(function(s){
+        var pred=s.placePrediction;
+        if(!pred)return null;
+        return {
+          placeId:pred.placeId,
+          n:pred.mainText?pred.mainText.text:(pred.text?pred.text.text:''),
+          c:pred.secondaryText?pred.secondaryText.text:'',
+          fullAddr:pred.text?pred.text.text:''
+        };
+      }).filter(Boolean);
+      _renderSuggestions(suggestions);
+    });
+  }
+  function _tryLegacyPlacesAPI(){
+    var svc=new google.maps.places.AutocompleteService();
+    svc.getPlacePredictions({
+      input:query,
+      sessionToken:_placesSessionToken,
+      location:new google.maps.LatLng(biasLat,biasLng),
+      radius:50000
+    },function(preds,status){
+      if(status!==google.maps.places.PlacesServiceStatus.OK||!preds){return;}
+      var suggestions=preds.map(function(p){
+        return {
+          placeId:p.place_id,
+          n:p.structured_formatting?p.structured_formatting.main_text:p.description,
+          c:p.structured_formatting?p.structured_formatting.secondary_text:'',
+          fullAddr:p.description
+        };
+      });
+      _renderSuggestions(suggestions);
+    });
+  }
+  // Try new API first, fall back to legacy if it fails (handles key restrictions on native)
+  if(google.maps.places.AutocompleteSuggestion&&typeof google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions==='function'){
+    _tryNewPlacesAPI().catch(function(){_tryLegacyPlacesAPI();});
+  } else {
+    _tryLegacyPlacesAPI();
+  }
 }
 var _liveGeoResults=[];
 
@@ -4227,7 +4259,6 @@ function initMap(){
     map=new google.maps.Map(document.getElementById('liveMap'),{
       center:{lat:defLat,lng:defLng},
       zoom:15,
-      mapId:'DEMO_MAP_ID',
       disableDefaultUI:false,
       zoomControl:true,
       zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
@@ -4243,11 +4274,13 @@ function initMap(){
         {featureType:'water',elementType:'geometry',stylers:[{color:'#0e1626'}]}
       ]
     });
-    userMarker=new google.maps.marker.AdvancedMarkerElement({
-      position:{lat:defLat,lng:defLng},
-      map:map,
-      content:(function(){var d=document.createElement('div');d.style.cssText='width:14px;height:14px;background:#4A90E2;border:2.5px solid white;border-radius:50%;box-shadow:0 0 6px rgba(74,144,226,0.8)';return d;})()
-    });
+    var _markerEl=document.createElement('div');
+    _markerEl.style.cssText='width:14px;height:14px;background:#4A90E2;border:2.5px solid white;border-radius:50%;box-shadow:0 0 6px rgba(74,144,226,0.8);position:relative;z-index:1';
+    try{
+      userMarker=new google.maps.marker.AdvancedMarkerElement({position:{lat:defLat,lng:defLng},map:map,content:_markerEl});
+    }catch(_me){
+      userMarker=new google.maps.Marker({position:{lat:defLat,lng:defLng},map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:'#4A90E2',fillOpacity:1,strokeColor:'white',strokeWeight:2}});
+    }
     routeLine=new google.maps.Polyline({
       path:[],strokeColor:'#6C3CE0',strokeWeight:4,strokeOpacity:0.8,map:map
     });
@@ -4266,17 +4299,20 @@ function initMap(){
       routeLine.setPath(path);
       var last=positions[positions.length-1];
       map.setCenter({lat:last.lat,lng:last.lng});
-      userMarker.position={lat:last.lat,lng:last.lng};
+      if(userMarker){if(typeof userMarker.position!=='undefined'){userMarker.position={lat:last.lat,lng:last.lng};}else if(typeof userMarker.setPosition==='function'){userMarker.setPosition({lat:last.lat,lng:last.lng});}}
     }
   }catch(e){console.error('Map init error:',e);}
 }
 function updateMapPos(lat,lng){
-  if(!mapReady)return;
+  if(!mapReady||!map||!routeLine)return;
   var pos={lat:lat,lng:lng};
-  userMarker.position=pos;
+  if(userMarker){
+    if(typeof userMarker.position!=='undefined'){userMarker.position=pos;}
+    else if(typeof userMarker.setPosition==='function'){userMarker.setPosition(pos);}
+  }
   if(mapSheetOpen)map.panTo(pos);
   if(tracking){
-    routeLine.getPath().push(new google.maps.LatLng(lat,lng));
+    if(routeLine){routeLine.getPath().push(new google.maps.LatLng(lat,lng));}
     if(mapSheetOpen){
       document.getElementById('mapLiveDist').textContent=document.getElementById('trackDist').textContent+' '+LOC.unit;
     }
@@ -4287,7 +4323,8 @@ function recenterMap(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(p){
       var pos={lat:p.coords.latitude,lng:p.coords.longitude};
-      map.setCenter(pos);map.setZoom(16);userMarker.position=pos;
+      map.setCenter(pos);map.setZoom(16);
+      if(userMarker){if(typeof userMarker.position!=='undefined'){userMarker.position=pos;}else if(typeof userMarker.setPosition==='function'){userMarker.setPosition(pos);}}
     });
   }
 }
