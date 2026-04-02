@@ -1084,6 +1084,7 @@ var _googleMapsReady=false;
 function _initGoogleMaps(){
     window._mapsLoading = false;
     window._pendingMapOpen = false;
+    _googleMapsReady=true;
     var lm = document.getElementById('liveMap');
     var ml = document.getElementById('mapLoading');
     if (lm && typeof google !== 'undefined' && google.maps) {
@@ -3445,11 +3446,24 @@ var _placesAutocompleteFrom=null,_placesAutocompleteTo=null;
 var _geoTimer=null;
 var _placesSessionToken=null;
 
+function _ensureMapsLoaded(){
+  if(_googleMapsReady)return;
+  if(typeof google!=='undefined'&&google.maps){_googleMapsReady=true;return;}
+  if(window._mapsLoading)return;
+  window._mapsLoading=true;
+  var s=document.createElement('script');
+  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places,marker&loading=async&callback=_initGoogleMaps';
+  s.async=true;s.defer=true;
+  s.onerror=function(){window._mapsLoading=false;};
+  document.head.appendChild(s);
+}
+
 function onAddrType(inpId,ddId){
   var inp=document.getElementById(inpId);
   var dd=document.getElementById(ddId);
   var v=inp.value.trim();
 
+  _ensureMapsLoaded();
   calcDistance();
 
   if(v.length<2){dd.classList.remove('show');dd.innerHTML='';return;}
@@ -3539,7 +3553,7 @@ function geocodeAddr(query,inpId,ddId){
 }
 var _liveGeoResults=[];
 
-// ── pickGeo: resolve place_id to coords via Geocoder, then trigger distance calc ──
+// ── pickGeo: resolve place_id to coords via Place.fetchFields, then trigger distance calc ──
 function pickGeo(e,inpId,ddId,idx){
   e.preventDefault();
   var p=_liveGeoResults[idx];
@@ -3552,21 +3566,26 @@ function pickGeo(e,inpId,ddId,idx){
   if(p.lat&&p.lng){
     if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
     else toCoords={lat:p.lat,lng:p.lng};
-    _placesSessionToken=null; // reset token after selection
+    _placesSessionToken=null;
     _tryGoogleDistance();
     return;
   }
 
-  // Resolve place_id to coordinates
-  if(p.placeId&&_googleMapsReady){
-    var geocoder=new google.maps.Geocoder();
-    geocoder.geocode({placeId:p.placeId},function(results,status){
-      if(status==='OK'&&results&&results[0]){
-        var loc=results[0].geometry.location;
-        var coords={lat:loc.lat(),lng:loc.lng()};
+  // Resolve place_id to coordinates via new Places API
+  if(p.placeId&&_googleMapsReady&&google.maps.places.Place){
+    var place=new google.maps.places.Place({id:p.placeId});
+    place.fetchFields({fields:['location','formattedAddress','displayName']}).then(function(result){
+      var pl=result.place||result;
+      if(pl.location){
+        var coords={lat:pl.location.lat(),lng:pl.location.lng()};
         if(inpId==='addFrom') fromCoords=coords;
         else toCoords=coords;
+        // Update input with formatted address if available
+        if(pl.formattedAddress) inp.value=pl.formattedAddress;
       }
+      _placesSessionToken=null;
+      _tryGoogleDistance();
+    }).catch(function(){
       _placesSessionToken=null;
       _tryGoogleDistance();
     });
