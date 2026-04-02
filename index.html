@@ -1090,6 +1090,15 @@ function _initGoogleMaps(){
   if(mapSheetOpen&&!mapReady){
     setTimeout(initMap,100);
   }
+  // If Add Trip sheet is open and user already typed addresses, trigger distance calc now
+  var _addSheetOpen=document.getElementById('addSheet')&&document.getElementById('addSheet').classList.contains('show');
+  if(_addSheetOpen){
+    var _pf=document.getElementById('addFrom')&&document.getElementById('addFrom').value.trim();
+    var _pt=document.getElementById('addTo')&&document.getElementById('addTo').value.trim();
+    if(_pf&&_pf.length>=3) setTimeout(function(){_geocodeWhenReady(_pf,'addFrom','fromDD',0);},200);
+    if(_pt&&_pt.length>=3) setTimeout(function(){_geocodeWhenReady(_pt,'addTo','toDD',0);},400);
+    if(_pf&&_pt) setTimeout(_tryGoogleDistance,600);
+  }
 }
 
 /* ===== SVG ICON SYSTEM ===== */
@@ -3635,70 +3644,130 @@ function geocodeAddr(query,inpId,ddId){
 }
 var _liveGeoResults=[];
 
-// ── pickGeo: resolve place_id to coords via Place.fetchFields, then trigger distance calc ──
+// ── pickGeo: resolve place_id to coords, 4 fallback paths ──
 function pickGeo(e,inpId,ddId,idx){
   e.preventDefault();
   var p=_liveGeoResults[idx];
   if(!p)return;
   var inp=document.getElementById(inpId);
-  inp.value=p.fullAddr||p.n+(p.c?', '+p.c:'');
+  // Set input to full address string immediately
+  var addrText=p.fullAddr||p.n+(p.c?', '+p.c:'');
+  inp.value=addrText;
   document.getElementById(ddId).classList.remove('show');
+  _placesSessionToken=null;
 
-  // If we already have lat/lng, use it
-  if(p.lat&&p.lng){
-    if(inpId==='addFrom') fromCoords={lat:p.lat,lng:p.lng};
-    else toCoords={lat:p.lat,lng:p.lng};
-    _placesSessionToken=null;
+  // Helper: set coords and trigger distance
+  function _done(coords){
+    if(inpId==='addFrom') fromCoords=coords;
+    else toCoords=coords;
     _tryGoogleDistance();
+  }
+
+  // Path 1: coords already in result (fastest)
+  if(p.lat&&p.lng){
+    _done({lat:p.lat,lng:p.lng});
     return;
   }
 
-  // Resolve place_id to coordinates via new Places API
-  if(p.placeId&&_googleMapsReady&&google.maps.places.Place){
+  // Path 2: resolve placeId via new Places API (Place.fetchFields)
+  if(p.placeId&&_googleMapsReady&&google&&google.maps&&google.maps.places&&google.maps.places.Place){
     var place=new google.maps.places.Place({id:p.placeId});
-    place.fetchFields({fields:['location','formattedAddress','displayName']}).then(function(result){
+    place.fetchFields({fields:['location','formattedAddress']}).then(function(result){
       var pl=result.place||result;
       if(pl.location){
-        var coords={lat:pl.location.lat(),lng:pl.location.lng()};
-        if(inpId==='addFrom') fromCoords=coords;
-        else toCoords=coords;
-        // Update input with formatted address if available
         if(pl.formattedAddress) inp.value=pl.formattedAddress;
+        _done({lat:pl.location.lat(),lng:pl.location.lng()});
+      } else {
+        _fallbackGeocode();
       }
-      _placesSessionToken=null;
-      _tryGoogleDistance();
-    }).catch(function(){
-      _placesSessionToken=null;
-      _tryGoogleDistance();
+    }).catch(function(){_fallbackGeocode();});
+    return;
+  }
+
+  // Path 3: resolve placeId via legacy PlacesService
+  if(p.placeId&&_googleMapsReady&&google&&google.maps&&google.maps.places&&google.maps.places.PlacesService){
+    var mapDiv=document.createElement('div');
+    var svc=new google.maps.places.PlacesService(mapDiv);
+    svc.getDetails({placeId:p.placeId,fields:['geometry','formatted_address']},function(result,status){
+      if(status===google.maps.places.PlacesServiceStatus.OK&&result&&result.geometry){
+        if(result.formatted_address) inp.value=result.formatted_address;
+        _done({lat:result.geometry.location.lat(),lng:result.geometry.location.lng()});
+      } else {
+        _fallbackGeocode();
+      }
     });
+    return;
+  }
+
+  // Path 4: geocode the address text directly (always works, no placeId needed)
+  _fallbackGeocode();
+
+  function _fallbackGeocode(){
+    if(_googleMapsReady&&google&&google.maps){
+      var geocoder=new google.maps.Geocoder();
+      geocoder.geocode({address:addrText},function(results,status){
+        if(status==='OK'&&results&&results[0]){
+          var loc=results[0].geometry.location;
+          if(results[0].formatted_address) inp.value=results[0].formatted_address;
+          _done({lat:loc.lat(),lng:loc.lng()});
+        } else {
+          // No coords but still try distance with address string
+          if(inpId==='addFrom') fromCoords=null;
+          else toCoords=null;
+          _tryGoogleDistance();
+        }
+      });
+    } else {
+      // Maps not ready — distance will use address strings only
+      if(inpId==='addFrom') fromCoords=null;
+      else toCoords=null;
+      _tryGoogleDistance();
+    }
   }
 }
 function _tryGoogleDistance(){
-  if(!fromCoords||!toCoords)return;
+  // Always read address strings from input — most accurate for Google routing
+  var _f=document.getElementById('addFrom').value.trim();
+  var _t=document.getElementById('addTo').value.trim();
+  // Need both addresses to calculate
+  if(!_f||!_t)return;
   var distInp=document.getElementById('addDistInput');
   var badge=document.getElementById('addDistBadge');
   var status=document.getElementById('addDistStatus');
   status.textContent='Calculating driving distance...';
   status.classList.remove('calculated');
   badge.classList.remove('active');
+  var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
 
-  var oLat=fromCoords.lat,oLng=fromCoords.lng;
-  var dLat=toCoords.lat,dLng=toCoords.lng;
-
-  var _f=document.getElementById('addFrom').value.trim();
-  var _t=document.getElementById('addTo').value.trim();
-  _getGoogleDistance(_f||{lat:oLat,lng:oLng},_t||{lat:dLat,lng:dLng},function(distMi,err){
+  // Use address strings directly — Google routes exactly as Maps app does
+  // Falls back to lat/lng coords if address strings fail
+  _getGoogleDistance(_f,_t,function(distMi,err){
     if(distMi!==null){
-      var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
       var displayDist=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
       addDistVal=parseFloat(displayDist);
       distInp.value=displayDist;
       distInp.classList.add('filled');
-      badge.classList.add('active');badge.textContent=LOC.unit.toUpperCase();
-      status.textContent='Driving distance (via roads)';
+      badge.classList.add('active');badge.textContent=useKm?'KM':'MI';
+      status.textContent='Exact driving distance (Google Maps)';
       status.classList.add('calculated');
+    } else if(fromCoords&&toCoords){
+      // Address routing failed — try lat/lng coords
+      _getGoogleDistance(fromCoords,toCoords,function(distMi2,err2){
+        if(distMi2!==null){
+          var displayDist=useKm?(distMi2*1.60934).toFixed(1):distMi2.toFixed(1);
+          addDistVal=parseFloat(displayDist);
+          distInp.value=displayDist;
+          distInp.classList.add('filled');
+          badge.classList.add('active');badge.textContent=useKm?'KM':'MI';
+          status.textContent='Driving distance (via roads)';
+          status.classList.add('calculated');
+        } else {
+          _fallbackHaversine(fromCoords.lat,fromCoords.lng,toCoords.lat,toCoords.lng,distInp,badge,status);
+        }
+      });
     } else {
-      _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status);
+      status.textContent='Enter both addresses to calculate';
+      status.classList.remove('calculated');
     }
   });
 }
