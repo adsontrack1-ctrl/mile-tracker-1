@@ -1090,7 +1090,7 @@ function _initGoogleMaps(){
     if (lm && typeof google !== 'undefined' && google.maps) {
       if (ml) ml.classList.add('hidden');
       lm.innerHTML = '';
-      var mapOpts = {zoom:15,center:{lat:37.7749,lng:-122.4194},mapTypeId:'roadmap'};
+      var mapOpts = {zoom:15,center:{lat:37.7749,lng:-122.4194},mapTypeId:'roadmap',mapId:'DEMO_MAP_ID'};
       var m = new google.maps.Map(lm, mapOpts);
       window._liveMapInstance = m;
       if (navigator.geolocation) {
@@ -3489,11 +3489,20 @@ function onAddrType(inpId,ddId){
   if(v.length>=3&&navigator.onLine){
     clearTimeout(_geoTimer);
     _geoTimer=setTimeout(function(){
-      geocodeAddr(v,inpId,ddId);
+      _geocodeWhenReady(v,inpId,ddId,0);
     },300);
   }
 }
 
+function _geocodeWhenReady(query,inpId,ddId,attempt){
+  if(_googleMapsReady&&typeof google!=='undefined'&&google.maps&&google.maps.places){
+    geocodeAddr(query,inpId,ddId);
+    return;
+  }
+  if(attempt<10){
+    setTimeout(function(){_geocodeWhenReady(query,inpId,ddId,attempt+1);},200);
+  }
+}
 function geocodeAddr(query,inpId,ddId){
   var dd=document.getElementById(ddId);
   var inp=document.getElementById(inpId);
@@ -4208,6 +4217,7 @@ function initMap(){
       map=new google.maps.Map(document.getElementById('liveMap'),{
       center:{lat:defLat,lng:defLng},
       zoom:15,
+      mapId:'DEMO_MAP_ID',
       disableDefaultUI:false,
       zoomControl:true,
       zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP},
