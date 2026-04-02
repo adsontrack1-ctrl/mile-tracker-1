@@ -3270,57 +3270,124 @@ function stopTracking(){
     }
 
     // Step 1: Get road distance via Routes API using start+end GPS coords
-    // Uses actual lat/lng so it works even before geocoding completes
     function _getRoadDistanceThenSave(fromA,toA){
-      var startPos=positions.length>0?positions[0]:null;
-      if(!startPos||!endPos||!navigator.onLine){
-        // No GPS positions or offline — use haversine
+      // Need at least start + end positions and online connectivity
+      if(positions.length<2||!endPos||!navigator.onLine){
         _geocodeEndThenSave(_haversineMi,fromA,toA);
         return;
       }
-      var origin={lat:startPos.lat,lng:startPos.lng};
-      var destination={lat:endPos.lat,lng:endPos.lng};
-      // Timeout: if Routes API takes >6s, fall back to haversine
+
+      // ── WAYPOINT SAMPLING ──────────────────────────────────────────────
+      // Google computeRoutes allows max 25 intermediate waypoints (27 total incl origin+dest).
+      // Sample up to 23 intermediate points evenly from positions[] to reconstruct actual path.
+      // Filter to only accurate readings (accuracy<=50m) to avoid GPS drift points.
+      // This makes our distance match Google Maps because we trace the actual road taken.
+      var goodPos=positions.filter(function(p){return p.accuracy<=80;});
+      if(goodPos.length<2){goodPos=positions;} // fallback: use all positions
+
+      var origin=goodPos[0];
+      var dest=endPos; // best stationary end reading
+
+      // Build intermediate waypoints — evenly sample from between first and last
+      var intermediates=[];
+      if(goodPos.length>2){
+        var inner=goodPos.slice(1,goodPos.length-1); // exclude first and last
+        var maxInter=23; // max 23 intermediates (25 total with origin+dest = Google limit)
+        var step=Math.max(1,Math.floor(inner.length/maxInter));
+        for(var i=0;i<inner.length&&intermediates.length<maxInter;i+=step){
+          intermediates.push({
+            via:true, // via=true = waypoint must be passed through but not displayed as stop
+            location:{latLng:{latitude:inner[i].lat,longitude:inner[i].lng}}
+          });
+        }
+      }
+
+      // Build request body for computeRoutes (Directions API)
+      // computeRoutes traces the actual path — much more accurate than computeRouteMatrix
+      var routeBody={
+        origin:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}},
+        destination:{location:{latLng:{latitude:dest.lat,longitude:dest.lng}}},
+        travelMode:'DRIVE',
+        routingPreference:'TRAFFIC_UNAWARE', // fastest, no traffic data needed for distance
+        computeAlternativeRoutes:false,
+        routeModifiers:{avoidTolls:false,avoidHighways:false,avoidFerries:false}
+      };
+      if(intermediates.length>0){
+        routeBody.intermediates=intermediates;
+      }
+
       var _routesDone=false;
+      // 8s timeout — computeRoutes with waypoints can take longer than matrix
       var _routesTimeout=setTimeout(function(){
-        if(!_routesDone){_routesDone=true;_geocodeEndThenSave(_haversineMi,fromA,toA);}
-      },6000);
-      fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{
+        if(!_routesDone){
+          _routesDone=true;
+          _geocodeEndThenSave(_haversineMi,fromA,toA);
+        }
+      },8000);
+
+      fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
         method:'POST',
         headers:{
           'Content-Type':'application/json',
           'X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE',
-          'X-Goog-FieldMask':'originIndex,destinationIndex,distanceMeters,status'
+          'X-Goog-FieldMask':'routes.distanceMeters,routes.duration'
         },
-        body:JSON.stringify({
-          origins:[{waypoint:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}}}],
-          destinations:[{waypoint:{location:{latLng:{latitude:destination.lat,longitude:destination.lng}}}}],
-          travelMode:'DRIVE'
-        })
+        body:JSON.stringify(routeBody)
       }).then(function(r){return r.json();}).then(function(data){
         if(_routesDone)return;
         _routesDone=true;
         clearTimeout(_routesTimeout);
-        var roadMi=null;
-        if(data&&data[0]&&data[0].distanceMeters&&data[0].distanceMeters>0){
-          roadMi=data[0].distanceMeters/1609.34;
-          // Sanity check: road distance should be >= haversine and not >3x haversine
-          // (guards against routing errors for short trips or GPS drift)
-          if(roadMi>=_haversineMi*0.8&&roadMi<=_haversineMi*3.0){
+        // computeRoutes returns routes[0].distanceMeters
+        if(data&&data.routes&&data.routes[0]&&data.routes[0].distanceMeters>0){
+          var roadMi=data.routes[0].distanceMeters/1609.34;
+          // Sanity: road distance must be 0.9x–2.0x haversine
+          // Tighter bounds than before because waypoints make this much more accurate
+          if(roadMi>=_haversineMi*0.9&&roadMi<=_haversineMi*2.0){
             _geocodeEndThenSave(roadMi,fromA,toA);
           } else {
-            // Road distance outside sanity bounds — use haversine
             _geocodeEndThenSave(_haversineMi,fromA,toA);
           }
         } else {
-          _geocodeEndThenSave(_haversineMi,fromA,toA);
+          // computeRoutes failed — try fallback with just origin+destination via computeRouteMatrix
+          _fallbackRouteMatrix(fromA,toA);
         }
       }).catch(function(){
         if(_routesDone)return;
         _routesDone=true;
         clearTimeout(_routesTimeout);
-        _geocodeEndThenSave(_haversineMi,fromA,toA);
+        _fallbackRouteMatrix(fromA,toA);
       });
+
+      // Fallback: computeRouteMatrix with just start→end (no waypoints)
+      // Used when computeRoutes fails or returns bad data
+      function _fallbackRouteMatrix(fromA,toA){
+        fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE',
+            'X-Goog-FieldMask':'originIndex,destinationIndex,distanceMeters,status'
+          },
+          body:JSON.stringify({
+            origins:[{waypoint:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}}}],
+            destinations:[{waypoint:{location:{latLng:{latitude:dest.lat,longitude:dest.lng}}}}],
+            travelMode:'DRIVE'
+          })
+        }).then(function(r){return r.json();}).then(function(data){
+          if(data&&data[0]&&data[0].distanceMeters&&data[0].distanceMeters>0){
+            var mi=data[0].distanceMeters/1609.34;
+            if(mi>=_haversineMi*0.8&&mi<=_haversineMi*3.0){
+              _geocodeEndThenSave(mi,fromA,toA);
+            } else {
+              _geocodeEndThenSave(_haversineMi,fromA,toA);
+            }
+          } else {
+            _geocodeEndThenSave(_haversineMi,fromA,toA);
+          }
+        }).catch(function(){
+          _geocodeEndThenSave(_haversineMi,fromA,toA);
+        });
+      }
     }
 
     // Step 2: Geocode end position, then save
