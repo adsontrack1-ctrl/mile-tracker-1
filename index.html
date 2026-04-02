@@ -3785,7 +3785,7 @@ function _calcDistCore(){
     status.classList.remove('calculated');
 
     // Always use Google Distance Matrix for accurate driving distance
-    _getGoogleDistance(fromCoords,toCoords,function(distMi,err){
+    _getGoogleDistance(f,t,function(distMi,err){
       if(distMi!==null){
         var displayDist=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
         addDistVal=parseFloat(displayDist);
@@ -4034,7 +4034,7 @@ function saveManual(){
       var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
       var status=document.getElementById('addDistStatus');
       if(status){status.textContent='Getting exact distance from Google Maps...';}
-      _getGoogleDistance(fromCoords,toCoords,function(distMi,err){
+      _getGoogleDistance(f,t,function(distMi,err){
         if(distMi!==null){
           addDistVal=useKm?parseFloat((distMi*1.60934).toFixed(1)):parseFloat(distMi.toFixed(1));
           var distInp=document.getElementById('addDistInput');
