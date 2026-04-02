@@ -3496,11 +3496,14 @@ function onAddrType(inpId,ddId){
 
 function _geocodeWhenReady(query,inpId,ddId,attempt){
   if(_googleMapsReady&&typeof google!=='undefined'&&google.maps&&google.maps.places){
-    geocodeAddr(query,inpId,ddId);
+    // Re-read current input value in case user kept typing while Maps was loading
+    var inp=document.getElementById(inpId);
+    var currentVal=inp?inp.value.trim():query;
+    if(currentVal.length>=3) geocodeAddr(currentVal,inpId,ddId);
     return;
   }
-  if(attempt<10){
-    setTimeout(function(){_geocodeWhenReady(query,inpId,ddId,attempt+1);},200);
+  if(attempt<15){
+    setTimeout(function(){_geocodeWhenReady(query,inpId,ddId,attempt+1);},250);
   }
 }
 function geocodeAddr(query,inpId,ddId){
@@ -4236,14 +4239,7 @@ function initMap(){
     userMarker=new google.maps.marker.AdvancedMarkerElement({
       position:{lat:defLat,lng:defLng},
       map:map,
-      icon:{
-        path:google.maps.SymbolPath.CIRCLE,
-        scale:9,
-        fillColor:'#6C3CE0',
-        fillOpacity:1,
-        strokeColor:'#fff',
-        strokeWeight:3
-      }
+      content:(function(){var d=document.createElement('div');d.style.cssText='width:14px;height:14px;background:#4A90E2;border:2px solid white;border-radius:50%';return d;})()
     });
     routeLine=new google.maps.Polyline({
       path:[],
