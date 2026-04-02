@@ -1082,27 +1082,15 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 /* ===== Google Maps Init Callback ===== */
 var _googleMapsReady=false;
 function _initGoogleMaps(){
-    window._mapsLoading = false;
-    window._pendingMapOpen = false;
-    _googleMapsReady=true;
-    var lm = document.getElementById('liveMap');
-    var ml = document.getElementById('mapLoading');
-    if (lm && typeof google !== 'undefined' && google.maps) {
-      if (ml) ml.classList.add('hidden');
-      lm.innerHTML = '';
-      var mapOpts = {zoom:15,center:{lat:37.7749,lng:-122.4194},mapTypeId:'roadmap',mapId:'DEMO_MAP_ID'};
-      var m = new google.maps.Map(lm, mapOpts);
-      window._liveMapInstance = m;
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(p){
-          var c={lat:p.coords.latitude,lng:p.coords.longitude};
-          m.setCenter(c);
-          new google.maps.marker.AdvancedMarkerElement({position:c,map:m});
-          window._userLat=c.lat; window._userLng=c.lng;
-        }, function(){});
-      }
-    }
+  window._mapsLoading=false;
+  window._pendingMapOpen=false;
+  _googleMapsReady=true;
+  // Do NOT create a map here — initMap() owns the single map instance.
+  // If the map sheet is already open when Maps SDK loads, init now.
+  if(mapSheetOpen&&!mapReady){
+    setTimeout(initMap,100);
   }
+}
 
 /* ===== SVG ICON SYSTEM ===== */
 /* ===== SECURITY: HTML escape — MUST use for all user data in innerHTML ===== */
@@ -2542,38 +2530,37 @@ function renderFreqLocChips(){
   });
 }
 
-/* ── SMART START ADDRESS — wait for accuracy<20m, median of 3 readings ── */
+/* ── SMART START ADDRESS — relaxed accuracy for native GPS ── */
 function _tryLockStartAddress(lat,lng,accuracy){
   if(_startAddrLocked)return;
-  // Only accept readings with accuracy < 20m
-  if(accuracy>20)return;
+  // Native GPS: accept up to 65m; browser GPS: accept up to 40m
+  var accThresh=window.__MYMILESAI_NATIVE__?65:40;
+  if(accuracy>accThresh)return;
   _startReadings.push({lat:lat,lng:lng,accuracy:accuracy});
   if(_startReadings.length<3)return;
-  // Take median of 3 readings (sort by lat, pick middle)
-  var sorted=_startReadings.slice().sort(function(a,b){return a.lat-b.lat;});
-  var median=sorted[Math.floor(sorted.length/2)];
+  var sorted=_startReadings.slice().sort(function(a,b){return a.accuracy-b.accuracy;});
+  var best=sorted[0]; // pick most accurate reading, not median by lat
   _startAddrLocked=true;
-  // Check frequent locations first
-  var freqLabel=_getFreqLocLabel(median.lat,median.lng);
-  if(freqLabel){
-    _startAddr=freqLabel;
+  var freqLabel=_getFreqLocLabel(best.lat,best.lng);
+  if(freqLabel){_startAddr=freqLabel;return;}
+  _startAddr='Locating...'; // placeholder so stopTracking never sees ''
+  if(!_googleMapsReady||!google||!google.maps){
+    _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
     return;
   }
-  _startAddr='GPS ('+median.lat.toFixed(4)+', '+median.lng.toFixed(4)+')';
-  if(!_googleMapsReady||!google||!google.maps)return;
   var geocoder=new google.maps.Geocoder();
-  geocoder.geocode({location:{lat:median.lat,lng:median.lng}},function(results,status){
+  geocoder.geocode({location:{lat:best.lat,lng:best.lng}},function(results,status){
     if(status==='OK'&&results&&results[0]){
       var addr=results[0].formatted_address;
-      // Highway snap: if address is a highway, find nearest place
       if(_isHighwayAddress(addr)){
-        _snapToNearestPlace(median.lat,median.lng,function(placeName){
-          if(placeName)_startAddr=placeName;
-          else _startAddr=addr;
+        _snapToNearestPlace(best.lat,best.lng,function(placeName){
+          _startAddr=placeName||addr;
         });
       } else {
         _startAddr=addr;
       }
+    } else {
+      _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
     }
   });
 }
@@ -3256,15 +3243,15 @@ function stopTracking(){
     var dist=_useKm()?(mi*1.60934):mi;
     var elapsed=Math.floor((Date.now()-trackStart)/60000);
     var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
-    // SMART START: use already-captured start address
-    var fromAddr=_startAddr||'GPS Start';
-    if(!_startAddr&&positions.length>0){
+    // If geocode still pending, wait up to 3s then proceed
+    var fromAddr=(_startAddr&&_startAddr!=='Locating...')?_startAddr:'';
+    if(!fromAddr&&positions.length>0){
       fromAddr='GPS ('+positions[0].lat.toFixed(4)+', '+positions[0].lng.toFixed(4)+')';
     }
     // SMART END: use best reading from stationary window
     var endPos=_getBestEndPosition();
     if(!endPos&&positions.length>0){endPos=positions[positions.length-1];}
-    var toAddr='GPS End';
+    var toAddr='';
     if(endPos){toAddr='GPS ('+endPos.lat.toFixed(4)+', '+endPos.lng.toFixed(4)+')';}
     // Check frequent locations for end
     if(endPos){
@@ -4205,19 +4192,31 @@ function closeMapSheet(){
   mapSheetOpen=false;
 }
 function initMap(){
-  if(!_googleMapsReady){
-    // Retry in 500ms if Google Maps not loaded yet
-    setTimeout(initMap,500);return;
+  if(!_googleMapsReady){setTimeout(initMap,500);return;}
+  if(mapReady&&map){
+    // Map already exists — just resize and recenter
+    setTimeout(function(){
+      google.maps.event.trigger(map,'resize');
+      var lat=lastGpsLat||map.getCenter().lat();
+      var lng=lastGpsLng||map.getCenter().lng();
+      map.setCenter({lat:lat,lng:lng});
+    },200);
+    return;
   }
   try{
     var tzMapCoords={'America/Winnipeg':[49.89,-97.14],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/Edmonton':[53.54,-113.49],'America/Montreal':[45.50,-73.57],'America/New_York':[40.71,-74.00],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24],'Europe/London':[51.50,-0.12],'Australia/Sydney':[-33.87,151.21]};
     var tzNow='';try{tzNow=Intl.DateTimeFormat().resolvedOptions().timeZone;}catch(e){}
-    var tzDefault=tzMapCoords[tzNow]||[49.89,-97.14];
-    var defLat=lastGpsLat||tzDefault[0],defLng=lastGpsLng||tzDefault[1];
-    if(!lastGpsLat){var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}if(tzMapCoords[tz]){defLat=tzMapCoords[tz][0];defLng=tzMapCoords[tz][1];}}
-
-  var _ml = document.getElementById('mapLoading'); if (_ml) _ml.style.display = 'none';
-      map=new google.maps.Map(document.getElementById('liveMap'),{
+    var tzDefault=tzMapCoords[tzNow]||[37.77,-122.41];
+    // Prefer live GPS over timezone default
+    var defLat=lastGpsLat||tzDefault[0];
+    var defLng=lastGpsLng||tzDefault[1];
+    // On native, also check __nativeGPS__ last known position
+    if(!lastGpsLat&&window.__MYMILESAI_NATIVE__&&window._nativeLastLat){
+      defLat=window._nativeLastLat;defLng=window._nativeLastLng;
+    }
+    var _ml=document.getElementById('mapLoading');
+    if(_ml){_ml.style.display='none';}
+    map=new google.maps.Map(document.getElementById('liveMap'),{
       center:{lat:defLat,lng:defLng},
       zoom:15,
       mapId:'DEMO_MAP_ID',
@@ -4239,26 +4238,29 @@ function initMap(){
     userMarker=new google.maps.marker.AdvancedMarkerElement({
       position:{lat:defLat,lng:defLng},
       map:map,
-      content:(function(){var d=document.createElement('div');d.style.cssText='width:14px;height:14px;background:#4A90E2;border:2px solid white;border-radius:50%';return d;})()
+      content:(function(){var d=document.createElement('div');d.style.cssText='width:14px;height:14px;background:#4A90E2;border:2.5px solid white;border-radius:50%;box-shadow:0 0 6px rgba(74,144,226,0.8)';return d;})()
     });
     routeLine=new google.maps.Polyline({
-      path:[],
-      strokeColor:'#6C3CE0',
-      strokeWeight:4,
-      strokeOpacity:0.8,
-      map:map
+      path:[],strokeColor:'#6C3CE0',strokeWeight:4,strokeOpacity:0.8,map:map
     });
     mapReady=true;
-    // Trigger resize + re-center in case map was init'd while container was hidden (iOS WKWebView fix)
-    setTimeout(function(){if(map){google.maps.event.trigger(map,'resize');map.setCenter({lat:defLat,lng:defLng});}},300);
-    document.getElementById('mapLoading').classList.add('hidden');
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(function(p){
-        var pos={lat:p.coords.latitude,lng:p.coords.longitude};
-        map.setCenter(pos);userMarker.position=pos;
-      },function(){},{enableHighAccuracy:true});
+    // Force resize after sheet animation completes
+    setTimeout(function(){
+      if(map){
+        google.maps.event.trigger(map,'resize');
+        map.setCenter({lat:defLat,lng:defLng});
+      }
+    },350);
+    if(_ml)_ml.classList.add('hidden');
+    // Replay any positions already recorded this trip
+    if(tracking&&positions.length>0){
+      var path=positions.map(function(p){return{lat:p.lat,lng:p.lng};});
+      routeLine.setPath(path);
+      var last=positions[positions.length-1];
+      map.setCenter({lat:last.lat,lng:last.lng});
+      userMarker.position={lat:last.lat,lng:last.lng};
     }
-  }catch(e){console.log('Map init error:',e);}
+  }catch(e){console.error('Map init error:',e);}
 }
 function updateMapPos(lat,lng){
   if(!mapReady)return;
