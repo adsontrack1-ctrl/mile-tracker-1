@@ -2545,7 +2545,35 @@ function _tryLockStartAddress(lat,lng,accuracy){
   if(freqLabel){_startAddr=freqLabel;return;}
   _startAddr='Locating...'; // placeholder so stopTracking never sees ''
   if(!_googleMapsReady||!google||!google.maps){
-    _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
+    // Maps not ready yet — retry every 500ms for up to 30 seconds
+    // This happens on native iOS where Maps SDK loads after first GPS fix
+    _ensureMapsLoaded();
+    var _geoAttempt=0;
+    var _geoRetry=setInterval(function(){
+      _geoAttempt++;
+      if(_googleMapsReady&&google&&google.maps){
+        clearInterval(_geoRetry);
+        var geocoder=new google.maps.Geocoder();
+        geocoder.geocode({location:{lat:best.lat,lng:best.lng}},function(results,status){
+          if(status==='OK'&&results&&results[0]){
+            var addr=results[0].formatted_address;
+            if(_isHighwayAddress(addr)){
+              _snapToNearestPlace(best.lat,best.lng,function(placeName){
+                _startAddr=placeName||addr;
+              });
+            } else {
+              _startAddr=addr;
+            }
+          } else {
+            _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
+          }
+        });
+      } else if(_geoAttempt>=60){
+        // 30 seconds elapsed — give up and use coordinates
+        clearInterval(_geoRetry);
+        _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
+      }
+    },500);
     return;
   }
   var geocoder=new google.maps.Geocoder();
@@ -3515,7 +3543,13 @@ function geocodeAddr(query,inpId,ddId){
   var inp=document.getElementById(inpId);
   if(!inp||inp.value.trim().length<2)return;
 
-  if(!_googleMapsReady||!google||!google.maps||!google.maps.places)return;
+  if(!_googleMapsReady||!google||!google.maps||!google.maps.places){
+    // Maps not ready — queue this search and retry
+    // Critical on native iOS where SDK loads after user starts typing
+    _ensureMapsLoaded();
+    _geocodeWhenReady(query,inpId,ddId,0);
+    return;
+  }
 
   // Create session token for billing optimization
   if(!_placesSessionToken)_placesSessionToken=new google.maps.places.AutocompleteSessionToken();
