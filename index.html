@@ -1082,9 +1082,26 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 /* ===== Google Maps Init Callback ===== */
 var _googleMapsReady=false;
 function _initGoogleMaps(){
-  window._mapsLoading = false;
-  if (window._pendingMapOpen) { window._pendingMapOpen = false; setTimeout(openMapSheet, 50); return; }
-_googleMapsReady=true;if(typeof initMap==='function')initMap();}
+    window._mapsLoading = false;
+    window._pendingMapOpen = false;
+    var lm = document.getElementById('liveMap');
+    var ml = document.getElementById('mapLoading');
+    if (lm && typeof google !== 'undefined' && google.maps) {
+      if (ml) ml.classList.add('hidden');
+      lm.innerHTML = '';
+      var mapOpts = {zoom:15,center:{lat:37.7749,lng:-122.4194},mapTypeId:'roadmap'};
+      var m = new google.maps.Map(lm, mapOpts);
+      window._liveMapInstance = m;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(p){
+          var c={lat:p.coords.latitude,lng:p.coords.longitude};
+          m.setCenter(c);
+          new google.maps.Marker({position:c,map:m});
+          window._userLat=c.lat; window._userLng=c.lng;
+        }, function(){});
+      }
+    }
+  }
 
 /* ===== SVG ICON SYSTEM ===== */
 /* ===== SECURITY: HTML escape — MUST use for all user data in innerHTML ===== */
@@ -4110,18 +4127,17 @@ function loadMapAppPref(){
   }catch(e){}
 }
 function openMapSheet(){
-  if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-    if (!window._mapsLoading) {
-      window._mapsLoading = true;
-      var s = document.createElement('script');
-      s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&loading=async&callback=_initGoogleMaps';
-      s.async = true; s.defer = true;
-      s.onerror = function() { window._mapsLoading = false; };
-      document.head.appendChild(s);
+  // Dynamic Maps loader — works on file://, capacitor://, https:// origins
+    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+      if (!window._mapsLoading) {
+        window._mapsLoading = true;
+        var _s = document.createElement('script');
+        _s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&loading=async&callback=_initGoogleMaps';
+        _s.async = true; _s.defer = true;
+        _s.onerror = function(){ window._mapsLoading = false; };
+        document.head.appendChild(_s);
+      }
     }
-    window._pendingMapOpen = true;
-    return;
-  }
 
   var pref='inapp';
   // On native app, always use in-app map — ignore any saved preference
@@ -4178,7 +4194,8 @@ function initMap(){
     var defLat=lastGpsLat||tzDefault[0],defLng=lastGpsLng||tzDefault[1];
     if(!lastGpsLat){var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}if(tzMapCoords[tz]){defLat=tzMapCoords[tz][0];defLng=tzMapCoords[tz][1];}}
 
-    map=new google.maps.Map(document.getElementById('liveMap'),{
+  var _ml = document.getElementById('mapLoading'); if (_ml) _ml.style.display = 'none';
+      map=new google.maps.Map(document.getElementById('liveMap'),{
       center:{lat:defLat,lng:defLng},
       zoom:15,
       disableDefaultUI:false,
