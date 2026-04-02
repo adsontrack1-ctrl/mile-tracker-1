@@ -2615,20 +2615,22 @@ function _isHighwayAddress(addr){
 }
 function _snapToNearestPlace(lat,lng,cb){
   if(!_googleMapsReady||!google||!google.maps||!google.maps.places){cb(null);return;}
-  var service=null;
-  service.nearbySearch({
-    location:{lat:lat,lng:lng},
-    radius:200,
-    type:['establishment']
-  },function(results,status){
-    if(status==='OK'&&results&&results.length>0){
-      // Pick the nearest named place
-      var best=results[0];
-      cb(best.name+(best.vicinity?', '+best.vicinity:''));
+  google.maps.places.Place.searchNearby({
+    locationRestriction:{center:{lat:lat,lng:lng},radius:200},
+    includedPrimaryTypes:['establishment'],
+    fields:['displayName','formattedAddress'],
+    maxResultCount:1
+  }).then(function(result){
+    var places=result.places||[];
+    if(places.length>0){
+      var best=places[0];
+      var name=best.displayName||'';
+      var addr=best.formattedAddress||'';
+      cb(name+(addr?', '+addr:''));
     } else {
       cb(null);
     }
-  });
+  }).catch(function(){cb(null);});
 }
 
 function toggleTracking(){
@@ -3441,10 +3443,7 @@ var _placesAutocompleteFrom=null,_placesAutocompleteTo=null;
 
 /* --- Dropdown rendering (Google Places powered) --- */
 var _geoTimer=null;
-var _placesService=null;
 var _placesSessionToken=null;
-
-function _getPlacesService(){return null;}
 
 function onAddrType(inpId,ddId){
   var inp=document.getElementById(inpId);
@@ -3486,8 +3485,7 @@ function geocodeAddr(query,inpId,ddId){
   var inp=document.getElementById(inpId);
   if(!inp||inp.value.trim().length<2)return;
 
-  var svc=_getPlacesService();
-  if(!svc){return;}
+  if(!_googleMapsReady||!google||!google.maps||!google.maps.places)return;
 
   // Create session token for billing optimization
   if(!_placesSessionToken)_placesSessionToken=new google.maps.places.AutocompleteSessionToken();
@@ -3503,28 +3501,30 @@ function geocodeAddr(query,inpId,ddId){
     if(tzG[tz]&&!lastGpsLat){biasLat=tzG[tz][0];biasLng=tzG[tz][1];}
   }catch(e){}
 
-  svc.getPlacePredictions({
+  google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
     input:query,
     sessionToken:_placesSessionToken,
     locationBias:{center:{lat:biasLat,lng:biasLng},radius:50000}
-  },function(predictions,status){
+  }).then(function(result){
     if(!inp||inp.value.trim().length<2)return;
     _liveGeoResults=[];
     var html='';
+    var suggestions=result.suggestions||[];
 
-    if(status==='OK'&&predictions){
-      predictions.forEach(function(pred,j){
-        var mainLabel=pred.structured_formatting?pred.structured_formatting.main_text:pred.description;
-        var subLabel=pred.structured_formatting?pred.structured_formatting.secondary_text:'';
-        _liveGeoResults.push({placeId:pred.place_id,n:mainLabel,c:subLabel,fullAddr:pred.description});
-        html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" '
-          +'style="border-left:3px solid var(--mint)">'
-          +'<div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2">'
-          +'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
-          +'<div><div class="adi-main">'+_esc(mainLabel)+'</div>'
-          +'<div class="adi-sub" style="color:var(--mint)">'+_esc(subLabel)+'</div></div></div>';
-      });
-    }
+    suggestions.forEach(function(s,j){
+      var pred=s.placePrediction;
+      if(!pred)return;
+      var mainLabel=pred.mainText?pred.mainText.text:(pred.text?pred.text.text:'');
+      var subLabel=pred.secondaryText?pred.secondaryText.text:'';
+      var fullAddr=pred.text?pred.text.text:mainLabel;
+      _liveGeoResults.push({placeId:pred.placeId,n:mainLabel,c:subLabel,fullAddr:fullAddr});
+      html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" '
+        +'style="border-left:3px solid var(--mint)">'
+        +'<div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2">'
+        +'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
+        +'<div><div class="adi-main">'+_esc(mainLabel)+'</div>'
+        +'<div class="adi-sub" style="color:var(--mint)">'+_esc(subLabel)+'</div></div></div>';
+    });
 
     // "Use as typed" always last
     html+='<div class="add-dd-item use-typed" onmousedown="pickCustom(event,\''+inpId+'\',\''+ddId+'\')">'
@@ -3535,7 +3535,7 @@ function geocodeAddr(query,inpId,ddId){
 
     dd.innerHTML=html;
     dd.classList.add('show');
-  });
+  }).catch(function(e){});
 }
 var _liveGeoResults=[];
 
@@ -3602,15 +3602,16 @@ function _tryGoogleDistance(){
 
 function _getGoogleDistance(origin,destination,cb){
   if(!_googleMapsReady||!google||!google.maps){cb(null,'no_maps');return;}
-  fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE','X-Goog-FieldMask':'originIndex,destinationIndex,duration,distanceMeters,status'},body:JSON.stringify({origins:[{waypoint:{address:origin}}],destinations:[{waypoint:{address:destination}}],travelMode:'DRIVE'})}).then(r=>r.json()).then(function(data){var rows=data&&data[0]?[{elements:[{distance:{value:data[0].distanceMeters||0},duration:{text:(Math.round((data[0].duration||'0s').replace('s','')/60))+' mins'},status:'OK'}]}]:[];var response={rows:rows};var status=rows.length?'OK':'ZERO_RESULTS';(function(response,status){
-    if(status==='OK'&&response.rows[0].elements[0].status==='OK'){
-      var distMeters=response.rows[0].elements[0].distance.value;
-      var distMi=distMeters/1609.34;
+  var oWaypoint=typeof origin==='string'?{address:origin}:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}};
+  var dWaypoint=typeof destination==='string'?{address:destination}:{location:{latLng:{latitude:destination.lat,longitude:destination.lng}}};
+  fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE','X-Goog-FieldMask':'originIndex,destinationIndex,duration,distanceMeters,status'},body:JSON.stringify({origins:[{waypoint:oWaypoint}],destinations:[{waypoint:dWaypoint}],travelMode:'DRIVE'})}).then(function(r){return r.json();}).then(function(data){
+    if(data&&data[0]&&data[0].distanceMeters){
+      var distMi=data[0].distanceMeters/1609.34;
       cb(distMi,null);
     } else {
-      cb(null,status);
+      cb(null,'ZERO_RESULTS');
     }
-  });
+  }).catch(function(){cb(null,'fetch_error');});
 }
 
 function _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status){
@@ -4502,18 +4503,19 @@ function updateTemplateDists(){
 
     // AIRPORT: Use Google Places to find nearest real airport
     if(window.google&&window.google.maps&&window.google.maps.places){
-      var dummy=document.createElement('div');
-      var svc=null;
-      svc.nearbySearch({
-        location:new google.maps.LatLng(lat,lng),
-        rankBy:google.maps.places.RankBy.DISTANCE,
-        keyword:'airport'
-      },function(results,status){
+      google.maps.places.Place.searchNearby({
+        locationRestriction:{center:{lat:lat,lng:lng},radius:50000},
+        includedPrimaryTypes:['airport'],
+        fields:['displayName','location'],
+        maxResultCount:1
+      }).then(function(result){
+        var places=result.places||[];
         var airEl=document.getElementById('tmplAirDist');
-        if(status==='OK'&&results&&results[0]){
-          var airLat=results[0].geometry.location.lat();
-          var airLng=results[0].geometry.location.lng();
-          var airName=results[0].name;
+        if(places.length>0){
+          var airport=places[0];
+          var airLat=airport.location.lat();
+          var airLng=airport.location.lng();
+          var airName=airport.displayName||'';
           // Update template label to show actual airport name
           var nameEl=document.querySelector('.tmpl:nth-child(3) .tmpl-n');
           if(nameEl&&airName)nameEl.textContent=airName.length>15?airName.substring(0,15)+'…':airName;
@@ -4531,6 +4533,9 @@ function updateTemplateDists(){
             }
           });
         } else {if(airEl)airEl.textContent='— '+u;}
+      }).catch(function(){
+        var airEl=document.getElementById('tmplAirDist');
+        if(airEl)airEl.textContent='— '+u;
       });
     } else {
       var airEl=document.getElementById('tmplAirDist');
