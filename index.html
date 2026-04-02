@@ -3685,7 +3685,9 @@ function _tryGoogleDistance(){
   var oLat=fromCoords.lat,oLng=fromCoords.lng;
   var dLat=toCoords.lat,dLng=toCoords.lng;
 
-  _getGoogleDistance({lat:oLat,lng:oLng},{lat:dLat,lng:dLng},function(distMi,err){
+  var _f=document.getElementById('addFrom').value.trim();
+  var _t=document.getElementById('addTo').value.trim();
+  _getGoogleDistance(_f||{lat:oLat,lng:oLng},_t||{lat:dLat,lng:dLng},function(distMi,err){
     if(distMi!==null){
       var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
       var displayDist=useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
