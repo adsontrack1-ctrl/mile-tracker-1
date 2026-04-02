@@ -4255,7 +4255,7 @@ function initMap(){
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(function(p){
         var pos={lat:p.coords.latitude,lng:p.coords.longitude};
-        map.setCenter(pos);userMarker.setPosition(pos);
+        map.setCenter(pos);userMarker.position=pos;
       },function(){},{enableHighAccuracy:true});
     }
   }catch(e){console.log('Map init error:',e);}
@@ -4263,7 +4263,7 @@ function initMap(){
 function updateMapPos(lat,lng){
   if(!mapReady)return;
   var pos={lat:lat,lng:lng};
-  userMarker.setPosition(pos);
+  userMarker.position=pos;
   if(mapSheetOpen)map.panTo(pos);
   if(tracking){
     routeLine.getPath().push(new google.maps.LatLng(lat,lng));
@@ -4277,7 +4277,7 @@ function recenterMap(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(p){
       var pos={lat:p.coords.latitude,lng:p.coords.longitude};
-      map.setCenter(pos);map.setZoom(16);userMarker.setPosition(pos);
+      map.setCenter(pos);map.setZoom(16);userMarker.position=pos;
     });
   }
 }
