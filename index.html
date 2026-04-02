@@ -3247,11 +3247,10 @@ function stopTracking(){
   var _tMin=(Date.now()-trackStart)/60000;
   if(totalDist>0.05&&_tMin>=5){var _kd=_matchKnownLocation(lastGpsLat,lastGpsLng);setTimeout(function(){_promptSmartSave(_kd);},1500);}
   if(totalDist>0.01){
-    var mi=totalDist;
-    var dist=_useKm()?(mi*1.60934):mi;
+    var _haversineMi=totalDist; // keep haversine as fallback
     var elapsed=Math.floor((Date.now()-trackStart)/60000);
     var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
-    // If geocode still pending, wait up to 3s then proceed
+    // If geocode still pending, use coordinate fallback
     var fromAddr=(_startAddr&&_startAddr!=='Locating...')?_startAddr:'';
     if(!fromAddr&&positions.length>0){
       fromAddr='GPS ('+positions[0].lat.toFixed(4)+', '+positions[0].lng.toFixed(4)+')';
@@ -3261,57 +3260,112 @@ function stopTracking(){
     if(!endPos&&positions.length>0){endPos=positions[positions.length-1];}
     var toAddr='';
     if(endPos){toAddr='GPS ('+endPos.lat.toFixed(4)+', '+endPos.lng.toFixed(4)+')';}
-    // Check frequent locations for end
-    if(endPos){
-      var endFreqLabel=_getFreqLocLabel(endPos.lat,endPos.lng);
-      if(endFreqLabel){
-        toAddr=endFreqLabel;
-        _updateFreqLoc(endPos.lat,endPos.lng,endFreqLabel);
-        finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
-        // Update start freq loc too
-        if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
+
+    // Core save function — called after both road distance and geocoding resolve
+    function _doSave(finalMi,finalFromAddr,finalToAddr){
+      var finalDist=_useKm()?(finalMi*1.60934):finalMi;
+      _updateFreqLoc(endPos?endPos.lat:lastGpsLat,endPos?endPos.lng:lastGpsLng,finalToAddr);
+      if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
+      finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
+    }
+
+    // Step 1: Get road distance via Routes API using start+end GPS coords
+    // Uses actual lat/lng so it works even before geocoding completes
+    function _getRoadDistanceThenSave(fromA,toA){
+      var startPos=positions.length>0?positions[0]:null;
+      if(!startPos||!endPos||!navigator.onLine){
+        // No GPS positions or offline — use haversine
+        _geocodeEndThenSave(_haversineMi,fromA,toA);
         return;
       }
-    }
-    // Reverse geocode the end position
-    if(endPos&&_googleMapsReady&&google&&google.maps){
-      var geocoder=new google.maps.Geocoder();
-      geocoder.geocode({location:{lat:endPos.lat,lng:endPos.lng}},function(results,status){
-        if(status==='OK'&&results&&results[0]){
-          var endAddr=results[0].formatted_address;
-          // If accuracy > 30m or highway address, snap to nearest place
-          if((endPos.accuracy>30||_isHighwayAddress(endAddr))){
-            _snapToNearestPlace(endPos.lat,endPos.lng,function(placeName){
-              toAddr=placeName||endAddr;
-              _updateFreqLoc(endPos.lat,endPos.lng,toAddr);
-              if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
-              finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
-            });
+      var origin={lat:startPos.lat,lng:startPos.lng};
+      var destination={lat:endPos.lat,lng:endPos.lng};
+      // Timeout: if Routes API takes >6s, fall back to haversine
+      var _routesDone=false;
+      var _routesTimeout=setTimeout(function(){
+        if(!_routesDone){_routesDone=true;_geocodeEndThenSave(_haversineMi,fromA,toA);}
+      },6000);
+      fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE',
+          'X-Goog-FieldMask':'originIndex,destinationIndex,distanceMeters,status'
+        },
+        body:JSON.stringify({
+          origins:[{waypoint:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}}}],
+          destinations:[{waypoint:{location:{latLng:{latitude:destination.lat,longitude:destination.lng}}}}],
+          travelMode:'DRIVE'
+        })
+      }).then(function(r){return r.json();}).then(function(data){
+        if(_routesDone)return;
+        _routesDone=true;
+        clearTimeout(_routesTimeout);
+        var roadMi=null;
+        if(data&&data[0]&&data[0].distanceMeters&&data[0].distanceMeters>0){
+          roadMi=data[0].distanceMeters/1609.34;
+          // Sanity check: road distance should be >= haversine and not >3x haversine
+          // (guards against routing errors for short trips or GPS drift)
+          if(roadMi>=_haversineMi*0.8&&roadMi<=_haversineMi*3.0){
+            _geocodeEndThenSave(roadMi,fromA,toA);
           } else {
-            toAddr=endAddr;
-            _updateFreqLoc(endPos.lat,endPos.lng,toAddr);
-            if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
-            finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+            // Road distance outside sanity bounds — use haversine
+            _geocodeEndThenSave(_haversineMi,fromA,toA);
           }
         } else {
-          _updateFreqLoc(endPos.lat,endPos.lng,toAddr);
-          if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
-          finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
+          _geocodeEndThenSave(_haversineMi,fromA,toA);
         }
+      }).catch(function(){
+        if(_routesDone)return;
+        _routesDone=true;
+        clearTimeout(_routesTimeout);
+        _geocodeEndThenSave(_haversineMi,fromA,toA);
       });
-      // Fallback if geocode takes too long
-      setTimeout(function(){
-        if(!_gpsTrioSaved){
-          _updateFreqLoc(endPos.lat,endPos.lng,toAddr);
-          if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
-          finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
-        }
-      },5000);
-    } else {
-      if(endPos)_updateFreqLoc(endPos.lat,endPos.lng,toAddr);
-      if(positions.length>0)_updateFreqLoc(positions[0].lat,positions[0].lng,_startAddr);
-      finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist);
     }
+
+    // Step 2: Geocode end position, then save
+    function _geocodeEndThenSave(finalMi,fromA,toA){
+      // Check frequent locations for end first
+      if(endPos){
+        var endFreqLabel=_getFreqLocLabel(endPos.lat,endPos.lng);
+        if(endFreqLabel){
+          _doSave(finalMi,fromA,endFreqLabel);
+          return;
+        }
+      }
+      // Geocode end position
+      if(endPos&&_googleMapsReady&&google&&google.maps){
+        var geocoder=new google.maps.Geocoder();
+        var _geoDone=false;
+        // Fallback if geocode takes too long
+        var _geoTimeout=setTimeout(function(){
+          if(!_geoDone&&!_gpsTrioSaved){_geoDone=true;_doSave(finalMi,fromA,toA);}
+        },5000);
+        geocoder.geocode({location:{lat:endPos.lat,lng:endPos.lng}},function(results,status){
+          if(_geoDone)return;
+          _geoDone=true;
+          clearTimeout(_geoTimeout);
+          if(status==='OK'&&results&&results[0]){
+            var endAddr=results[0].formatted_address;
+            if(endPos.accuracy>30||_isHighwayAddress(endAddr)){
+              _snapToNearestPlace(endPos.lat,endPos.lng,function(placeName){
+                _doSave(finalMi,fromA,placeName||endAddr);
+              });
+            } else {
+              _doSave(finalMi,fromA,endAddr);
+            }
+          } else {
+            _doSave(finalMi,fromA,toA);
+          }
+        });
+      } else {
+        _doSave(finalMi,fromA,toA);
+      }
+    }
+
+    // Kick off the chain: road distance → geocode end → save
+    _getRoadDistanceThenSave(fromAddr,toAddr);
+
   } else {
     showToast(_i('warn'),'No distance recorded — trip not saved',3000);
   }
