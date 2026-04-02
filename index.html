@@ -3576,12 +3576,12 @@ function geocodeAddr(query,inpId,ddId){
 
   function _renderSuggestions(suggestions){
     if(!inp||inp.value.trim().length<2)return;
-    _liveGeoResults=[];
+    _liveGeoResults[ddId]=[];
     var html='';
     suggestions.forEach(function(item,j){
       var mainLabel=item.n||'';
       var subLabel=item.c||'';
-      _liveGeoResults.push(item);
+      _liveGeoResults[ddId].push(item);
       html+='<div class="add-dd-item" onmousedown="pickGeo(event,\''+inpId+'\',\''+ddId+'\','+j+')" '
         +'style="border-left:3px solid var(--mint)">'
         +'<div class="adi-icon" style="background:var(--mint-s)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2">'
@@ -3642,12 +3642,12 @@ function geocodeAddr(query,inpId,ddId){
     _tryLegacyPlacesAPI();
   }
 }
-var _liveGeoResults=[];
+var _liveGeoResults={};
 
 // ── pickGeo: resolve place_id to coords, 4 fallback paths ──
 function pickGeo(e,inpId,ddId,idx){
   e.preventDefault();
-  var p=_liveGeoResults[idx];
+  var p=(_liveGeoResults[ddId]||[])[idx];
   if(!p)return;
   var inp=document.getElementById(inpId);
   // Set input to full address string immediately
