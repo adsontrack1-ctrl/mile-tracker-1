@@ -1401,6 +1401,8 @@ async function ensureProfile(user){
       var hn=document.getElementById('hdrName');if(hn)hn.textContent=profile.name;
       var av=document.getElementById('hdrAv');if(av)av.textContent=profile.name.charAt(0).toUpperCase();
     }
+    // Update subscription UI in Settings
+    if(typeof _updateSubUI==='function')_updateSubUI(profile);
     // Bug 3 fix: register device for ALL tiers (including free/unsubscribed)
     var tier=(profile&&profile.subscription_tier)||'free';
     var allowed=await _registerDevice(user.id,tier);
