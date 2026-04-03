@@ -1382,12 +1382,19 @@ async function ensureProfile(user){
   try{
     var provider=((user.app_metadata||{}).provider)||'email';
     var name=(user.user_metadata||{}).full_name||(user.user_metadata||{}).name||'';
+    // OTP/email users have no metadata name — derive from email prefix
+    if(!name&&user.email)name=user.email.split('@')[0].replace(/[._-]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
     await _sb.from('profiles').upsert({id:user.id,email:user.email||'',name:name,auth_provider:provider,last_active_at:new Date().toISOString()},{onConflict:'id',ignoreDuplicates:false});
     var resp=await _sb.from('profiles').select('*').eq('id',user.id).single();
     var profile=resp.data;
     currentUser={id:user.id,email:user.email,profile:profile};
     window.currentUser=currentUser;
-    if(profile&&profile.name){try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}}
+    if(profile&&profile.name){
+      try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}
+      // Update header greeting with real name
+      var hn=document.getElementById('hdrName');if(hn)hn.textContent=profile.name;
+      var av=document.getElementById('hdrAv');if(av)av.textContent=profile.name.charAt(0).toUpperCase();
+    }
     // Bug 3 fix: register device for ALL tiers (including free/unsubscribed)
     var tier=(profile&&profile.subscription_tier)||'free';
     var allowed=await _registerDevice(user.id,tier);
