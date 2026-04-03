@@ -1765,14 +1765,32 @@ function initProfile(){
 /* ===== RECALC ALL STATS ===== */
 function _calcStreak(){
   if(!TRIPS||TRIPS.length===0)return 0;
+  // Build a Set of unique calendar days (midnight timestamps) from trips
+  // MUST use t.ts (Unix timestamp) — t.day contains "Today"/"Yesterday"/"3 days ago"
+  // which are NOT parseable by new Date() and always return Invalid Date
   var days=new Set();
-  TRIPS.forEach(function(t){if(t.day){try{var d=new Date(t.day);d.setHours(0,0,0,0);days.add(d.getTime());}catch(e){}}});
+  var now=Date.now();
+  TRIPS.forEach(function(t){
+    var ts=t.ts||(t.date?new Date(t.date).getTime():0);
+    if(ts>0){
+      var d=new Date(ts);
+      d.setHours(0,0,0,0);
+      days.add(d.getTime());
+    }
+  });
   var streak=0;
-  var cur=new Date();cur.setHours(0,0,0,0);
+  var cur=new Date();
+  cur.setHours(0,0,0,0);
   for(var i=0;i<365;i++){
-    if(days.has(cur.getTime())){streak++;}
-    else if(i===0){cur.setDate(cur.getDate()-1);continue;}
-    else break;
+    if(days.has(cur.getTime())){
+      streak++;
+    } else if(i===0){
+      // No trip today — check if there was one yesterday (streak still valid)
+      cur.setDate(cur.getDate()-1);
+      continue;
+    } else {
+      break;
+    }
     cur.setDate(cur.getDate()-1);
   }
   return streak;
@@ -1920,6 +1938,7 @@ function recalcStats(){
   if(tripPill)tripPill.textContent=totalTrips+' trip'+(totalTrips!==1?'s':'');
   // Update year-to-date savings bar
   _updateYTD();
+  _updateStreak();
 
   // Nav bell badge
   var navBadge=document.getElementById('navAlertBadge');
