@@ -1278,7 +1278,8 @@ async function _authSendOtp(){
   document.getElementById('authErr').textContent='';
   _authSetLoading('authSendBtn',true);
   try{
-    var result=await _sb.auth.signInWithOtp({email:email,options:{shouldCreateUser:true}});
+    // emailRedirectTo:null forces Supabase to send a 6-digit code, not a magic link
+    var result=await _sb.auth.signInWithOtp({email:email,options:{shouldCreateUser:true,emailRedirectTo:null}});
     if(result.error)throw result.error;
     _authPendingEmail=email;
     document.getElementById('authEmailStep').style.display='none';
@@ -1302,8 +1303,18 @@ async function _authVerifyOtp(){
   if(token.length!==6){document.getElementById('authOtpErr').textContent='Enter all 6 digits';return;}
   document.getElementById('authOtpErr').textContent='';
   _authSetLoading('authVerifyBtn',true);
-  try{var result=await _sb.auth.verifyOtp({email:_authPendingEmail,token:token,type:'email'});if(result.error)throw result.error;}
-  catch(e){document.getElementById('authOtpErr').textContent=e.message||'Invalid code — try again';}
+  try{
+    var result=await _sb.auth.verifyOtp({email:_authPendingEmail,token:token,type:'email'});
+    if(result.error)throw result.error;
+    // Session is now live — hide auth modal and boot the app
+    var session=result.data&&result.data.session;
+    if(session){
+      document.getElementById('authModal').style.display='none';
+      if(typeof initApp==='function')initApp(session.user);
+      else if(typeof _onSignedIn==='function')_onSignedIn(session.user);
+      showToast('Welcome back! ✓','#22c55e');
+    }
+  }catch(e){document.getElementById('authOtpErr').textContent=e.message||'Invalid code — try again';}
   _authSetLoading('authVerifyBtn',false);
 }
 async function _authGoogle(){
