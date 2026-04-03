@@ -1784,9 +1784,16 @@ function _updateStreak(){
 }
 function _updateYTD(){
   var goal=5000;
-  var totalDed=0,yr=new Date().getFullYear();
+  var totalDed=0;
+  var yr=new Date().getFullYear();
   TRIPS.forEach(function(t){
-    if(t.ded&&t.day){try{var d=new Date(t.day);if(d.getFullYear()===yr)totalDed+=(parseFloat(tripDist(t.mi))||0)*catRate(t.type);}catch(e){}}
+    // Use t.ts (Unix timestamp) for reliable year filtering
+    // t.day contains "Today"/"Yesterday"/"Mon" — not parseable as a date
+    var tripYear=t.ts?new Date(t.ts).getFullYear():yr;
+    if(tripYear===yr&&t.type==='biz'){
+      // Add actual deduction for this business trip
+      totalDed+=_tripDeduction(t);
+    }
   });
   var pct=Math.min(Math.round((totalDed/goal)*100),100);
   var bar=document.getElementById('ytdBar');
@@ -1795,6 +1802,7 @@ function _updateYTD(){
     var f=document.getElementById('ytdFill');if(f)f.style.width=pct+'%';
     var p=document.getElementById('ytdPct');if(p)p.textContent=pct+'%';
     var s=document.getElementById('ytdSaved');if(s)s.textContent=LOC.currency+totalDed.toFixed(0)+' saved';
+    var g=document.getElementById('ytdGoal');if(g)g.textContent='Goal: '+LOC.currency+goal.toLocaleString();
   }
 }
 function recalcStats(){
@@ -1910,6 +1918,8 @@ function recalcStats(){
   // Trip count pill
   var tripPill=document.getElementById('tripPill');
   if(tripPill)tripPill.textContent=totalTrips+' trip'+(totalTrips!==1?'s':'');
+  // Update year-to-date savings bar
+  _updateYTD();
 
   // Nav bell badge
   var navBadge=document.getElementById('navAlertBadge');
