@@ -1289,13 +1289,21 @@ async function _authVerifyOtp(){
 }
 async function _authGoogle(){
   if(!_sb)return;_authSetLoading('authGoogleBtn',true);
-  try{await _sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname,skipBrowserRedirect:false}});}
-  catch(e){document.getElementById('authErr').textContent=e.message||'Google sign-in failed';_authSetLoading('authGoogleBtn',false);}
+  try{
+    var redirectTo=window.__MYMILESAI_NATIVE__
+      ?'https://dxpuuiqibtizewbbffjk.supabase.co/auth/v1/callback'
+      :window.location.origin+window.location.pathname;
+    await _sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:redirectTo,skipBrowserRedirect:false}});
+  }catch(e){document.getElementById('authErr').textContent=e.message||'Google sign-in failed';_authSetLoading('authGoogleBtn',false);}
 }
 async function _authApple(){
   if(!_sb)return;_authSetLoading('authAppleBtn',true);
-  try{await _sb.auth.signInWithOAuth({provider:'apple',options:{redirectTo:window.location.origin+window.location.pathname}});}
-  catch(e){document.getElementById('authErr').textContent=e.message||'Apple sign-in failed';_authSetLoading('authAppleBtn',false);}
+  try{
+    var redirectTo=window.__MYMILESAI_NATIVE__
+      ?'https://dxpuuiqibtizewbbffjk.supabase.co/auth/v1/callback'
+      :window.location.origin+window.location.pathname;
+    await _sb.auth.signInWithOAuth({provider:'apple',options:{redirectTo:redirectTo}});
+  }catch(e){document.getElementById('authErr').textContent=e.message||'Apple sign-in failed';_authSetLoading('authAppleBtn',false);}
 }
 
 // ── Device registration (all 3 gaps fixed) ──
