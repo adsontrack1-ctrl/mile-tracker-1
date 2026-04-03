@@ -5,7 +5,7 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.mymilesai.workers.dev https://api.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.harijasllc.workers.dev https://api.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1357,7 +1357,7 @@ async function _upgradeClick(plan){
   var btn=document.getElementById(plan==='pro'?'btnUpgradePro':'btnUpgradeBusiness');
   if(btn){btn.disabled=true;btn.innerHTML='<span class="auth-spinner"></span>';}
   try{
-    var resp=await fetch('https://mymilesai-ai.mymilesai.workers.dev/create-checkout',{
+    var resp=await fetch('https://mymilesai-ai.harijasllc.workers.dev/create-checkout',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({priceId:_PRICES[plan]||_PRICES.pro,userId:currentUser.id,email:currentUser.email,deviceId:_deviceId,plan:plan,successUrl:window.location.origin+window.location.pathname+'?payment=success&plan='+plan,cancelUrl:window.location.origin+window.location.pathname+'?payment=cancelled'})
     });
@@ -4897,7 +4897,7 @@ function saveAIKey(key){
   _aiApiKey=key;
   _updateAIKeyBar();
   // Test call
-  fetch('https://mymilesai-ai.mymilesai.workers.dev/api/chat',{
+  fetch('https://mymilesai-ai.harijasllc.workers.dev/api/chat',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({messages:[{role:'user',content:'test'}]})
@@ -5053,7 +5053,7 @@ function sendAIChat(){
   document.getElementById('aiMsgs').scrollTop=document.getElementById('aiMsgs').scrollHeight;
   document.getElementById('aiSendBtn').disabled=true;
 
-  fetch('https://mymilesai-ai.mymilesai.workers.dev/api/chat',{
+  fetch('https://mymilesai-ai.harijasllc.workers.dev/api/chat',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
