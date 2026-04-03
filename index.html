@@ -1420,7 +1420,7 @@ if(_sb){
 // ── Boot sequence (Bug 1 fix: payment handler after session, Bug 6 fix: loading state) ──
 (async function _authBoot(){
   // 1. Native iOS: skip all web auth + subscription
-  if(window.__MYMILESAI_NATIVE__||window.__AUTH_SKIPPED__){_authHideModal();return;}
+  if(window.__AUTH_SKIPPED__){_authHideModal();return;}
   // 2. Check payment callback
   var urlParams=new URLSearchParams(window.location.search);
   var isPaymentSuccess=urlParams.get('payment')==='success';
