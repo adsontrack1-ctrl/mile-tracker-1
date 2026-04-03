@@ -1031,8 +1031,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .paywall-box{width:100%;max-width:420px;text-align:center;font-family:system-ui,-apple-system,sans-serif;}
 .paywall-title{font-size:24px;font-weight:800;color:#111827;margin-bottom:8px;}
 .paywall-desc{font-size:14px;color:#6B7280;margin-bottom:28px;line-height:1.6;}
-.paywall-plan{background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:22px;margin-bottom:12px;text-align:left;box-shadow:0 2px 12px rgba(0,0,0,.04);}
-.paywall-plan.featured{border-color:#2563EB;box-shadow:0 4px 24px rgba(37,99,235,.12);}
+.paywall-plan{background:#fff;border:1px solid #E5E7EB;border-radius:20px;padding:22px;margin-bottom:12px;text-align:left;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+.paywall-plan.featured{border:2px solid #2563EB;box-shadow:0 4px 24px rgba(37,99,235,.12);}
 .paywall-plan h4{font-size:17px;font-weight:700;color:#111827;margin:0 0 4px;}
 .paywall-plan p{font-size:13px;color:#6B7280;margin:0;}
 .paywall-plan .price{font-size:22px;font-weight:800;color:#2563EB;margin-top:10px;}
@@ -1090,28 +1090,36 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="auth-footer">No password required · Privacy-first · Free to start<br>By continuing you agree to our <span onclick="openInfoModal('Terms','See Terms & Conditions in Settings.')">Terms</span> & <span onclick="openInfoModal('Privacy','See Privacy Policy in Settings.')">Privacy Policy</span></div>
   </div>
 </div>
-<!-- Subscribe / Paywall -->
+<!-- Subscribe / Paywall — 2 plans: Pro + Business, both with 10-day trial -->
 <div class="paywall-overlay hidden" id="paywallOverlay">
   <div class="paywall-box">
     <div style="font-size:44px;margin-bottom:12px;">🚗</div>
     <div class="paywall-title">Start Your 10-Day Free Trial</div>
-    <div class="paywall-desc">Full access. No charge until day 10. Cancel anytime.</div>
-    <div class="paywall-plan">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4 style="margin:0">Pro</h4><span style="font-size:11px;color:#6B7280;background:#F3F4F6;padding:3px 10px;border-radius:100px;">1 device</span></div>
+    <div class="paywall-desc">Full access for 10 days. Then $69.99/year (Pro) or $600/year (Business).<br>Cancel before day 10 and pay nothing.</div>
+    <div class="paywall-plan" style="border-radius:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h4 style="margin:0">Pro</h4>
+        <span style="font-size:11px;color:#6B7280;background:#F3F4F6;padding:3px 10px;border-radius:100px;">1 device</span>
+      </div>
       <div class="price">$69.99<span style="font-size:13px;font-weight:400;color:#6B7280">/year</span></div>
-      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">From $5.83/month</div>
-      <div style="font-size:13px;color:#374151;margin-top:12px;line-height:1.8;">✓ Unlimited trips<br>✓ GPS auto-tracking<br>✓ AI classification<br>✓ PDF &amp; CSV reports<br>✓ 1 vehicle</div>
-      <button class="paywall-upgrade" onclick="_upgradeClick('pro')" id="btnUpgradePro">Start Free Trial →</button>
+      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">$5.83/month equivalent · Billed after 10-day trial</div>
+      <div style="font-size:13px;color:#374151;margin-top:14px;line-height:1.9;">✓ Unlimited trips<br>✓ GPS auto-tracking<br>✓ AI classification<br>✓ PDF &amp; CSV export<br>✓ 1 vehicle</div>
+      <button class="paywall-upgrade" onclick="_upgradeClick('pro')" id="btnUpgradePro">Start 10-Day Trial — Pro</button>
     </div>
-    <div class="paywall-plan featured">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4 style="margin:0">Business</h4><span style="font-size:10px;font-weight:700;color:#2563EB;background:#EFF6FF;padding:3px 10px;border-radius:100px;border:1px solid rgba(37,99,235,.15);">MOST POPULAR</span></div>
-      <div style="display:flex;align-items:baseline;gap:4px;"><span style="font-size:11px;color:#6B7280;background:#F3F4F6;padding:3px 10px;border-radius:100px;">Up to 10 devices</span></div>
-      <div class="price" style="margin-top:8px;">$600<span style="font-size:13px;font-weight:400;color:#6B7280">/year</span></div>
-      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">$50/month</div>
-      <div style="font-size:13px;color:#374151;margin-top:12px;line-height:1.8;">✓ Everything in Pro<br>✓ Up to 10 vehicles<br>✓ Fleet dashboard<br>✓ Team management<br>✓ Priority support</div>
-      <button class="paywall-upgrade" onclick="_upgradeClick('business')" id="btnUpgradeBusiness">Start Free Trial →</button>
+    <div class="paywall-plan featured" style="border-radius:20px;border-width:2px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h4 style="margin:0">Business</h4>
+        <span style="font-size:10px;font-weight:700;color:#2563EB;background:#EFF6FF;padding:3px 10px;border-radius:100px;border:1px solid rgba(37,99,235,.15);">MOST POPULAR</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:11px;color:#6B7280;background:#F3F4F6;padding:3px 10px;border-radius:100px;">Up to 10 devices</span>
+      </div>
+      <div class="price">$600<span style="font-size:13px;font-weight:400;color:#6B7280">/year</span></div>
+      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">$50/month equivalent · Billed after 10-day trial</div>
+      <div style="font-size:13px;color:#374151;margin-top:14px;line-height:1.9;">✓ Everything in Pro<br>✓ Up to 10 vehicles<br>✓ Fleet management<br>✓ Team sharing<br>✓ Priority support</div>
+      <button class="paywall-upgrade" onclick="_upgradeClick('business')" id="btnUpgradeBusiness">Start 10-Day Trial — Business</button>
     </div>
-    <div style="font-size:11px;color:#9CA3AF;margin-top:16px;line-height:1.6;text-align:center;">10-day free trial · No credit card charged today · Cancel before day 10 for free</div>
+    <div style="font-size:11px;color:#9CA3AF;margin-top:18px;line-height:1.6;text-align:center;">No credit card charged for 10 days · Cancel anytime before day 10 · Full access during trial</div>
     <div class="paywall-restore" onclick="_restorePurchase()">Already subscribed? Restore Purchase</div>
   </div>
 </div>
@@ -1306,7 +1314,7 @@ async function _registerDevice(userId,tier){
       await _sb.from('user_sessions').update({last_seen_at:new Date().toISOString()}).eq('user_id',userId).eq('device_id',_deviceId);
       return true;
     }
-    // Enforce limit only for paid tiers
+    // Enforce device limit only for paid tiers (free/trial = no limit, they haven't paid yet)
     if(tier==='pro'||tier==='business'){
       var limit=_DEVICE_LIMITS[tier]||1;
       if(deviceIds.length>=limit)return false;
@@ -1351,15 +1359,19 @@ async function ensureProfile(user){
   }catch(e){console.warn('ensureProfile error:',e);_authHideLoading();return null;}
 }
 
-// ── Subscription check ───────────────────────────────────────────────
+// ── Subscription check — SINGLE source of truth for app access ──
 function _isSubscriptionActive(profile){
   if(!profile)return false;
   var tier=profile.subscription_tier;
   var now=new Date();
-  var isActive=(tier==='pro'||tier==='business')&&(!profile.subscription_expires_at||new Date(profile.subscription_expires_at)>now);
+  // Active paid subscription (pro or business, not expired)
+  var isPaid=(tier==='pro'||tier==='business')&&(!profile.subscription_expires_at||new Date(profile.subscription_expires_at)>now);
+  // Active trial (first 10 days after Stripe checkout, regardless of tier value)
   var inTrial=profile.trial_ends_at&&new Date(profile.trial_ends_at)>now;
-  return isActive||inTrial;
+  // Access granted if either paid OR in trial
+  return isPaid||inTrial;
 }
+// NOTE: tier='free' or null = unsubscribed = returns false = paywall shown
 function _showSubscribeModal(){var o=document.getElementById('paywallOverlay');if(o){o.classList.remove('hidden');o.style.display='flex';}}
 function _hideSubscribeModal(){var o=document.getElementById('paywallOverlay');if(o){o.classList.add('hidden');o.style.display='none';}}
 
