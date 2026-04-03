@@ -1224,7 +1224,26 @@ var _SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 var _sb=null;
 var currentUser=null;
 var _deviceId=(function(){var k='_mmai_device_id';var id=localStorage.getItem(k);if(!id){id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2);localStorage.setItem(k,id);}return id;})();
-try{if(typeof supabase!=='undefined'&&supabase.createClient){_sb=supabase.createClient(_SUPABASE_URL,_SUPABASE_ANON);}}catch(e){console.warn('Supabase init failed:',e);}
+try{
+  if(typeof supabase!=='undefined'&&supabase.createClient){
+    // On native iOS (file:// origin), Supabase needs explicit auth headers
+    // The file:// origin sends null Origin header which some Supabase instances reject
+    _sb=supabase.createClient(_SUPABASE_URL,_SUPABASE_ANON,{
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      },
+      global:{
+        headers:{'apikey':_SUPABASE_ANON}
+      }
+    });
+    // Diagnostic: verify key works on init
+    _sb.auth.getSession().then(function(r){
+      if(r.error)console.warn('Supabase session check:',r.error.message);
+    }).catch(function(){});
+  }
+}catch(e){console.warn('Supabase init failed:',e);}
 var _PRICES={pro:'price_1TI1ETPDX1EjEZICkTMmklbN',business:'price_1TI1YTPDX1EjEZIC3qSy2jNe'};
 var _DEVICE_LIMITS={pro:1,business:10};
 var _authPendingEmail='';
