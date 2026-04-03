@@ -1085,6 +1085,11 @@ function _initGoogleMaps(){
   window._mapsLoading=false;
   window._pendingMapOpen=false;
   _googleMapsReady=true;
+  // Suppress "This page can't load Google Maps correctly" dialog on native iOS
+  // This fires when Maps loads in WKWebView — safe to suppress, map works fine
+  window.gm_authFailure=function(){
+    console.warn('MyMilesAI: gm_authFailure suppressed — running in native WKWebView');
+  };
   // Do NOT create a map here — initMap() owns the single map instance.
   // If the map sheet is already open when Maps SDK loads, init now.
   if(mapSheetOpen&&!mapReady){
@@ -3479,7 +3484,7 @@ function _ensureMapsLoaded(){
   if(window._mapsLoading)return;
   window._mapsLoading=true;
   var s=document.createElement('script');
-  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places,marker&loading=async&callback=_initGoogleMaps';
+  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&loading=async&callback=_initGoogleMaps';
   s.async=true;s.defer=true;
   s.onerror=function(){window._mapsLoading=false;};
   document.head.appendChild(s);
@@ -4301,7 +4306,7 @@ function openMapSheet(){
       if (!window._mapsLoading) {
         window._mapsLoading = true;
         var _s = document.createElement('script');
-        _s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places,marker&loading=async&callback=_initGoogleMaps';
+        _s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&loading=async&callback=_initGoogleMaps';
         _s.async = true; _s.defer = true;
         _s.onerror = function(){ window._mapsLoading = false; };
         document.head.appendChild(_s);
@@ -4394,13 +4399,11 @@ function initMap(){
         {featureType:'water',elementType:'geometry',stylers:[{color:'#0e1626'}]}
       ]
     });
-    var _markerEl=document.createElement('div');
-    _markerEl.style.cssText='width:14px;height:14px;background:#4A90E2;border:2.5px solid white;border-radius:50%;box-shadow:0 0 6px rgba(74,144,226,0.8);position:relative;z-index:1';
-    try{
-      userMarker=new google.maps.marker.AdvancedMarkerElement({position:{lat:defLat,lng:defLng},map:map,content:_markerEl});
-    }catch(_me){
-      userMarker=new google.maps.Marker({position:{lat:defLat,lng:defLng},map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:'#4A90E2',fillOpacity:1,strokeColor:'white',strokeWeight:2}});
-    }
+    userMarker=new google.maps.Marker({
+      position:{lat:defLat,lng:defLng},
+      map:map,
+      icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:'#4A90E2',fillOpacity:1,strokeColor:'white',strokeWeight:2.5}
+    });
     routeLine=new google.maps.Polyline({
       path:[],strokeColor:'#6C3CE0',strokeWeight:4,strokeOpacity:0.8,map:map
     });
