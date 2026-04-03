@@ -767,6 +767,13 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="sr"><div><h4>Milestone alerts</h4><p>Deduction goal reminders</p></div><div class="tgl on" id="notifMilestoneTgl" onclick="toggleNotifSetting(this,'milestone')"></div></div>
       <div class="sr"><div><h4>Savings goal</h4><p>Year-to-date deduction target</p></div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="goalCurrencySymbol">$</span><input type="number" class="sr-n" style="width:80px" id="savingsGoalVal" value="5000" min="100" max="999999" step="100" onchange="saveSettings();_updateYTD()"></div></div>
     </div>
+    <div class="set-hdr">Subscription</div>
+    <div class="set">
+      <div class="sr"><div><h4>Current plan</h4><p id="subPlanLabel">Loading...</p></div><span id="subPlanBadge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:100px;background:var(--vi-s);color:var(--vi)">Free</span></div>
+      <div class="sr" id="subExpiryRow" style="display:none"><div><h4>Renews</h4><p id="subExpiryLabel">—</p></div></div>
+      <div class="sr" id="subManageRow" style="display:none"><div><h4>Manage subscription</h4><p>Cancel, upgrade or view invoices</p></div><button class="btn-rd" onclick="_openCustomerPortal()">Manage →</button></div>
+      <div class="sr" id="subUpgradeRow"><div><h4>Upgrade plan</h4><p>Unlock Pro or Business</p></div><button class="btn-rd" onclick="_showSubscribeModal()">Upgrade →</button></div>
+    </div>
     <div class="set-hdr">Account & Privacy</div>
     <div class="set">
       <div class="sr" onclick="openInfoModal('Location Permissions','MyMilesAI uses your GPS location to automatically detect and record trips.<br><br><b>Background Access:</b> Allows trip tracking even when the app is minimized. Your location data stays on your device.<br><br><b>When In Use:</b> Only tracks when the app is open.<br><br><b>To change:</b> Go to your device Settings → Privacy → Location Services → MyMilesAI')"><div><h4>Location permissions</h4><p>Background GPS access</p></div><span class="sr-link">Manage →</span></div>
@@ -1466,6 +1473,50 @@ async function _restorePurchase(){
   _showToast('No active subscription found','#EF4444');
 }
 
+// ── Stripe customer portal ──────────────────────────────────────────
+async function _openCustomerPortal(){
+  if(!currentUser){_showToast('Please sign in first','#EF4444');return;}
+  _showToast('Opening billing portal...','#6366f1');
+  try{
+    var resp=await fetch('https://mymilesai-ai.harijasllc.workers.dev/customer-portal',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({userId:currentUser.id,email:currentUser.email,returnUrl:window.location.origin+window.location.pathname})
+    });
+    var data=await resp.json();
+    if(data.url){window.location.href=data.url;}
+    else throw new Error(data.error||'Portal unavailable');
+  }catch(e){_showToast('Error: '+e.message,'#EF4444');}
+}
+function _updateSubUI(profile){
+  var plan=(profile&&profile.subscription_tier)||'free';
+  var badge=document.getElementById('subPlanBadge');
+  var label=document.getElementById('subPlanLabel');
+  var expiryRow=document.getElementById('subExpiryRow');
+  var expiryLabel=document.getElementById('subExpiryLabel');
+  var manageRow=document.getElementById('subManageRow');
+  var upgradeRow=document.getElementById('subUpgradeRow');
+  if(!badge)return;
+  var active=_isSubscriptionActive(profile);
+  if(active&&(plan==='pro'||plan==='business')){
+    badge.textContent=plan.charAt(0).toUpperCase()+plan.slice(1);
+    badge.style.cssText='font-size:12px;font-weight:700;padding:4px 10px;border-radius:100px;background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(168,85,247,.12));color:#6366f1';
+    label.textContent=plan==='pro'?'Pro — 1 device':'Business — 10 devices';
+    if(profile.subscription_expires_at){
+      var d=new Date(profile.subscription_expires_at);
+      if(expiryLabel)expiryLabel.textContent=d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+      if(expiryRow)expiryRow.style.display='';
+    }
+    if(manageRow)manageRow.style.display='';
+    if(upgradeRow)upgradeRow.style.display='none';
+  } else {
+    badge.textContent='Free';
+    badge.style.cssText='font-size:12px;font-weight:700;padding:4px 10px;border-radius:100px;background:var(--vi-s);color:var(--vi)';
+    label.textContent='No active subscription';
+    if(expiryRow)expiryRow.style.display='none';
+    if(manageRow)manageRow.style.display='none';
+    if(upgradeRow)upgradeRow.style.display='';
+  }
+}
 // ── Device limit modal ───────────────────────────────────────────────
 function _showDeviceLimitModal(tier){
   var existing=document.getElementById('deviceLimitOverlay');if(existing)existing.remove();
