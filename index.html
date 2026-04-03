@@ -1387,11 +1387,17 @@ async function ensureProfile(user){
     await _sb.from('profiles').upsert({id:user.id,email:user.email||'',name:name,auth_provider:provider,last_active_at:new Date().toISOString()},{onConflict:'id',ignoreDuplicates:false});
     var resp=await _sb.from('profiles').select('*').eq('id',user.id).single();
     var profile=resp.data;
+    // If profile name is blank (existing OTP user), derive from email and patch it
+    if(profile&&!profile.name&&user.email){
+      var derived=user.email.split('@')[0].replace(/[._-]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+      await _sb.from('profiles').update({name:derived}).eq('id',user.id);
+      profile.name=derived;
+    }
     currentUser={id:user.id,email:user.email,profile:profile};
     window.currentUser=currentUser;
     if(profile&&profile.name){
       try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}
-      // Update header greeting with real name
+      // Update header with real name and avatar initial
       var hn=document.getElementById('hdrName');if(hn)hn.textContent=profile.name;
       var av=document.getElementById('hdrAv');if(av)av.textContent=profile.name.charAt(0).toUpperCase();
     }
