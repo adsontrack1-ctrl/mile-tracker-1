@@ -765,6 +765,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="sr"><div><h4>Trip alerts</h4><p>Notify on save</p></div><div class="tgl on" id="notifTripTgl" onclick="toggleNotifSetting(this,'trip')"></div></div>
 
       <div class="sr"><div><h4>Milestone alerts</h4><p>Deduction goal reminders</p></div><div class="tgl on" id="notifMilestoneTgl" onclick="toggleNotifSetting(this,'milestone')"></div></div>
+      <div class="sr"><div><h4>Savings goal</h4><p>Year-to-date deduction target</p></div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="goalCurrencySymbol">$</span><input type="number" class="sr-n" style="width:80px" id="savingsGoalVal" value="5000" min="100" max="999999" step="100" onchange="saveSettings();_updateYTD()"></div></div>
     </div>
     <div class="set-hdr">Account & Privacy</div>
     <div class="set">
@@ -1230,6 +1231,7 @@ function applyLocale(){
   _set('rateDesc','Per '+LOC.unit+' deduction');
   var _rv=document.getElementById('rateVal');if(_rv)_rv.textContent=LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit;
   _set('editDistLabel',_useKm()?'Kilometers':'Miles');
+  var _goalCurr=document.getElementById('goalCurrencySymbol');if(_goalCurr)_goalCurr.textContent=LOC.currency;
   document.querySelectorAll('.trip-mi-u').forEach(e=>e.textContent=LOC.label);
   document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers|Kilometres/,_useKm()?LOC.label.charAt(0).toUpperCase()+LOC.label.slice(1):'Miles'));
   // Re-render template distances from stored raw miles — respects current unit setting
@@ -1801,7 +1803,7 @@ function _updateStreak(){
   if(el)el.textContent=s>0?String(s):'0';
 }
 function _updateYTD(){
-  var goal=5000;
+  var goal=parseInt((document.getElementById('savingsGoalVal')||{}).value)||5000;
   var totalDed=0;
   var yr=new Date().getFullYear();
   TRIPS.forEach(function(t){
@@ -5059,7 +5061,8 @@ function saveSettings(){
     defaultCat:document.getElementById('defaultCatSel').value,
     rate:parseFloat(document.getElementById('rateVal').value)||LOC.rate,
     pauseTimeout:parseInt(document.getElementById('pauseTimeoutSel').value)||300000,
-    locale:LOC.country
+    locale:LOC.country,
+    savingsGoal:parseInt(document.getElementById('savingsGoalVal').value)||5000
   };
   try{localStorage.setItem('mymilesai_settings',JSON.stringify(settings));}catch(e){}
 }
@@ -5068,7 +5071,6 @@ function loadSettings(){
     var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'null');
     if(s){
       if(s.threshold)document.getElementById('threshVal').value=s.threshold;
-
       if(s.defaultCat)document.getElementById('defaultCatSel').value=s.defaultCat;
       // Restore locale FIRST, then rate (rate overrides locale default)
       if(s.locale)setLocale(s.locale);
@@ -5076,6 +5078,10 @@ function loadSettings(){
       if(s.pauseTimeout){
         document.getElementById('pauseTimeoutSel').value=s.pauseTimeout;
         SMART_STOP_MS=s.pauseTimeout;
+      }
+      if(s.savingsGoal){
+        var goalEl=document.getElementById('savingsGoalVal');
+        if(goalEl)goalEl.value=s.savingsGoal;
       }
     }
   }catch(e){}
