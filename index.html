@@ -5,7 +5,7 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.mymilesai.workers.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net https://js.stripe.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.mymilesai.workers.dev https://api.stripe.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1090,25 +1090,29 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="auth-footer">No password required · Privacy-first · Free to start<br>By continuing you agree to our <span onclick="openInfoModal('Terms','See Terms & Conditions in Settings.')">Terms</span> & <span onclick="openInfoModal('Privacy','See Privacy Policy in Settings.')">Privacy Policy</span></div>
   </div>
 </div>
-<!-- Paywall -->
+<!-- Subscribe / Paywall -->
 <div class="paywall-overlay hidden" id="paywallOverlay">
   <div class="paywall-box">
-    <div style="font-size:48px;margin-bottom:16px;">🚗</div>
-    <div class="paywall-title">Free Limit Reached</div>
-    <div class="paywall-desc">You've tracked 20 trips for free — upgrade to unlock unlimited miles and maximize your tax deductions.</div>
-    <div class="paywall-plan featured">
-      <h4>Pro Plan</h4>
-      <p>Unlimited trips · Cloud sync · PDF reports</p>
-      <div class="price">$6.99<span style="font-size:13px;font-weight:400;color:#6B7280">/month</span> <span style="font-size:12px;color:#9CA3AF">or $69/year</span></div>
-      <button class="paywall-upgrade" onclick="_upgradeClick('pro')">Upgrade to Pro</button>
-    </div>
+    <div style="font-size:44px;margin-bottom:12px;">🚗</div>
+    <div class="paywall-title">Start Your 10-Day Free Trial</div>
+    <div class="paywall-desc">Full access. No charge until day 10. Cancel anytime.</div>
     <div class="paywall-plan">
-      <h4>Business Plan</h4>
-      <p>Everything in Pro + multi-vehicle · team sharing</p>
-      <div class="price">$9.99<span style="font-size:13px;font-weight:400;color:#6B7280">/month</span></div>
-      <button class="paywall-upgrade" style="background:#111827" onclick="_upgradeClick('business')">Upgrade to Business</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4 style="margin:0">Pro</h4><span style="font-size:11px;color:#6B7280;background:#F3F4F6;padding:3px 10px;border-radius:100px;">1 device</span></div>
+      <div class="price">$69.99<span style="font-size:13px;font-weight:400;color:#6B7280">/year</span></div>
+      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">From $5.83/month</div>
+      <div style="font-size:13px;color:#374151;margin-top:12px;line-height:1.8;">✓ Unlimited trips<br>✓ GPS auto-tracking<br>✓ AI classification<br>✓ PDF &amp; CSV reports<br>✓ 1 vehicle</div>
+      <button class="paywall-upgrade" onclick="_upgradeClick('pro')" id="btnUpgradePro">Start Free Trial →</button>
     </div>
-    <div class="paywall-restore" onclick="_restorePurchase()">Restore Purchase</div>
+    <div class="paywall-plan featured">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4 style="margin:0">Business</h4><span style="font-size:10px;font-weight:700;color:#2563EB;background:#EFF6FF;padding:3px 10px;border-radius:100px;border:1px solid rgba(37,99,235,.15);">MOST POPULAR</span></div>
+      <div style="display:flex;align-items:baseline;gap:4px;"><span style="font-size:11px;color:#6B7280;background:#F3F4F6;padding:3px 10px;border-radius:100px;">Up to 10 devices</span></div>
+      <div class="price" style="margin-top:8px;">$600<span style="font-size:13px;font-weight:400;color:#6B7280">/year</span></div>
+      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">$50/month</div>
+      <div style="font-size:13px;color:#374151;margin-top:12px;line-height:1.8;">✓ Everything in Pro<br>✓ Up to 10 vehicles<br>✓ Fleet dashboard<br>✓ Team management<br>✓ Priority support</div>
+      <button class="paywall-upgrade" onclick="_upgradeClick('business')" id="btnUpgradeBusiness">Start Free Trial →</button>
+    </div>
+    <div style="font-size:11px;color:#9CA3AF;margin-top:16px;line-height:1.6;text-align:center;">10-day free trial · No credit card charged today · Cancel before day 10 for free</div>
+    <div class="paywall-restore" onclick="_restorePurchase()">Already subscribed? Restore Purchase</div>
   </div>
 </div>
 
@@ -1202,20 +1206,33 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
-/* ===== SUPABASE AUTH ===== */
+/* ===== SUPABASE AUTH + STRIPE + DEVICE LOCKING ===== */
 var _SUPABASE_URL='https://dxpuuiqibtizewbbffjk.supabase.co';
 var _SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cHV1aXFpYnRpemV3YmJmZmprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NTM5MzAsImV4cCI6MjA1ODQyOTkzMH0.it2rrn4NxSJJTSMIFHL4JHtEKqFVrNPKdRiDxUFBcLs';
 var _sb=null;
 var currentUser=null;
+// Device ID — persistent per browser/device
+var _deviceId=(function(){
+  var k='_mmai_device_id';
+  var id=localStorage.getItem(k);
+  if(!id){id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2);localStorage.setItem(k,id);}
+  return id;
+})();
 try{
   if(typeof supabase!=='undefined'&&supabase.createClient){
     _sb=supabase.createClient(_SUPABASE_URL,_SUPABASE_ANON);
   }
 }catch(e){console.warn('Supabase init failed:',e);}
+// Stripe
+var _stripe=null;
+try{if(typeof Stripe!=='undefined')_stripe=Stripe('pk_test_51TI142PDX1EjEZICSFjN9hemsw5DKHQy7yRKaNVdUz8qTTY1pGx0THNV7OzbpVP95R8a2QSXTEUvfn6qRV5KQgFK005ySp3dqc');}catch(e){}
+var _PRICES={pro:'price_1TI1ETPDX1EjEZICkTMmklbN',business:'price_1TI1YTPDX1EjEZIC3qSy2jNe'};
+var _DEVICE_LIMITS={pro:1,business:10};
 
 var _authPendingEmail='';
 
@@ -1314,43 +1331,81 @@ async function _authApple(){
     _authSetLoading('authAppleBtn',false);
   }
 }
+// Device session registration
+async function _registerDevice(userId,tier){
+  if(!_sb)return true;
+  var limit=_DEVICE_LIMITS[tier]||1;
+  try{
+    var r=await _sb.from('user_sessions').select('device_id').eq('user_id',userId);
+    var sessions=r.data||[];
+    var deviceIds=[...new Set(sessions.map(function(s){return s.device_id;}))];
+    if(deviceIds.includes(_deviceId)){
+      await _sb.from('user_sessions').update({last_seen_at:new Date().toISOString()}).eq('user_id',userId).eq('device_id',_deviceId);
+      return true;
+    }
+    if(deviceIds.length>=limit)return false;
+    await _sb.from('user_sessions').insert({user_id:userId,device_id:_deviceId,device_name:navigator.userAgent.includes('iPhone')?'iPhone':'Device',last_seen_at:new Date().toISOString()});
+    return true;
+  }catch(e){return true;}
+}
 async function ensureProfile(user){
   if(!_sb||!user)return null;
   var provider=((user.app_metadata||{}).provider)||'email';
   var name=(user.user_metadata||{}).full_name||(user.user_metadata||{}).name||'';
   try{
     await _sb.from('profiles').upsert({
-      id:user.id,
-      email:user.email||'',
-      name:name,
-      auth_provider:provider,
-      last_active_at:new Date().toISOString()
+      id:user.id,email:user.email||'',name:name,
+      auth_provider:provider,last_active_at:new Date().toISOString()
     },{onConflict:'id',ignoreDuplicates:false});
-    // Fetch full profile
     var resp=await _sb.from('profiles').select('*').eq('id',user.id).single();
     var profile=resp.data;
     currentUser={id:user.id,email:user.email,profile:profile};
     window.currentUser=currentUser;
-    // Set user name in app
-    if(profile&&profile.name){
-      try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}
-    }
-    // Check paywall
-    if(profile&&profile.subscription_tier==='free'&&(profile.total_trips||0)>=20){
-      _showPaywall();
+    if(profile&&profile.name){try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}}
+    // Device locking
+    if(profile&&profile.subscription_tier&&profile.subscription_tier!=='free'){
+      var allowed=await _registerDevice(user.id,profile.subscription_tier);
+      if(!allowed){_showDeviceLimitModal(profile.subscription_tier);return profile;}
     }
     return profile;
   }catch(e){console.warn('ensureProfile error:',e);return null;}
 }
-function _showPaywall(){
+function _showSubscribeModal(){
   var o=document.getElementById('paywallOverlay');
   if(o){o.classList.remove('hidden');o.style.display='flex';}
 }
-function _upgradeClick(plan){
-  alert('Stripe payment integration coming soon! Plan selected: '+plan);
+async function _upgradeClick(plan){
+  if(!currentUser){alert('Please sign in first');return;}
+  var btn=document.getElementById(plan==='pro'?'btnUpgradePro':'btnUpgradeBusiness');
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="auth-spinner"></span>';}
+  try{
+    var resp=await fetch('https://mymilesai-ai.mymilesai.workers.dev/create-checkout',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({priceId:_PRICES[plan]||_PRICES.pro,userId:currentUser.id,email:currentUser.email,deviceId:_deviceId,plan:plan,successUrl:window.location.origin+window.location.pathname+'?payment=success&plan='+plan,cancelUrl:window.location.origin+window.location.pathname+'?payment=cancelled'})
+    });
+    var data=await resp.json();
+    if(data.url){window.location.href=data.url;}
+    else throw new Error(data.error||'Checkout failed');
+  }catch(e){alert('Payment error: '+e.message);if(btn){btn.disabled=false;btn.textContent='Start Free Trial →';}}
 }
 function _restorePurchase(){
-  alert('Restore purchase — checking App Store receipts...\n\nThis feature will be available after Stripe/IAP integration.');
+  if(!currentUser){alert('Please sign in first');return;}
+  alert('Checking your subscription status...\n\nIf you subscribed on another device, your access will be restored automatically when the webhook confirms your payment.');
+}
+function _showDeviceLimitModal(tier){
+  var existing=document.getElementById('deviceLimitOverlay');
+  if(existing)existing.remove();
+  var div=document.createElement('div');
+  div.id='deviceLimitOverlay';
+  div.style.cssText='position:fixed;inset:0;z-index:999999;background:#FAFAF7;display:flex;align-items:center;justify-content:center;padding:24px;';
+  div.innerHTML='<div style="background:#fff;border-radius:24px;padding:40px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 4px 40px rgba(0,0,0,.08);border:1px solid #E5E7EB;font-family:system-ui,-apple-system,sans-serif;">'
+    +'<div style="font-size:48px;margin-bottom:16px;">📱</div>'
+    +'<h2 style="font-size:22px;font-weight:800;color:#111827;margin-bottom:8px;">Device Limit Reached</h2>'
+    +'<p style="font-size:14px;color:#6B7280;margin-bottom:24px;line-height:1.6;">Your '+tier+' plan allows '+(tier==='pro'?'1':'10')+' device'+(tier==='pro'?'':'s')+'. To use this device, upgrade or sign in on your registered device.</p>'
+    +(tier==='pro'?'<button onclick="_upgradeClick(\'business\')" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:12px;">Upgrade to Business — 10 devices</button>':'')
+    +'<button onclick="if(_sb)_sb.auth.signOut()" style="width:100%;padding:14px;border-radius:14px;background:#F3F4F6;color:#374151;font-size:14px;font-weight:600;border:none;cursor:pointer;">Sign Out</button>'
+    +'</div>';
+  document.body.appendChild(div);
 }
 // Auth state listener
 if(_sb){
@@ -1359,36 +1414,51 @@ if(_sb){
       _authHideModal();
       ensureProfile(session.user);
     } else if(event==='SIGNED_OUT'){
-      currentUser=null;
-      window.currentUser=null;
+      currentUser=null;window.currentUser=null;
+      var dl=document.getElementById('deviceLimitOverlay');if(dl)dl.remove();
       _authShowModal();
     }
   });
 }
-// Boot: check session on load
+// Boot: check session + subscription + payment callback
 (async function _authBoot(){
-  // Native iOS app skips auth entirely
-  if(window.__MYMILESAI_NATIVE__||window.__AUTH_SKIPPED__){
-    _authHideModal();
-    return;
+  // Payment success handler
+  var _up=new URLSearchParams(window.location.search);
+  if(_up.get('payment')==='success'){
+    history.replaceState(null,'',window.location.pathname);
+    setTimeout(async function(){
+      if(_sb&&currentUser){
+        var r=await _sb.from('profiles').select('*').eq('id',currentUser.id).single();
+        if(r.data){currentUser.profile=r.data;window.currentUser=currentUser;var pw=document.getElementById('paywallOverlay');if(pw){pw.classList.add('hidden');pw.style.display='none';}}
+      }
+      var t=document.createElement('div');
+      t.style.cssText='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;padding:14px 28px;border-radius:14px;font-size:14px;font-weight:700;z-index:999999;box-shadow:0 8px 32px rgba(0,0,0,.2);white-space:nowrap;';
+      t.textContent='✅ Trial started! Welcome to MyMilesAI.';
+      document.body.appendChild(t);
+      setTimeout(function(){t.remove();},5000);
+    },1000);
   }
-  // Skip auth if Supabase failed to load (offline/file:// origin)
-  if(!_sb){
-    _authHideModal();
-    return;
-  }
+  if(_up.get('payment')==='cancelled'){history.replaceState(null,'',window.location.pathname);}
+  // Native iOS app skips auth
+  if(window.__MYMILESAI_NATIVE__||window.__AUTH_SKIPPED__){_authHideModal();return;}
+  if(!_sb){_authHideModal();return;}
   try{
     var resp=await _sb.auth.getSession();
     if(resp.data&&resp.data.session&&resp.data.session.user){
       _authHideModal();
       await ensureProfile(resp.data.session.user);
-    } else {
-      _authShowModal();
-    }
-  }catch(e){
-    // If auth check fails (network error, etc), let user in
-    _authHideModal();
-  }
+      // Check subscription after profile
+      if(window.currentUser&&window.currentUser.profile){
+        var tier=window.currentUser.profile.subscription_tier;
+        var expires=window.currentUser.profile.subscription_expires_at;
+        var trialEnds=window.currentUser.profile.trial_ends_at;
+        var now=new Date();
+        var isActive=(tier==='pro'||tier==='business')&&(!expires||new Date(expires)>now);
+        var inTrial=trialEnds&&new Date(trialEnds)>now;
+        if(!isActive&&!inTrial){_showSubscribeModal();}
+      }
+    } else {_authShowModal();}
+  }catch(e){_authHideModal();}
 })();
 
 /* ===== Google Maps Init Callback ===== */
