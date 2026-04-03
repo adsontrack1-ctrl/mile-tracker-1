@@ -1232,16 +1232,21 @@ function applyLocale(){
   _set('editDistLabel',_useKm()?'Kilometers':'Miles');
   document.querySelectorAll('.trip-mi-u').forEach(e=>e.textContent=LOC.label);
   document.querySelectorAll('.sUnit').forEach(e=>e.textContent=e.textContent.replace(/Miles|Kilometers|Kilometres/,_useKm()?LOC.label.charAt(0).toUpperCase()+LOC.label.slice(1):'Miles'));
-  document.querySelectorAll('.tmpl-dist').forEach(e=>{const v=parseFloat(e.textContent);if(!isNaN(v)){const nv=LOC.country==='CA'?(v*1.60934).toFixed(1):v.toFixed(1);e.textContent=nv+' '+u;}});
-  // Update template default text with correct unit
-  var tmplOff=document.getElementById('tmplOffDist');
-  var tmplCli=document.getElementById('tmplCliDist');
-  var tmplAir=document.getElementById('tmplAirDist');
-  if(tmplOff&&tmplOff.textContent==='—')tmplOff.textContent='— '+u;
-  if(tmplCli&&tmplCli.textContent==='—')tmplCli.textContent='— '+u;
-  if(tmplAir&&tmplAir.textContent==='—')tmplAir.textContent='— '+u;
-  // If distances were already calculated, just update the unit
-  if(tmplOff&&tmplOff.textContent!=='— '+u){var tv=parseFloat(tmplOff.textContent);if(!isNaN(tv)){updateTemplateDists();}}
+  // Re-render template distances from stored raw miles — respects current unit setting
+  var _useKmNow=_useKm();
+  ['tmplOffDist','tmplCliDist','tmplAirDist'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    var rawMi=parseFloat(el.dataset.mi);
+    if(!isNaN(rawMi)){
+      // Re-display stored miles value in current unit
+      el.textContent=(_useKmNow?(rawMi*1.60934).toFixed(1):rawMi.toFixed(1))+' '+u;
+    } else if(!el.textContent||el.textContent==='—'||el.textContent.slice(0,2)==='— '||el.textContent==='...'){
+      el.textContent='— '+u;
+    } else if(el.textContent==='Tap to set'){
+      // keep as-is
+    }
+  });
   // Update swipe hint labels to match locale category names
   document.documentElement.style.setProperty('--swipe-left',"'← Business'");
   document.documentElement.style.setProperty('--swipe-right',"'Personal →'");
@@ -4717,6 +4722,7 @@ function updateTemplateDists(){
           _getGoogleDistance({lat:lat,lng:lng},{lat:airLat,lng:airLng},function(distMi){
             if(airEl){
               if(distMi!==null){
+                airEl.dataset.mi=distMi.toFixed(4);
                 airEl.textContent=(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u;
               } else {
                 // Haversine fallback
@@ -4743,12 +4749,12 @@ function updateTemplateDists(){
     var cliEl=document.getElementById('tmplCliDist');
     if(settings.officeAddress){
       _getGoogleDistance({lat:lat,lng:lng},settings.officeAddress,function(distMi){
-        if(offEl)offEl.textContent=distMi!==null?(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u:'— '+u;
+        if(offEl){if(distMi!==null){offEl.dataset.mi=distMi.toFixed(4);offEl.textContent=(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u;}else{offEl.textContent='— '+u;}}
       });
     } else {if(offEl)offEl.textContent='Tap to set';}
     if(settings.clientAddress){
       _getGoogleDistance({lat:lat,lng:lng},settings.clientAddress,function(distMi){
-        if(cliEl)cliEl.textContent=distMi!==null?(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u:'— '+u;
+        if(cliEl){if(distMi!==null){cliEl.dataset.mi=distMi.toFixed(4);cliEl.textContent=(useKm?(distMi*1.60934).toFixed(1):distMi.toFixed(1))+' '+u;}else{cliEl.textContent='— '+u;}}
       });
     } else {if(cliEl)cliEl.textContent='Tap to set';}
   },function(){
