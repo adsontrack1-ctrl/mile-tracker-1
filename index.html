@@ -1290,12 +1290,14 @@ async function _authApple(){
   catch(e){document.getElementById('authErr').textContent=e.message||'Apple sign-in failed';_authSetLoading('authAppleBtn',false);}
 }
 
-// ── Device registration (Bug 3 fix: registers ALL tiers, Gap 2 fix: 90-day cleanup) ──
+// ── Device registration (all 3 gaps fixed) ──
 async function _registerDevice(userId,tier){
   if(!_sb)return true;
   try{
-    // Gap 2 fix: clean sessions older than 90 days
-    await _sb.from('user_sessions').delete().eq('user_id',userId).lt('last_seen_at',new Date(Date.now()-90*24*60*60*1000).toISOString());
+    // Gap 3: only auto-clean old sessions for business (10 slots); pro (1 slot) never auto-cleans
+    if(tier==='business'){
+      await _sb.from('user_sessions').delete().eq('user_id',userId).lt('last_seen_at',new Date(Date.now()-90*24*60*60*1000).toISOString());
+    }
     var r=await _sb.from('user_sessions').select('device_id').eq('user_id',userId);
     var sessions=r.data||[];
     var deviceIds=[...new Set(sessions.map(function(s){return s.device_id;}))];
@@ -1309,10 +1311,23 @@ async function _registerDevice(userId,tier){
       var limit=_DEVICE_LIMITS[tier]||1;
       if(deviceIds.length>=limit)return false;
     }
-    // Register device (works for free/pending/pro/business)
-    await _sb.from('user_sessions').insert({user_id:userId,device_id:_deviceId,device_name:/iPhone|iPad/.test(navigator.userAgent)?'iPhone':/Mac/.test(navigator.userAgent)?'Mac':'Device',last_seen_at:new Date().toISOString()});
+    // Register device + store device_id in profiles (Gap 1: so webhook knows which device)
+    await _sb.from('user_sessions').insert({user_id:userId,device_id:_deviceId,device_name:/iPhone|iPad/.test(navigator.userAgent)?'iPhone':'Device',last_seen_at:new Date().toISOString()});
+    await _sb.from('profiles').update({device_id:_deviceId}).eq('id',userId);
     return true;
   }catch(e){console.warn('_registerDevice error:',e);return true;}
+}
+// "I got a new phone" — clears other sessions so this device gets the Pro slot
+async function _transferDeviceSlot(){
+  if(!currentUser||!_sb)return;
+  try{
+    await _sb.from('user_sessions').delete().eq('user_id',currentUser.id).neq('device_id',_deviceId);
+    var allowed=await _registerDevice(currentUser.id,currentUser.profile.subscription_tier);
+    if(allowed){
+      var dl=document.getElementById('deviceLimitOverlay');if(dl)dl.remove();
+      _showToast('Device transferred! This is now your active device.','#16a34a');
+    }
+  }catch(e){_showToast('Transfer failed — try again','#EF4444');}
 }
 
 // ── Profile management ───────────────────────────────────────────────
@@ -1394,8 +1409,10 @@ function _showDeviceLimitModal(tier){
   div.innerHTML='<div style="background:#fff;border-radius:24px;padding:40px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 4px 40px rgba(0,0,0,.08);border:1px solid #E5E7EB;font-family:system-ui,-apple-system,sans-serif;">'
     +'<div style="font-size:48px;margin-bottom:16px;">📱</div>'
     +'<h2 style="font-size:22px;font-weight:800;color:#111827;margin-bottom:8px;">Device Limit Reached</h2>'
-    +'<p style="font-size:14px;color:#6B7280;margin-bottom:24px;line-height:1.6;">Your '+tier+' plan allows '+(tier==='pro'?'1':'10')+' device'+(tier==='pro'?'':'s')+'. To use this device, upgrade or sign in on your registered device.</p>'
-    +(tier==='pro'?'<button onclick="_upgradeClick(\'business\')" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:12px;">Upgrade to Business — 10 devices</button>':'')
+    +'<p style="font-size:14px;color:#6B7280;margin-bottom:20px;line-height:1.6;">Your '+tier+' plan allows '+(tier==='pro'?'1':'10')+' device'+(tier==='pro'?'':'s')+'. To use this device, transfer from your old device or upgrade.</p>'
+    +'<button onclick="_transferDeviceSlot()" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:10px;">I got a new phone — transfer here</button>'
+    +'<p style="font-size:11px;color:#9CA3AF;margin:0 0 14px;">This will sign out your other device</p>'
+    +(tier==='pro'?'<button onclick="_upgradeClick(\'business\')" style="width:100%;padding:14px;border-radius:14px;background:#fff;color:#2563EB;font-size:14px;font-weight:600;border:1.5px solid #E5E7EB;cursor:pointer;margin-bottom:10px;">Upgrade to Business — 10 devices</button>':'')
     +'<button onclick="if(_sb)_sb.auth.signOut()" style="width:100%;padding:14px;border-radius:14px;background:#F3F4F6;color:#374151;font-size:14px;font-weight:600;border:none;cursor:pointer;">Sign Out</button></div>';
   document.body.appendChild(div);
 }
@@ -1444,7 +1461,12 @@ if(_sb){
         if(fresh.data){profile=fresh.data;if(currentUser){currentUser.profile=fresh.data;window.currentUser=currentUser;}}
         _showToast('Trial started! Welcome to MyMilesAI.','#16a34a');
       }
-      // 7. Subscription gate
+      // 7. Gap 2 fix: re-check device limit on every boot (not just first login)
+      if(profile&&(profile.subscription_tier==='pro'||profile.subscription_tier==='business')){
+        var bootDeviceOk=await _registerDevice(currentUser.id,profile.subscription_tier);
+        if(!bootDeviceOk){_showDeviceLimitModal(profile.subscription_tier);return;}
+      }
+      // 8. Subscription gate
       if(profile&&_isSubscriptionActive(profile)){_hideSubscribeModal();}
       else if(profile){_showSubscribeModal();}
     } else {
