@@ -5,7 +5,7 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.mymilesai.workers.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.mymilesai.workers.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -987,6 +987,101 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
 </div></div>
 
+<!-- AUTH MODAL -->
+<style>
+.auth-overlay{position:fixed;inset:0;z-index:99999;background:var(--bg,#0C0C1D);display:flex;align-items:center;justify-content:center;transition:opacity .3s;}
+.auth-overlay.hidden{display:none;}
+.auth-box{width:100%;max-width:380px;padding:40px 28px 32px;text-align:center;}
+.auth-logo{font-size:28px;font-weight:800;color:var(--ink,#fff);margin-bottom:6px;letter-spacing:-.5px;}
+.auth-sub{font-size:14px;color:var(--ink3,#9898B0);margin-bottom:32px;line-height:1.5;}
+.auth-btn{width:100%;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;transition:opacity .2s;}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;}
+.auth-btn-google{background:#fff;color:#333;}
+.auth-btn-apple{background:#000;color:#fff;}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--ink4,#666);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--ink6,#333);}
+.auth-input{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid var(--ink6,#333);background:var(--white,#161628);color:var(--ink,#fff);font-size:15px;box-sizing:border-box;outline:none;margin-bottom:12px;}
+.auth-input:focus{border-color:var(--vi,#6C3CE0);}
+.auth-btn-primary{background:var(--vi,#6C3CE0);color:#fff;}
+.auth-otp-row{display:flex;gap:8px;justify-content:center;margin:16px 0;}
+.auth-otp-row input{width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border-radius:10px;border:1.5px solid var(--ink6,#333);background:var(--white,#161628);color:var(--ink,#fff);outline:none;box-sizing:border-box;}
+.auth-otp-row input:focus{border-color:var(--vi,#6C3CE0);}
+.auth-err{color:#EF3D58;font-size:13px;margin:8px 0;min-height:18px;}
+.auth-footer{font-size:11px;color:var(--ink4,#666);margin-top:24px;line-height:1.6;}
+.auth-back{font-size:13px;color:var(--vi,#6C3CE0);cursor:pointer;font-weight:600;margin-top:12px;display:inline-block;}
+.auth-spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Paywall */
+.paywall-overlay{position:fixed;inset:0;z-index:999999;background:var(--bg,#0C0C1D);display:flex;align-items:center;justify-content:center;}
+.paywall-overlay.hidden{display:none;}
+.paywall-box{width:100%;max-width:380px;padding:40px 28px;text-align:center;}
+.paywall-title{font-size:22px;font-weight:800;color:var(--ink,#fff);margin-bottom:8px;}
+.paywall-desc{font-size:14px;color:var(--ink3,#9898B0);margin-bottom:28px;line-height:1.5;}
+.paywall-plan{background:var(--white,#161628);border:1.5px solid var(--ink6,#333);border-radius:14px;padding:20px;margin-bottom:12px;text-align:left;}
+.paywall-plan.featured{border-color:var(--vi,#6C3CE0);background:rgba(108,60,224,.08);}
+.paywall-plan h4{font-size:16px;font-weight:700;color:var(--ink,#fff);margin:0 0 4px;}
+.paywall-plan p{font-size:13px;color:var(--ink3,#9898B0);margin:0;}
+.paywall-plan .price{font-size:20px;font-weight:800;color:var(--vi,#6C3CE0);margin-top:8px;}
+.paywall-upgrade{width:100%;padding:14px;border-radius:12px;background:var(--vi,#6C3CE0);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-top:8px;}
+.paywall-restore{font-size:12px;color:var(--ink4,#666);margin-top:16px;cursor:pointer;}
+</style>
+<div class="auth-overlay hidden" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">MyMilesAI</div>
+    <div class="auth-sub">Smart mileage tracking for tax deductions.<br>Sign in to sync your trips across devices.</div>
+    <div id="authEmailStep">
+      <button class="auth-btn auth-btn-google" onclick="_authGoogle()" id="authGoogleBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09A6.97 6.97 0 015.47 12c0-.72.13-1.42.37-2.09V7.07H2.18A11.97 11.97 0 001 12c0 1.94.46 3.77 1.18 5.07l3.66-2.98z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <button class="auth-btn auth-btn-apple" onclick="_authApple()" id="authAppleBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        Continue with Apple
+      </button>
+      <div class="auth-divider">or</div>
+      <input type="email" class="auth-input" id="authEmail" placeholder="you@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')_authSendOtp()">
+      <button class="auth-btn auth-btn-primary" onclick="_authSendOtp()" id="authSendBtn">Send Login Code</button>
+      <div class="auth-err" id="authErr"></div>
+    </div>
+    <div id="authOtpStep" style="display:none">
+      <div style="font-size:14px;color:var(--ink3,#9898B0);margin-bottom:4px;">Enter the 6-digit code sent to</div>
+      <div style="font-size:15px;font-weight:700;color:var(--ink,#fff);margin-bottom:16px;" id="authOtpEmail"></div>
+      <div class="auth-otp-row" id="authOtpRow">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      </div>
+      <button class="auth-btn auth-btn-primary" onclick="_authVerifyOtp()" id="authVerifyBtn">Verify Code</button>
+      <div class="auth-err" id="authOtpErr"></div>
+      <span class="auth-back" onclick="_authShowEmail()">← Back to email</span>
+    </div>
+    <div class="auth-footer">By continuing you agree to our <span style="color:var(--vi,#6C3CE0);cursor:pointer" onclick="openInfoModal('Terms','See Terms & Conditions in Settings.')">Terms</span> & <span style="color:var(--vi,#6C3CE0);cursor:pointer" onclick="openInfoModal('Privacy','See Privacy Policy in Settings.')">Privacy Policy</span></div>
+  </div>
+</div>
+<div class="paywall-overlay hidden" id="paywallOverlay">
+  <div class="paywall-box">
+    <div style="font-size:48px;margin-bottom:12px;">🚗</div>
+    <div class="paywall-title">Free Limit Reached</div>
+    <div class="paywall-desc">You've tracked 20 trips for free — upgrade to keep tracking unlimited miles and maximize your tax deductions.</div>
+    <div class="paywall-plan featured">
+      <h4>Pro Plan</h4>
+      <p>Unlimited trips · Cloud sync · PDF reports</p>
+      <div class="price">$6.99/month <span style="font-size:13px;font-weight:400;color:var(--ink4)">or $69/year</span></div>
+      <button class="paywall-upgrade" onclick="_upgradeClick('pro')">Upgrade to Pro</button>
+    </div>
+    <div class="paywall-plan">
+      <h4>Business Plan</h4>
+      <p>Everything in Pro + multi-vehicle · team sharing</p>
+      <div class="price">$9.99/month</div>
+      <button class="paywall-upgrade" style="background:var(--ink3)" onclick="_upgradeClick('business')">Upgrade to Business</button>
+    </div>
+    <div class="paywall-restore" onclick="_restorePurchase()">Restore Purchase</div>
+  </div>
+</div>
+
 <!-- ONBOARDING — Full-screen immersive -->
 <div class="ob-overlay" id="onboardOverlay"><div class="ob-screen" id="onboardSheet">
   <div class="ob-mesh"><div class="m1"></div><div class="m2"></div><div class="m3"></div></div>
@@ -1076,10 +1171,196 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
+/* ===== SUPABASE AUTH ===== */
+var _SUPABASE_URL='https://dxpuuiqibtizewbbffjk.supabase.co';
+var _SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cHV1aXFpYnRpemV3YmJmZmprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NTM5MzAsImV4cCI6MjA1ODQyOTkzMH0.it2rrn4NxSJJTSMIFHL4JHtEKqFVrNPKdRiDxUFBcLs';
+var _sb=null;
+var currentUser=null;
+try{
+  if(typeof supabase!=='undefined'&&supabase.createClient){
+    _sb=supabase.createClient(_SUPABASE_URL,_SUPABASE_ANON);
+  }
+}catch(e){console.warn('Supabase init failed:',e);}
+
+var _authPendingEmail='';
+
+function _authShowModal(){
+  var o=document.getElementById('authOverlay');
+  if(o){o.classList.remove('hidden');o.style.display='flex';}
+}
+function _authHideModal(){
+  var o=document.getElementById('authOverlay');
+  if(o){o.classList.add('hidden');o.style.display='none';}
+}
+function _authShowEmail(){
+  document.getElementById('authEmailStep').style.display='';
+  document.getElementById('authOtpStep').style.display='none';
+  document.getElementById('authErr').textContent='';
+}
+function _authSetLoading(btnId,loading){
+  var btn=document.getElementById(btnId);
+  if(!btn)return;
+  btn.disabled=loading;
+  if(loading){btn.dataset.origText=btn.textContent;btn.innerHTML='<span class="auth-spinner"></span>';}
+  else{btn.textContent=btn.dataset.origText||btn.textContent;}
+}
+async function _authSendOtp(){
+  var email=document.getElementById('authEmail').value.trim();
+  if(!email||!email.includes('@')){document.getElementById('authErr').textContent='Please enter a valid email';return;}
+  document.getElementById('authErr').textContent='';
+  _authSetLoading('authSendBtn',true);
+  try{
+    var result=await _sb.auth.signInWithOtp({email:email,options:{shouldCreateUser:true}});
+    if(result.error)throw result.error;
+    _authPendingEmail=email;
+    document.getElementById('authEmailStep').style.display='none';
+    document.getElementById('authOtpStep').style.display='';
+    document.getElementById('authOtpEmail').textContent=email;
+    document.getElementById('authOtpErr').textContent='';
+    // Focus first OTP input
+    var inputs=document.querySelectorAll('#authOtpRow input');
+    if(inputs[0])inputs[0].focus();
+    // Wire OTP auto-advance
+    inputs.forEach(function(inp,i){
+      inp.value='';
+      inp.oninput=function(){
+        if(inp.value.length===1&&i<5)inputs[i+1].focus();
+        if(i===5&&inp.value.length===1)_authVerifyOtp();
+      };
+      inp.onkeydown=function(e){
+        if(e.key==='Backspace'&&!inp.value&&i>0)inputs[i-1].focus();
+      };
+      inp.onpaste=function(e){
+        e.preventDefault();
+        var paste=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+        for(var j=0;j<paste.length&&j<6;j++){inputs[j].value=paste[j];}
+        if(paste.length===6)_authVerifyOtp();
+      };
+    });
+  }catch(e){
+    document.getElementById('authErr').textContent=e.message||'Failed to send code';
+  }
+  _authSetLoading('authSendBtn',false);
+}
+async function _authVerifyOtp(){
+  var inputs=document.querySelectorAll('#authOtpRow input');
+  var token='';inputs.forEach(function(inp){token+=inp.value;});
+  if(token.length!==6){document.getElementById('authOtpErr').textContent='Enter all 6 digits';return;}
+  document.getElementById('authOtpErr').textContent='';
+  _authSetLoading('authVerifyBtn',true);
+  try{
+    var result=await _sb.auth.verifyOtp({email:_authPendingEmail,token:token,type:'email'});
+    if(result.error)throw result.error;
+    // Success handled by onAuthStateChange
+  }catch(e){
+    document.getElementById('authOtpErr').textContent=e.message||'Invalid code — try again';
+  }
+  _authSetLoading('authVerifyBtn',false);
+}
+async function _authGoogle(){
+  if(!_sb)return;
+  _authSetLoading('authGoogleBtn',true);
+  try{
+    var redirectTo=window.location.origin+window.location.pathname;
+    await _sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:redirectTo,skipBrowserRedirect:false}});
+  }catch(e){
+    document.getElementById('authErr').textContent=e.message||'Google sign-in failed';
+    _authSetLoading('authGoogleBtn',false);
+  }
+}
+async function _authApple(){
+  if(!_sb)return;
+  _authSetLoading('authAppleBtn',true);
+  try{
+    var redirectTo=window.location.origin+window.location.pathname;
+    await _sb.auth.signInWithOAuth({provider:'apple',options:{redirectTo:redirectTo}});
+  }catch(e){
+    document.getElementById('authErr').textContent=e.message||'Apple sign-in failed';
+    _authSetLoading('authAppleBtn',false);
+  }
+}
+async function ensureProfile(user){
+  if(!_sb||!user)return null;
+  var provider=((user.app_metadata||{}).provider)||'email';
+  var name=(user.user_metadata||{}).full_name||(user.user_metadata||{}).name||'';
+  try{
+    await _sb.from('profiles').upsert({
+      id:user.id,
+      email:user.email||'',
+      name:name,
+      auth_provider:provider,
+      last_active_at:new Date().toISOString()
+    },{onConflict:'id',ignoreDuplicates:false});
+    // Fetch full profile
+    var resp=await _sb.from('profiles').select('*').eq('id',user.id).single();
+    var profile=resp.data;
+    currentUser={id:user.id,email:user.email,profile:profile};
+    window.currentUser=currentUser;
+    // Set user name in app
+    if(profile&&profile.name){
+      try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}
+    }
+    // Check paywall
+    if(profile&&profile.subscription_tier==='free'&&(profile.total_trips||0)>=20){
+      _showPaywall();
+    }
+    return profile;
+  }catch(e){console.warn('ensureProfile error:',e);return null;}
+}
+function _showPaywall(){
+  var o=document.getElementById('paywallOverlay');
+  if(o){o.classList.remove('hidden');o.style.display='flex';}
+}
+function _upgradeClick(plan){
+  alert('Stripe payment integration coming soon! Plan selected: '+plan);
+}
+function _restorePurchase(){
+  alert('Restore purchase — checking App Store receipts...\n\nThis feature will be available after Stripe/IAP integration.');
+}
+// Auth state listener
+if(_sb){
+  _sb.auth.onAuthStateChange(function(event,session){
+    if(event==='SIGNED_IN'&&session&&session.user){
+      _authHideModal();
+      ensureProfile(session.user);
+    } else if(event==='SIGNED_OUT'){
+      currentUser=null;
+      window.currentUser=null;
+      _authShowModal();
+    }
+  });
+}
+// Boot: check session on load
+(async function _authBoot(){
+  // Native iOS app skips auth entirely
+  if(window.__MYMILESAI_NATIVE__||window.__AUTH_SKIPPED__){
+    _authHideModal();
+    return;
+  }
+  // Skip auth if Supabase failed to load (offline/file:// origin)
+  if(!_sb){
+    _authHideModal();
+    return;
+  }
+  try{
+    var resp=await _sb.auth.getSession();
+    if(resp.data&&resp.data.session&&resp.data.session.user){
+      _authHideModal();
+      await ensureProfile(resp.data.session.user);
+    } else {
+      _authShowModal();
+    }
+  }catch(e){
+    // If auth check fails (network error, etc), let user in
+    _authHideModal();
+  }
+})();
+
 /* ===== Google Maps Init Callback ===== */
 var _googleMapsReady=false;
 function _initGoogleMaps(){
@@ -5196,6 +5477,9 @@ function restoreJSON(input){
 
 function signOut(){
   _showConfirm('Sign Out & Clear Data','This will permanently delete all your trips, settings, and profile data. This cannot be undone.','Sign Out & Clear All','var(--coral)',function(){
+    // Sign out from Supabase first
+    if(_sb){try{_sb.auth.signOut();}catch(e){}}
+    currentUser=null;window.currentUser=null;
     try{
       localStorage.removeItem('mymilesai_trips');
       localStorage.removeItem('mymilesai_name');
