@@ -987,98 +987,74 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <button class="modal-cancel" style="width:100%;font-size:13px;color:var(--ink4)" onclick="closeClassifyPrompt()">Classify later</button>
 </div></div>
 
-<!-- AUTH MODAL — Luxury Dark Design -->
+<!-- AUTH MODAL — mymilesai.com design system -->
 <style>
-/* ── Auth Overlay: animated gradient mesh background ── */
-.auth-overlay{position:fixed;inset:0;z-index:99999;background:#0A0A1B;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .4s;}
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+.auth-overlay{position:fixed;inset:0;z-index:99999;background:#FAFAF7;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px;transition:opacity .3s;}
 .auth-overlay.hidden{display:none;}
-.auth-overlay::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 30%,rgba(18,0,58,.6) 0%,transparent 60%),radial-gradient(ellipse 70% 50% at 80% 70%,rgba(108,60,224,.12) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 50% 10%,rgba(201,169,110,.06) 0%,transparent 50%);animation:authMesh 12s ease-in-out infinite alternate;z-index:0;}
-@keyframes authMesh{0%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}100%{opacity:.8;transform:scale(1)}}
-/* Floating gold particles */
-.auth-particles{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.auth-particle{position:absolute;width:2px;height:2px;background:rgba(201,169,110,.5);border-radius:50%;animation:authFloat linear infinite;}
-@keyframes authFloat{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-10vh) scale(1);opacity:0}}
-/* ── Glass card ── */
-.auth-card{position:relative;z-index:1;width:100%;max-width:400px;padding:44px 32px 36px;backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:28px;box-shadow:0 -1px 0 rgba(201,169,110,.15),0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03);text-align:center;}
-/* ── Logo halo ── */
-.auth-halo{position:relative;display:inline-block;margin-bottom:20px;}
-.auth-halo::before{content:'';position:absolute;inset:-18px;border-radius:50%;background:radial-gradient(circle,rgba(201,169,110,.12) 0%,transparent 70%);animation:authHaloPulse 3s ease-in-out infinite;z-index:0;}
-@keyframes authHaloPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
-.auth-logo-icon{display:flex;align-items:center;justify-content:center;gap:10px;position:relative;z-index:1;}
-.auth-logo{font-size:30px;font-weight:800;color:#fff;letter-spacing:-.5px;}
-.auth-logo-gold{color:#C9A96E;}
-.auth-tagline{font-size:14px;color:rgba(255,255,255,.45);font-weight:300;margin-bottom:20px;letter-spacing:.3px;line-height:1.5;}
-/* ── Trust badges ── */
+.auth-card{width:100%;max-width:420px;background:#fff;border-radius:24px;box-shadow:0 4px 40px rgba(0,0,0,.08);border:1px solid #E5E7EB;padding:40px 32px 32px;text-align:center;font-family:system-ui,-apple-system,sans-serif;}
+.auth-icon-pill{display:inline-flex;align-items:center;justify-content:center;background:#EFF6FF;border-radius:14px;padding:12px;margin-bottom:16px;}
+.auth-logo-row{display:flex;align-items:baseline;justify-content:center;gap:0;margin-bottom:8px;}
+.auth-logo-sans{font-size:26px;font-weight:800;color:#111827;letter-spacing:-.5px;font-family:system-ui,-apple-system,sans-serif;}
+.auth-logo-serif{font-size:26px;font-weight:700;color:#2563EB;font-family:'Playfair Display',Georgia,serif;font-style:italic;letter-spacing:-.3px;}
+.auth-tagline{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:400;font-size:15px;color:#6B7280;line-height:1.5;margin-bottom:20px;}
 .auth-trust{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:28px;}
-.auth-trust span{font-size:10px;color:rgba(255,255,255,.35);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);padding:4px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.3px;}
-/* ── Buttons ── */
-.auth-btn{width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
-.auth-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
-.auth-btn:active:not(:disabled){transform:translateY(0);box-shadow:none;}
+.auth-trust span{font-size:11px;color:#374151;background:#F9FAFB;border:1px solid #E5E7EB;padding:4px 12px;border-radius:100px;white-space:nowrap;font-family:system-ui,-apple-system,sans-serif;}
+.auth-btn{width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;transition:all .2s ease;font-family:system-ui,-apple-system,sans-serif;}
 .auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none !important;}
-.auth-btn-google{background:#fff;color:#1f1f1f;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.15);}
-.auth-btn-apple{background:#000;color:#fff;border:1px solid rgba(255,255,255,.12);}
-/* ── Divider ── */
-.auth-divider{display:flex;align-items:center;gap:14px;margin:20px 0;color:rgba(255,255,255,.25);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1.5px;}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,110,.2),transparent);}
-/* ── Email input ── */
+.auth-btn-google{background:#fff;color:#111827;border:1.5px solid #E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.auth-btn-google:hover:not(:disabled){box-shadow:0 2px 12px rgba(0,0,0,.1);transform:translateY(-1px);}
+.auth-btn-apple{background:#111827;color:#fff;}
+.auth-btn-apple:hover:not(:disabled){background:#1F2937;transform:translateY(-1px);}
+.auth-divider{display:flex;align-items:center;gap:14px;margin:18px 0;color:#9CA3AF;font-size:12px;font-weight:500;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:#E5E7EB;}
 .auth-input-wrap{position:relative;margin-bottom:12px;}
-.auth-input-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.35;}
-.auth-input{width:100%;padding:15px 16px 15px 42px;border-radius:14px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#fff;font-size:15px;box-sizing:border-box;outline:none;transition:all .3s;}
-.auth-input::placeholder{color:rgba(255,255,255,.25);}
-.auth-input:focus{border-color:rgba(201,169,110,.5);box-shadow:0 0 0 3px rgba(201,169,110,.1);background:rgba(255,255,255,.06);}
-/* ── Gold CTA ── */
-.auth-btn-gold{background:linear-gradient(135deg,#C9A96E 0%,#E8C88A 50%,#C9A96E 100%);color:#1a1a0e;font-weight:700;background-size:200% 100%;transition:all .3s;}
-.auth-btn-gold:hover:not(:disabled){background-position:100% 0;box-shadow:0 8px 32px rgba(201,169,110,.3);transform:translateY(-2px);}
-/* ── OTP ── */
-.auth-otp-row{display:flex;gap:10px;justify-content:center;margin:20px 0;}
-.auth-otp-row input{width:48px;height:56px;text-align:center;font-size:24px;font-weight:700;border-radius:14px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#fff;outline:none;box-sizing:border-box;transition:all .3s;caret-color:#C9A96E;}
-.auth-otp-row input:focus{border-color:rgba(201,169,110,.5);box-shadow:0 0 0 3px rgba(201,169,110,.1);background:rgba(255,255,255,.06);}
-/* ── Misc ── */
-.auth-err{color:#EF3D58;font-size:13px;margin:8px 0;min-height:18px;}
-.auth-footer{font-size:10px;color:rgba(255,255,255,.2);margin-top:28px;line-height:1.6;letter-spacing:.2px;}
-.auth-footer a,.auth-footer span[onclick]{color:rgba(201,169,110,.5);cursor:pointer;text-decoration:none;}
-.auth-back{font-size:13px;color:#C9A96E;cursor:pointer;font-weight:600;margin-top:14px;display:inline-block;transition:opacity .2s;}
+.auth-input-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;}
+.auth-input{width:100%;padding:14px 16px 14px 42px;border-radius:12px;border:1.5px solid #E5E7EB;background:#fff;color:#111827;font-size:15px;box-sizing:border-box;outline:none;transition:all .2s;font-family:system-ui,-apple-system,sans-serif;}
+.auth-input::placeholder{color:#9CA3AF;}
+.auth-input:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.auth-btn-cta{background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;font-weight:700;}
+.auth-btn-cta:hover:not(:disabled){opacity:.92;transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.3);}
+.auth-otp-row{display:flex;gap:8px;justify-content:center;margin:20px 0;}
+.auth-otp-row input{width:48px;height:56px;text-align:center;font-size:24px;font-weight:700;border-radius:12px;border:1.5px solid #E5E7EB;background:#fff;color:#111827;outline:none;box-sizing:border-box;transition:all .2s;caret-color:#2563EB;font-family:system-ui,-apple-system,sans-serif;}
+.auth-otp-row input:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.auth-err{color:#EF4444;font-size:13px;margin:8px 0;min-height:18px;font-family:system-ui,-apple-system,sans-serif;}
+.auth-footer{font-size:11px;color:#9CA3AF;margin-top:20px;line-height:1.6;font-family:system-ui,-apple-system,sans-serif;}
+.auth-footer span[onclick]{color:#2563EB;cursor:pointer;}
+.auth-back{font-size:13px;color:#2563EB;cursor:pointer;font-weight:600;margin-top:14px;display:inline-block;font-family:system-ui,-apple-system,sans-serif;}
 .auth-back:hover{opacity:.7;}
-.auth-spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(0,0,0,.15);border-top-color:#1a1a0e;border-radius:50%;animation:spin .6s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-/* ── Paywall ── */
-.paywall-overlay{position:fixed;inset:0;z-index:999999;background:#0A0A1B;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.auth-spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:authSpin .6s linear infinite;}
+@keyframes authSpin{to{transform:rotate(360deg)}}
+/* Paywall */
+.paywall-overlay{position:fixed;inset:0;z-index:999999;background:#FAFAF7;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px;}
 .paywall-overlay.hidden{display:none;}
-.paywall-overlay::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(201,169,110,.08) 0%,transparent 60%);z-index:0;}
-.paywall-box{position:relative;z-index:1;width:100%;max-width:400px;padding:44px 28px;text-align:center;}
-.paywall-title{font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-.3px;}
-.paywall-desc{font-size:14px;color:rgba(255,255,255,.45);margin-bottom:28px;line-height:1.6;}
-.paywall-plan{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px;margin-bottom:12px;text-align:left;transition:all .3s;backdrop-filter:blur(20px);}
-.paywall-plan.featured{border-color:rgba(201,169,110,.3);box-shadow:0 0 0 1px rgba(201,169,110,.1),0 20px 40px rgba(0,0,0,.3);}
-.paywall-plan h4{font-size:17px;font-weight:700;color:#fff;margin:0 0 4px;}
-.paywall-plan p{font-size:13px;color:rgba(255,255,255,.4);margin:0;}
-.paywall-plan .price{font-size:22px;font-weight:800;color:#C9A96E;margin-top:10px;}
-.paywall-upgrade{width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#C9A96E,#E8C88A);color:#1a1a0e;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-top:10px;transition:all .25s;}
-.paywall-upgrade:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,169,110,.3);}
-.paywall-restore{font-size:12px;color:rgba(255,255,255,.25);margin-top:20px;cursor:pointer;transition:color .2s;}
-.paywall-restore:hover{color:rgba(201,169,110,.6);}
+.paywall-box{width:100%;max-width:420px;text-align:center;font-family:system-ui,-apple-system,sans-serif;}
+.paywall-title{font-size:24px;font-weight:800;color:#111827;margin-bottom:8px;}
+.paywall-desc{font-size:14px;color:#6B7280;margin-bottom:28px;line-height:1.6;}
+.paywall-plan{background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:22px;margin-bottom:12px;text-align:left;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+.paywall-plan.featured{border-color:#2563EB;box-shadow:0 4px 24px rgba(37,99,235,.12);}
+.paywall-plan h4{font-size:17px;font-weight:700;color:#111827;margin:0 0 4px;}
+.paywall-plan p{font-size:13px;color:#6B7280;margin:0;}
+.paywall-plan .price{font-size:22px;font-weight:800;color:#2563EB;margin-top:10px;}
+.paywall-upgrade{width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-top:10px;transition:all .2s;}
+.paywall-upgrade:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.3);}
+.paywall-restore{font-size:12px;color:#9CA3AF;margin-top:20px;cursor:pointer;}
+.paywall-restore:hover{color:#2563EB;}
 </style>
 <div class="auth-overlay hidden" id="authOverlay">
-  <!-- Floating particles -->
-  <div class="auth-particles" id="authParticles"></div>
-  <script>(function(){var c=document.getElementById('authParticles');if(!c)return;for(var i=0;i<20;i++){var p=document.createElement('div');p.className='auth-particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(6+Math.random()*8)+'s';p.style.animationDelay=(-Math.random()*10)+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';c.appendChild(p);}})()</script>
   <div class="auth-card">
-    <!-- Logo with halo -->
-    <div class="auth-halo">
-      <div class="auth-logo-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke-opacity=".3"/></svg>
-        <span class="auth-logo">My<span class="auth-logo-gold">Miles</span>AI</span>
-      </div>
+    <div class="auth-icon-pill">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/><circle cx="6.5" cy="15.5" r="1.5"/><circle cx="17.5" cy="15.5" r="1.5"/><path d="M5 11l1.5-4.5h11L19 11H5z"/></svg>
     </div>
-    <div class="auth-tagline">Track every mile. Maximize every deduction.</div>
-    <!-- Trust badges -->
+    <div class="auth-logo-row">
+      <span class="auth-logo-sans">MyMiles</span><span class="auth-logo-serif">AI</span>
+    </div>
+    <div class="auth-tagline">Track every mile. Claim every dollar.</div>
     <div class="auth-trust">
-      <span>🔒 Bank-level security</span>
-      <span>📱 iOS Native</span>
-      <span>⭐ 4.9 rated</span>
+      <span>Privacy-first</span>
+      <span>US + Canada</span>
+      <span>30-sec setup</span>
     </div>
-    <!-- Email step -->
     <div id="authEmailStep">
       <button class="auth-btn auth-btn-google" onclick="_authGoogle()" id="authGoogleBtn">
         <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09A6.97 6.97 0 015.47 12c0-.72.13-1.42.37-2.09V7.07H2.18A11.97 11.97 0 001 12c0 1.94.46 3.77 1.18 5.07l3.66-2.98z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
@@ -1090,16 +1066,15 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       </button>
       <div class="auth-divider">or continue with email</div>
       <div class="auth-input-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
         <input type="email" class="auth-input" id="authEmail" placeholder="you@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')_authSendOtp()">
       </div>
-      <button class="auth-btn auth-btn-gold" onclick="_authSendOtp()" id="authSendBtn">Send Magic Code</button>
+      <button class="auth-btn auth-btn-cta" onclick="_authSendOtp()" id="authSendBtn">Send Magic Code →</button>
       <div class="auth-err" id="authErr"></div>
     </div>
-    <!-- OTP step -->
     <div id="authOtpStep" style="display:none">
-      <div style="font-size:14px;color:rgba(255,255,255,.4);margin-bottom:4px;">Enter the 6-digit code sent to</div>
-      <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:16px;" id="authOtpEmail"></div>
+      <div style="font-size:14px;color:#6B7280;margin-bottom:4px;">Enter the 6-digit code sent to</div>
+      <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:16px;" id="authOtpEmail"></div>
       <div class="auth-otp-row" id="authOtpRow">
         <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
         <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
@@ -1108,30 +1083,30 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
         <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
         <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
       </div>
-      <button class="auth-btn auth-btn-gold" onclick="_authVerifyOtp()" id="authVerifyBtn">Verify Code</button>
+      <button class="auth-btn auth-btn-cta" onclick="_authVerifyOtp()" id="authVerifyBtn">Verify Code</button>
       <div class="auth-err" id="authOtpErr"></div>
       <span class="auth-back" onclick="_authShowEmail()">← Back to email</span>
     </div>
-    <div class="auth-footer">By continuing you agree to our <span onclick="openInfoModal('Terms','See Terms & Conditions in Settings.')">Terms</span> & <span onclick="openInfoModal('Privacy','See Privacy Policy in Settings.')">Privacy Policy</span><br>Trusted by 10,000+ drivers</div>
+    <div class="auth-footer">No password required · Privacy-first · Free to start<br>By continuing you agree to our <span onclick="openInfoModal('Terms','See Terms & Conditions in Settings.')">Terms</span> & <span onclick="openInfoModal('Privacy','See Privacy Policy in Settings.')">Privacy Policy</span></div>
   </div>
 </div>
 <!-- Paywall -->
 <div class="paywall-overlay hidden" id="paywallOverlay">
   <div class="paywall-box">
-    <div style="font-size:52px;margin-bottom:16px;">🚗</div>
+    <div style="font-size:48px;margin-bottom:16px;">🚗</div>
     <div class="paywall-title">Free Limit Reached</div>
     <div class="paywall-desc">You've tracked 20 trips for free — upgrade to unlock unlimited miles and maximize your tax deductions.</div>
     <div class="paywall-plan featured">
       <h4>Pro Plan</h4>
       <p>Unlimited trips · Cloud sync · PDF reports</p>
-      <div class="price">$6.99<span style="font-size:13px;font-weight:400;color:rgba(255,255,255,.35)">/month</span> <span style="font-size:12px;color:rgba(255,255,255,.25)">or $69/year</span></div>
+      <div class="price">$6.99<span style="font-size:13px;font-weight:400;color:#6B7280">/month</span> <span style="font-size:12px;color:#9CA3AF">or $69/year</span></div>
       <button class="paywall-upgrade" onclick="_upgradeClick('pro')">Upgrade to Pro</button>
     </div>
     <div class="paywall-plan">
       <h4>Business Plan</h4>
       <p>Everything in Pro + multi-vehicle · team sharing</p>
-      <div class="price">$9.99<span style="font-size:13px;font-weight:400;color:rgba(255,255,255,.35)">/month</span></div>
-      <button class="paywall-upgrade" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12)" onclick="_upgradeClick('business')">Upgrade to Business</button>
+      <div class="price">$9.99<span style="font-size:13px;font-weight:400;color:#6B7280">/month</span></div>
+      <button class="paywall-upgrade" style="background:#111827" onclick="_upgradeClick('business')">Upgrade to Business</button>
     </div>
     <div class="paywall-restore" onclick="_restorePurchase()">Restore Purchase</div>
   </div>
