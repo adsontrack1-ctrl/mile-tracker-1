@@ -5,7 +5,7 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net https://js.stripe.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.mymilesai.workers.dev https://api.stripe.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.mymilesai.workers.dev https://api.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1206,56 +1206,45 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
-/* ===== SUPABASE AUTH + STRIPE + DEVICE LOCKING ===== */
+/* ===== SUPABASE AUTH + PAYMENTS + DEVICE LOCKING (v2 — full rewrite) ===== */
 var _SUPABASE_URL='https://dxpuuiqibtizewbbffjk.supabase.co';
 var _SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cHV1aXFpYnRpemV3YmJmZmprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NTM5MzAsImV4cCI6MjA1ODQyOTkzMH0.it2rrn4NxSJJTSMIFHL4JHtEKqFVrNPKdRiDxUFBcLs';
 var _sb=null;
 var currentUser=null;
-// Device ID — persistent per browser/device
-var _deviceId=(function(){
-  var k='_mmai_device_id';
-  var id=localStorage.getItem(k);
-  if(!id){id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2);localStorage.setItem(k,id);}
-  return id;
-})();
-try{
-  if(typeof supabase!=='undefined'&&supabase.createClient){
-    _sb=supabase.createClient(_SUPABASE_URL,_SUPABASE_ANON);
-  }
-}catch(e){console.warn('Supabase init failed:',e);}
-// Stripe
-var _stripe=null;
-try{if(typeof Stripe!=='undefined')_stripe=Stripe('pk_test_51TI142PDX1EjEZICSFjN9hemsw5DKHQy7yRKaNVdUz8qTTY1pGx0THNV7OzbpVP95R8a2QSXTEUvfn6qRV5KQgFK005ySp3dqc');}catch(e){}
+var _deviceId=(function(){var k='_mmai_device_id';var id=localStorage.getItem(k);if(!id){id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2);localStorage.setItem(k,id);}return id;})();
+try{if(typeof supabase!=='undefined'&&supabase.createClient){_sb=supabase.createClient(_SUPABASE_URL,_SUPABASE_ANON);}}catch(e){console.warn('Supabase init failed:',e);}
 var _PRICES={pro:'price_1TI1ETPDX1EjEZICkTMmklbN',business:'price_1TI1YTPDX1EjEZIC3qSy2jNe'};
 var _DEVICE_LIMITS={pro:1,business:10};
-
 var _authPendingEmail='';
 
-function _authShowModal(){
-  var o=document.getElementById('authOverlay');
-  if(o){o.classList.remove('hidden');o.style.display='flex';}
+// ── UI helpers ───────────────────────────────────────────────────────
+function _authShowModal(){var o=document.getElementById('authOverlay');if(o){o.classList.remove('hidden');o.style.display='flex';}_authHideLoading();}
+function _authHideModal(){var o=document.getElementById('authOverlay');if(o){o.classList.add('hidden');o.style.display='none';}_authHideLoading();}
+function _authShowEmail(){document.getElementById('authEmailStep').style.display='';document.getElementById('authOtpStep').style.display='none';document.getElementById('authErr').textContent='';}
+function _authSetLoading(btnId,loading){var btn=document.getElementById(btnId);if(!btn)return;btn.disabled=loading;if(loading){btn.dataset.origText=btn.textContent;btn.innerHTML='<span class="auth-spinner"></span>';}else{btn.textContent=btn.dataset.origText||btn.textContent;}}
+function _authShowLoading(){
+  var o=document.getElementById('authOverlay');if(!o)return;
+  o.classList.remove('hidden');o.style.display='flex';
+  var card=o.querySelector('.auth-card');
+  if(card&&!document.getElementById('authLoadingSpinner')){
+    var s=document.createElement('div');s.id='authLoadingSpinner';
+    s.style.cssText='position:absolute;inset:0;background:rgba(250,250,247,.92);display:flex;align-items:center;justify-content:center;border-radius:24px;z-index:10;';
+    s.innerHTML='<div class="auth-spinner" style="width:32px;height:32px;border-width:3px;border-color:rgba(0,0,0,.08);border-top-color:#2563EB;"></div>';
+    card.style.position='relative';card.appendChild(s);
+  }
 }
-function _authHideModal(){
-  var o=document.getElementById('authOverlay');
-  if(o){o.classList.add('hidden');o.style.display='none';}
+function _authHideLoading(){var s=document.getElementById('authLoadingSpinner');if(s)s.remove();}
+function _showToast(msg,color){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:'+(color||'#111827')+';color:#fff;padding:14px 28px;border-radius:14px;font-size:14px;font-weight:700;z-index:9999999;box-shadow:0 8px 32px rgba(0,0,0,.2);white-space:nowrap;font-family:system-ui,-apple-system,sans-serif;';
+  t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},5000);
 }
-function _authShowEmail(){
-  document.getElementById('authEmailStep').style.display='';
-  document.getElementById('authOtpStep').style.display='none';
-  document.getElementById('authErr').textContent='';
-}
-function _authSetLoading(btnId,loading){
-  var btn=document.getElementById(btnId);
-  if(!btn)return;
-  btn.disabled=loading;
-  if(loading){btn.dataset.origText=btn.textContent;btn.innerHTML='<span class="auth-spinner"></span>';}
-  else{btn.textContent=btn.dataset.origText||btn.textContent;}
-}
+
+// ── Auth flows ───────────────────────────────────────────────────────
 async function _authSendOtp(){
   var email=document.getElementById('authEmail').value.trim();
   if(!email||!email.includes('@')){document.getElementById('authErr').textContent='Please enter a valid email';return;}
@@ -1269,29 +1258,15 @@ async function _authSendOtp(){
     document.getElementById('authOtpStep').style.display='';
     document.getElementById('authOtpEmail').textContent=email;
     document.getElementById('authOtpErr').textContent='';
-    // Focus first OTP input
     var inputs=document.querySelectorAll('#authOtpRow input');
     if(inputs[0])inputs[0].focus();
-    // Wire OTP auto-advance
     inputs.forEach(function(inp,i){
       inp.value='';
-      inp.oninput=function(){
-        if(inp.value.length===1&&i<5)inputs[i+1].focus();
-        if(i===5&&inp.value.length===1)_authVerifyOtp();
-      };
-      inp.onkeydown=function(e){
-        if(e.key==='Backspace'&&!inp.value&&i>0)inputs[i-1].focus();
-      };
-      inp.onpaste=function(e){
-        e.preventDefault();
-        var paste=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
-        for(var j=0;j<paste.length&&j<6;j++){inputs[j].value=paste[j];}
-        if(paste.length===6)_authVerifyOtp();
-      };
+      inp.oninput=function(){if(inp.value.length===1&&i<5)inputs[i+1].focus();if(i===5&&inp.value.length===1)_authVerifyOtp();};
+      inp.onkeydown=function(e){if(e.key==='Backspace'&&!inp.value&&i>0)inputs[i-1].focus();};
+      inp.onpaste=function(e){e.preventDefault();var paste=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);for(var j=0;j<paste.length&&j<6;j++){inputs[j].value=paste[j];}if(paste.length===6)_authVerifyOtp();};
     });
-  }catch(e){
-    document.getElementById('authErr').textContent=e.message||'Failed to send code';
-  }
+  }catch(e){document.getElementById('authErr').textContent=e.message||'Failed to send code';}
   _authSetLoading('authSendBtn',false);
 }
 async function _authVerifyOtp(){
@@ -1300,81 +1275,84 @@ async function _authVerifyOtp(){
   if(token.length!==6){document.getElementById('authOtpErr').textContent='Enter all 6 digits';return;}
   document.getElementById('authOtpErr').textContent='';
   _authSetLoading('authVerifyBtn',true);
-  try{
-    var result=await _sb.auth.verifyOtp({email:_authPendingEmail,token:token,type:'email'});
-    if(result.error)throw result.error;
-    // Success handled by onAuthStateChange
-  }catch(e){
-    document.getElementById('authOtpErr').textContent=e.message||'Invalid code — try again';
-  }
+  try{var result=await _sb.auth.verifyOtp({email:_authPendingEmail,token:token,type:'email'});if(result.error)throw result.error;}
+  catch(e){document.getElementById('authOtpErr').textContent=e.message||'Invalid code — try again';}
   _authSetLoading('authVerifyBtn',false);
 }
 async function _authGoogle(){
-  if(!_sb)return;
-  _authSetLoading('authGoogleBtn',true);
-  try{
-    var redirectTo=window.location.origin+window.location.pathname;
-    await _sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:redirectTo,skipBrowserRedirect:false}});
-  }catch(e){
-    document.getElementById('authErr').textContent=e.message||'Google sign-in failed';
-    _authSetLoading('authGoogleBtn',false);
-  }
+  if(!_sb)return;_authSetLoading('authGoogleBtn',true);
+  try{await _sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname,skipBrowserRedirect:false}});}
+  catch(e){document.getElementById('authErr').textContent=e.message||'Google sign-in failed';_authSetLoading('authGoogleBtn',false);}
 }
 async function _authApple(){
-  if(!_sb)return;
-  _authSetLoading('authAppleBtn',true);
-  try{
-    var redirectTo=window.location.origin+window.location.pathname;
-    await _sb.auth.signInWithOAuth({provider:'apple',options:{redirectTo:redirectTo}});
-  }catch(e){
-    document.getElementById('authErr').textContent=e.message||'Apple sign-in failed';
-    _authSetLoading('authAppleBtn',false);
-  }
+  if(!_sb)return;_authSetLoading('authAppleBtn',true);
+  try{await _sb.auth.signInWithOAuth({provider:'apple',options:{redirectTo:window.location.origin+window.location.pathname}});}
+  catch(e){document.getElementById('authErr').textContent=e.message||'Apple sign-in failed';_authSetLoading('authAppleBtn',false);}
 }
-// Device session registration
+
+// ── Device registration (Bug 3 fix: registers ALL tiers, Gap 2 fix: 90-day cleanup) ──
 async function _registerDevice(userId,tier){
   if(!_sb)return true;
-  var limit=_DEVICE_LIMITS[tier]||1;
   try{
+    // Gap 2 fix: clean sessions older than 90 days
+    await _sb.from('user_sessions').delete().eq('user_id',userId).lt('last_seen_at',new Date(Date.now()-90*24*60*60*1000).toISOString());
     var r=await _sb.from('user_sessions').select('device_id').eq('user_id',userId);
     var sessions=r.data||[];
     var deviceIds=[...new Set(sessions.map(function(s){return s.device_id;}))];
+    // Already registered: update last_seen
     if(deviceIds.includes(_deviceId)){
       await _sb.from('user_sessions').update({last_seen_at:new Date().toISOString()}).eq('user_id',userId).eq('device_id',_deviceId);
       return true;
     }
-    if(deviceIds.length>=limit)return false;
-    await _sb.from('user_sessions').insert({user_id:userId,device_id:_deviceId,device_name:navigator.userAgent.includes('iPhone')?'iPhone':'Device',last_seen_at:new Date().toISOString()});
+    // Enforce limit only for paid tiers
+    if(tier==='pro'||tier==='business'){
+      var limit=_DEVICE_LIMITS[tier]||1;
+      if(deviceIds.length>=limit)return false;
+    }
+    // Register device (works for free/pending/pro/business)
+    await _sb.from('user_sessions').insert({user_id:userId,device_id:_deviceId,device_name:/iPhone|iPad/.test(navigator.userAgent)?'iPhone':/Mac/.test(navigator.userAgent)?'Mac':'Device',last_seen_at:new Date().toISOString()});
     return true;
-  }catch(e){return true;}
+  }catch(e){console.warn('_registerDevice error:',e);return true;}
 }
+
+// ── Profile management ───────────────────────────────────────────────
 async function ensureProfile(user){
   if(!_sb||!user)return null;
-  var provider=((user.app_metadata||{}).provider)||'email';
-  var name=(user.user_metadata||{}).full_name||(user.user_metadata||{}).name||'';
   try{
-    await _sb.from('profiles').upsert({
-      id:user.id,email:user.email||'',name:name,
-      auth_provider:provider,last_active_at:new Date().toISOString()
-    },{onConflict:'id',ignoreDuplicates:false});
+    var provider=((user.app_metadata||{}).provider)||'email';
+    var name=(user.user_metadata||{}).full_name||(user.user_metadata||{}).name||'';
+    await _sb.from('profiles').upsert({id:user.id,email:user.email||'',name:name,auth_provider:provider,last_active_at:new Date().toISOString()},{onConflict:'id',ignoreDuplicates:false});
     var resp=await _sb.from('profiles').select('*').eq('id',user.id).single();
     var profile=resp.data;
     currentUser={id:user.id,email:user.email,profile:profile};
     window.currentUser=currentUser;
     if(profile&&profile.name){try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}}
-    // Device locking
-    if(profile&&profile.subscription_tier&&profile.subscription_tier!=='free'){
-      var allowed=await _registerDevice(user.id,profile.subscription_tier);
-      if(!allowed){_showDeviceLimitModal(profile.subscription_tier);return profile;}
-    }
+    // Bug 3 fix: register device for ALL tiers (including free/unsubscribed)
+    var tier=(profile&&profile.subscription_tier)||'free';
+    var allowed=await _registerDevice(user.id,tier);
+    if(!allowed){_authHideLoading();_showDeviceLimitModal(tier);return profile;}
+    _authHideLoading();
     return profile;
-  }catch(e){console.warn('ensureProfile error:',e);return null;}
+  }catch(e){console.warn('ensureProfile error:',e);_authHideLoading();return null;}
 }
-function _showSubscribeModal(){
-  var o=document.getElementById('paywallOverlay');
-  if(o){o.classList.remove('hidden');o.style.display='flex';}
+
+// ── Subscription check ───────────────────────────────────────────────
+function _isSubscriptionActive(profile){
+  if(!profile)return false;
+  var tier=profile.subscription_tier;
+  var now=new Date();
+  var isActive=(tier==='pro'||tier==='business')&&(!profile.subscription_expires_at||new Date(profile.subscription_expires_at)>now);
+  var inTrial=profile.trial_ends_at&&new Date(profile.trial_ends_at)>now;
+  return isActive||inTrial;
 }
+function _showSubscribeModal(){var o=document.getElementById('paywallOverlay');if(o){o.classList.remove('hidden');o.style.display='flex';}}
+function _hideSubscribeModal(){var o=document.getElementById('paywallOverlay');if(o){o.classList.add('hidden');o.style.display='none';}}
+
+// ── Stripe checkout (Bug 7 fix: re-fetch session if currentUser null) ──
 async function _upgradeClick(plan){
+  if(!currentUser&&_sb){
+    try{var s=await _sb.auth.getSession();if(s&&s.data&&s.data.session&&s.data.session.user){await ensureProfile(s.data.session.user);}}catch(e){}
+  }
   if(!currentUser){alert('Please sign in first');return;}
   var btn=document.getElementById(plan==='pro'?'btnUpgradePro':'btnUpgradeBusiness');
   if(btn){btn.disabled=true;btn.innerHTML='<span class="auth-spinner"></span>';}
@@ -1388,31 +1366,49 @@ async function _upgradeClick(plan){
     else throw new Error(data.error||'Checkout failed');
   }catch(e){alert('Payment error: '+e.message);if(btn){btn.disabled=false;btn.textContent='Start Free Trial →';}}
 }
-function _restorePurchase(){
-  if(!currentUser){alert('Please sign in first');return;}
-  alert('Checking your subscription status...\n\nIf you subscribed on another device, your access will be restored automatically when the webhook confirms your payment.');
+
+// ── Restore purchase (Bug 5 fix: actually re-checks profile) ──
+async function _restorePurchase(){
+  if(!currentUser||!_sb){_showToast('Please sign in first','#EF4444');return;}
+  var btn=event&&event.target;
+  if(btn){btn.textContent='Checking...';btn.style.pointerEvents='none';}
+  try{
+    var r=await _sb.from('profiles').select('subscription_tier,trial_ends_at,subscription_expires_at').eq('id',currentUser.id).single();
+    if(r.data&&_isSubscriptionActive(r.data)){
+      currentUser.profile=Object.assign(currentUser.profile||{},r.data);
+      window.currentUser=currentUser;
+      _hideSubscribeModal();
+      _showToast('Subscription restored!','#16a34a');
+      return;
+    }
+  }catch(e){}
+  if(btn){btn.textContent='Already subscribed? Restore Purchase';btn.style.pointerEvents='';}
+  _showToast('No active subscription found','#EF4444');
 }
+
+// ── Device limit modal ───────────────────────────────────────────────
 function _showDeviceLimitModal(tier){
-  var existing=document.getElementById('deviceLimitOverlay');
-  if(existing)existing.remove();
-  var div=document.createElement('div');
-  div.id='deviceLimitOverlay';
+  var existing=document.getElementById('deviceLimitOverlay');if(existing)existing.remove();
+  var div=document.createElement('div');div.id='deviceLimitOverlay';
   div.style.cssText='position:fixed;inset:0;z-index:999999;background:#FAFAF7;display:flex;align-items:center;justify-content:center;padding:24px;';
   div.innerHTML='<div style="background:#fff;border-radius:24px;padding:40px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 4px 40px rgba(0,0,0,.08);border:1px solid #E5E7EB;font-family:system-ui,-apple-system,sans-serif;">'
     +'<div style="font-size:48px;margin-bottom:16px;">📱</div>'
     +'<h2 style="font-size:22px;font-weight:800;color:#111827;margin-bottom:8px;">Device Limit Reached</h2>'
     +'<p style="font-size:14px;color:#6B7280;margin-bottom:24px;line-height:1.6;">Your '+tier+' plan allows '+(tier==='pro'?'1':'10')+' device'+(tier==='pro'?'':'s')+'. To use this device, upgrade or sign in on your registered device.</p>'
     +(tier==='pro'?'<button onclick="_upgradeClick(\'business\')" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:12px;">Upgrade to Business — 10 devices</button>':'')
-    +'<button onclick="if(_sb)_sb.auth.signOut()" style="width:100%;padding:14px;border-radius:14px;background:#F3F4F6;color:#374151;font-size:14px;font-weight:600;border:none;cursor:pointer;">Sign Out</button>'
-    +'</div>';
+    +'<button onclick="if(_sb)_sb.auth.signOut()" style="width:100%;padding:14px;border-radius:14px;background:#F3F4F6;color:#374151;font-size:14px;font-weight:600;border:none;cursor:pointer;">Sign Out</button></div>';
   document.body.appendChild(div);
 }
-// Auth state listener
+
+// ── Auth state listener ──────────────────────────────────────────────
 if(_sb){
   _sb.auth.onAuthStateChange(function(event,session){
     if(event==='SIGNED_IN'&&session&&session.user){
       _authHideModal();
-      ensureProfile(session.user);
+      ensureProfile(session.user).then(function(profile){
+        if(profile&&!_isSubscriptionActive(profile)){_showSubscribeModal();}
+        else{_hideSubscribeModal();}
+      });
     } else if(event==='SIGNED_OUT'){
       currentUser=null;window.currentUser=null;
       var dl=document.getElementById('deviceLimitOverlay');if(dl)dl.remove();
@@ -1420,45 +1416,42 @@ if(_sb){
     }
   });
 }
-// Boot: check session + subscription + payment callback
+
+// ── Boot sequence (Bug 1 fix: payment handler after session, Bug 6 fix: loading state) ──
 (async function _authBoot(){
-  // Payment success handler
-  var _up=new URLSearchParams(window.location.search);
-  if(_up.get('payment')==='success'){
-    history.replaceState(null,'',window.location.pathname);
-    setTimeout(async function(){
-      if(_sb&&currentUser){
-        var r=await _sb.from('profiles').select('*').eq('id',currentUser.id).single();
-        if(r.data){currentUser.profile=r.data;window.currentUser=currentUser;var pw=document.getElementById('paywallOverlay');if(pw){pw.classList.add('hidden');pw.style.display='none';}}
-      }
-      var t=document.createElement('div');
-      t.style.cssText='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;padding:14px 28px;border-radius:14px;font-size:14px;font-weight:700;z-index:999999;box-shadow:0 8px 32px rgba(0,0,0,.2);white-space:nowrap;';
-      t.textContent='✅ Trial started! Welcome to MyMilesAI.';
-      document.body.appendChild(t);
-      setTimeout(function(){t.remove();},5000);
-    },1000);
-  }
-  if(_up.get('payment')==='cancelled'){history.replaceState(null,'',window.location.pathname);}
-  // Native iOS app skips auth
+  // 1. Native iOS: skip all web auth + subscription
   if(window.__MYMILESAI_NATIVE__||window.__AUTH_SKIPPED__){_authHideModal();return;}
+  // 2. Check payment callback
+  var urlParams=new URLSearchParams(window.location.search);
+  var isPaymentSuccess=urlParams.get('payment')==='success';
+  var isPaymentCancelled=urlParams.get('payment')==='cancelled';
+  if(isPaymentSuccess||isPaymentCancelled){history.replaceState(null,'',window.location.pathname);}
+  // 3. No Supabase: offline mode
   if(!_sb){_authHideModal();return;}
+  // 4. Bug 6 fix: show loading while checking session
+  _authShowLoading();
   try{
-    var resp=await _sb.auth.getSession();
-    if(resp.data&&resp.data.session&&resp.data.session.user){
+    var sessionResp=await _sb.auth.getSession();
+    var session=sessionResp&&sessionResp.data&&sessionResp.data.session;
+    if(session&&session.user){
+      // 5. Logged in
       _authHideModal();
-      await ensureProfile(resp.data.session.user);
-      // Check subscription after profile
-      if(window.currentUser&&window.currentUser.profile){
-        var tier=window.currentUser.profile.subscription_tier;
-        var expires=window.currentUser.profile.subscription_expires_at;
-        var trialEnds=window.currentUser.profile.trial_ends_at;
-        var now=new Date();
-        var isActive=(tier==='pro'||tier==='business')&&(!expires||new Date(expires)>now);
-        var inTrial=trialEnds&&new Date(trialEnds)>now;
-        if(!isActive&&!inTrial){_showSubscribeModal();}
+      var profile=await ensureProfile(session.user);
+      // 6. Bug 1 fix: payment success AFTER ensureProfile
+      if(isPaymentSuccess){
+        await new Promise(function(r){setTimeout(r,2000);}); // wait for webhook
+        var fresh=await _sb.from('profiles').select('*').eq('id',session.user.id).single();
+        if(fresh.data){profile=fresh.data;if(currentUser){currentUser.profile=fresh.data;window.currentUser=currentUser;}}
+        _showToast('Trial started! Welcome to MyMilesAI.','#16a34a');
       }
-    } else {_authShowModal();}
-  }catch(e){_authHideModal();}
+      // 7. Subscription gate
+      if(profile&&_isSubscriptionActive(profile)){_hideSubscribeModal();}
+      else if(profile){_showSubscribeModal();}
+    } else {
+      // 8. Not logged in
+      _authShowModal();
+    }
+  }catch(e){console.warn('Auth boot error:',e);_authHideModal();}
 })();
 
 /* ===== Google Maps Init Callback ===== */
@@ -5576,9 +5569,13 @@ function restoreJSON(input){
 }
 
 function signOut(){
-  _showConfirm('Sign Out & Clear Data','This will permanently delete all your trips, settings, and profile data. This cannot be undone.','Sign Out & Clear All','var(--coral)',function(){
-    // Sign out from Supabase first
-    if(_sb){try{_sb.auth.signOut();}catch(e){}}
+  _showConfirm('Sign Out & Clear Data','This will permanently delete all your trips, settings, and profile data. This cannot be undone.','Sign Out & Clear All','var(--coral)',async function(){
+    // Gap 2 fix: remove this device session from Supabase
+    if(_sb&&currentUser&&currentUser.id){
+      try{await _sb.from('user_sessions').delete().eq('user_id',currentUser.id).eq('device_id',_deviceId);}catch(e){}
+    }
+    // Sign out from Supabase
+    if(_sb){try{await _sb.auth.signOut();}catch(e){}}
     currentUser=null;window.currentUser=null;
     try{
       localStorage.removeItem('mymilesai_trips');
@@ -5593,6 +5590,7 @@ function signOut(){
       localStorage.removeItem('mymilesai_autodetect');
       localStorage.removeItem('mymilesai_notif_settings');
       localStorage.removeItem('mymilesai_last_trip_end');
+      localStorage.removeItem('_mmai_device_id'); // Gap 2: de-register device
     }catch(e){}
     showToast(_i('wave'),'Signed out — data cleared');
     setTimeout(function(){location.reload();},1500);
