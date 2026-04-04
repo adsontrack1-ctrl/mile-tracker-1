@@ -615,7 +615,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="hero">
       <div class="hero-mesh"><div class="m1"></div><div class="m2"></div><div class="m3"></div></div><div class="hero-noise"></div>
       <div class="hero-content">
-        <div class="hero-top"><div class="hero-status" id="heroStatus"><span class="hero-dot"></span><span id="statusText">GPS Active</span></div><div class="hero-brand">MyMilesAI</div></div>
+        <div class="hero-top"><div class="hero-status" id="heroStatus" style="opacity:0;pointer-events:none"><span class="hero-dot"></span><span id="statusText">Monitoring</span></div><div class="hero-brand">MyMilesAI</div></div>
         <div class="speedo"><div class="speedo-wrap">
           <svg class="speedo-svg" viewBox="0 0 200 110"><defs><linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="40%" stop-color="#C084FC"/><stop offset="70%" stop-color="#FB7185"/><stop offset="100%" stop-color="#FCA5A5"/></linearGradient></defs>
             <line x1="25" y1="95" x2="25" y2="88" class="sp-tick"/><line x1="48" y1="65" x2="53" y2="70" class="sp-tick"/><line x1="80" y1="42" x2="82" y2="48" class="sp-tick"/><line x1="120" y1="42" x2="118" y2="48" class="sp-tick"/><line x1="152" y1="65" x2="147" y2="70" class="sp-tick"/><line x1="175" y1="95" x2="175" y2="88" class="sp-tick"/>
@@ -795,7 +795,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 84</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 85</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -3824,6 +3824,11 @@ function startAutoMonitoring(){
     // Signal native to keep continuous GPS alive during auto-monitoring
     if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
       window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'MONITORING'}));
+      // Also send after delay to ensure background task is running
+      setTimeout(function(){
+        if(window.ReactNativeWebView)
+          window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'MONITORING'}));
+      }, 2000);
     }
     return;
   }
@@ -3847,7 +3852,7 @@ function stopAutoMonitoring(){
   autoWatchId=null;
   if(!tracking){
     document.getElementById('heroStatus').classList.remove('mon');
-    document.getElementById('statusText').textContent='GPS Active';
+    document.getElementById('statusText').textContent='';document.getElementById('heroStatus').style.opacity='0';
   }
   updateAutoBtn();
 }
@@ -3936,10 +3941,10 @@ function onAutoPos(p){
     _detectCount++;
     if(_detectCount===1){
       _autoState='DETECTING';
-      document.getElementById('statusText').textContent='Detecting driving...';
+      document.getElementById('statusText').textContent='';document.getElementById('heroStatus').style.opacity='0';
     }
     if(_detectCount>=_detectRequired){
-      _autoState='RECORDING';
+      _autoState='RECORDING';document.getElementById('heroStatus').style.opacity='0.6';document.getElementById('statusText').textContent='';
       _detectCount=0;
       showToast(_i('car'),'Trip detected — recording automatically',3000);
       if(navigator.vibrate)try{navigator.vibrate([50,50,50]);}catch(e){}
@@ -4008,7 +4013,7 @@ function stopTracking(){
     setTimeout(function(){startAutoMonitoring();},2000);
   } else {
     document.getElementById('heroStatus').classList.remove('mon');
-    document.getElementById('statusText').textContent='GPS Active';
+    document.getElementById('statusText').textContent='';document.getElementById('heroStatus').style.opacity='0';
     updateAutoBtn();
   }
   // Reset milestone flags
