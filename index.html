@@ -738,7 +738,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
       <div class="sr"><div><h4>Appearance</h4><p>App theme</p></div><div style="display:flex;gap:8px"><button onclick="_setTheme('auto')" id="themeAuto" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--vi);background:var(--vi-s);font-size:13px;cursor:pointer;font-weight:700;color:var(--vi)">Auto</button><button onclick="_setTheme('light')" id="themeLight" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);font-size:13px;cursor:pointer">☀️ Light</button><button onclick="_setTheme('dark')" id="themeDark" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);font-size:13px;cursor:pointer">🌙 Dark</button></div></div>
-<div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
+<div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value,true);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="8" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
 
@@ -1480,7 +1480,7 @@ async function _openCustomerPortal(){
   try{
     var resp=await fetch('https://mymilesai-ai.harijasllc.workers.dev/customer-portal',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({userId:currentUser.id,email:currentUser.email,returnUrl:window.location.origin+window.location.pathname})
+      body:JSON.stringify({userId:currentUser.id,email:currentUser.email,returnUrl:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'})
     });
     var data=await resp.json();
     if(data.url){window.location.href=data.url;}
@@ -1541,6 +1541,8 @@ if(_sb){
       ensureProfile(session.user).then(function(profile){
         if(profile&&!_isSubscriptionActive(profile)){_showSubscribeModal();}
         else{_hideSubscribeModal();}
+        // Pull trips from Supabase on every login
+        setTimeout(function(){_pullTripsFromSupabase();},500);
       });
     } else if(event==='SIGNED_OUT'){
       currentUser=null;window.currentUser=null;
@@ -1714,10 +1716,11 @@ function _setTheme(t){
   else{if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');}
 }
 function _initTheme(){try{_setTheme(localStorage.getItem('mymilesai_theme')||'auto');}catch(e){}}
-function setLocale(c){
+function setLocale(c,userChosen){
   LOC=LOCALES[c]||LOCALES.US;
   var sel=document.getElementById('unitSel');
   if(sel)sel.value=c;
+  if(userChosen){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');s.localeSetByUser=true;localStorage.setItem('mymilesai_settings',JSON.stringify(s));}catch(e){}}
   applyLocale();
 }
 function applyLocale(){
@@ -5370,11 +5373,54 @@ function _decStore(key){
 }
 
 function saveTripsToStorage(){
-  
   try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
   // Debounce cloud sync — wait 2s after last change
   if(_syncTimer)clearTimeout(_syncTimer);
-  _syncTimer=setTimeout(function(){_pushToCloud();},2000);
+  _syncTimer=setTimeout(function(){_pushToCloud();_pushTripsToSupabase();},2000);
+}
+
+async function _pushTripsToSupabase(){
+  if(!_sb||!currentUser||!TRIPS.length)return;
+  try{
+    var rows=TRIPS.map(function(t){return{
+      id:t.id,user_id:currentUser.id,
+      from_addr:t.from||'',to_addr:t.to||'',
+      mi:t.mi||0,type:t.type||'uncl',ded:!!t.ded,
+      date:t.date||'',day:t.day||'',ts:t.ts||0,
+      purpose:t.purpose||'',notes:t.notes||'',
+      updated_at:new Date().toISOString()
+    };});
+    var result=await _sb.from('trips').upsert(rows,{onConflict:'id,user_id',ignoreDuplicates:false});
+    if(result.error)throw result.error;
+    _showSyncStatus('Synced to cloud ✓',true);
+  }catch(e){console.warn('Supabase trip push failed:',e.message);_showSyncStatus('Sync failed — saved locally',false);}
+}
+
+async function _pullTripsFromSupabase(){
+  if(!_sb||!currentUser)return;
+  try{
+    _showSyncStatus('Syncing...',true);
+    var result=await _sb.from('trips').select('*').eq('user_id',currentUser.id).order('ts',{ascending:false});
+    if(result.error)throw result.error;
+    if(!result.data||!result.data.length){_showSyncStatus('No cloud trips found',false);return;}
+    var cloudTrips=result.data.map(function(r){return{
+      id:r.id,from:r.from_addr,to:r.to_addr,
+      mi:r.mi,type:r.type,ded:r.ded,
+      date:r.date,day:r.day,ts:r.ts,
+      purpose:r.purpose,notes:r.notes
+    };});
+    var merged=_mergeTrips(TRIPS,cloudTrips);
+    TRIPS.length=0;
+    merged.forEach(function(t){
+      if(!t.purpose)t.purpose='';
+      if(!t.notes)t.notes='';
+      TRIPS.push(t);
+    });
+    TRIPS.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
+    try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
+    renderTrips();renderAlerts();recalcStats();
+    _showSyncStatus('Synced from cloud ✓',true);
+  }catch(e){console.warn('Supabase trip pull failed:',e.message);_showSyncStatus('Offline — using local data',false);}
 }
 
 function _pushToCloud(){
@@ -5585,7 +5631,8 @@ function loadSettings(){
       if(s.threshold)document.getElementById('threshVal').value=s.threshold;
       if(s.defaultCat)document.getElementById('defaultCatSel').value=s.defaultCat;
       // Restore locale FIRST, then rate (rate overrides locale default)
-      if(s.locale)setLocale(s.locale);
+      // Only restore saved locale if user explicitly chose it (not just auto-detected default)
+      if(s.locale&&s.localeSetByUser)setLocale(s.locale);
       if(s.rate){document.getElementById('rateVal').value=s.rate;LOC.rate=s.rate;}
       if(s.pauseTimeout){
         document.getElementById('pauseTimeoutSel').value=s.pauseTimeout;
