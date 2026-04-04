@@ -723,7 +723,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="tax"><div class="tax-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> <span id="taxLabel">IRS 2026 Rate</span></div><div class="tax-amt" id="taxAmt">$0</div><div class="tax-det" id="taxDet">—</div><div class="tax-split"><div class="tax-seg b"></div><div class="tax-seg p"></div></div><div class="tax-legend"><span><span class="tax-lg-dot" style="background:var(--vi)"></span>Business 0%</span><span><span class="tax-lg-dot" style="background:var(--mag)"></span>Personal 0%</span></div></div>
     <div class="sh"><span class="sh-t">Export Reports</span></div>
-    <div class="exp-r"><button class="exp" onclick="exportCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> CSV</button><button class="exp" onclick="exportPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> PDF</button><button class="exp ac" onclick="exportEmail()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button></div>
+    <div class="exp-r"><button class="exp" onclick="exportCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> CSV</button><button class="exp ac" onclick="exportAll()" style="background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border-color:transparent;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> All</button><button class="exp" onclick="exportPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> PDF</button><button class="exp ac" onclick="exportEmail()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button></div>
     <div style="height:16px"></div>
     <div class="sh" id="settingsSection"><span class="sh-t">Settings</span></div>
     <div class="profile-card" onclick="editProfileName()">
@@ -2668,8 +2668,19 @@ function exportCSV(){
   rows.push(['Total '+unit,totalMiles.toFixed(1)]);
   rows.push(['Total Deduction',LOC.currency+totalDed.toFixed(2)]);
   rows.push([]);
+  // Add odometer log if available
+  try{
+    var odo=JSON.parse(localStorage.getItem('mymilesai_odometer')||'{}');
+    if(odo.start&&odo.current){
+      rows.push([]);
+      rows.push(['ODOMETER LOG (IRS Publication 463 compliant)']);
+      rows.push(['Start of Year Reading',odo.start+' '+LOC.unit]);
+      rows.push(['Current Reading',odo.current+' '+LOC.unit]);
+      rows.push(['Total Driven',Math.max(0,odo.current-odo.start)+' '+LOC.unit]);
+    }
+  }catch(e){}
   rows.push(['Disclaimer: This log is maintained in accordance with IRS Publication 463. Consult a tax professional for advice.']);
-  rows.push(['Generated','MyMilesAI v4.2 — '+new Date().toLocaleDateString()]);
+  rows.push(['Generated','MyMilesAI v5.6 — '+new Date().toLocaleDateString()]);
 
   var csv=rows.map(function(r){return r.join(',');}).join('\n');
   var filename='MyMilesAI_Mileage_Log_'+yr+'_'+new Date().toISOString().slice(0,10)+'.csv';
@@ -4051,6 +4062,14 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   else if(isWorkHours())type='biz';
   TRIPS.unshift({id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath()});
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
+  // Update frequent location memory from GPS coordinates so Named Places populate automatically
+  if(_lastGoodPos){
+    _updateFreqLoc(_lastGoodPos.lat,_lastGoodPos.lng,toAddr);
+  }
+  if(positions&&positions.length>0){
+    var _startPos=positions[0];
+    _updateFreqLoc(_startPos.lat,_startPos.lng,fromAddr);
+  }
   renderTrips();renderAlerts();saveTripsToStorage();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
   recordTripEnd();
@@ -5782,6 +5801,28 @@ function getDefaultCat(){
   try{return document.getElementById('defaultCatSel').value||'uncl';}catch(e){return 'uncl';}
 }
 
+function exportAll(){
+  showToast(_i('box'),'Preparing full export...');
+  try{
+    var yr=new Date().getFullYear();
+    var backup={version:'5.6',exported:new Date().toISOString(),taxYear:yr,locale:LOC,trips:TRIPS,settings:{},odometer:{},workhours:_workHours,freqRoutes:_freqRoutes,freqLocations:_freqLocs,notifSettings:_notifSettings};
+    try{backup.settings=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');}catch(e){}
+    try{backup.odometer=JSON.parse(localStorage.getItem('mymilesai_odometer')||'{}');}catch(e){}
+    try{backup.name=localStorage.getItem('mymilesai_name')||'';}catch(e){}
+    var unit=LOC.label;
+    var rows=[['MyMilesAI Mileage Log - Tax Year '+yr]];
+    rows.push([LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit]);
+    rows.push([]);
+    rows.push(['Date','From','To','Distance ('+unit+')','Category','Purpose','Deduction ('+LOC.currency+')']);
+    for(var i=0;i<TRIPS.length;i++){var t=TRIPS[i];var d=tripDist(t.mi);var ded=_tripDeduction(t).toFixed(2);rows.push([t.date||t.day,'"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,CAT_LABELS[t.type]||t.type,'"'+_csvCell(t.purpose||'')+'"',LOC.currency+ded]);}
+    var csv=rows.map(function(r){return r.join(',');}).join('\n');
+    var csvFilename='MyMilesAI_Mileage_'+yr+'_'+new Date().toISOString().slice(0,10)+'.csv';
+    var jsonFilename='MyMilesAI_Backup_'+new Date().toISOString().slice(0,10)+'.json';
+    _shareOrDownload(csv,csvFilename,'text/csv;charset=utf-8;');
+    setTimeout(function(){_shareOrDownload(JSON.stringify(backup,null,2),jsonFilename,'application/json');},1500);
+    openInfoModal('Full Export Ready','Your complete mileage data has been exported.<br><br><b>'+TRIPS.length+' trips exported</b>');
+  }catch(e){showToast(_i('warn'),'Export failed: '+e.message,'#EF4444');}
+}
 function exportJSON(){
   var backup={
     version:'4.0',
