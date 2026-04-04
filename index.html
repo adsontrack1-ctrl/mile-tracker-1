@@ -734,6 +734,9 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       </div>
       <span class="profile-arrow">›</span>
     </div>
+    <div class="set-hdr">My Vehicles</div>
+    <div class="set" id="vehiclesList"></div>
+    <button onclick="_openAddVehicle()" style="margin:0 0 16px 0;width:100%;padding:12px;border-radius:12px;background:var(--vi-s);color:var(--vi);font-weight:700;font-size:14px;border:1.5px dashed var(--vi);cursor:pointer;">+ Add Vehicle</button>
     <div class="set-hdr">Tracking</div>
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
@@ -935,6 +938,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
     <label class="add-label">Category</label>
     <div class="add-cat-row">
+      <div style="margin-bottom:10px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px;">Vehicle</label><select class="sr-sel" id="addVehicleSel" style="width:100%;padding:10px 12px;border:1.5px solid var(--ink6);border-radius:var(--r);font-size:14px;"></select></div>
       <div class="add-cat biz-active" id="addCatBiz" onclick="setAddCat('biz')">
         <div class="add-cat-icon" style="display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
         <div class="add-cat-name">Business</div>
@@ -1950,7 +1954,9 @@ function tripCard(t,wide){
   const safePurpose=_esc(t.purpose);
   const pathStartY=safePath.match(/M\d+,(\d+)/)?safePath.match(/M\d+,(\d+)/)[1]:'45';
   const pathEndXY=safePath.match(/(\d+)$/)?safePath.match(/(\d+)$/)[1]:'45';
-  const purposeTag=safePurpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${safePurpose}</span>`:'';
+  const purposeTag=safePurpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${safePurpose}</span>`:"";
+  const vehName=_getVehicleName(t.vehicleId);
+  const vehTag=vehName?`<span style="font-size:10px;font-weight:600;color:var(--ink3);background:var(--ink7);padding:2px 8px;border-radius:var(--rpill);margin-left:4px">${_esc(vehName)}</span>`:"";
   var _mapDiv='<div class="trip-map"><div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+(wide?340:290)+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>';
   // Business trips: show $ saved as big number, distance as sub-label
   // Personal/unclassified: show distance as big number (no deduction)
@@ -1958,7 +1964,7 @@ function tripCard(t,wide){
   const bigVal=t.ded?LOC.currency+dedAmt.toFixed(2):d;
   const bigUnit=t.ded?'saved':LOC.label;
   const subDist=t.ded?`<div class="trip-mi-sub">${d} ${LOC.label}</div>`:'';
-  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${purposeTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip">📤 Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${vehTag}${purposeTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip">📤 Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -2647,12 +2653,13 @@ function exportCSV(){
   rows.push(['MyMilesAI Mileage Log - Tax Year '+yr]);
   rows.push([LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' (Business) | '+LOC.currency+(LOC.rates.med||0).toFixed(2)+'/'+LOC.unit+' (Medical) | '+LOC.currency+(LOC.rates.char||0).toFixed(2)+'/'+LOC.unit+' (Charity)']);
   rows.push([]);
-  rows.push(['Date','Start Time','From Address','To Address','Distance ('+unit+')','Category','Business Purpose','Notes','Tax Deductible','Deduction ('+LOC.currency+')']);
+  rows.push(['Date','Start Time','Vehicle','From Address','To Address','Distance ('+unit+')','Category','Business Purpose','Notes','Tax Deductible','Deduction ('+LOC.currency+')']);
   for(var i=0;i<TRIPS.length;i++){
     var t=TRIPS[i];
     var d=tripDist(t.mi);
     var ded=_tripDeduction(t).toFixed(2);
-    rows.push([t.date||t.day,t.startTime||t.time,'"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,CAT_LABELS[t.type]||t.type,'"'+_csvCell(t.purpose||'')+'"','"'+_csvCell(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
+    var _vname=_getVehicleName(t.vehicleId);
+    rows.push([t.date||t.day,t.startTime||t.time,'"'+_csvCell(_vname)+'"','"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,CAT_LABELS[t.type]||t.type,'"'+_csvCell(t.purpose||'')+'"','"'+_csvCell(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
   }
   // Category breakdown summary
   var cats=_tripSummaryByCategory();
@@ -4060,7 +4067,8 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   var freq=getFreqRouteType(fromAddr,toAddr);
   if(freq)type=freq;
   else if(isWorkHours())type='biz';
-  TRIPS.unshift({id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath()});
+  var _gpsVehId=_getDefaultVehicleId();
+  TRIPS.unshift({id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId});
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   // Update frequent location memory from GPS coordinates so Named Places populate automatically
   if(_lastGoodPos){
@@ -4907,7 +4915,8 @@ function _doSaveManual(){
   var startT=document.getElementById('addStartTime').value||'';
   var endT=document.getElementById('addEndTime').value||'';
   var timeLabel=startT?(startT+(endT?' – '+endT:'')):'Just now';
-  TRIPS.unshift({id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:!!CAT_DEDUCTIBLE[autoType],purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT});
+  var _manVehId=document.getElementById('addVehicleSel')?document.getElementById('addVehicleSel').value||_getDefaultVehicleId():_getDefaultVehicleId();
+  TRIPS.unshift({id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:!!CAT_DEDUCTIBLE[autoType],purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT,vehicleId:_manVehId});
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
   renderAlerts();
