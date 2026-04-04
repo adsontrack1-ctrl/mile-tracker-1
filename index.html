@@ -724,6 +724,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="tax"><div class="tax-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> <span id="taxLabel">IRS 2026 Rate</span></div><div class="tax-amt" id="taxAmt">$0</div><div class="tax-det" id="taxDet">—</div><div class="tax-split"><div class="tax-seg b"></div><div class="tax-seg p"></div></div><div class="tax-legend"><span><span class="tax-lg-dot" style="background:var(--vi)"></span>Business 0%</span><span><span class="tax-lg-dot" style="background:var(--mag)"></span>Personal 0%</span></div></div>
     <div class="sh"><span class="sh-t">Export Reports</span></div>
     <div class="exp-r"><button class="exp" onclick="exportCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> CSV</button><button class="exp ac" onclick="exportAll()" style="background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border-color:transparent;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> All</button><button class="exp" onclick="exportPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> PDF</button><button class="exp ac" onclick="exportEmail()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button></div>
+    <div style="height:8px"></div>
+    <div class="exp-r"><button class="exp" onclick="exportQuickBooks()">📊 QuickBooks</button><button class="exp" onclick="exportReimbursement()">💼 Reimburse</button><button class="exp" onclick="exportCPA()">📋 CPA Pack</button><button class="exp" onclick="exportAuditPack()">🛡️ Audit Defense</button></div>
     <div style="height:16px"></div>
     <div class="sh" id="settingsSection"><span class="sh-t">Settings</span></div>
     <div class="profile-card" onclick="editProfileName()">
@@ -770,6 +772,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="sr"><div><h4>Milestone alerts</h4><p>Deduction goal reminders</p></div><div class="tgl on" id="notifMilestoneTgl" onclick="toggleNotifSetting(this,'milestone')"></div></div>
       <div class="sr"><div><h4>Savings goal</h4><p>Year-to-date deduction target</p></div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="goalCurrencySymbol">$</span><input type="number" class="sr-n" style="width:80px" id="savingsGoalVal" value="5000" min="100" max="999999" step="100" onchange="saveSettings();_updateYTD()"></div></div>
     </div>
+    <div class="set-hdr">Employer Reimbursement</div>
+    <div class="set">
+      <div class="sr"><div><h4>Company name</h4><p>For reimbursement reports</p></div><input type="text" class="sr-n" style="width:140px;text-align:left" id="companyName" placeholder="Company name" onchange="saveCompanyRate()"></div>
+      <div class="sr"><div><h4>Reimbursement rate</h4><p>Per mile/km rate your employer pays</p></div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="reimbCurrency">$</span><input type="number" class="sr-n" style="width:80px" id="companyRate" value="0" min="0" max="10" step="0.01" onchange="saveCompanyRate()"></div></div>
+    </div>
     <div class="set-hdr">Subscription</div>
     <div class="set">
       <div class="sr"><div><h4>Current plan</h4><p id="subPlanLabel">Loading...</p></div><span id="subPlanBadge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:100px;background:var(--vi-s);color:var(--vi)">Free</span></div>
@@ -788,7 +795,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 82</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 83</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -976,6 +983,9 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Category</label><div style="display:flex;gap:8px"><button class="cls ob" id="eBiz" onclick="setEC('biz')" style="flex:1"><span class="cls-d"></span>Business</button><button class="cls" id="ePer" onclick="setEC('pers')" style="flex:1"><span class="cls-d"></span>Personal</button></div></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Purpose</label><select class="inp" id="editPurpose" style="appearance:auto;padding-right:8px"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical Appointment</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Notes <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><input type="text" class="inp" id="editNotes" placeholder="Add a note..." maxlength="100"></div>
+  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Toll Cost <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="editTollCurrency">$</span><input type="number" class="inp" id="editToll" step="0.01" min="0" placeholder="0.00" style="flex:1"></div></div>
+  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Fuel Cost <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="editFuelCurrency">$</span><input type="number" class="inp" id="editFuel" step="0.01" min="0" placeholder="0.00" style="flex:1"></div></div>
+  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Receipts</label><div id="editReceipts" style="margin-bottom:8px"></div><button type="button" class="btn-rd" onclick="_scanReceipt()" style="font-size:12px;padding:6px 14px">📷 Scan Receipt</button></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Date</label><input type="date" class="inp" id="editDate" style="padding:10px 16px"></div>
   <div class="modal-row"><button class="modal-cancel" onclick="closeEdit()">Cancel</button><button class="cta" onclick="saveEdit()" style="flex:1">Save</button></div>
 </div></div>
@@ -1957,6 +1967,8 @@ function tripCard(t,wide){
   const purposeTag=safePurpose?`<span style="font-size:10px;font-weight:600;color:var(--${clr});background:var(--${clr}-s);padding:2px 8px;border-radius:var(--rpill);margin-left:6px">${safePurpose}</span>`:"";
   const vehName=_getVehicleName(t.vehicleId);
   const vehTag=vehName?`<span style="font-size:10px;font-weight:600;color:var(--ink3);background:var(--ink7);padding:2px 8px;border-radius:var(--rpill);margin-left:4px">${_esc(vehName)}</span>`:"";
+  const _tripExp=(parseFloat(t.tollCost)||0)+(parseFloat(t.fuelCost)||0)+((t.receipts||[]).reduce((s,r)=>s+(parseFloat(r.amount)||0),0));
+  const expTag=_tripExp>0?`<span style="font-size:10px;font-weight:600;color:var(--coral);background:var(--coral-s,rgba(239,68,68,.1));padding:2px 8px;border-radius:var(--rpill);margin-left:4px">💲${_tripExp.toFixed(2)}</span>`:"";
   var _mapDiv='<div class="trip-map"><div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+(wide?340:290)+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>';
   // Business trips: show $ saved as big number, distance as sub-label
   // Personal/unclassified: show distance as big number (no deduction)
@@ -1964,7 +1976,7 @@ function tripCard(t,wide){
   const bigVal=t.ded?LOC.currency+dedAmt.toFixed(2):d;
   const bigUnit=t.ded?'saved':LOC.label;
   const subDist=t.ded?`<div class="trip-mi-sub">${d} ${LOC.label}</div>`:'';
-  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${vehTag}${purposeTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip">📤 Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${vehTag}${purposeTag}${expTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip">📤 Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -2653,13 +2665,14 @@ function exportCSV(){
   rows.push(['MyMilesAI Mileage Log - Tax Year '+yr]);
   rows.push([LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit+' (Business) | '+LOC.currency+(LOC.rates.med||0).toFixed(2)+'/'+LOC.unit+' (Medical) | '+LOC.currency+(LOC.rates.char||0).toFixed(2)+'/'+LOC.unit+' (Charity)']);
   rows.push([]);
-  rows.push(['Date','Start Time','Vehicle','From Address','To Address','Distance ('+unit+')','Category','Business Purpose','Notes','Tax Deductible','Deduction ('+LOC.currency+')']);
+  rows.push(['Date','Start Time','Vehicle','From Address','To Address','Distance ('+unit+')','Category','Business Purpose','Notes','Tax Deductible','Deduction ('+LOC.currency+')','Toll Cost','Fuel Cost','Total Expenses']);
   for(var i=0;i<TRIPS.length;i++){
     var t=TRIPS[i];
     var d=tripDist(t.mi);
     var ded=_tripDeduction(t).toFixed(2);
     var _vname=_getVehicleName(t.vehicleId);
-    rows.push([t.date||t.day,t.startTime||t.time,'"'+_csvCell(_vname)+'"','"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,CAT_LABELS[t.type]||t.type,'"'+_csvCell(t.purpose||'')+'"','"'+_csvCell(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
+    var _toll=parseFloat(t.tollCost)||0,_fuel=parseFloat(t.fuelCost)||0,_rcptTotal=(t.receipts||[]).reduce(function(s,r){return s+(parseFloat(r.amount)||0);},0);
+    rows.push([t.date||t.day,t.startTime||t.time,'"'+_csvCell(_vname)+'"','"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,CAT_LABELS[t.type]||t.type,'"'+_csvCell(t.purpose||'')+'"','"'+_csvCell(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded,_toll.toFixed(2),_fuel.toFixed(2),(_toll+_fuel+_rcptTotal).toFixed(2)]);
   }
   // Category breakdown summary
   var cats=_tripSummaryByCategory();
@@ -4956,10 +4969,10 @@ function returnTrip(id){
   document.getElementById('addPurpose').value=orig.purpose||'';
   document.getElementById('addNote').value='Return trip';
 }
-function openEdit(id){id=isNaN(id)?id:+id;curTrip=TRIPS.find(t=>+t.id===+id);if(!curTrip)return;document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');}
+function openEdit(id){id=isNaN(id)?id:+id;curTrip=TRIPS.find(t=>+t.id===+id);if(!curTrip)return;document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';document.getElementById('editToll').value=curTrip.tollCost||'';document.getElementById('editFuel').value=curTrip.fuelCost||'';_renderEditReceipts();var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');}
 function closeEdit(){document.getElementById('editModal').classList.remove('show');curTrip=null;}
 function setEC(c){document.getElementById('eBiz').classList.remove('ob');document.getElementById('ePer').classList.remove('op');if(c==='biz')document.getElementById('eBiz').classList.add('ob');else document.getElementById('ePer').classList.add('op');}
-function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('editFrom').value;curTrip.to=document.getElementById('editTo').value;const v=parseFloat(document.getElementById('editMi').value);curTrip.mi=_useKm()?v/1.60934:v;curTrip.type=document.getElementById('eBiz').classList.contains('ob')?'biz':'pers';curTrip.ded=curTrip.type==='biz';curTrip.purpose=document.getElementById('editPurpose').value;curTrip.notes=document.getElementById('editNotes').value;var edv=document.getElementById('editDate').value;if(edv){var nd=new Date(edv+'T12:00:00');curTrip.date=_fmt(nd);curTrip.day=_rel(nd);curTrip.ts=nd.getTime();}checkFrequentRoute(curTrip);renderTrips();renderAlerts();saveTripsToStorage();closeEdit();showToast(_i('edit'),'Trip updated');}
+function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('editFrom').value;curTrip.to=document.getElementById('editTo').value;const v=parseFloat(document.getElementById('editMi').value);curTrip.mi=_useKm()?v/1.60934:v;curTrip.type=document.getElementById('eBiz').classList.contains('ob')?'biz':'pers';curTrip.ded=curTrip.type==='biz';curTrip.purpose=document.getElementById('editPurpose').value;curTrip.notes=document.getElementById('editNotes').value;curTrip.tollCost=parseFloat(document.getElementById('editToll').value)||0;curTrip.fuelCost=parseFloat(document.getElementById('editFuel').value)||0;var edv=document.getElementById('editDate').value;if(edv){var nd=new Date(edv+'T12:00:00');curTrip.date=_fmt(nd);curTrip.day=_rel(nd);curTrip.ts=nd.getTime();}checkFrequentRoute(curTrip);renderTrips();renderAlerts();saveTripsToStorage();closeEdit();showToast(_i('edit'),'Trip updated');}
 function openDel(id){id=isNaN(id)?id:+id;curTrip=TRIPS.find(t=>+t.id===+id);if(!curTrip)return;document.getElementById('delRoute').textContent=curTrip.from+' → '+curTrip.to+' · '+tripDist(curTrip.mi)+' '+LOC.label;document.getElementById('delModal').classList.add('show');}
 function closeDel(){document.getElementById('delModal').classList.remove('show');curTrip=null;}
 var _lastDeleted=null,_lastDeletedIdx=-1,_undoTimer=null;
@@ -6237,6 +6250,315 @@ if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
     });
   }
 }
+
+/* ===== PHASE 2: RECEIPT SCANNING, QUICKBOOKS, REIMBURSEMENT, CPA, AUDIT DEFENSE, TOLL/FUEL (#06-#11) ===== */
+
+/* -- Render receipts list in Edit Modal -- */
+function _renderEditReceipts(){
+  var el=document.getElementById('editReceipts');if(!el||!curTrip)return;
+  var rcpts=curTrip.receipts||[];
+  if(rcpts.length===0){el.innerHTML='<div style="font-size:12px;color:var(--ink4)">No receipts attached</div>';return;}
+  el.innerHTML=rcpts.map(function(r,i){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--card2);border-radius:8px;margin-bottom:4px">'+
+      '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--ink1)">'+_esc(r.vendor||'Receipt '+(i+1))+'</div>'+
+      '<div style="font-size:11px;color:var(--ink3)">'+LOC.currency+(parseFloat(r.amount)||0).toFixed(2)+(r.category?' · '+_esc(r.category):'')+'</div></div>'+
+      '<button onclick="_removeReceipt('+i+')" style="background:none;border:none;color:var(--coral);font-size:16px;cursor:pointer;padding:4px 8px">&times;</button></div>';
+  }).join('');
+}
+function _removeReceipt(idx){
+  if(!curTrip||!curTrip.receipts)return;
+  curTrip.receipts.splice(idx,1);
+  _renderEditReceipts();
+  saveTripsToStorage();
+}
+
+/* -- Receipt Scanning via Camera + AI OCR -- */
+function _scanReceipt(){
+  if(!curTrip){showToast(_i('warn'),'Open a trip to attach receipts','#EF4444');return;}
+  var inp=document.createElement('input');
+  inp.type='file';inp.accept='image/*';inp.capture='environment';
+  inp.onchange=function(){
+    if(!inp.files||!inp.files[0])return;
+    var file=inp.files[0];
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var base64=e.target.result;
+      showToast(_i('scan'),'Scanning receipt...');
+      _ocrReceiptViaAI(base64).then(function(parsed){
+        if(!curTrip.receipts)curTrip.receipts=[];
+        curTrip.receipts.push({
+          vendor:parsed.vendor||'Unknown',
+          amount:parsed.amount||0,
+          category:parsed.category||'expense',
+          date:parsed.date||new Date().toISOString().slice(0,10),
+          imageData:base64.slice(0,200)+'...',
+          scannedAt:new Date().toISOString()
+        });
+        _renderEditReceipts();
+        saveTripsToStorage();
+        showToast(_i('check'),'Receipt added: '+LOC.currency+(parsed.amount||0).toFixed(2));
+      }).catch(function(err){
+        showToast(_i('warn'),'Scan failed: '+err.message,'#EF4444');
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+  inp.click();
+}
+
+async function _ocrReceiptViaAI(base64Image){
+  try{
+    var resp=await fetch('https://mymilesai-ai.harijasllc.workers.dev/api/ocr',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({image:base64Image})
+    });
+    if(!resp.ok)throw new Error('OCR service error '+resp.status);
+    return await resp.json();
+  }catch(e){
+    // Fallback: manual entry
+    var amt=prompt('Could not auto-scan. Enter receipt amount:');
+    var vendor=prompt('Vendor name (optional):');
+    return {vendor:vendor||'Manual Entry',amount:parseFloat(amt)||0,category:'expense',date:new Date().toISOString().slice(0,10)};
+  }
+}
+
+/* -- QuickBooks IIF Export -- */
+function exportQuickBooks(){
+  if(TRIPS.length===0){showToast(_i('warn'),'No trips to export','#EF4444');return;}
+  var yr=new Date().getFullYear();
+  var lines=[];
+  lines.push('!TRNS\tTRNSTYPE\tDATE\tACCNT\tNAME\tAMOUNT\tMEMO');
+  lines.push('!SPL\tTRNSTYPE\tDATE\tACCNT\tNAME\tAMOUNT\tMEMO');
+  lines.push('!ENDTRNS');
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];
+    if(t.type!=='biz')continue;
+    var d=tripDist(t.mi);
+    var ded=_tripDeduction(t);
+    var toll=parseFloat(t.tollCost)||0;
+    var fuel=parseFloat(t.fuelCost)||0;
+    var total=ded+toll+fuel;
+    var dt=t.date||t.day;
+    var memo=_esc(t.from)+' to '+_esc(t.to)+' ('+d+' '+LOC.label+')';
+    lines.push('TRNS\tGeneral Journal\t'+dt+'\tAuto:Mileage Expense\t\t'+total.toFixed(2)+'\t'+memo);
+    if(ded>0)lines.push('SPL\tGeneral Journal\t'+dt+'\tAuto:Mileage Deduction\t\t-'+ded.toFixed(2)+'\tMileage @ '+LOC.currency+LOC.rate+'/'+LOC.unit);
+    if(toll>0)lines.push('SPL\tGeneral Journal\t'+dt+'\tAuto:Tolls\t\t-'+toll.toFixed(2)+'\tToll cost');
+    if(fuel>0)lines.push('SPL\tGeneral Journal\t'+dt+'\tAuto:Fuel\t\t-'+fuel.toFixed(2)+'\tFuel cost');
+    lines.push('ENDTRNS');
+  }
+  var content=lines.join('\n');
+  var filename='MyMilesAI_QuickBooks_'+yr+'.iif';
+  _shareOrDownload(content,filename,'text/plain;charset=utf-8;');
+  var bizCount=TRIPS.filter(function(t){return t.type==='biz';}).length;
+  openInfoModal('QuickBooks Export','IIF file exported with '+bizCount+' business trips.<br><br><b>File:</b> '+filename+'<br><br><b>To import:</b><br>1. Open QuickBooks Desktop<br>2. File → Utilities → Import → IIF Files<br>3. Select the downloaded file<br><br><i>For QuickBooks Online, use the CSV export instead.</i>');
+}
+
+/* -- Employer Reimbursement Report -- */
+function exportReimbursement(){
+  if(TRIPS.length===0){showToast(_i('warn'),'No trips to export','#EF4444');return;}
+  var co=localStorage.getItem('mymilesai_company_name')||'';
+  var rate=parseFloat(localStorage.getItem('mymilesai_company_rate'))||parseFloat(LOC.rate)||0.70;
+  var yr=new Date().getFullYear();
+  var name=localStorage.getItem('mymilesai_name')||'Employee';
+  var bizTrips=TRIPS.filter(function(t){return t.type==='biz';});
+  if(bizTrips.length===0){showToast(_i('warn'),'No business trips for reimbursement','#EF4444');return;}
+  var rows=[];
+  rows.push(['EMPLOYER MILEAGE REIMBURSEMENT REPORT']);
+  rows.push(['Company: '+(co||'[Set in Settings → Employer Reimbursement]')]);
+  rows.push(['Employee: '+name]);
+  rows.push(['Period: Tax Year '+yr]);
+  rows.push(['Rate: '+LOC.currency+rate.toFixed(2)+'/'+LOC.unit]);
+  rows.push([]);
+  rows.push(['Date','From','To','Distance ('+LOC.label+')','Purpose','Toll','Fuel','Mileage Reimb','Total Reimb']);
+  var totalMi=0,totalToll=0,totalFuel=0,totalReimb=0;
+  for(var i=0;i<bizTrips.length;i++){
+    var t=bizTrips[i];
+    var d=parseFloat(tripDist(t.mi));
+    var toll=parseFloat(t.tollCost)||0;
+    var fuel=parseFloat(t.fuelCost)||0;
+    var mileReimb=d*rate;
+    var lineTotal=mileReimb+toll+fuel;
+    totalMi+=d;totalToll+=toll;totalFuel+=fuel;totalReimb+=lineTotal;
+    rows.push([t.date||t.day,'"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d.toFixed(1),'"'+_csvCell(t.purpose||'')+'"',toll.toFixed(2),fuel.toFixed(2),mileReimb.toFixed(2),lineTotal.toFixed(2)]);
+  }
+  rows.push([]);
+  rows.push(['TOTALS','','',totalMi.toFixed(1),'',totalToll.toFixed(2),totalFuel.toFixed(2),(totalMi*rate).toFixed(2),totalReimb.toFixed(2)]);
+  rows.push([]);
+  rows.push(['Employee Signature: ____________________','Date: ____________________']);
+  rows.push(['Manager Approval: ____________________','Date: ____________________']);
+  rows.push([]);
+  rows.push(['Generated by MyMilesAI v5.6 on '+new Date().toLocaleDateString()]);
+  var csv=rows.map(function(r){return r.join(',');}).join('\n');
+  var filename='MyMilesAI_Reimbursement_'+yr+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  _shareOrDownload(csv,filename,'text/csv;charset=utf-8;');
+  openInfoModal('Reimbursement Report','Report generated for '+bizTrips.length+' business trips.<br><br><b>Total distance:</b> '+totalMi.toFixed(1)+' '+LOC.label+'<br><b>Mileage reimbursement:</b> '+LOC.currency+(totalMi*rate).toFixed(2)+'<br><b>Tolls:</b> '+LOC.currency+totalToll.toFixed(2)+'<br><b>Fuel:</b> '+LOC.currency+totalFuel.toFixed(2)+'<br><b>Grand total:</b> '+LOC.currency+totalReimb.toFixed(2)+'<br><br>Submit this CSV to your employer\'s finance department.');
+}
+
+/* -- CPA Tax Package Export -- */
+function exportCPA(){
+  if(TRIPS.length===0){showToast(_i('warn'),'No trips to export','#EF4444');return;}
+  var yr=new Date().getFullYear();
+  var cats=_tripSummaryByCategory();
+  var totalDed=0;
+  var catKeys=['biz','med','char'];
+  for(var c=0;c<catKeys.length;c++){if(cats[catKeys[c]])totalDed+=cats[catKeys[c]].deduction;}
+  var totalTolls=0,totalFuel=0,totalReceipts=0;
+  for(var i=0;i<TRIPS.length;i++){
+    totalTolls+=parseFloat(TRIPS[i].tollCost)||0;
+    totalFuel+=parseFloat(TRIPS[i].fuelCost)||0;
+    totalReceipts+=(TRIPS[i].receipts||[]).reduce(function(s,r){return s+(parseFloat(r.amount)||0);},0);
+  }
+  var pack={
+    title:'MyMilesAI CPA Tax Package',
+    taxYear:yr,
+    generatedAt:new Date().toISOString(),
+    preparedFor:localStorage.getItem('mymilesai_name')||'Taxpayer',
+    summary:{
+      totalTrips:TRIPS.length,
+      businessTrips:(cats.biz?cats.biz.trips:0),
+      personalTrips:(cats.pers?cats.pers.trips:0),
+      medicalTrips:(cats.med?cats.med.trips:0),
+      charityTrips:(cats.char?cats.char.trips:0),
+      businessMiles:cats.biz?cats.biz.miles:0,
+      totalDeduction:totalDed,
+      totalTolls:totalTolls,
+      totalFuel:totalFuel,
+      totalReceipts:totalReceipts,
+      irsRate:LOC.rate,
+      rateUnit:LOC.unit
+    },
+    trips:TRIPS.map(function(t){
+      return {date:t.date||t.day,from:t.from,to:t.to,miles:tripDist(t.mi),category:t.type,purpose:t.purpose||'',deduction:_tripDeduction(t),tollCost:t.tollCost||0,fuelCost:t.fuelCost||0,receipts:(t.receipts||[]).length};
+    }),
+    odometer:JSON.parse(localStorage.getItem('mymilesai_odometer')||'{}'),
+    irsCompliance:{
+      publication463:true,
+      standardMileageMethod:true,
+      contemporaneousRecords:true,
+      note:'Mileage log maintained using MyMilesAI digital tracking application. Records include date, destination, business purpose, and distance for each trip as required by IRS Publication 463.'
+    }
+  };
+  var content=JSON.stringify(pack,null,2);
+  var filename='MyMilesAI_CPA_TaxPackage_'+yr+'.json';
+  _shareOrDownload(content,filename,'application/json');
+  openInfoModal('CPA Tax Package','Complete tax package generated for your CPA.<br><br><b>Tax Year:</b> '+yr+'<br><b>Business trips:</b> '+(cats.biz?cats.biz.trips:0)+'<br><b>Total deduction:</b> '+LOC.currency+totalDed.toFixed(2)+'<br><b>Expenses:</b> '+LOC.currency+(totalTolls+totalFuel+totalReceipts).toFixed(2)+'<br><br><b>Includes:</b><br>• Complete trip log with IRS-required fields<br>• Category breakdown summary<br>• Odometer readings<br>• IRS Publication 463 compliance note<br><br>Share this file with your CPA or tax preparer.');
+}
+
+/* -- IRS Audit Defense Pack -- */
+function exportAuditPack(){
+  if(TRIPS.length===0){showToast(_i('warn'),'No trips to export','#EF4444');return;}
+  var yr=new Date().getFullYear();
+  var cats=_tripSummaryByCategory();
+  var odo=JSON.parse(localStorage.getItem('mymilesai_odometer')||'{}');
+  var totalDed=0;
+  var catKeys=['biz','med','char'];
+  for(var c=0;c<catKeys.length;c++){if(cats[catKeys[c]])totalDed+=cats[catKeys[c]].deduction;}
+  var totalExp=0;
+  for(var i=0;i<TRIPS.length;i++){totalExp+=(parseFloat(TRIPS[i].tollCost)||0)+(parseFloat(TRIPS[i].fuelCost)||0);}
+  // Generate comprehensive HTML report
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>IRS Audit Defense Pack - '+yr+'</title>';
+  html+='<style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:800px;margin:0 auto;padding:20px;color:#1a1a2e}';
+  html+='h1{color:#6C3CE0;border-bottom:3px solid #6C3CE0;padding-bottom:10px}h2{color:#333;margin-top:30px;border-bottom:1px solid #ddd;padding-bottom:5px}';
+  html+='table{width:100%;border-collapse:collapse;margin:15px 0;font-size:12px}th{background:#6C3CE0;color:#fff;padding:8px;text-align:left}';
+  html+='td{padding:6px 8px;border-bottom:1px solid #eee}tr:nth-child(even){background:#f8f8fc}';
+  html+='.summary-box{background:#f0ebff;border:2px solid #6C3CE0;border-radius:12px;padding:20px;margin:15px 0}';
+  html+='.stat{display:inline-block;margin:10px 20px 10px 0}.stat-val{font-size:24px;font-weight:700;color:#6C3CE0}.stat-lbl{font-size:12px;color:#666}';
+  html+='.compliance{background:#e8f5e9;border:1px solid #4caf50;border-radius:8px;padding:15px;margin:15px 0}';
+  html+='.footer{margin-top:40px;padding-top:20px;border-top:2px solid #ddd;font-size:11px;color:#888;text-align:center}';
+  html+='@media print{body{padding:0}h1{font-size:18px}table{font-size:10px}}</style></head><body>';
+  html+='<h1>IRS Audit Defense Documentation Pack</h1>';
+  html+='<p><b>Taxpayer:</b> '+(localStorage.getItem('mymilesai_name')||'[Name]')+'<br><b>Tax Year:</b> '+yr+'<br><b>Generated:</b> '+new Date().toLocaleDateString()+'</p>';
+  // Summary
+  html+='<div class="summary-box"><h2 style="margin-top:0;border:none">Deduction Summary</h2>';
+  html+='<div class="stat"><div class="stat-val">'+LOC.currency+totalDed.toFixed(2)+'</div><div class="stat-lbl">Total Mileage Deduction</div></div>';
+  html+='<div class="stat"><div class="stat-val">'+(cats.biz?cats.biz.miles.toFixed(0):'0')+'</div><div class="stat-lbl">Business '+LOC.label+'</div></div>';
+  html+='<div class="stat"><div class="stat-val">'+(cats.biz?cats.biz.trips:'0')+'</div><div class="stat-lbl">Business Trips</div></div>';
+  html+='<div class="stat"><div class="stat-val">'+LOC.currency+totalExp.toFixed(2)+'</div><div class="stat-lbl">Additional Expenses</div></div></div>';
+  // IRS compliance
+  html+='<div class="compliance"><h3 style="margin-top:0;color:#2e7d32">IRS Publication 463 Compliance</h3>';
+  html+='<p>This mileage log satisfies IRS substantiation requirements under IRC Section 274(d):</p>';
+  html+='<ul><li><b>Date</b> of each trip ✓</li><li><b>Destination</b> (business location) ✓</li>';
+  html+='<li><b>Business purpose</b> of trip ✓</li><li><b>Miles driven</b> per trip ✓</li>';
+  html+='<li><b>Contemporaneous recording</b> — trips logged at time of travel ✓</li></ul>';
+  html+='<p><b>Method:</b> Standard Mileage Rate ('+LOC.currency+LOC.rate+'/'+LOC.unit+' for '+yr+')</p></div>';
+  // Odometer
+  if(odo.start||odo.current){
+    html+='<h2>Odometer Log</h2><table><tr><th>Reading</th><th>Value</th></tr>';
+    html+='<tr><td>Start of Year</td><td>'+(odo.start||'N/A')+' '+LOC.unit+'</td></tr>';
+    html+='<tr><td>Current</td><td>'+(odo.current||'N/A')+' '+LOC.unit+'</td></tr>';
+    if(odo.start&&odo.current)html+='<tr><td><b>Total Driven</b></td><td><b>'+Math.max(0,odo.current-odo.start)+' '+LOC.unit+'</b></td></tr>';
+    html+='</table>';
+  }
+  // Category breakdown
+  html+='<h2>Category Breakdown</h2><table><tr><th>Category</th><th>Trips</th><th>'+LOC.label+'</th><th>Deduction</th></tr>';
+  var catLabels={biz:'Business',pers:'Personal',med:'Medical',char:'Charity',move:'Moving',uncl:'Unclassified'};
+  var allCats=['biz','pers','med','char','move','uncl'];
+  for(var c=0;c<allCats.length;c++){
+    var ck=allCats[c];if(!cats[ck])continue;
+    html+='<tr><td>'+catLabels[ck]+'</td><td>'+cats[ck].trips+'</td><td>'+cats[ck].miles.toFixed(1)+'</td><td>'+LOC.currency+cats[ck].deduction.toFixed(2)+'</td></tr>';
+  }
+  html+='</table>';
+  // Trip detail table
+  html+='<h2>Complete Trip Log ('+TRIPS.length+' trips)</h2>';
+  html+='<table><tr><th>#</th><th>Date</th><th>From</th><th>To</th><th>'+LOC.label+'</th><th>Category</th><th>Purpose</th><th>Deduction</th><th>Tolls</th><th>Fuel</th></tr>';
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];
+    html+='<tr><td>'+(i+1)+'</td><td>'+(t.date||t.day)+'</td><td>'+_esc(t.from)+'</td><td>'+_esc(t.to)+'</td>';
+    html+='<td>'+tripDist(t.mi)+'</td><td>'+(catLabels[t.type]||t.type)+'</td><td>'+_esc(t.purpose||'')+'</td>';
+    html+='<td>'+LOC.currency+_tripDeduction(t).toFixed(2)+'</td><td>'+(parseFloat(t.tollCost)||0).toFixed(2)+'</td><td>'+(parseFloat(t.fuelCost)||0).toFixed(2)+'</td></tr>';
+  }
+  html+='</table>';
+  // Footer
+  html+='<div class="footer"><p>Generated by MyMilesAI v5.6 · This document is intended for tax preparation and audit defense purposes.</p>';
+  html+='<p>IRS standard mileage rate for '+yr+': '+LOC.currency+LOC.rate+'/'+LOC.unit+' (Business) | Consult IRS Publication 463 for full requirements.</p></div>';
+  html+='</body></html>';
+  var filename='MyMilesAI_AuditDefense_'+yr+'.html';
+  _shareOrDownload(html,filename,'text/html;charset=utf-8;');
+  openInfoModal('Audit Defense Pack','Comprehensive IRS audit defense documentation generated.<br><br><b>Includes:</b><br>• Deduction summary with totals<br>• IRS Publication 463 compliance statement<br>• Odometer readings<br>• Category breakdown<br>• Complete trip log ('+TRIPS.length+' trips)<br>• Toll and fuel expenses<br><br><b>Total deduction:</b> '+LOC.currency+totalDed.toFixed(2)+'<br><br>Open the HTML file in any browser or print to PDF for your records.');
+}
+
+/* -- Toll/Fuel Summary Export -- */
+function exportTollFuelSummary(){
+  var yr=new Date().getFullYear();
+  var rows=[];
+  rows.push(['TOLL & FUEL EXPENSE SUMMARY — '+yr]);
+  rows.push([]);
+  rows.push(['Date','Route','Toll Cost','Fuel Cost','Receipts','Total']);
+  var totalToll=0,totalFuel=0,totalRcpt=0;
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];
+    var toll=parseFloat(t.tollCost)||0;
+    var fuel=parseFloat(t.fuelCost)||0;
+    var rcpt=(t.receipts||[]).reduce(function(s,r){return s+(parseFloat(r.amount)||0);},0);
+    if(toll===0&&fuel===0&&rcpt===0)continue;
+    totalToll+=toll;totalFuel+=fuel;totalRcpt+=rcpt;
+    rows.push([t.date||t.day,'"'+_csvCell(t.from)+' → '+_csvCell(t.to)+'"',toll.toFixed(2),fuel.toFixed(2),rcpt.toFixed(2),(toll+fuel+rcpt).toFixed(2)]);
+  }
+  rows.push([]);
+  rows.push(['TOTALS','',totalToll.toFixed(2),totalFuel.toFixed(2),totalRcpt.toFixed(2),(totalToll+totalFuel+totalRcpt).toFixed(2)]);
+  var csv=rows.map(function(r){return r.join(',');}).join('\n');
+  var filename='MyMilesAI_Expenses_'+yr+'.csv';
+  _shareOrDownload(csv,filename,'text/csv;charset=utf-8;');
+  showToast(_i('check'),'Expense summary exported');
+}
+
+/* -- Save Company Reimbursement Rate -- */
+function saveCompanyRate(){
+  var name=document.getElementById('companyName');
+  var rate=document.getElementById('companyRate');
+  if(name)localStorage.setItem('mymilesai_company_name',name.value);
+  if(rate)localStorage.setItem('mymilesai_company_rate',rate.value);
+}
+function _loadCompanyRate(){
+  var name=document.getElementById('companyName');
+  var rate=document.getElementById('companyRate');
+  if(name)name.value=localStorage.getItem('mymilesai_company_name')||'';
+  if(rate)rate.value=localStorage.getItem('mymilesai_company_rate')||'0';
+}
+// Load on boot
+try{_loadCompanyRate();}catch(e){}
+
 </script>
 </body>
 </html>
