@@ -1062,6 +1062,33 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <span>US + Canada</span>
       <span>30-sec setup</span>
     </div>
+    <div id="authPricingPreview" style="background:linear-gradient(135deg,#f0f4ff,#faf5ff);border:1px solid #e0e7ff;border-radius:16px;padding:14px 16px;margin-bottom:20px;text-align:left;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:.5px;">PLANS</span>
+        <span id="authDiscountBadge" style="display:none;font-size:10px;font-weight:800;color:#fff;background:linear-gradient(135deg,#ef4444,#f97316);padding:2px 8px;border-radius:100px;letter-spacing:.5px;"></span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1;background:#fff;border-radius:10px;padding:10px;border:1px solid #e5e7eb;">
+          <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">Pro <span style="color:#9ca3af;font-weight:400;">· 1 device</span></div>
+          <div style="display:flex;align-items:baseline;gap:3px;">
+            <span id="authProOrigPrice" style="display:none;font-size:11px;color:#9ca3af;text-decoration:line-through;"></span>
+            <span id="authProPrice" style="font-size:18px;font-weight:800;color:#6366f1;"></span>
+            <span style="font-size:10px;color:#9ca3af;">/mo</span>
+          </div>
+          <div id="authProYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:10px;padding:10px;border:1.5px solid #6366f1;">
+          <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">Business <span style="color:#9ca3af;font-weight:400;">· 10 devices</span></div>
+          <div style="display:flex;align-items:baseline;gap:3px;">
+            <span id="authBizOrigPrice" style="display:none;font-size:11px;color:#9ca3af;text-decoration:line-through;"></span>
+            <span id="authBizPrice" style="font-size:18px;font-weight:800;color:#6366f1;"></span>
+            <span style="font-size:10px;color:#9ca3af;">/mo</span>
+          </div>
+          <div id="authBizYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#9ca3af;margin-top:8px;text-align:center;">✓ 10-day free trial · No credit card required</div>
+    </div>
     <div id="authEmailStep">
       <button class="auth-btn auth-btn-google" onclick="_authGoogle()" id="authGoogleBtn">
         <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09A6.97 6.97 0 015.47 12c0-.72.13-1.42.37-2.09V7.07H2.18A11.97 11.97 0 001 12c0 1.94.46 3.77 1.18 5.07l3.66-2.98z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
@@ -1102,16 +1129,21 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div class="paywall-box">
     <div style="font-size:44px;margin-bottom:12px;">🚗</div>
     <div class="paywall-title">Start Your 10-Day Free Trial</div>
-    <div class="paywall-desc">Full access for 10 days. Then $69.99/year (Pro) or $600/year (Business).<br>Cancel before day 10 and pay nothing.</div>
+    <div class="paywall-desc" id="paywallDesc">Full access for 10 days. Then cancel before day 10 and pay nothing.</div>
+    <div id="paywallDiscountBanner" style="display:none;background:linear-gradient(135deg,#ef4444,#f97316);color:#fff;border-radius:12px;padding:8px 16px;margin-bottom:16px;font-size:13px;font-weight:700;text-align:center;letter-spacing:.3px;"></div>
     <div class="paywall-plan" style="border-radius:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <h4 style="margin:0">Pro</h4>
         <span style="font-size:11px;color:#6B7280;background:#F3F4F6;padding:3px 10px;border-radius:100px;">1 device</span>
       </div>
-      <div class="price">$69.99<span style="font-size:13px;font-weight:400;color:#6B7280">/year</span></div>
-      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">$5.83/month equivalent · Billed after 10-day trial</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-top:10px;">
+        <span id="pwProOrigPrice" style="display:none;font-size:16px;color:#9ca3af;text-decoration:line-through;font-weight:600;"></span>
+        <span class="price" id="pwProPrice" style="margin:0;"></span>
+        <span style="font-size:13px;color:#6B7280;">/year</span>
+      </div>
+      <div id="pwProMonthly" style="font-size:12px;color:#9CA3AF;margin-top:2px;"></div>
       <div style="font-size:13px;color:#374151;margin-top:14px;line-height:1.9;">✓ Unlimited trips<br>✓ GPS auto-tracking<br>✓ AI classification<br>✓ PDF &amp; CSV export<br>✓ 1 vehicle</div>
-      <button class="paywall-upgrade" onclick="_upgradeClick('pro')" id="btnUpgradePro">Start 10-Day Trial — Pro</button>
+      <button class="paywall-upgrade" onclick="_upgradeClick('pro')" id="btnUpgradePro">Start Free Trial — Pro</button>
     </div>
     <div class="paywall-plan featured" style="border-radius:20px;border-width:2px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -1121,12 +1153,16 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
         <span style="font-size:11px;color:#6B7280;background:#F3F4F6;padding:3px 10px;border-radius:100px;">Up to 10 devices</span>
       </div>
-      <div class="price">$600<span style="font-size:13px;font-weight:400;color:#6B7280">/year</span></div>
-      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">$50/month equivalent · Billed after 10-day trial</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-top:10px;">
+        <span id="pwBizOrigPrice" style="display:none;font-size:16px;color:#9ca3af;text-decoration:line-through;font-weight:600;"></span>
+        <span class="price" id="pwBizPrice" style="margin:0;"></span>
+        <span style="font-size:13px;color:#6B7280;">/year</span>
+      </div>
+      <div id="pwBizMonthly" style="font-size:12px;color:#9CA3AF;margin-top:2px;"></div>
       <div style="font-size:13px;color:#374151;margin-top:14px;line-height:1.9;">✓ Everything in Pro<br>✓ Up to 10 vehicles<br>✓ Fleet management<br>✓ Team sharing<br>✓ Priority support</div>
-      <button class="paywall-upgrade" onclick="_upgradeClick('business')" id="btnUpgradeBusiness">Start 10-Day Trial — Business</button>
+      <button class="paywall-upgrade" onclick="_upgradeClick('business')" id="btnUpgradeBusiness">Start Free Trial — Business</button>
     </div>
-    <div style="font-size:11px;color:#9CA3AF;margin-top:18px;line-height:1.6;text-align:center;">No credit card charged for 10 days · Cancel anytime before day 10 · Full access during trial</div>
+    <div id="pwTrialNote" style="font-size:11px;color:#9CA3AF;margin-top:18px;line-height:1.6;text-align:center;"></div>
     <div class="paywall-restore" onclick="_restorePurchase()">Already subscribed? Restore Purchase</div>
   </div>
 </div>
@@ -1252,9 +1288,88 @@ try{
   }
 }catch(e){console.warn('Supabase init failed:',e);}
 var _PRICES={pro:'price_1TI1ETPDX1EjEZICkTMmklbN',business:'price_1TI1YTPDX1EjEZIC3qSy2jNe'};
+// ── App Pricing Config — change prices here, everything updates everywhere ──
+var _APP_CONFIG={
+  proMonthly:6.99,       // displayed monthly price
+  proYearly:69.99,       // annual price
+  bizMonthly:9.99,       // business monthly price
+  bizYearly:599.88,      // business annual (10 seats)
+  trialDays:10,
+  discount:0,            // e.g. 0.15 = 15% off. Set 0 for no discount
+  discountLabel:'',      // e.g. 'LAUNCH15' — shows badge when set
+  couponEnabled:true     // show coupon field on auth screen
+};
+function _cfg(){
+  var c=_APP_CONFIG;
+  var d=c.discount||0;
+  return {
+    proM:d?(c.proMonthly*(1-d)).toFixed(2):c.proMonthly.toFixed(2),
+    proY:d?(c.proYearly*(1-d)).toFixed(2):c.proYearly.toFixed(2),
+    bizM:d?(c.bizMonthly*(1-d)).toFixed(2):c.bizMonthly.toFixed(2),
+    bizY:d?(c.bizYearly*(1-d)).toFixed(2):c.bizYearly.toFixed(2),
+    proMOrig:c.proMonthly.toFixed(2),
+    proYOrig:c.proYearly.toFixed(2),
+    bizMOrig:c.bizMonthly.toFixed(2),
+    bizYOrig:c.bizYearly.toFixed(2),
+    pctOff:d?Math.round(d*100):0,
+    label:c.discountLabel||'',
+    trial:c.trialDays
+  };
+}
 var _DEVICE_LIMITS={pro:1,business:10};
 var _authPendingEmail='';
 
+// ── Pricing renderer — reads _APP_CONFIG, updates all price elements ──
+function _renderPricing(){
+  var p=_cfg();
+  // Auth screen pricing preview
+  var proP=document.getElementById('authProPrice');
+  var proO=document.getElementById('authProOrigPrice');
+  var proY=document.getElementById('authProYearly');
+  var bizP=document.getElementById('authBizPrice');
+  var bizO=document.getElementById('authBizOrigPrice');
+  var bizY=document.getElementById('authBizYearly');
+  var badge=document.getElementById('authDiscountBadge');
+  if(proP)proP.textContent='$'+p.proM;
+  if(proY)proY.textContent='$'+p.proY+'/yr billed annually';
+  if(bizP)bizP.textContent='$'+p.bizM;
+  if(bizY)bizY.textContent='$'+p.bizY+'/yr billed annually';
+  if(p.pctOff>0){
+    if(proO){proO.style.display='';proO.textContent='$'+p.proMOrig;}
+    if(bizO){bizO.style.display='';bizO.textContent='$'+p.bizMOrig;}
+    if(badge){badge.style.display='';badge.textContent=p.pctOff+'% OFF'+(p.label?' \u00b7 '+p.label:'');}
+  }
+  // Paywall pricing
+  var pwPP=document.getElementById('pwProPrice');
+  var pwPO=document.getElementById('pwProOrigPrice');
+  var pwPM=document.getElementById('pwProMonthly');
+  var pwBP=document.getElementById('pwBizPrice');
+  var pwBO=document.getElementById('pwBizOrigPrice');
+  var pwBM=document.getElementById('pwBizMonthly');
+  var pwBanner=document.getElementById('paywallDiscountBanner');
+  var pwNote=document.getElementById('pwTrialNote');
+  var pwDesc=document.getElementById('paywallDesc');
+  if(pwPP)pwPP.textContent='$'+p.proY;
+  if(pwPM)pwPM.textContent='$'+p.proM+'/month equivalent \u00b7 Billed after '+p.trial+'-day trial';
+  if(pwBP)pwBP.textContent='$'+p.bizY;
+  if(pwBM)pwBM.textContent='$'+p.bizM+'/month equivalent \u00b7 Billed after '+p.trial+'-day trial';
+  if(pwDesc)pwDesc.textContent='Full access for '+p.trial+' days. Cancel before day '+p.trial+' and pay nothing.';
+  if(pwNote)pwNote.textContent='No credit card charged for '+p.trial+' days \u00b7 Cancel anytime \u00b7 Full access during trial';
+  if(p.pctOff>0){
+    if(pwPO){pwPO.style.display='';pwPO.textContent='$'+p.proYOrig;}
+    if(pwBO){pwBO.style.display='';pwBO.textContent='$'+p.bizYOrig;}
+    if(pwBanner){pwBanner.style.display='';pwBanner.textContent='\ud83c\udf89 '+p.pctOff+'% OFF'+(p.label?' \u2014 Use code '+p.label:'')+' \u00b7 Limited time';}
+  } else {
+    if(pwBanner)pwBanner.style.display='none';
+  }
+  // Update upgrade button labels
+  var bp=document.getElementById('btnUpgradePro');
+  var bb=document.getElementById('btnUpgradeBusiness');
+  if(bp)bp.textContent='Start '+p.trial+'-Day Trial \u2014 Pro';
+  if(bb)bb.textContent='Start '+p.trial+'-Day Trial \u2014 Business';
+}
+// Run on load and expose globally
+try{_renderPricing();}catch(e){}
 // ── UI helpers ───────────────────────────────────────────────────────
 function _authShowModal(){var o=document.getElementById('authOverlay');if(o){o.classList.remove('hidden');o.style.display='flex';}_authHideLoading();}
 function _authHideModal(){var o=document.getElementById('authOverlay');if(o){o.classList.add('hidden');o.style.display='none';}_authHideLoading();}
