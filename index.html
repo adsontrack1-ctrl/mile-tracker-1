@@ -1483,8 +1483,14 @@ async function _openCustomerPortal(){
       body:JSON.stringify({userId:currentUser.id,email:currentUser.email,returnUrl:'https://adsontrack1-ctrl.github.io/mile-tracker-1/'})
     });
     var data=await resp.json();
-    if(data.url){window.location.href=data.url;}
-    else throw new Error(data.error||'Portal unavailable');
+    if(data.url){
+      // Native: open in Safari via Linking (WebView blocks external domains)
+      if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+        window.ReactNativeWebView.postMessage(JSON.stringify({type:'openURL',url:data.url}));
+      } else {
+        window.location.href=data.url;
+      }
+    } else throw new Error(data.error||'Portal unavailable');
   }catch(e){_showToast('Error: '+e.message,'#EF4444');}
 }
 function _updateSubUI(profile){
