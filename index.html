@@ -5855,6 +5855,107 @@ function exportJSON(){
   URL.revokeObjectURL(url);
   showToast(_i('box'),'Backup downloaded');
 }
+
+/* ===== MULTI-VEHICLE SUPPORT (#04) ===== */
+var _vehicles=[];
+try{var _vs=localStorage.getItem('mymilesai_vehicles');if(_vs)_vehicles=JSON.parse(_vs);}catch(e){}
+
+function _saveVehicles(){try{localStorage.setItem('mymilesai_vehicles',JSON.stringify(_vehicles));}catch(e){}}
+
+function _getDefaultVehicleId(){
+  var def=_vehicles.find(function(v){return v.isDefault;});
+  return def?def.id:(_vehicles.length?_vehicles[0].id:'');
+}
+
+function _getVehicleName(vehicleId){
+  if(!vehicleId||!_vehicles.length)return '';
+  var v=_vehicles.find(function(x){return x.id===vehicleId;});
+  return v?v.name:'';
+}
+
+function _renderVehiclesList(){
+  var el=document.getElementById('vehiclesList');
+  if(!el)return;
+  if(!_vehicles.length){
+    el.innerHTML='<div style="padding:14px 16px;font-size:13px;color:var(--ink3);text-align:center;">No vehicles added yet.<br>Add your first vehicle below.</div>';
+    return;
+  }
+  el.innerHTML=_vehicles.map(function(v){
+    return '<div class="sr" style="align-items:center;">'
+      +'<div style="flex:1"><h4>'+_esc(v.name)+'</h4>'
+      +(v.plate?'<p>'+_esc(v.plate)+'</p>':'<p style="color:var(--ink4)">No plate</p>')+'</div>'
+      +'<div style="display:flex;gap:8px;align-items:center;">'
+      +(v.isDefault?'<span style="font-size:10px;font-weight:700;color:var(--vi);background:var(--vi-s);padding:2px 8px;border-radius:100px;">Default</span>':'<button onclick="_setDefaultVehicle(\''+v.id+'\')" style="font-size:11px;color:var(--ink3);background:none;border:1px solid var(--ink5);border-radius:100px;padding:2px 8px;cursor:pointer;">Set Default</button>')
+      +'<button onclick="_deleteVehicle(\''+v.id+'\')" style="background:none;border:none;color:#EF4444;font-size:18px;cursor:pointer;padding:4px 8px;">&#x2715;</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function _populateVehicleSel(){
+  var sel=document.getElementById('addVehicleSel');
+  if(!sel)return;
+  if(!_vehicles.length){
+    sel.innerHTML='<option value="">No vehicles \u2014 add in Settings</option>';
+    return;
+  }
+  sel.innerHTML=_vehicles.map(function(v){
+    return '<option value="'+v.id+'"'+(v.isDefault?' selected':'')+'>'+_esc(v.name)+(v.plate?' ('+_esc(v.plate)+')':'')+'</option>';
+  }).join('');
+}
+
+function _openAddVehicle(){
+  var overlay=document.createElement('div');
+  overlay.className='modal-overlay show';
+  overlay.style.cssText='display:flex;align-items:flex-end;justify-content:center;z-index:10000;';
+  overlay.innerHTML='<div class="modal" style="width:100%;max-width:480px;">'
+    +'<div class="modal-handle"></div>'
+    +'<div class="modal-title">Add Vehicle</div>'
+    +'<div class="iw" style="padding:0;margin-bottom:10px;"><input class="inp" id="vehNameInp" placeholder="Vehicle name (e.g. My Truck, Work Van)" style="border-radius:var(--r);width:100%;box-sizing:border-box;"></div>'
+    +'<div class="iw" style="padding:0;margin-bottom:10px;"><input class="inp" id="vehPlateInp" placeholder="License plate (optional)" style="border-radius:var(--r);width:100%;box-sizing:border-box;"></div>'
+    +'<div class="iw" style="padding:0;margin-bottom:16px;"><input class="inp" id="vehYearInp" placeholder="Year / Make / Model (optional)" style="border-radius:var(--r);width:100%;box-sizing:border-box;"></div>'
+    +'<div class="modal-row">'
+    +'<button class="modal-cancel" onclick="this.closest(\'.modal-overlay\').remove()">Cancel</button>'
+    +'<button class="cta" style="flex:1" onclick="_saveVehicle(this)">Add Vehicle</button>'
+    +'</div></div>';
+  document.body.appendChild(overlay);
+  setTimeout(function(){var inp=document.getElementById('vehNameInp');if(inp)inp.focus();},300);
+}
+
+function _saveVehicle(btn){
+  var name=(document.getElementById('vehNameInp').value||'').trim();
+  var plate=(document.getElementById('vehPlateInp').value||'').trim();
+  var year=(document.getElementById('vehYearInp').value||'').trim();
+  if(!name){showToast('','Vehicle name is required');return;}
+  var id='veh_'+Date.now();
+  var isDefault=_vehicles.length===0;
+  _vehicles.push({id:id,name:name,plate:plate,year:year,isDefault:isDefault,created:Date.now()});
+  _saveVehicles();
+  _renderVehiclesList();
+  _populateVehicleSel();
+  btn.closest('.modal-overlay').remove();
+  showToast(_i('car'),'Vehicle added: '+name);
+}
+
+function _deleteVehicle(id){
+  _vehicles=_vehicles.filter(function(v){return v.id!==id;});
+  if(_vehicles.length&&!_vehicles.find(function(v){return v.isDefault;})){_vehicles[0].isDefault=true;}
+  _saveVehicles();
+  _renderVehiclesList();
+  _populateVehicleSel();
+  showToast(_i('trash'),'Vehicle removed');
+}
+
+function _setDefaultVehicle(id){
+  _vehicles.forEach(function(v){v.isDefault=(v.id===id);});
+  _saveVehicles();
+  _renderVehiclesList();
+  _populateVehicleSel();
+  showToast(_i('car'),'Default vehicle updated');
+}
+
+// Init on load
+try{_renderVehiclesList();_populateVehicleSel();}catch(e){}
+
 /* ===== CUSTOM CONFIRM DIALOG (replaces native confirm()) ===== */
 function _showConfirm(title,message,confirmLabel,confirmColor,onConfirm){
   var overlay=document.createElement('div');
