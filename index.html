@@ -5383,12 +5383,11 @@ async function _pushTripsToSupabase(){
   if(!_sb||!currentUser||!TRIPS.length)return;
   try{
     var rows=TRIPS.map(function(t){return{
-      id:t.id,user_id:currentUser.id,
+      id:String(t.id),user_id:currentUser.id,
       from_addr:t.from||'',to_addr:t.to||'',
-      mi:t.mi||0,type:t.type||'uncl',ded:!!t.ded,
-      date:t.date||'',day:t.day||'',ts:t.ts||0,
-      purpose:t.purpose||'',notes:t.notes||'',
-      updated_at:new Date().toISOString()
+      miles:t.mi||0,type:t.type||'uncl',deductible:!!t.ded,
+      trip_date:t.date||'',ts:t.ts||0,
+      purpose:t.purpose||'',notes:t.notes||''
     };});
     var result=await _sb.from('trips').upsert(rows,{onConflict:'id,user_id',ignoreDuplicates:false});
     if(result.error)throw result.error;
@@ -5404,9 +5403,9 @@ async function _pullTripsFromSupabase(){
     if(result.error)throw result.error;
     if(!result.data||!result.data.length){_showSyncStatus('No cloud trips found',false);return;}
     var cloudTrips=result.data.map(function(r){return{
-      id:r.id,from:r.from_addr,to:r.to_addr,
-      mi:r.mi,type:r.type,ded:r.ded,
-      date:r.date,day:r.day,ts:r.ts,
+      id:String(r.id),from:r.from_addr,to:r.to_addr,
+      mi:r.miles,type:r.type,ded:r.deductible,
+      date:r.trip_date,ts:r.ts,
       purpose:r.purpose,notes:r.notes
     };});
     var merged=_mergeTrips(TRIPS,cloudTrips);
