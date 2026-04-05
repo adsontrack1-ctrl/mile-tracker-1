@@ -764,7 +764,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
         </button>
         <button onclick="exportAuditPack()" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:none;border:none;cursor:pointer;text-align:left;font-family:var(--f);">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <div><div style="font-size:13px;font-weight:700;color:var(--ink);">IRS Audit Defense Pack</div><div style="font-size:11px;color:var(--ink3);margin-top:1px;">IRS-ready documentation if you get audited</div></div>
+          <div><div id="auditDefenseLabel" style="font-size:13px;font-weight:700;color:var(--ink);">IRS Audit Defense Pack</div><div id="auditDefenseDesc" style="font-size:11px;color:var(--ink3);margin-top:1px;">IRS-ready documentation if you get audited</div></div>
         </button>
         <button onclick="exportAll()" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:linear-gradient(135deg,rgba(108,60,224,.06),rgba(214,0,110,.06));border:none;cursor:pointer;text-align:left;font-family:var(--f);border-top:1px solid var(--ink6);">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--mag)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1201,9 +1201,10 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 <div class="paywall-overlay hidden" id="paywallOverlay">
   <div class="paywall-box">
     <div style="font-size:44px;margin-bottom:12px;">🚗</div>
-    <div class="paywall-title">Start Your 10-Day Free Trial</div>
-    <div class="paywall-desc" id="paywallDesc">Full access for 10 days free. Cancel before day 10 to pay nothing. After trial, billed annually. All fees are non-refundable once charged.</div>
+    <div class="paywall-title">Save $13.89/year — Limited Intro Price</div>
+    <div class="paywall-desc" id="paywallDesc">Regular price <b style="text-decoration:line-through;color:#9ca3af;">$83.88/yr</b> &rarr; <b style="color:#2563EB;">only $69.99/yr</b> while this offer lasts. That's just <b>$5.83/month</b> — less than a coffee. 10-day free trial, no card charged today.</div>
     <div id="paywallDiscountBanner" style="display:none;background:linear-gradient(135deg,#ef4444,#f97316);color:#fff;border-radius:12px;padding:8px 16px;margin-bottom:16px;font-size:13px;font-weight:700;text-align:center;letter-spacing:.3px;"></div>
+    <div style="background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;text-align:center;font-size:11px;font-weight:800;letter-spacing:.8px;padding:7px 12px;border-radius:12px;margin-bottom:12px;">SAVE 17% OFF MONTHLY · INTRO PRICE · LIMITED TIME</div>
     <div class="paywall-plan" style="border-radius:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <h4 style="margin:0">Pro</h4>
@@ -6615,7 +6616,8 @@ function setObUnit(btn,unit){
 try{
   var _hasName=false;
   try{_hasName=!!localStorage.getItem('mymilesai_name');}catch(e){}
-  if(!localStorage.getItem('mymilesai_onboarded')){
+  // Show onboarding on first launch — even if auth session exists
+if(!localStorage.getItem('mymilesai_onboarded')){
   setTimeout(function(){showOnboarding();},800);
 }
 }catch(e){}
