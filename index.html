@@ -599,6 +599,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   z-index: 999 !important;
   background: inherit;
 }
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 </style>
 </head>
 <body>
@@ -840,7 +841,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 97</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 98</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1485,6 +1486,16 @@ function _renderPricing(){
 try{_renderPricing();}catch(e){}
 // ── UI helpers ───────────────────────────────────────────────────────
 var _selectedAuthPlan = 'pro';
+function _updateAuthTaxLabel(country){
+  var lbl=document.getElementById('authTaxRateLabel');
+  if(!lbl)return;
+  if(country==='CA') lbl.textContent='CRA 2026 Rate · $0.73/km · Tax deductible';
+  else lbl.textContent='IRS 2026 Rate · $0.70/mi · Tax deductible';
+  var al=document.getElementById('auditDefenseLabel');
+  var ad=document.getElementById('auditDefenseDesc');
+  if(al)al.textContent=(country==='CA'?'CRA Audit Defense Pack':'IRS Audit Defense Pack');
+  if(ad)ad.textContent=(country==='CA'?'CRA-ready documentation if you get audited':'IRS-ready documentation if you get audited');
+}
 function _authChkChanged(){var err=document.getElementById('authAgreeErr');if(err)err.style.display='none';}
 function _authCheckAgreeFirst(method){
   var chk=document.getElementById('authAgreementChk');
