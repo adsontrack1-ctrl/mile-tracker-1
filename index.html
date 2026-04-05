@@ -840,7 +840,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 96</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 97</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1152,7 +1152,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
           <div id="authBizYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
         </div>
       </div>
-      <div style="font-size:10px;color:#9ca3af;margin-top:8px;text-align:center;">✓ 10-day free trial · No credit card required</div>
+      <div id="authTaxRateLabel" style="font-size:10px;color:#6366f1;font-weight:700;margin-top:6px;text-align:center;">IRS 2026 Rate · $0.70/mi · Tax deductible</div><div style="font-size:10px;color:#9ca3af;margin-top:4px;text-align:center;">✓ 10-day free trial · No credit card required · Prices in USD</div>
     </div>
     <div id="authEmailStep">
       <button class="auth-btn auth-btn-google" onclick="_authCheckAgreeFirst('google')" id="authGoogleBtn">
@@ -1236,9 +1236,9 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div class="ob-content">
     <div class="ob-header">
       <div class="ob-back hidden" id="obBack" onclick="obPrev()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div class="ob-step-label" id="obStepLabel">Step 1 of 4</div>
+      <div class="ob-step-label" id="obStepLabel">Step 1 of 5</div>
     </div>
-    <div class="ob-progress"><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg1" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg2" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg3" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg4" style="width:0%"></div></div></div>
+    <div class="ob-progress"><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg1" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg2" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg3" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg4" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg5" style="width:0%"></div></div></div>
 
     <!-- Step 0: Country Picker -->
     <div class="ob-slide" id="obSlideCountry" style="display:flex">
@@ -1253,12 +1253,12 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
         <button id="obCountryUS" onclick="_obPickCountry('US')" style="display:flex;align-items:center;gap:16px;padding:20px;border-radius:20px;border:2px solid rgba(99,102,241,.6);background:rgba(108,60,224,.12);cursor:pointer;text-align:left;">
           <span style="font-size:36px;">&#127482;&#127480;</span>
-          <div style="flex:1;"><div style="font-size:17px;font-weight:800;color:#fff;">United States</div><div style="font-size:12px;color:rgba(255,255,255,.6);">IRS · $0.70/mi · Miles</div></div>
+          <div style="flex:1;"><div style="font-size:17px;font-weight:800;color:#fff;">United States</div><div style="font-size:12px;color:rgba(255,255,255,.6);">IRS · $0.70/mi · Miles</div><div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.2);color:rgba(192,132,252,.9);padding:2px 8px;border-radius:100px;">IRS Form 4562</span><span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.2);color:rgba(192,132,252,.9);padding:2px 8px;border-radius:100px;">Schedule C Ready</span></div></div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,.8)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button id="obCountryCA" onclick="_obPickCountry('CA')" style="display:flex;align-items:center;gap:16px;padding:20px;border-radius:20px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);cursor:pointer;text-align:left;">
           <span style="font-size:36px;">&#127464;&#127462;</span>
-          <div style="flex:1;"><div style="font-size:17px;font-weight:800;color:rgba(255,255,255,.8);">Canada</div><div style="font-size:12px;color:rgba(255,255,255,.5);">CRA · $0.73/km · Kilometers</div></div>
+          <div style="flex:1;"><div style="font-size:17px;font-weight:800;color:rgba(255,255,255,.8);">Canada</div><div style="font-size:12px;color:rgba(255,255,255,.5);">CRA · $0.73/km · Kilometers</div><div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:10px;font-weight:700;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:100px;">CRA T2200</span><span style="font-size:10px;font-weight:700;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:100px;">T4 Employee Use</span></div></div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
@@ -6500,7 +6500,7 @@ function _updateObUI(step){
     else fill.style.width='0%';
   }
   // Update step label
-  document.getElementById('obStepLabel').textContent='Step '+(step+1)+' of 4';
+  document.getElementById('obStepLabel').textContent='Step '+(step+1)+' of 5';
   // Back button visibility
   var back=document.getElementById('obBack');
   if(step>0)back.classList.remove('hidden');
