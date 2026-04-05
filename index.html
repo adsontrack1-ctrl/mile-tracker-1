@@ -724,7 +724,14 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="tax"><div class="tax-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> <span id="taxLabel">IRS 2026 Rate</span></div><div class="tax-amt" id="taxAmt">$0</div><div class="tax-det" id="taxDet">—</div><div class="tax-split"><div class="tax-seg b"></div><div class="tax-seg p"></div></div><div class="tax-legend"><span><span class="tax-lg-dot" style="background:var(--vi)"></span>Business 0%</span><span><span class="tax-lg-dot" style="background:var(--mag)"></span>Personal 0%</span></div></div>
     <div class="sh"><span class="sh-t">Export Reports</span></div>
-    <div class="exp-r"><button class="exp" onclick="exportCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> CSV</button><button class="exp ac" onclick="exportAll()" style="background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border-color:transparent;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> All</button><button class="exp" onclick="exportPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> PDF</button><button class="exp ac" onclick="exportEmail()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button></div>
+    <div class="exp-r"><button class="exp" onclick="exportExcel()" title="Export as Excel spreadsheet" style="color:#1D6F42;">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+  Excel
+</button>
+<button class="exp" onclick="exportGoogleSheets()" title="Open in Google Sheets" style="color:#0F9D58;">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+  Sheets
+</button><button class="exp ac" onclick="exportAll()" style="background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border-color:transparent;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> All</button><button class="exp" onclick="exportPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> PDF</button><button class="exp ac" onclick="exportEmail()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button></div>
     <div style="height:8px"></div>
     <div class="exp-r">
       <button class="exp" onclick="exportQuickBooks()" title="Export to QuickBooks">
@@ -813,7 +820,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 89</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 90</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1280,6 +1287,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
@@ -5516,7 +5524,7 @@ function _tryOfflineResponse(text){
 }
 
 function _parseAIActions(text){
-  if(text.indexOf('[ACTION:EXPORT_CSV]')!==-1){setTimeout(exportCSV,500);}
+  if(text.indexOf('[ACTION:EXPORT_CSV]')!==-1){setTimeout(exportExcel,500);}
   if(text.indexOf('[ACTION:EXPORT_PDF]')!==-1){setTimeout(exportPDF,500);}
   if(text.indexOf('[ACTION:SHOW_STATS]')!==-1){setTimeout(function(){toggleAIChat();switchTabId('tab-stats');},500);}
 }
@@ -6801,6 +6809,102 @@ function _quickSwitchVehicle(){
     btn.style.background='var(--vi)';btn.style.color='#fff';
     setTimeout(function(){btn.style.background='';btn.style.color='';},600);
   }
+}
+
+// ── Excel Export (.xlsx) ──
+function exportExcel(){
+  var unit=LOC.label;
+  var yr=new Date().getFullYear();
+  var cats=_tripSummaryByCategory();
+  var totalDed=0;
+  ['biz','med','char'].forEach(function(k){if(cats[k])totalDed+=cats[k].deduction;});
+
+  if(typeof XLSX==='undefined'){
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=function(){exportExcel();};
+    document.head.appendChild(s);
+    showToast(_i('search'),'Loading Excel engine...');
+    return;
+  }
+
+  var wsData=[];
+  wsData.push(['MyMilesAI Mileage Log - Tax Year '+yr]);
+  wsData.push([LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit]);
+  wsData.push([]);
+  wsData.push(['Date','Start Time','Vehicle','From','To','Distance ('+unit+')','Category','Purpose','Notes','Deductible','Deduction ('+LOC.currency+')','Toll','Fuel']);
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];
+    var d=tripDist(t.mi);
+    var ded=_tripDeduction(t).toFixed(2);
+    var vn=_getVehicleName(t.vehicleId)||'';
+    wsData.push([t.date||t.day,t.startTime||t.time||'',vn,t.from,t.to,parseFloat(d),CAT_LABELS[t.type]||t.type,t.purpose||'',t.notes||'',t.ded?'Yes':'No',parseFloat(ded),t.tollCost||0,t.fuelCost||0]);
+  }
+  wsData.push([]);
+  wsData.push(['SUMMARY']);
+  wsData.push(['Category','Trips','Distance ('+unit+')','Deduction ('+LOC.currency+')']);
+  var catKeys=['biz','pers','med','char','move','uncl'];
+  var totalMi=0;
+  catKeys.forEach(function(ck){
+    if(!cats[ck])return;
+    wsData.push([CAT_LABELS[ck]||ck,cats[ck].trips,parseFloat(cats[ck].miles.toFixed(1)),parseFloat(cats[ck].deduction.toFixed(2))]);
+    totalMi+=cats[ck].miles;
+  });
+  wsData.push(['TOTAL','',parseFloat(totalMi.toFixed(1)),parseFloat(totalDed.toFixed(2))]);
+
+  var wb=XLSX.utils.book_new();
+  var ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:12},{wch:10},{wch:16},{wch:30},{wch:30},{wch:12},{wch:14},{wch:20},{wch:20},{wch:10},{wch:14},{wch:8},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,ws,'Mileage Log');
+
+  var wsSummary=XLSX.utils.aoa_to_sheet([
+    ['MyMilesAI Summary - '+yr],
+    ['Total Trips',TRIPS.length],
+    ['Business '+unit,parseFloat((cats.biz?cats.biz.miles:0).toFixed(1))],
+    ['Personal '+unit,parseFloat((cats.pers?cats.pers.miles:0).toFixed(1))],
+    ['Total Deduction',parseFloat(totalDed.toFixed(2))],
+    ['IRS Rate',LOC.currency+LOC.rate+'/'+LOC.unit],
+    ['Generated',new Date().toLocaleDateString()],
+    ['App','MyMilesAI v5.6']
+  ]);
+  XLSX.utils.book_append_sheet(wb,wsSummary,'Summary');
+
+  var filename='MyMilesAI_Mileage_'+yr+'_'+new Date().toISOString().slice(0,10)+'.xlsx';
+
+  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    var wbout=XLSX.write(wb,{bookType:'xlsx',type:'base64'});
+    _shareOrDownload(wbout,filename,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  } else {
+    XLSX.writeFile(wb,filename);
+  }
+
+  var bizMi=cats.biz?cats.biz.miles.toFixed(1):0;
+  openInfoModal('Excel Export Ready','Your mileage log has been exported as an Excel file.<br><br><b>File:</b> '+filename+'<br><br><b>Contains:</b><br>'+String.fromCharCode(8226)+' '+TRIPS.length+' trips on "Mileage Log" sheet<br>'+String.fromCharCode(8226)+' Summary totals on "Summary" sheet<br>'+String.fromCharCode(8226)+' '+bizMi+' business '+unit+'<br>'+String.fromCharCode(8226)+' '+LOC.currency+totalDed.toFixed(2)+' in deductions<br><br>Open in Microsoft Excel, Apple Numbers, or Google Sheets.');
+}
+
+// ── Google Sheets Export ──
+function exportGoogleSheets(){
+  var unit=LOC.label;
+  var yr=new Date().getFullYear();
+  var rows=[];
+  rows.push(['MyMilesAI Mileage Log - Tax Year '+yr]);
+  rows.push([LOC.taxLabel+': '+LOC.currency+LOC.rate.toFixed(2)+'/'+LOC.unit]);
+  rows.push([]);
+  rows.push(['Date','Start Time','Vehicle','From','To','Distance ('+unit+')','Category','Purpose','Notes','Deductible','Deduction ('+LOC.currency+')']);
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];
+    var d=tripDist(t.mi);
+    var ded=_tripDeduction(t).toFixed(2);
+    var vn=_getVehicleName(t.vehicleId)||'';
+    rows.push([t.date||t.day,t.startTime||t.time||'',vn,'"'+_csvCell(t.from)+'"','"'+_csvCell(t.to)+'"',d,CAT_LABELS[t.type]||t.type,'"'+_csvCell(t.purpose||'')+'"','"'+_csvCell(t.notes||'')+'"',t.ded?'Yes':'No',LOC.currency+ded]);
+  }
+  var csv=rows.map(function(r){return r.join(',');}).join('\n');
+  var filename='MyMilesAI_Mileage_'+yr+'.csv';
+  _shareOrDownload(csv,filename,'text/csv;charset=utf-8;');
+
+  setTimeout(function(){
+    openInfoModal('Open in Google Sheets','<b>Step 1:</b> Your CSV file has been downloaded: <b>'+filename+'</b><br><br><b>Step 2:</b> Go to <a href="https://sheets.google.com" target="_blank" style="color:var(--vi)">sheets.google.com</a><br><br><b>Step 3:</b> Click <b>Blank spreadsheet</b> then <b>File</b> then <b>Import</b><br><br><b>Step 4:</b> Upload the CSV file and click <b>Import data</b><br><br><i>Tip: Your data will appear with all columns properly formatted.</i>');
+  },500);
 }
 
 </script>
