@@ -1468,7 +1468,7 @@ function _renderPricing(){
   if(pwPM)pwPM.textContent='$'+p.proM+'/month equivalent \u00b7 Billed annually after '+p.trial+'-day trial — non-refundable';
   if(pwBP)pwBP.textContent='$'+p.bizY;
   if(pwBM)pwBM.textContent='$'+p.bizM+'/month equivalent \u00b7 Billed annually after '+p.trial+'-day trial — non-refundable';
-  if(pwDesc)pwDesc.innerHTML='Regular price <b style="text-decoration:line-through;color:#9ca3af;">$'+(p.proM*12).toFixed(2)+'/yr</b> &rarr; <b style="color:#2563EB;">only $'+p.proY+'/yr</b> · Just <b>$'+p.proM+'/month</b> — less than a coffee. '+p.trial+'-day free trial, no card charged today.';
+  if(pwDesc)pwDesc.innerHTML='Regular price <b style="text-decoration:line-through;color:#9ca3af;">$'+(p.proM*12).toFixed(2)+'/yr</b> &rarr; <b style="color:#2563EB;">only $'+p.proY+'/yr</b> · Just <b>$'+(p.proY/12).toFixed(2)+'/month</b> — less than a coffee. '+p.trial+'-day free trial, no card charged today.';
   if(pwNote)pwNote.textContent='No credit card charged for '+p.trial+' days \u00b7 Cancel anytime \u00b7 Full access during trial';
   if(p.pctOff>0){
     if(pwPO){pwPO.style.display='';pwPO.textContent='$'+p.proYOrig;}
