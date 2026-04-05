@@ -841,7 +841,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 102</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 103</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1169,7 +1169,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
         <input type="email" class="auth-input" id="authEmail" placeholder="you@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')_authSendOtp()" onfocus="_scrollInputIntoView(this)">
       </div>
-      <button class="auth-btn auth-btn-cta" onclick="_authCheckAgreeFirst('email')" id="authSendBtn">Send Code →</button>
+      <button class="auth-btn auth-btn-cta" onclick="_authCheckAgreeFirst('email')" id="authSendBtn">Send Magic Code →</button>
       <div class="auth-err" id="authErr"></div>
     </div>
     <div id="authOtpStep" style="display:none">
@@ -1488,13 +1488,17 @@ try{_renderPricing();}catch(e){}
 var _selectedAuthPlan = 'pro';
 function _updateAuthTaxLabel(country){
   var lbl=document.getElementById('authTaxRateLabel');
-  if(!lbl)return;
-  if(country==='CA') lbl.textContent='CRA 2026 Rate · $0.73/km · Tax deductible';
-  else lbl.textContent='IRS 2026 Rate · $0.70/mi · Tax deductible';
+  if(lbl){
+    if(country==='CA') lbl.textContent='CRA 2026 Rate · $0.73/km · Tax deductible';
+    else lbl.textContent='IRS 2026 Rate · $0.70/mi · Tax deductible';
+  }
   var al=document.getElementById('auditDefenseLabel');
   var ad=document.getElementById('auditDefenseDesc');
   if(al)al.textContent=(country==='CA'?'CRA Audit Defense Pack':'IRS Audit Defense Pack');
   if(ad)ad.textContent=(country==='CA'?'CRA-ready documentation if you get audited':'IRS-ready documentation if you get audited');
+  var tagline=document.querySelector('.auth-tagline');
+  if(tagline)tagline.textContent=(country==='CA'?'Track every kilometre. Claim every dollar.':'Track every mile. Claim every dollar.');
+  window._appCountry=country;
 }
 function _authChkChanged(){var err=document.getElementById('authAgreeErr');if(err)err.style.display='none';}
 function _authCheckAgreeFirst(method){
@@ -1691,7 +1695,13 @@ async function ensureProfile(user){
       }catch(e){}
     }
     if(_restoredLocale&&typeof setLocale==='function'){
-      try{setLocale(_restoredLocale,false);}catch(e){}
+      try{
+        setLocale(_restoredLocale,false);
+        var _uSel=document.getElementById('unitSel');
+        if(_uSel)_uSel.value=_restoredLocale;
+        if(typeof applyLocale==='function')applyLocale();
+        console.log('[Locale] Restored on login: '+_restoredLocale);
+      }catch(e){}
     }
     // If user had set locale before, sync it to Supabase now that we have currentUser.id
     try{
@@ -2035,18 +2045,21 @@ function setLocale(c,userChosen){
   LOC=LOCALES[c]||LOCALES.US;
   var sel=document.getElementById('unitSel');
   if(sel)sel.value=c;
-  if(userChosen){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');s.localeSetByUser=true;s.locale=c;localStorage.setItem('mymilesai_settings',JSON.stringify(s));}catch(e){}}
-  // Sync locale preference to Supabase so it persists across devices/reinstalls
-  if(userChosen&&_sb&&currentUser&&currentUser.id){
-    var _settingsToSync=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
-    _sb.from('profiles').update({settings:_settingsToSync}).eq('id',currentUser.id)
-      .then(function(r){
-        if(r.error){
-          console.warn('[Settings] Supabase sync error:',r.error.message);
-        } else {
-          console.log('[Settings] Locale synced to Supabase:',c);
-        }
-      }).catch(function(e){console.warn('[Settings] Supabase sync failed:',e);});
+  if(userChosen){
+    try{
+      var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
+      s.localeSetByUser=true;s.locale=c;
+      localStorage.setItem('mymilesai_settings',JSON.stringify(s));
+    }catch(e){}
+    // Sync to Supabase
+    if(_sb&&currentUser&&currentUser.id){
+      var _settingsToSync=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
+      _sb.from('profiles').update({settings:_settingsToSync}).eq('id',currentUser.id)
+        .then(function(r){
+          if(r.error){console.warn('[Settings] Supabase sync error:',r.error.message);}
+          else{console.log('[Settings] Locale synced to Supabase:',c);}
+        }).catch(function(e){console.warn('[Settings] Supabase sync failed:',e);});
+    }
   }
   applyLocale();
 }
@@ -3730,18 +3743,19 @@ if(window.visualViewport){
     var windowH = window.innerHeight;
     _kbHeight = Math.max(0, windowH - vh - (window.visualViewport.offsetTop||0));
 
-    var modals = document.querySelectorAll('.modal-overlay.show, .modal-overlay[style*="display:flex"]');
-    modals.forEach(function(overlay){
+    var allOverlays = document.querySelectorAll('.modal-overlay.show, .modal-overlay[style*="display:flex"], #authOverlay, #paywallOverlay');
+    allOverlays.forEach(function(overlay){
+      if(!overlay || overlay.style.display==='none' || overlay.classList.contains('hidden')) return;
       if(_kbHeight > 50){
         overlay.style.paddingBottom = _kbHeight + 'px';
-        overlay.style.alignItems = 'flex-end';
+        overlay.style.overflowY = 'auto';
         var focused = overlay.querySelector('input:focus, textarea:focus, select:focus');
         if(focused){
           setTimeout(function(){ focused.scrollIntoView({block:'center', behavior:'smooth'}); }, 50);
         }
       } else {
         overlay.style.paddingBottom = '';
-        overlay.style.alignItems = '';
+        overlay.style.overflowY = '';
       }
     });
 
@@ -6601,7 +6615,9 @@ function setObUnit(btn,unit){
 try{
   var _hasName=false;
   try{_hasName=!!localStorage.getItem('mymilesai_name');}catch(e){}
-  if(!localStorage.getItem('mymilesai_onboarded'))setTimeout(showOnboarding,800);
+  if(!localStorage.getItem('mymilesai_onboarded')){
+  setTimeout(function(){showOnboarding();},800);
+}
 }catch(e){}
 
 /* ===== AUTO-DETECT INIT ===== */
@@ -6894,7 +6910,7 @@ function exportAuditPack(){
   var totalExp=0;
   for(var i=0;i<TRIPS.length;i++){totalExp+=(parseFloat(TRIPS[i].tollCost)||0)+(parseFloat(TRIPS[i].fuelCost)||0);}
   // Generate comprehensive HTML report
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>IRS Audit Defense Pack - '+yr+'</title>';
+  var _authority=(window._appCountry==='CA'?'CRA':'IRS');var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+_authority+' Audit Defense Pack - '+yr+'</title>';
   html+='<style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:800px;margin:0 auto;padding:20px;color:#1a1a2e}';
   html+='h1{color:#6C3CE0;border-bottom:3px solid #6C3CE0;padding-bottom:10px}h2{color:#333;margin-top:30px;border-bottom:1px solid #ddd;padding-bottom:5px}';
   html+='table{width:100%;border-collapse:collapse;margin:15px 0;font-size:12px}th{background:#6C3CE0;color:#fff;padding:8px;text-align:left}';
@@ -6904,7 +6920,7 @@ function exportAuditPack(){
   html+='.compliance{background:#e8f5e9;border:1px solid #4caf50;border-radius:8px;padding:15px;margin:15px 0}';
   html+='.footer{margin-top:40px;padding-top:20px;border-top:2px solid #ddd;font-size:11px;color:#888;text-align:center}';
   html+='@media print{body{padding:0}h1{font-size:18px}table{font-size:10px}}</style></head><body>';
-  html+='<h1>IRS Audit Defense Documentation Pack</h1>';
+  html+='<h1>'+_authority+' Audit Defense Documentation Pack</h1>';
   html+='<p><b>Taxpayer:</b> '+(localStorage.getItem('mymilesai_name')||'[Name]')+'<br><b>Tax Year:</b> '+yr+'<br><b>Generated:</b> '+new Date().toLocaleDateString()+'</p>';
   // Summary
   html+='<div class="summary-box"><h2 style="margin-top:0;border:none">Deduction Summary</h2>';
