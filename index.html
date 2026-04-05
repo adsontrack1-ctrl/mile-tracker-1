@@ -463,7 +463,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(12,12,29,.5);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;}
 .modal-overlay.show{display:flex;animation:fadeIn .25s ease;}
-.modal{width:393px;max-width:100vw;background:var(--white);border-radius:var(--r3) var(--r3) 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0));box-shadow:0 -12px 48px rgba(12,12,29,.15);animation:slideUpModal .35s cubic-bezier(.22,1,.36,1);}
+.modal{width:393px;max-width:100vw;background:var(--white);border-radius:var(--r3) var(--r3) 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0));box-shadow:0 -12px 48px rgba(12,12,29,.15);animation:slideUpModal .35s cubic-bezier(.22,1,.36,1);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--ink6);margin:0 auto 20px;}
 .modal-title{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--ink);margin-bottom:20px;}
 .modal .iw{padding:0;margin-bottom:12px;}.modal .inp{border-radius:var(--r);}
@@ -702,7 +702,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
   <!-- TAB 3: STATS -->
   <div class="tab" id="tab-stats">
-    <div class="sh"><span class="sh-t">Statistics</span><div style="display:flex;align-items:center;gap:8px"><button onclick="changeStatsMonth(-1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8249;</button><span class="sh-pill" id="statsPeriod">Mar 2026</span><button onclick="changeStatsMonth(1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8250;</button></div></div>
+    <div class="sh"><span class="sh-t">Statistics</span><div style="display:flex;align-items:center;gap:8px"><button onclick="changeStatsMonth(-1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8249;</button><span class="sh-pill" id="statsPeriod">Loading...</span><button onclick="changeStatsMonth(1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8250;</button></div></div>
     <div class="tf-row"><button class="tf a" onclick="switchStatsPeriod(this,'day')">Day</button><button class="tf" onclick="switchStatsPeriod(this,'week')">Week</button><button class="tf" onclick="switchStatsPeriod(this,'month')">Month</button><button class="tf" onclick="switchStatsPeriod(this,'year')">Year</button></div>
     <div class="ins-grid">
       <div class="ins-row">
@@ -726,7 +726,24 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="sh"><span class="sh-t">Export Reports</span></div>
     <div class="exp-r"><button class="exp" onclick="exportCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> CSV</button><button class="exp ac" onclick="exportAll()" style="background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border-color:transparent;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> All</button><button class="exp" onclick="exportPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> PDF</button><button class="exp ac" onclick="exportEmail()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button></div>
     <div style="height:8px"></div>
-    <div class="exp-r"><button class="exp" onclick="exportQuickBooks()">📊 QuickBooks</button><button class="exp" onclick="exportReimbursement()">💼 Reimburse</button><button class="exp" onclick="exportCPA()">📋 CPA Pack</button><button class="exp" onclick="exportAuditPack()">🛡️ Audit Defense</button></div>
+    <div class="exp-r">
+      <button class="exp" onclick="exportQuickBooks()" title="Export to QuickBooks">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;color:#2CA01C"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        QuickBooks
+      </button>
+      <button class="exp" onclick="exportReimbursement()" title="Reimbursement Report">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+        Reimburse
+      </button>
+      <button class="exp" onclick="exportCPA()" title="CPA Tax Package">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        CPA Pack
+      </button>
+      <button class="exp" onclick="exportAuditPack()" title="IRS Audit Defense Pack">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Audit Defense
+      </button>
+    </div>
     <div style="height:16px"></div>
     <div class="sh" id="settingsSection"><span class="sh-t">Settings</span></div>
     <div class="profile-card" onclick="editProfileName()">
@@ -796,7 +813,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 88</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 89</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1555,6 +1572,10 @@ async function ensureProfile(user){
     }
     currentUser={id:user.id,email:user.email,profile:profile};
     window.currentUser=currentUser;
+    // Restore user's locale/unit preference from Supabase profile
+    if(profile&&profile.settings&&profile.settings.locale&&typeof setLocale==='function'){
+      try{setLocale(profile.settings.locale,false);}catch(e){}
+    }
     if(profile&&profile.name){
       try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}
       // Update header with real name and avatar initial
@@ -1888,7 +1909,11 @@ function setLocale(c,userChosen){
   LOC=LOCALES[c]||LOCALES.US;
   var sel=document.getElementById('unitSel');
   if(sel)sel.value=c;
-  if(userChosen){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');s.localeSetByUser=true;localStorage.setItem('mymilesai_settings',JSON.stringify(s));}catch(e){}}
+  if(userChosen){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');s.localeSetByUser=true;s.locale=c;localStorage.setItem('mymilesai_settings',JSON.stringify(s));}catch(e){}}
+  // Sync locale preference to Supabase so it persists across devices/reinstalls
+  if(userChosen&&_sb&&currentUser){
+    _sb.from('profiles').update({settings:JSON.parse(localStorage.getItem('mymilesai_settings')||'{}')}).eq('id',currentUser.id).then(function(r){if(r.error)console.warn('[Settings] Supabase sync error:',r.error.message);}).catch(function(){});
+  }
   applyLocale();
 }
 function applyLocale(){
@@ -2954,6 +2979,45 @@ function switchStatsPeriod(el,period){
   document.getElementById('statsPeriod').textContent=labels[period]||'';
   recalcStatsForPeriod(period);
 }
+var _statsViewMonth=new Date().getMonth();
+var _statsViewYear=new Date().getFullYear();
+
+function _updateStatsPeriodLabel(){
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el=document.getElementById('statsPeriod');
+  if(el)el.textContent=months[_statsViewMonth]+' '+_statsViewYear;
+}
+
+function changeStatsMonth(dir){
+  _statsViewMonth+=dir;
+  if(_statsViewMonth>11){_statsViewMonth=0;_statsViewYear++;}
+  if(_statsViewMonth<0){_statsViewMonth=11;_statsViewYear--;}
+  _updateStatsPeriodLabel();
+  recalcStatsForMonth(_statsViewMonth,_statsViewYear);
+}
+
+function recalcStatsForMonth(month,year){
+  var totalBiz=0,totalPer=0,totalDed=0,totalTrips=0;
+  TRIPS.forEach(function(t){
+    var d=t.ts?new Date(t.ts):null;
+    if(!d||d.getMonth()!==month||d.getFullYear()!==year)return;
+    var mi=convMi(t.mi);
+    if(t.type==='biz'){totalBiz+=mi;}
+    else if(t.type==='pers'){totalPer+=mi;}
+    totalDed+=_tripDeduction(t);
+    totalTrips++;
+  });
+  var u=LOC.unit,c=LOC.currency;
+  var hsBiz=document.getElementById('hsBiz');if(hsBiz)hsBiz.textContent=totalBiz.toFixed(1);
+  var hsPer=document.getElementById('hsPer');if(hsPer)hsPer.textContent=totalPer.toFixed(1);
+  var hsDed=document.getElementById('hsDed');if(hsDed)hsDed.textContent=c+(totalDed).toFixed(2);
+  // Update stats tab if visible
+  var statsContent=document.getElementById('tab-stats');
+  if(statsContent&&statsContent.style.display!=='none'){
+    recalcStats();
+  }
+}
+
 function recalcStatsForPeriod(period){
   var now=new Date();
   var startDate=new Date(now);
@@ -3478,6 +3542,24 @@ window.__nativeGPS__ = function(coords) {
 
 
 
+/* ── Keyboard-aware input focus ── */
+function _scrollInputIntoView(inp){
+  if(!inp)return;
+  setTimeout(function(){
+    var kbH=0;
+    if(window.visualViewport){kbH=Math.max(0,window.innerHeight-window.visualViewport.height);}
+    if(kbH>50){inp.scrollIntoView({block:'center',behavior:'smooth'});}
+  },150);
+}
+document.addEventListener('focusin',function(e){
+  var inp=e.target;if(!inp||!inp.tagName)return;
+  var tag=inp.tagName.toLowerCase();
+  if(tag!=='input'&&tag!=='textarea'&&tag!=='select')return;
+  var modal=inp.closest('.modal-overlay,.modal');
+  if(!modal)return;
+  _scrollInputIntoView(inp);
+},{passive:true});
+
 /* Handle iOS dynamic safe area changes (phone call bar, hotspot bar) */
 function _updateSafeArea(){
   var safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || 
@@ -3487,11 +3569,39 @@ function _updateSafeArea(){
 }
 // Listen for visual viewport changes (triggered by iOS call bar)
 if(window.visualViewport){
+  var _lastVpHeight = window.visualViewport.height;
+  var _kbHeight = 0;
+
   window.visualViewport.addEventListener('resize', function(){
     _updateSafeArea();
-    // Redraw header
     var header = document.querySelector('.top-bar, .topbar, header');
     if(header) header.style.paddingTop = 'env(safe-area-inset-top)';
+
+    var vh = window.visualViewport.height;
+    var windowH = window.innerHeight;
+    _kbHeight = Math.max(0, windowH - vh - (window.visualViewport.offsetTop||0));
+
+    var modals = document.querySelectorAll('.modal-overlay.show, .modal-overlay[style*="display:flex"]');
+    modals.forEach(function(overlay){
+      if(_kbHeight > 50){
+        overlay.style.paddingBottom = _kbHeight + 'px';
+        overlay.style.alignItems = 'flex-end';
+        var focused = overlay.querySelector('input:focus, textarea:focus, select:focus');
+        if(focused){
+          setTimeout(function(){ focused.scrollIntoView({block:'center', behavior:'smooth'}); }, 50);
+        }
+      } else {
+        overlay.style.paddingBottom = '';
+        overlay.style.alignItems = '';
+      }
+    });
+  });
+
+  window.visualViewport.addEventListener('scroll', function(){
+    var modals = document.querySelectorAll('.modal-overlay.show, .modal-overlay[style*="display:flex"]');
+    modals.forEach(function(overlay){
+      overlay.style.transform = 'translateY(' + (window.visualViewport.offsetTop||0) + 'px)';
+    });
   });
 }
 // Also handle on focus/blur (when returning from call)
@@ -3553,7 +3663,7 @@ function _confirmAutoSave(){
     to:dest,distance:parseFloat(p.dist),unit:LOC.unit,category:cat,
     deduction:parseFloat(p.dist)*LOC.rate,note:'Auto-saved',ts:Date.now()};
   var trips=loadTrips();trips.unshift(trip);saveTrips(trips);
-  recalcStats();renderTrips();
+  recalcStats();renderTrips();try{_updateStatsPeriodLabel();}catch(e){}
   showToast('✅','Saved — '+p.dist+' '+LOC.unit+' ('+cat+')');
   _pendingAutoSave=null;_autoSaveShown=false;
 }
@@ -4884,6 +4994,14 @@ function saveManual(){
       return;
     }
 
+    // If distance is already calculated and showing on screen — save immediately
+    // This fixes the stuck "Calculating..." when user taps Save after distance loads
+    if(addDistVal&&addDistVal>0){
+      _doSaveManual();
+      if(btn){btn.disabled=false;btn.textContent='Save Trip';}
+      return;
+    }
+
     // Always get exact Google driving distance when we have both addresses
     // This gives the same distance Google Maps shows — regardless of whether
     // coords were pre-set or just geocoded
@@ -4891,7 +5009,16 @@ function saveManual(){
       var useKm=(LOC&&(LOC.country==='CA'||LOC.country==='AU'));
       var status=document.getElementById('addDistStatus');
       if(status){status.textContent='Getting exact distance from Google Maps...';}
+      // Safety timeout — re-enable button if Google API hangs
+      var _saveTimeout=setTimeout(function(){
+        if(btn&&btn.disabled){
+          console.warn('[saveManual] Google distance timeout — saving with current distance');
+          _doSaveManual();
+          if(btn){btn.disabled=false;btn.textContent='Save Trip';}
+        }
+      },8000);
       _getGoogleDistance(f,t,function(distMi,err){
+        clearTimeout(_saveTimeout);
         if(distMi!==null){
           addDistVal=useKm?parseFloat((distMi*1.60934).toFixed(1)):parseFloat(distMi.toFixed(1));
           var distInp=document.getElementById('addDistInput');
@@ -5025,7 +5152,32 @@ function saveEdit(){if(!curTrip)return;curTrip.from=document.getElementById('edi
 function openDel(id){id=isNaN(id)?id:+id;curTrip=TRIPS.find(t=>+t.id===+id);if(!curTrip)return;document.getElementById('delRoute').textContent=curTrip.from+' → '+curTrip.to+' · '+tripDist(curTrip.mi)+' '+LOC.label;document.getElementById('delModal').classList.add('show');}
 function closeDel(){document.getElementById('delModal').classList.remove('show');curTrip=null;}
 var _lastDeleted=null,_lastDeletedIdx=-1,_undoTimer=null;
-function confirmDel(){if(!curTrip)return;const i=TRIPS.findIndex(t=>+t.id===+curTrip.id);if(i>-1){_lastDeleted=TRIPS[i];_lastDeletedIdx=i;TRIPS.splice(i,1);}renderTrips();renderAlerts();saveTripsToStorage();closeDel();showUndoToast(_i('trash'),'Trip deleted',function(){if(_lastDeleted){TRIPS.splice(_lastDeletedIdx,0,_lastDeleted);_lastDeleted=null;renderTrips();renderAlerts();saveTripsToStorage();showToast(_i('undo'),'Trip restored');}});}
+function confirmDel(){
+  if(!curTrip)return;
+  const i=TRIPS.findIndex(t=>+t.id===+curTrip.id);
+  const deletedTrip=curTrip;
+  const deletedAppTripId=deletedTrip.app_trip_id||String(deletedTrip.id);
+  if(i>-1){_lastDeleted=TRIPS[i];_lastDeletedIdx=i;TRIPS.splice(i,1);}
+  renderTrips();renderAlerts();saveTripsToStorage();closeDel();
+  // Sync delete to Supabase immediately
+  if(_sb&&currentUser&&deletedAppTripId){
+    _sb.from('trips').delete()
+      .eq('user_id',currentUser.id)
+      .eq('app_trip_id',deletedAppTripId)
+      .then(function(r){if(r.error)console.warn('[Del] Supabase delete error:',r.error.message);else console.log('[Del] Supabase delete OK');})
+      .catch(function(e){console.warn('[Del] Supabase delete failed:',e.message);});
+  }
+  showUndoToast(_i('trash'),'Trip deleted',function(){
+    if(_lastDeleted){
+      TRIPS.splice(_lastDeletedIdx,0,_lastDeleted);
+      _lastDeleted=null;
+      renderTrips();renderAlerts();saveTripsToStorage();
+      // Re-sync the restored trip
+      if(_sb&&currentUser)_pullTripsFromSupabase();
+      showToast(_i('undo'),'Trip restored');
+    }
+  });
+}
 
 /* ===== COUNTERS ===== */
 function animateCounters(){
@@ -5973,18 +6125,19 @@ function _openAddVehicle(){
   var overlay=document.createElement('div');
   overlay.className='modal-overlay show';
   overlay.style.cssText='display:flex;align-items:flex-end;justify-content:center;z-index:10000;';
-  overlay.innerHTML='<div class="modal" style="width:100%;max-width:480px;">'
+  overlay.innerHTML='<div class="modal" style="width:100%;max-width:480px;transition:transform .2s ease;">'
     +'<div class="modal-handle"></div>'
     +'<div class="modal-title">Add Vehicle</div>'
-    +'<div class="iw" style="padding:0;margin-bottom:10px;"><input class="inp" id="vehNameInp" placeholder="Vehicle name (e.g. My Truck, Work Van)" style="border-radius:var(--r);width:100%;box-sizing:border-box;"></div>'
-    +'<div class="iw" style="padding:0;margin-bottom:10px;"><input class="inp" id="vehPlateInp" placeholder="License plate (optional)" style="border-radius:var(--r);width:100%;box-sizing:border-box;"></div>'
-    +'<div class="iw" style="padding:0;margin-bottom:16px;"><input class="inp" id="vehYearInp" placeholder="Year / Make / Model (optional)" style="border-radius:var(--r);width:100%;box-sizing:border-box;"></div>'
+    +'<div class="iw" style="padding:0;margin-bottom:10px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px;">Vehicle Name</label><input class="inp" id="vehNameInp" placeholder="e.g. My Truck, Tesla, Work Van" autocomplete="off" style="border-radius:var(--r);width:100%;box-sizing:border-box;" onfocus="_scrollInputIntoView(this)"></div>'
+    +'<div class="iw" style="padding:0;margin-bottom:10px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px;">License Plate <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><input class="inp" id="vehPlateInp" placeholder="e.g. 7ABC123" autocomplete="off" style="border-radius:var(--r);width:100%;box-sizing:border-box;" onfocus="_scrollInputIntoView(this)"></div>'
+    +'<div class="iw" style="padding:0;margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px;">Year / Make / Model <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><input class="inp" id="vehYearInp" placeholder="e.g. 2023 Ford F-150" autocomplete="off" style="border-radius:var(--r);width:100%;box-sizing:border-box;" onfocus="_scrollInputIntoView(this)"></div>'
     +'<div class="modal-row">'
-    +'<button class="modal-cancel" onclick="this.closest(\'.modal-overlay\').remove()">Cancel</button>'
+    +"<button class=\"modal-cancel\" onclick=\"this.closest('.modal-overlay').remove()\">Cancel</button>"
     +'<button class="cta" style="flex:1" onclick="_saveVehicle(this)">Add Vehicle</button>'
     +'</div></div>';
   document.body.appendChild(overlay);
-  setTimeout(function(){var inp=document.getElementById('vehNameInp');if(inp)inp.focus();},300);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay && document.activeElement) document.activeElement.blur(); });
+  setTimeout(function(){var inp=document.getElementById('vehNameInp');if(inp){inp.focus();_scrollInputIntoView(inp);}},400);
 }
 
 function _saveVehicle(btn){
