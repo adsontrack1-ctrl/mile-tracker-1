@@ -424,8 +424,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
 /* INPUTS / CTA */
 .iw{padding:0 16px;margin-bottom:10px;}
-.inp{width:100%;padding:14px 20px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);color:var(--ink);font-family:var(--f);font-size:14px;font-weight:500;transition:all .25s;box-shadow:var(--s1);}
-.inp::placeholder{color:var(--ink4);}.inp:focus{outline:none;border-color:var(--mag);box-shadow:0 0 0 4px var(--mag-s);}
+.inp{width:100%;padding:14px 20px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:#ffffff;color:#0C0C1D;-webkit-text-fill-color:#0C0C1D;font-family:var(--f);font-size:14px;font-weight:500;transition:all .25s;box-shadow:var(--s1);opacity:1;}
+.inp::placeholder{color:#94A3B8;-webkit-text-fill-color:#94A3B8;opacity:1;}.inp:focus{outline:none;border-color:var(--mag);box-shadow:0 0 0 4px var(--mag-s);}
 .cta-w{padding:8px 16px;}
 .cta{width:100%;padding:17px 24px;border-radius:var(--rpill);border:none;background:linear-gradient(135deg,var(--mag),var(--vi),#00A870);background-size:200% 100%;animation:ctaGrad 4s ease-in-out infinite;color:#fff;font-family:var(--f);font-size:16px;font-weight:700;cursor:pointer;transition:all .35s cubic-bezier(.22,1,.36,1);box-shadow:0 8px 28px rgba(214,0,110,.2),0 2px 8px rgba(108,60,224,.12),inset 0 1px 0 rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;}
 .cta::before{content:'';position:absolute;top:0;left:-100%;width:200%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transition:left .6s;}
@@ -796,7 +796,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 86</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 88</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
