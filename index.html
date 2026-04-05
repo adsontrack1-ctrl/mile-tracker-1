@@ -840,7 +840,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 93</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 94</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1644,10 +1644,29 @@ async function ensureProfile(user){
     }
     currentUser={id:user.id,email:user.email,profile:profile};
     window.currentUser=currentUser;
-    // Restore user's locale/unit preference from Supabase profile
-    if(profile&&profile.settings&&profile.settings.locale&&typeof setLocale==='function'){
-      try{setLocale(profile.settings.locale,false);}catch(e){}
+    // Restore user's locale/unit preference
+    // Priority: Supabase profile > localStorage > auto-detect
+    var _restoredLocale=null;
+    if(profile&&profile.settings&&profile.settings.locale){
+      _restoredLocale=profile.settings.locale;
+    } else {
+      try{
+        var _lsSet=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
+        if(_lsSet.locale&&_lsSet.localeSetByUser) _restoredLocale=_lsSet.locale;
+      }catch(e){}
     }
+    if(_restoredLocale&&typeof setLocale==='function'){
+      try{setLocale(_restoredLocale,false);}catch(e){}
+    }
+    // If user had set locale before, sync it to Supabase now that we have currentUser.id
+    try{
+      var _pendingSettings=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
+      if(_pendingSettings.localeSetByUser&&_sb&&currentUser&&currentUser.id){
+        _sb.from('profiles').update({settings:_pendingSettings}).eq('id',currentUser.id)
+          .then(function(r){if(!r.error)console.log('[Settings] Pending locale synced on login');})
+          .catch(function(){});
+      }
+    }catch(e){}
     if(profile&&profile.name){
       try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}
       // Update header with real name and avatar initial
@@ -1983,8 +2002,16 @@ function setLocale(c,userChosen){
   if(sel)sel.value=c;
   if(userChosen){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');s.localeSetByUser=true;s.locale=c;localStorage.setItem('mymilesai_settings',JSON.stringify(s));}catch(e){}}
   // Sync locale preference to Supabase so it persists across devices/reinstalls
-  if(userChosen&&_sb&&currentUser){
-    _sb.from('profiles').update({settings:JSON.parse(localStorage.getItem('mymilesai_settings')||'{}')}).eq('id',currentUser.id).then(function(r){if(r.error)console.warn('[Settings] Supabase sync error:',r.error.message);}).catch(function(){});
+  if(userChosen&&_sb&&currentUser&&currentUser.id){
+    var _settingsToSync=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
+    _sb.from('profiles').update({settings:_settingsToSync}).eq('id',currentUser.id)
+      .then(function(r){
+        if(r.error){
+          console.warn('[Settings] Supabase sync error:',r.error.message);
+        } else {
+          console.log('[Settings] Locale synced to Supabase:',c);
+        }
+      }).catch(function(e){console.warn('[Settings] Supabase sync failed:',e);});
   }
   applyLocale();
 }
@@ -5712,7 +5739,15 @@ function sendAIChat(){
 /* ===== INIT ===== */
 const detected=detectLocale();
 loadTripsFromStorage(); // Load trips BEFORE locale so renderTrips has data
-setLocale(detected);
+// Restore user's saved locale preference — don't overwrite with auto-detect
+try{
+  var _savedSettings=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
+  if(_savedSettings.locale&&_savedSettings.localeSetByUser){
+    setLocale(_savedSettings.locale,false);
+  } else {
+    setLocale(detected,false);
+  }
+}catch(e){ setLocale(detected,false); }
 updateGreeting();
 initProfile();
 setTimeout(animateCounters,600);
@@ -6110,6 +6145,13 @@ function saveSettings(){
   try{localStorage.setItem('mymilesai_settings',JSON.stringify(settings));}catch(e){}
 }
 function loadSettings(){
+  // Restore locale/unit from localStorage first
+  try{
+    var _ls=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
+    if(_ls.locale&&_ls.localeSetByUser&&typeof setLocale==='function'){
+      setLocale(_ls.locale,false);
+    }
+  }catch(e){}
   try{
     var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'null');
     if(s){
@@ -6485,8 +6527,8 @@ function obNext(step){
 }
 function obSkipGPS(){
   // Skip GPS permission request, just advance to next slide
-  _obStep=3;
-  _updateObUI(3);
+  _obStep=4;
+  _updateObUI(4);
 }
 function setObUnit(btn,unit){
   document.querySelectorAll('.ob-unit-btn').forEach(function(b){b.classList.remove('active');});
