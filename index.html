@@ -724,32 +724,52 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="tax"><div class="tax-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> <span id="taxLabel">IRS 2026 Rate</span></div><div class="tax-amt" id="taxAmt">$0</div><div class="tax-det" id="taxDet">—</div><div class="tax-split"><div class="tax-seg b"></div><div class="tax-seg p"></div></div><div class="tax-legend"><span><span class="tax-lg-dot" style="background:var(--vi)"></span>Business 0%</span><span><span class="tax-lg-dot" style="background:var(--mag)"></span>Personal 0%</span></div></div>
     <div class="sh"><span class="sh-t">Export Reports</span></div>
-    <div class="exp-r"><button class="exp" onclick="exportExcel()" title="Export as Excel spreadsheet" style="color:#1D6F42;">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-  Excel
-</button>
-<button class="exp" onclick="exportGoogleSheets()" title="Open in Google Sheets" style="color:#0F9D58;">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-  Sheets
-</button><button class="exp ac" onclick="exportAll()" style="background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border-color:transparent;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> All</button><button class="exp" onclick="exportPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> PDF</button><button class="exp ac" onclick="exportEmail()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button></div>
-    <div style="height:8px"></div>
     <div class="exp-r">
-      <button class="exp" onclick="exportQuickBooks()" title="Export to QuickBooks">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;color:#2CA01C"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <button class="exp" onclick="exportExcel()" title="Export as Excel .xlsx" style="color:#1D6F42;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+        Excel
+      </button>
+      <button class="exp" onclick="exportPDF()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+        PDF
+      </button>
+      <button class="exp" onclick="exportQuickBooks()" title="QuickBooks IIF" style="color:#2CA01C;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         QuickBooks
       </button>
-      <button class="exp" onclick="exportReimbursement()" title="Reimbursement Report">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
-        Reimburse
+      <button class="exp" onclick="_toggleMoreExports(this)" id="moreExportsBtn" style="color:var(--vi);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        More
       </button>
-      <button class="exp" onclick="exportCPA()" title="CPA Tax Package">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        CPA Pack
-      </button>
-      <button class="exp" onclick="exportAuditPack()" title="IRS Audit Defense Pack">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Audit Defense
-      </button>
+    </div>
+    <div id="moreExportsPanel" style="display:none;padding:0 16px;margin-top:4px;">
+      <div style="background:var(--ink7);border:1px solid var(--ink6);border-radius:var(--r2);overflow:hidden;">
+        <div style="padding:10px 14px;font-size:10px;font-weight:800;color:var(--vi);text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid var(--ink6);">Advanced Exports</div>
+        <button onclick="exportGoogleSheets()" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:none;border:none;border-bottom:1px solid var(--ink6);cursor:pointer;text-align:left;font-family:var(--f);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F9D58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          <div><div style="font-size:13px;font-weight:700;color:var(--ink);">Google Sheets</div><div style="font-size:11px;color:var(--ink3);margin-top:1px;">Download CSV and import to Sheets</div></div>
+        </button>
+        <button onclick="exportEmail()" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:none;border:none;border-bottom:1px solid var(--ink6);cursor:pointer;text-align:left;font-family:var(--f);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <div><div style="font-size:13px;font-weight:700;color:var(--ink);">Email Summary</div><div style="font-size:11px;color:var(--ink3);margin-top:1px;">Send trip summary via email</div></div>
+        </button>
+        <button onclick="exportReimbursement()" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:none;border:none;border-bottom:1px solid var(--ink6);cursor:pointer;text-align:left;font-family:var(--f);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          <div><div style="font-size:13px;font-weight:700;color:var(--ink);">Reimbursement Report</div><div style="font-size:11px;color:var(--ink3);margin-top:1px;">For employers — business trips only</div></div>
+        </button>
+        <button onclick="exportCPA()" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:none;border:none;border-bottom:1px solid var(--ink6);cursor:pointer;text-align:left;font-family:var(--f);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div><div style="font-size:13px;font-weight:700;color:var(--ink);">CPA Tax Package</div><div style="font-size:11px;color:var(--ink3);margin-top:1px;">Full mileage summary for your accountant</div></div>
+        </button>
+        <button onclick="exportAuditPack()" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:none;border:none;cursor:pointer;text-align:left;font-family:var(--f);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div><div style="font-size:13px;font-weight:700;color:var(--ink);">IRS Audit Defense Pack</div><div style="font-size:11px;color:var(--ink3);margin-top:1px;">IRS-ready documentation if you get audited</div></div>
+        </button>
+        <button onclick="exportAll()" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:linear-gradient(135deg,rgba(108,60,224,.06),rgba(214,0,110,.06));border:none;cursor:pointer;text-align:left;font-family:var(--f);border-top:1px solid var(--ink6);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--mag)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <div><div style="font-size:13px;font-weight:700;color:var(--mag);">Export All Data</div><div style="font-size:11px;color:var(--ink3);margin-top:1px;">CSV + JSON backup — everything at once</div></div>
+        </button>
+      </div>
     </div>
     <div style="height:16px"></div>
     <div class="sh" id="settingsSection"><span class="sh-t">Settings</span></div>
@@ -820,7 +840,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 90</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 91</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1107,8 +1127,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
         <span id="authDiscountBadge" style="display:none;font-size:10px;font-weight:800;color:#fff;background:linear-gradient(135deg,#ef4444,#f97316);padding:2px 8px;border-radius:100px;letter-spacing:.5px;"></span>
       </div>
       <div style="display:flex;gap:8px;">
-        <div style="flex:1;background:#fff;border-radius:10px;padding:10px;border:1px solid #e5e7eb;">
-          <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">Pro <span style="color:#9ca3af;font-weight:400;">· 1 device</span></div>
+        <div id="authPlanPro" onclick="_selectAuthPlan('pro')" style="flex:1;background:#fff;border-radius:10px;padding:10px;border:2px solid #6366f1;cursor:pointer;transition:all .2s;box-shadow:0 0 0 3px rgba(99,102,241,.15);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div style="font-size:11px;font-weight:700;color:#374151;">Pro <span style="color:#9ca3af;font-weight:400;">· 1 device</span></div>
+            <div id="authPlanProCheck" style="width:14px;height:14px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;"><svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          </div>
           <div style="display:flex;align-items:baseline;gap:3px;">
             <span id="authProOrigPrice" style="display:none;font-size:11px;color:#9ca3af;text-decoration:line-through;"></span>
             <span id="authProPrice" style="font-size:18px;font-weight:800;color:#6366f1;"></span>
@@ -1116,8 +1139,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
           </div>
           <div id="authProYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
         </div>
-        <div style="flex:1;background:#fff;border-radius:10px;padding:10px;border:1.5px solid #6366f1;">
-          <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">Business <span style="color:#9ca3af;font-weight:400;">· 10 devices</span></div>
+        <div id="authPlanBiz" onclick="_selectAuthPlan('business')" style="flex:1;background:#fff;border-radius:10px;padding:10px;border:1.5px solid #e5e7eb;cursor:pointer;transition:all .2s;opacity:0.7;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div style="font-size:11px;font-weight:700;color:#374151;">Business <span style="color:#9ca3af;font-weight:400;">· 10 devices</span></div>
+            <div id="authPlanBizCheck" style="width:14px;height:14px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;"><svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          </div>
           <div style="display:flex;align-items:baseline;gap:3px;">
             <span id="authBizOrigPrice" style="display:none;font-size:11px;color:#9ca3af;text-decoration:line-through;"></span>
             <span id="authBizPrice" style="font-size:18px;font-weight:800;color:#6366f1;"></span>
@@ -1129,20 +1155,20 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div style="font-size:10px;color:#9ca3af;margin-top:8px;text-align:center;">✓ 10-day free trial · No credit card required</div>
     </div>
     <div id="authEmailStep">
-      <button class="auth-btn auth-btn-google" onclick="_authGoogle()" id="authGoogleBtn">
+      <button class="auth-btn auth-btn-google" onclick="_authCheckAgreeFirst('google')" id="authGoogleBtn">
         <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09A6.97 6.97 0 015.47 12c0-.72.13-1.42.37-2.09V7.07H2.18A11.97 11.97 0 001 12c0 1.94.46 3.77 1.18 5.07l3.66-2.98z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         Continue with Google
       </button>
-      <button class="auth-btn auth-btn-apple" onclick="_authApple()" id="authAppleBtn">
+      <button class="auth-btn auth-btn-apple" onclick="_authCheckAgreeFirst('apple')" id="authAppleBtn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
         Continue with Apple
       </button>
       <div class="auth-divider">or continue with email</div>
       <div class="auth-input-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
-        <input type="email" class="auth-input" id="authEmail" placeholder="you@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')_authSendOtp()">
+        <input type="email" class="auth-input" id="authEmail" placeholder="you@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')_authSendOtp()" onfocus="_scrollInputIntoView(this)">
       </div>
-      <button class="auth-btn auth-btn-cta" onclick="_authSendOtp()" id="authSendBtn">Send Code →</button>
+      <button class="auth-btn auth-btn-cta" onclick="_authCheckAgreeFirst('email')" id="authSendBtn">Send Code →</button>
       <div class="auth-err" id="authErr"></div>
     </div>
     <div id="authOtpStep" style="display:none">
@@ -1160,7 +1186,14 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="auth-err" id="authOtpErr"></div>
       <span class="auth-back" onclick="_authShowEmail()">← Back to email</span>
     </div>
-    <div class="auth-footer">No password required · Privacy-first · Free to start<br>By continuing you agree to our <span onclick="openInfoModal('Terms','See Terms & Conditions in Settings.')">Terms</span> & <span onclick="openInfoModal('Privacy','See Privacy Policy in Settings.')">Privacy Policy</span></div>
+    <div style="display:flex;align-items:flex-start;gap:10px;margin:14px 0 4px;text-align:left;">
+      <input type="checkbox" id="authAgreementChk" style="width:18px;height:18px;min-width:18px;margin-top:1px;accent-color:#2563EB;cursor:pointer;" onchange="_authChkChanged()">
+      <label for="authAgreementChk" style="font-size:12px;color:#6B7280;line-height:1.5;cursor:pointer;">
+        I agree to the <span onclick="event.preventDefault();openInfoModal('Terms','See full Terms in Settings.')" style="color:#2563EB;font-weight:600;text-decoration:underline;">Terms</span> and <span onclick="event.preventDefault();openInfoModal('Privacy','See Privacy Policy in Settings.')" style="color:#2563EB;font-weight:600;text-decoration:underline;">Privacy Policy</span>, including the 10-day free trial, annual billing, and no-refund policy.
+      </label>
+    </div>
+    <div id="authAgreeErr" style="display:none;font-size:12px;color:#EF4444;margin-bottom:8px;text-align:center;">Please agree to the Terms to continue</div>
+    <div class="auth-footer">No password required · Privacy-first · Free to start</div>
   </div>
 </div>
 <!-- Subscribe / Paywall — 2 plans: Pro + Business, both with 10-day trial -->
@@ -1427,6 +1460,37 @@ function _renderPricing(){
 // Run on load and expose globally
 try{_renderPricing();}catch(e){}
 // ── UI helpers ───────────────────────────────────────────────────────
+var _selectedAuthPlan = 'pro';
+function _authChkChanged(){var err=document.getElementById('authAgreeErr');if(err)err.style.display='none';}
+function _authCheckAgreeFirst(method){
+  var chk=document.getElementById('authAgreementChk');
+  if(!chk||!chk.checked){
+    var err=document.getElementById('authAgreeErr');
+    if(err){err.style.display='block';setTimeout(function(){err.style.display='none';},3000);}
+    return;
+  }
+  if(method==='google')_authGoogle();
+  else if(method==='apple')_authApple();
+  else if(method==='email')_authSendOtp();
+}
+function _selectAuthPlan(plan){
+  _selectedAuthPlan = plan;
+  var proPlan=document.getElementById('authPlanPro');
+  var bizPlan=document.getElementById('authPlanBiz');
+  var proCheck=document.getElementById('authPlanProCheck');
+  var bizCheck=document.getElementById('authPlanBizCheck');
+  if(plan==='pro'){
+    if(proPlan){proPlan.style.border='2px solid #6366f1';proPlan.style.boxShadow='0 0 0 3px rgba(99,102,241,.15)';proPlan.style.opacity='1';}
+    if(bizPlan){bizPlan.style.border='1.5px solid #e5e7eb';bizPlan.style.boxShadow='none';bizPlan.style.opacity='0.7';}
+    if(proCheck)proCheck.style.background='#6366f1';
+    if(bizCheck)bizCheck.style.background='#e5e7eb';
+  } else {
+    if(bizPlan){bizPlan.style.border='2px solid #6366f1';bizPlan.style.boxShadow='0 0 0 3px rgba(99,102,241,.15)';bizPlan.style.opacity='1';}
+    if(proPlan){proPlan.style.border='1.5px solid #e5e7eb';proPlan.style.boxShadow='none';proPlan.style.opacity='0.7';}
+    if(bizCheck)bizCheck.style.background='#6366f1';
+    if(proCheck)proCheck.style.background='#e5e7eb';
+  }
+}
 function _authShowModal(){var o=document.getElementById('authOverlay');if(o){o.classList.remove('hidden');o.style.display='flex';}_authHideLoading();}
 function _authHideModal(){var o=document.getElementById('authOverlay');if(o){o.classList.add('hidden');o.style.display='none';}_authHideLoading();}
 function _authShowEmail(){document.getElementById('authEmailStep').style.display='';document.getElementById('authOtpStep').style.display='none';document.getElementById('authErr').textContent='';}
@@ -2983,8 +3047,16 @@ function switchStatsPeriod(el,period){
   el.closest('.tf-row').querySelectorAll('.tf').forEach(function(f){f.classList.remove('a');});
   el.classList.add('a');
   var now=new Date();
-  var labels={day:'Today',week:'This Week',month:now.toLocaleString('default',{month:'short'})+' '+now.getFullYear(),year:now.getFullYear().toString()};
-  document.getElementById('statsPeriod').textContent=labels[period]||'';
+  var labels={day:'Today',week:'This Week',year:now.getFullYear().toString()};
+  // statsPeriod shows month/year for nav arrows — don't overwrite it
+  // Only update month label when viewing month period
+  if(period==='month'){
+    _updateStatsPeriodLabel();
+  } else {
+    // For day/week/year — update statsPeriod to show current period context
+    // but keep showing the month year for the nav arrows
+    _updateStatsPeriodLabel(); // always show current month in nav
+  }
   recalcStatsForPeriod(period);
 }
 var _statsViewMonth=new Date().getMonth();
@@ -2992,6 +3064,8 @@ var _statsViewYear=new Date().getFullYear();
 
 function _updateStatsPeriodLabel(){
   var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(typeof _statsViewMonth==='undefined'||_statsViewMonth===null)_statsViewMonth=new Date().getMonth();
+  if(typeof _statsViewYear==='undefined'||_statsViewYear===null)_statsViewYear=new Date().getFullYear();
   var el=document.getElementById('statsPeriod');
   if(el)el.textContent=months[_statsViewMonth]+' '+_statsViewYear;
 }
@@ -3001,6 +3075,7 @@ function changeStatsMonth(dir){
   if(_statsViewMonth>11){_statsViewMonth=0;_statsViewYear++;}
   if(_statsViewMonth<0){_statsViewMonth=11;_statsViewYear--;}
   _updateStatsPeriodLabel();
+  var activeTab=document.querySelector('.stat-tab.active,.tab-period.active,[data-period].active');
   recalcStatsForMonth(_statsViewMonth,_statsViewYear);
 }
 
@@ -3603,6 +3678,24 @@ if(window.visualViewport){
         overlay.style.alignItems = '';
       }
     });
+
+    // Auth overlay keyboard fix
+    var authOverlay = document.getElementById('authOverlay');
+    if(authOverlay && authOverlay.style.display !== 'none'){
+      if(_kbHeight > 50){
+        var focusedInAuth = authOverlay.querySelector('input:focus');
+        if(focusedInAuth){
+          authOverlay.style.alignItems = 'flex-start';
+          authOverlay.style.paddingTop = '20px';
+          authOverlay.style.overflowY = 'auto';
+          setTimeout(function(){ focusedInAuth.scrollIntoView({block:'center', behavior:'smooth'}); }, 50);
+        }
+      } else {
+        authOverlay.style.alignItems = '';
+        authOverlay.style.paddingTop = '';
+        authOverlay.style.overflowY = '';
+      }
+    }
   });
 
   window.visualViewport.addEventListener('scroll', function(){
@@ -3671,7 +3764,13 @@ function _confirmAutoSave(){
     to:dest,distance:parseFloat(p.dist),unit:LOC.unit,category:cat,
     deduction:parseFloat(p.dist)*LOC.rate,note:'Auto-saved',ts:Date.now()};
   var trips=loadTrips();trips.unshift(trip);saveTrips(trips);
-  recalcStats();renderTrips();try{_updateStatsPeriodLabel();}catch(e){}
+  recalcStats();renderTrips();
+// Always update stats period label after render
+try{
+  _statsViewMonth=new Date().getMonth();
+  _statsViewYear=new Date().getFullYear();
+  _updateStatsPeriodLabel();
+}catch(e){}
   showToast('✅','Saved — '+p.dist+' '+LOC.unit+' ('+cat+')');
   _pendingAutoSave=null;_autoSaveShown=false;
 }
@@ -4978,7 +5077,12 @@ function saveManual(){
   if(!f||!t){showToast(_i('warn'),'Please enter both From and To addresses');return;}
 
   var btn=document.getElementById('addSaveBtn');
-  if(btn){btn.disabled=true;btn.textContent='Calculating...';}
+  if(btn){
+    btn.disabled=true;btn.textContent='Calculating...';
+    setTimeout(function(){
+      if(btn&&btn.disabled){btn.disabled=false;btn.textContent='Save Trip';console.warn('[saveManual] Force re-enabled button after 10s');}
+    },10000);
+  }
 
   function _geocodeIfNeeded(addr,cb){
     if(!_googleMapsReady||!google||!google.maps){cb(null);return;}
@@ -5795,6 +5899,7 @@ async function _pullTripsFromSupabase(){
     TRIPS.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
     try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
     renderTrips();renderAlerts();recalcStats();
+    try{_updateStatsPeriodLabel();}catch(e){}
     _showSyncStatus('Synced from cloud ✓',true);
   }catch(e){console.warn('Supabase trip pull failed:',e.message);_showSyncStatus('Offline — using local data',false);}
 }
@@ -6258,7 +6363,7 @@ function restoreJSON(input){
 }
 
 function signOut(){
-  _showConfirm('Sign Out & Clear Data','This will permanently delete all your trips, settings, and profile data. This cannot be undone.','Sign Out & Clear All','var(--coral)',async function(){
+  _showConfirm('Sign Out','Signing out will clear your local session. Your trips and data are safely stored in the cloud and will sync back when you sign in again.','Sign Out','var(--coral)',async function(){
     // Gap 2 fix: remove this device session from Supabase
     if(_sb&&currentUser&&currentUser.id){
       try{await _sb.from('user_sessions').delete().eq('user_id',currentUser.id).eq('device_id',_deviceId);}catch(e){}
@@ -6538,6 +6643,14 @@ async function _ocrReceiptViaAI(base64Image){
 }
 
 /* -- QuickBooks IIF Export -- */
+function _toggleMoreExports(btn){
+  var panel=document.getElementById('moreExportsPanel');
+  if(!panel)return;
+  var open=panel.style.display!=='none';
+  panel.style.display=open?'none':'block';
+  if(btn){btn.style.color=open?'var(--vi)':'var(--mag)';}
+}
+
 function exportQuickBooks(){
   if(TRIPS.length===0){showToast(_i('warn'),'No trips to export','#EF4444');return;}
   var yr=new Date().getFullYear();
