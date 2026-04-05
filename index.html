@@ -6474,8 +6474,9 @@ function signOut(){
 }
 
 /* ===== FEATURE 6: ONBOARDING ===== */
-var _obStep=0;window._obStep=_obStep;
+var _obStep=0;
 function showOnboarding(){
+  window._obStep=_obStep;window._obCountry=_obCountry;
   document.getElementById('onboardOverlay').classList.add('show');
   document.getElementById('onboardSheet').classList.add('show');
   _obStep=-1;
@@ -6495,6 +6496,9 @@ function closeOnboarding(){
   try{localStorage.setItem('mymilesai_onboarded','1');}catch(e){}
 }
 function _updateObUI(step){
+  // Keep globals in sync for testing
+  window._obStep=_obStep;
+  window._obCountry=_obCountry;
   // Hide country picker when on any numbered step
   var cp=document.getElementById('obSlideCountry');if(cp)cp.style.display='none';
   // Update slides
@@ -6518,7 +6522,7 @@ function _updateObUI(step){
   else back.classList.add('hidden');
 }
 function obPrev(){
-  if(_obStep>0){_obStep--;window._obStep=_obStep;_updateObUI(_obStep);}
+  if(_obStep>0){_obStep--;_updateObUI(_obStep);}
 }
 function obNext(step){
   // Step 1: Name
@@ -6561,7 +6565,7 @@ function obNext(step){
     return;
   }
   // Advance slide
-  _obStep=step;window._obStep=_obStep;
+  _obStep=step;
   _updateObUI(step);
 }
 function obSkipGPS(){
