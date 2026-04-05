@@ -661,7 +661,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="uncl" id="unclBanner" style="display:none" onclick="switchTabId('tab-trips')"><span class="uncl-i" style="display:inline-flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg></span><div><div class="uncl-t" id="unclText"></div><div class="uncl-d">Tap to classify →</div></div><span class="uncl-a">›</span></div>
     <div id="ytdBar" style="margin:8px 16px 0;padding:14px 16px;background:var(--white);border-radius:var(--r2);border:1px solid var(--ink6);display:none">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <span style="font-size:12px;font-weight:700;color:var(--ink2)">📅 Year-to-date savings</span>
+    <span style="font-size:12px;font-weight:700;color:var(--ink2);display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>Year-to-date savings</span>
     <span style="font-size:12px;color:var(--vi);font-weight:700" id="ytdPct">0%</span>
   </div>
   <div style="background:var(--ink6);border-radius:var(--rpill);height:8px;overflow:hidden">
@@ -840,7 +840,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 94</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 95</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1240,8 +1240,32 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="ob-progress"><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg1" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg2" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg3" style="width:0%"></div></div><div class="ob-prog-bar"><div class="ob-prog-fill" id="obProg4" style="width:0%"></div></div></div>
 
-    <!-- Step 0: Welcome -->
-    <div class="ob-slide" id="obSlide0" style="display:flex">
+    <!-- Step 0: Country Picker -->
+    <div class="ob-slide" id="obSlideCountry" style="display:flex">
+      <div class="ob-icon-wrap">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="var(--vi)"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" stroke="rgba(255,255,255,.3)"/>
+        </svg>
+      </div>
+      <div class="ob-title">Where are you based?</div>
+      <div class="ob-desc">We'll set the right tax rates and units for your country.</div>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
+        <button id="obCountryUS" onclick="_obPickCountry('US')" style="display:flex;align-items:center;gap:16px;padding:20px;border-radius:20px;border:2px solid rgba(99,102,241,.6);background:rgba(108,60,224,.12);cursor:pointer;text-align:left;">
+          <span style="font-size:36px;">&#127482;&#127480;</span>
+          <div style="flex:1;"><div style="font-size:17px;font-weight:800;color:#fff;">United States</div><div style="font-size:12px;color:rgba(255,255,255,.6);">IRS · $0.70/mi · Miles</div></div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,.8)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button id="obCountryCA" onclick="_obPickCountry('CA')" style="display:flex;align-items:center;gap:16px;padding:20px;border-radius:20px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);cursor:pointer;text-align:left;">
+          <span style="font-size:36px;">&#127464;&#127462;</span>
+          <div style="flex:1;"><div style="font-size:17px;font-weight:800;color:rgba(255,255,255,.8);">Canada</div><div style="font-size:12px;color:rgba(255,255,255,.5);">CRA · $0.73/km · Kilometers</div></div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div style="margin-top:16px;text-align:center;font-size:10px;color:rgba(255,255,255,.3);">Prices in USD. Change region anytime in Settings.</div>
+    </div>
+    <!-- Step 1: Welcome -->
+    <div class="ob-slide" id="obSlide0" style="display:none">
       <div class="ob-icon-wrap"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z" stroke="var(--vi)" fill="none"/><circle cx="6.5" cy="14.5" r="1.5" fill="#C084FC"/><circle cx="17.5" cy="14.5" r="1.5" fill="#D6006E"/><path d="M5 11l1.5-4.5h11L19 11H5z" stroke="#6EE7B7" fill="none"/></svg></div>
       <div class="ob-title">Welcome to MyMilesAI</div>
       <div class="ob-desc">Smart mileage tracking for tax deductions. Set up in 30 seconds.</div>
@@ -2133,7 +2157,7 @@ function tripCard(t,wide){
   const bigVal=t.ded?LOC.currency+dedAmt.toFixed(2):d;
   const bigUnit=t.ded?'saved':LOC.label;
   const subDist=t.ded?`<div class="trip-mi-sub">${d} ${LOC.label}</div>`:'';
-  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${vehTag}${purposeTag}${expTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip">📤 Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${vehTag}${purposeTag}${expTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button></div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   if(t.type==='uncl' && wide){
     return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
   }
@@ -6443,8 +6467,10 @@ var _obStep=0;
 function showOnboarding(){
   document.getElementById('onboardOverlay').classList.add('show');
   document.getElementById('onboardSheet').classList.add('show');
-  _obStep=0;
-  _updateObUI(0);
+  _obStep=-1;
+  // Show country picker first
+  var cp=document.getElementById('obSlideCountry');if(cp)cp.style.display='flex';
+  for(var i=0;i<5;i++){var s=document.getElementById('obSlide'+i);if(s)s.style.display='none';}
   setTimeout(function(){document.getElementById('obName').focus();},600);
 }
 function closeOnboarding(){
@@ -6458,6 +6484,8 @@ function closeOnboarding(){
   try{localStorage.setItem('mymilesai_onboarded','1');}catch(e){}
 }
 function _updateObUI(step){
+  // Hide country picker when on any numbered step
+  var cp=document.getElementById('obSlideCountry');if(cp)cp.style.display='none';
   // Update slides
   for(var i=0;i<4;i++){
     var slide=document.getElementById('obSlide'+i);
@@ -6530,6 +6558,26 @@ function obSkipGPS(){
   _obStep=4;
   _updateObUI(4);
 }
+var _obCountry='US';
+function _obPickCountry(country){
+  _obCountry=country;
+  if(typeof setLocale==='function') setLocale(country,true);
+  var usBtn=document.getElementById('obCountryUS');
+  var caBtn=document.getElementById('obCountryCA');
+  if(usBtn&&caBtn){
+    if(country==='US'){
+      usBtn.style.border='2px solid rgba(99,102,241,.6)';usBtn.style.background='rgba(108,60,224,.12)';
+      caBtn.style.border='1.5px solid rgba(255,255,255,.08)';caBtn.style.background='rgba(255,255,255,.04)';
+    } else {
+      caBtn.style.border='2px solid rgba(99,102,241,.6)';caBtn.style.background='rgba(108,60,224,.12)';
+      usBtn.style.border='1.5px solid rgba(255,255,255,.08)';usBtn.style.background='rgba(255,255,255,.04)';
+    }
+  }
+  // Hide country picker, show welcome
+  var cp=document.getElementById('obSlideCountry');if(cp)cp.style.display='none';
+  _obStep=0;_updateObUI(0);
+}
+
 function setObUnit(btn,unit){
   document.querySelectorAll('.ob-unit-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
