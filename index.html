@@ -794,7 +794,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="8" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
 
-      <div class="sr"><div><h4>Pause timeout</h4><p>Stop after pause of</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="600000">10 min</option></select></div>
+      <div class="sr"><div><h4>Smart stop timer</h4><p>Auto-stop trip after stationary</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="120000">2 min</option><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="480000">8 min</option><option value="600000">10 min</option></select></div>
       <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--vi)" id="rateVal">$0.70/mi</div></div>
     </div>
     <div class="set-hdr">Odometer</div>
@@ -3426,7 +3426,7 @@ function exportSummaryPDF(period){
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDist=0;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
 let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
-var SMART_STOP_MS=300000; // 5 min continuous stationary → end trip
+var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||5;return mins*60*1000;}catch(e){return 300000;}})();
 var _stationaryStart=0; // timestamp when device became stationary
 var _startAddr=''; // captured start address via reverse geocode
 var _startAddrLocked=false; // true once we have a quality start address
@@ -4387,13 +4387,13 @@ function stopAutoMonitoring(){
 
 var _autoState='IDLE'; // IDLE → DETECTING → RECORDING
 var _detectCount=0; // consecutive above-threshold readings
-var _detectRequired=2;
+var _detectRequired=4;
 var _stillCount=0;
 var _stopRequired=8;
 var _charging=false;
 var _accelMoving=false;
 var _accelBuf=[];
-if(navigator.getBattery){navigator.getBattery().then(function(bat){_charging=bat.charging;bat.addEventListener('chargingchange',function(){_charging=bat.charging;_detectRequired=_charging?2:3;});}).catch(function(){});}
+if(navigator.getBattery){navigator.getBattery().then(function(bat){_charging=bat.charging;bat.addEventListener('chargingchange',function(){_charging=bat.charging;_detectRequired=_charging?3:4;});}).catch(function(){});}
 if(window.DeviceMotionEvent){window.addEventListener('devicemotion',function(e){if(!e.acceleration)return;var mag=Math.sqrt(Math.pow(e.acceleration.x||0,2)+Math.pow(e.acceleration.y||0,2)+Math.pow(e.acceleration.z||0,2));_accelBuf.push(mag);if(_accelBuf.length>10)_accelBuf.shift();var avg=_accelBuf.reduce(function(a,b){return a+b;},0)/(_accelBuf.length||1);_accelMoving=(avg>0.5&&avg<15);},{passive:true});}
 
 function onAutoPos(p){
@@ -4668,6 +4668,10 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   /* Sync to Supabase — queue for offline retry if it fails */
   (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u)return;var row={user_id:u.id,trip_id:_t.tripId,from_addr:_t.from,to_addr:_t.to,miles:_t.mi,type:_t.type,date:_t.date,ts:_t.ts,purpose:_t.purpose||'',notes:_t.notes||'',vehicle_id:_t.vehicleId||null};_sb.from('trips').upsert(row,{onConflict:'trip_id'}).then(function(res){if(res.error){_addToPendingQueue(_t);}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(){_addToPendingQueue(_t);});}).catch(function(){_addToPendingQueue(_t);});})();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
+  /* Ask for push permission after first trip — once only */
+  if(!window.__MYMILESAI_NATIVE__&&'Notification' in window&&Notification.permission==='default'&&TRIPS.length===1){
+    setTimeout(function(){Notification.requestPermission().then(function(perm){if(perm==='granted'){console.log('[MMAI] Push permission granted');try{localStorage.setItem('mmai_push_granted','1');}catch(e){}}}).catch(function(){});},3000);
+  }
   recordTripEnd();
   // Always ask user to confirm trip type after every trip
   setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
@@ -6423,6 +6427,9 @@ loadWorkHours();
 function updatePauseTimeout(){
   SMART_STOP_MS=parseInt(document.getElementById('pauseTimeoutSel').value)||300000;
   saveSettings();
+  var mins=Math.round(SMART_STOP_MS/60000);
+  try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');s.smartStopMins=mins;localStorage.setItem('mymilesai_settings',JSON.stringify(s));}catch(e){}
+  showToast(_i('clock'),'Smart stop set to '+mins+' minutes',2000);
 }
 
 /* ===== NOTIFICATION SETTINGS ===== */
@@ -6431,6 +6438,10 @@ function toggleNotifSetting(el,key){
   el.classList.toggle('on');
   _notifSettings[key]=el.classList.contains('on');
   try{localStorage.setItem('mymilesai_notif_settings',JSON.stringify(_notifSettings));}catch(e){}
+  /* Request push permission when enabling any notification */
+  if(_notifSettings[key]&&'Notification' in window&&Notification.permission==='default'){
+    Notification.requestPermission().then(function(p){if(p==='granted'){try{localStorage.setItem('mmai_push_granted','1');}catch(e){}showToast(_i('bell'),'Notifications enabled',2000);}});
+  }
 }
 function loadNotifSettings(){
   try{
