@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0C0C1D">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16.png">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.harijasllc.workers.dev https://api.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.harijasllc.workers.dev https://api.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src 'self' blob:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2066,28 +2066,27 @@ if(_sb){
 /* ===== Google Maps Init Callback ===== */
 var _googleMapsReady=false;
 function _initGoogleMaps(){
-  window._mapsLoading=false;
-  window._pendingMapOpen=false;
   _googleMapsReady=true;
-  // Suppress "This page can't load Google Maps correctly" dialog on native iOS
-  // This fires when Maps loads in WKWebView — safe to suppress, map works fine
-  window.gm_authFailure=function(){
-    console.warn('MyMilesAI: gm_authFailure suppressed — running in native WKWebView');
-  };
-  // Do NOT create a map here — initMap() owns the single map instance.
-  // If the map sheet is already open when Maps SDK loads, init now.
-  if(mapSheetOpen&&!mapReady){
-    setTimeout(initMap,100);
-  }
-  // If Add Trip sheet is open and user already typed addresses, trigger distance calc now
-  var _addSheetOpen=document.getElementById('addSheet')&&document.getElementById('addSheet').classList.contains('show');
-  if(_addSheetOpen){
-    var _pf=document.getElementById('addFrom')&&document.getElementById('addFrom').value.trim();
-    var _pt=document.getElementById('addTo')&&document.getElementById('addTo').value.trim();
-    if(_pf&&_pf.length>=3) setTimeout(function(){_geocodeWhenReady(_pf,'addFrom','fromDD',0);},200);
-    if(_pt&&_pt.length>=3) setTimeout(function(){_geocodeWhenReady(_pt,'addTo','toDD',0);},400);
-    if(_pf&&_pt) setTimeout(_tryGoogleDistance,600);
-  }
+  window._mapsLoading=false;
+  console.log('[MMAI] Google Maps ready');
+  // Suppress gm_authFailure on native iOS WKWebView
+  window.gm_authFailure=function(){console.warn('[MMAI] gm_authFailure suppressed');};
+  // Flush all queued callbacks
+  var cbs=_mapsReadyCbs.splice(0);
+  cbs.forEach(function(cb){try{cb();}catch(e){}});
+  // Init any pending autocomplete inputs
+  _initPlacesInputs();
+  // If map sheet is open, init map
+  if(mapSheetOpen&&!mapReady)setTimeout(initMap,100);
+}
+function _initPlacesInputs(){
+  ['addFrom','addTo','editFrom','editTo'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el&&el.value&&el.value.length>=2){
+      var ddId=id==='addFrom'?'fromDD':id==='addTo'?'toDD':id==='editFrom'?'editFromDD':'editToDD';
+      onAddrType(id,ddId);
+    }
+  });
 }
 
 /* ===== SVG ICON SYSTEM ===== */
@@ -2199,10 +2198,7 @@ function setLocale(c,userChosen){
     if(_sb&&currentUser&&currentUser.id){
       var _settingsToSync=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
       _sb.from('profiles').update({settings:_settingsToSync}).eq('id',currentUser.id)
-        .then(function(r){
-          if(r.error){console.warn('[Settings] Supabase sync error:',r.error.message);}
-          else{console.log('[Settings] Locale synced to Supabase:',c);}
-        }).catch(function(e){console.warn('[Settings] Supabase sync failed:',e);});
+        .then(function(){}).catch(function(){});
     }
   }
   applyLocale();
@@ -4837,15 +4833,17 @@ var _placesAutocompleteFrom=null,_placesAutocompleteTo=null;
 var _geoTimer=null;
 var _placesSessionToken=null;
 
-function _ensureMapsLoaded(){
-  if(_googleMapsReady)return;
-  if(typeof google!=='undefined'&&google.maps){_googleMapsReady=true;return;}
+var _mapsReadyCbs=[];
+function _ensureMapsLoaded(cb){
+  if(cb)_mapsReadyCbs.push(cb);
+  if(_googleMapsReady){if(cb){try{cb();}catch(e){}}return;}
+  if(typeof google!=='undefined'&&google.maps){_googleMapsReady=true;if(cb){try{cb();}catch(e){}}return;}
   if(window._mapsLoading)return;
   window._mapsLoading=true;
   var s=document.createElement('script');
   s.src='https://maps.googleapis.com/maps/api/js?key='+_MAPS_KEY+'&libraries=places&loading=async&callback=_initGoogleMaps';
   s.async=true;s.defer=true;
-  s.onerror=function(){window._mapsLoading=false;};
+  s.onerror=function(){window._mapsLoading=false;console.warn('[MMAI] Maps failed to load');};
   document.head.appendChild(s);
 }
 
@@ -4854,7 +4852,7 @@ function onAddrType(inpId,ddId){
   var dd=document.getElementById(ddId);
   var v=inp.value.trim();
 
-  _ensureMapsLoaded();
+  _ensureMapsLoaded(function(){/* Maps ready — geocode will work */});
   calcDistance();
 
   if(v.length<2){dd.classList.remove('show');dd.innerHTML='';return;}
