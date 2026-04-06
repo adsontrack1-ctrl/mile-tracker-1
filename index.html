@@ -36,15 +36,6 @@ function _initGoogleMaps(){
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
-<script>
-(function _pollMapsReady(){
-  if(typeof google!=='undefined'&&google.maps&&google.maps.places){
-    if(!window._googleMapsReady) _initGoogleMaps();
-  } else {
-    setTimeout(_pollMapsReady,200);
-  }
-})();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
@@ -4843,9 +4834,23 @@ var _placesSessionToken=null;
 
 var _mapsReadyCbs=[];
 function _ensureMapsLoaded(cb){
-  if(!cb) return;
-  if(_googleMapsReady){try{cb();}catch(e){} return;}
-  _mapsReadyCbs.push(cb);
+  if(cb) _mapsReadyCbs.push(cb);
+  if(_googleMapsReady){
+    if(cb){try{cb();}catch(e){}}
+    return;
+  }
+  if(typeof google!=='undefined'&&google.maps&&google.maps.places){
+    _googleMapsReady=true;
+    var pending=_mapsReadyCbs.splice(0);
+    pending.forEach(function(fn){try{fn();}catch(e){}});
+    return;
+  }
+  if(window._mapsLoading)return;
+  window._mapsLoading=true;
+  var s=document.createElement('script');
+  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps';
+  s.onerror=function(){window._mapsLoading=false;};
+  document.head.appendChild(s);
 }
 
 function onAddrType(inpId,ddId){
