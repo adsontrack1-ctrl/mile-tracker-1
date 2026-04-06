@@ -23,7 +23,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
 <title>MyMilesAI Rel 5.6</title>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&loading=async&callback=_initGoogleMaps" async defer></script>
+<script>
+function _initGoogleMaps(){
+  window._googleMapsReady=true;
+  window._mapsLoading=false;
+  if(window._mapsReadyCbs){
+    var cbs=window._mapsReadyCbs.splice(0);
+    cbs.forEach(function(cb){try{cb();}catch(e){}});
+  }
+  if(typeof _initPlacesInputs==='function')_initPlacesInputs();
+  if(typeof mapSheetOpen!=='undefined'&&mapSheetOpen&&!mapReady&&typeof initMap==='function')setTimeout(initMap,100);
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
@@ -2064,22 +2076,8 @@ if(_sb){
   }catch(e){console.warn('Auth boot error:',e);_authHideModal();}
 })();
 
-/* ===== Google Maps Init Callback ===== */
+/* _initGoogleMaps defined in <head> — see inline script before Maps SDK load */
 var _googleMapsReady=false;
-function _initGoogleMaps(){
-  _googleMapsReady=true;
-  window._mapsLoading=false;
-  console.log('[MMAI] Google Maps ready');
-  // Suppress gm_authFailure on native iOS WKWebView
-  window.gm_authFailure=function(){console.warn('[MMAI] gm_authFailure suppressed');};
-  // Flush all queued callbacks
-  var cbs=_mapsReadyCbs.splice(0);
-  cbs.forEach(function(cb){try{cb();}catch(e){}});
-  // Init any pending autocomplete inputs
-  _initPlacesInputs();
-  // If map sheet is open, init map
-  if(mapSheetOpen&&!mapReady)setTimeout(initMap,100);
-}
 function _initPlacesInputs(){
   ['addFrom','addTo','editFrom','editTo'].forEach(function(id){
     var el=document.getElementById(id);
