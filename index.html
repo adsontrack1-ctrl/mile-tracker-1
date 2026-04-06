@@ -23,7 +23,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
 <title>MyMilesAI Rel 5.6</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#F6F7F9;--white:#FFF;
@@ -1040,7 +1042,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
 <!-- AUTH MODAL — mymilesai.com design system -->
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+/* Playfair Display loaded via consolidated <link> in <head> */
 .auth-overlay{position:fixed;inset:0;z-index:99999;background:#FAFAF7;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px;transition:opacity .3s;}
 .auth-overlay.hidden{display:none;}
 .auth-card{width:100%;max-width:420px;background:#fff;border-radius:24px;box-shadow:0 4px 40px rgba(0,0,0,.08);border:1px solid #E5E7EB;padding:40px 32px 32px;text-align:center;font-family:system-ui,-apple-system,sans-serif;}
@@ -1337,6 +1339,65 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
+/* ── Global Error Handler v109b ── */
+(function(){
+  var _errQueue=[];
+  var _errFlushing=false;
+  function _reportError(type,msg,src,line,col,err){
+    var entry={
+      type:type,message:String(msg).substring(0,500),
+      source:String(src||'').replace(location.origin,''),
+      line:line||0,col:col||0,
+      stack:err&&err.stack?String(err.stack).substring(0,1000):'',
+      url:location.pathname,ts:Date.now(),
+      ua:navigator.userAgent.substring(0,100),v:'v111'
+    };
+    console.warn('[MMAI] '+type+':',entry.message,'@',entry.source+':'+entry.line);
+    try{
+      var stored=JSON.parse(localStorage.getItem('mmai_error_log')||'[]');
+      stored.unshift(entry);if(stored.length>50)stored=stored.slice(0,50);
+      localStorage.setItem('mmai_error_log',JSON.stringify(stored));
+    }catch(e){}
+    _errQueue.push(entry);
+    if(!_errFlushing)_scheduleFlush();
+  }
+  function _scheduleFlush(){
+    _errFlushing=true;
+    var attempts=0;
+    var tryFlush=function(){
+      attempts++;
+      var sb=window._sb;
+      if(!sb){if(attempts<10)setTimeout(tryFlush,2000);else _errFlushing=false;return;}
+      sb.auth.getUser().then(function(r){
+        var uid=r&&r.data&&r.data.user?r.data.user.id:'anonymous';
+        var batch=_errQueue.splice(0,_errQueue.length);
+        batch.forEach(function(e){e.user_id=uid;});
+        sb.from('app_errors').insert(batch).then(function(){_errFlushing=false;})
+          .catch(function(){_errFlushing=false;});
+      }).catch(function(){_errFlushing=false;});
+    };
+    setTimeout(tryFlush,4000);
+  }
+  window.onerror=function(msg,src,line,col,err){
+    _reportError('js_error',msg,src,line,col,err);return false;
+  };
+  window.addEventListener('unhandledrejection',function(e){
+    var msg=e.reason&&e.reason.message?e.reason.message:String(e.reason);
+    _reportError('promise_rejection',msg,location.href,0,0,e.reason);
+  });
+  window.addEventListener('error',function(e){
+    if(e.target&&e.target!==window){
+      _reportError('resource_error',(e.target.src||e.target.href||'unknown')+' failed',location.href,0,0,null);
+    }
+  },true);
+  window._reportError=_reportError;
+  window._getErrorLog=function(){
+    try{return JSON.parse(localStorage.getItem('mmai_error_log')||'[]');}catch(e){return[];}
+  };
+})();
+
+var _MAPS_KEY='AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE';
+
 /* ===== SUPABASE AUTH + PAYMENTS + DEVICE LOCKING (v2 — full rewrite) ===== */
 var _SUPABASE_URL='https://dxpuuiqibtizewbbffjk.supabase.co';
 var _SUPABASE_ANON='sb_publishable_fiH2OGcy-0lon9qlXxFFIg_QqTDhm3u';
@@ -4710,7 +4771,7 @@ function _ensureMapsLoaded(){
   if(window._mapsLoading)return;
   window._mapsLoading=true;
   var s=document.createElement('script');
-  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&loading=async&callback=_initGoogleMaps';
+  s.src='https://maps.googleapis.com/maps/api/js?key='+_MAPS_KEY+'&libraries=places&loading=async&callback=_initGoogleMaps';
   s.async=true;s.defer=true;
   s.onerror=function(){window._mapsLoading=false;};
   document.head.appendChild(s);
@@ -5616,17 +5677,7 @@ function loadMapAppPref(){
   }catch(e){}
 }
 function openMapSheet(){
-  // Dynamic Maps loader — works on file://, capacitor://, https:// origins
-    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-      if (!window._mapsLoading) {
-        window._mapsLoading = true;
-        var _s = document.createElement('script');
-        _s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&loading=async&callback=_initGoogleMaps';
-        _s.async = true; _s.defer = true;
-        _s.onerror = function(){ window._mapsLoading = false; };
-        document.head.appendChild(_s);
-      }
-    }
+  _ensureMapsLoaded();
 
   var pref='inapp';
   // On native app, always use in-app map — ignore any saved preference
