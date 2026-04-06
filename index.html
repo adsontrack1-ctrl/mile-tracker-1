@@ -3763,9 +3763,16 @@ document.addEventListener('focusin',function(e){
   var inp=e.target;if(!inp||!inp.tagName)return;
   var tag=inp.tagName.toLowerCase();
   if(tag!=='input'&&tag!=='textarea'&&tag!=='select')return;
-  var modal=inp.closest('.modal-overlay,.modal');
-  if(!modal)return;
   _scrollInputIntoView(inp);
+  // Also scroll nearest sheet/modal content wrapper
+  var sheet=inp.closest('.modal-overlay,.modal,.bottom-sheet,.sheet-body,.sheet-content,[id*="Sheet"],[id*="Modal"],[id*="sheet"],[id*="modal"],[id*="add-trip"],[id*="addTrip"]');
+  if(sheet){
+    setTimeout(function(){
+      var rect=inp.getBoundingClientRect();
+      var vh=window.visualViewport?window.visualViewport.height:window.innerHeight;
+      if(rect.bottom>vh*0.6){sheet.scrollTop+=rect.bottom-vh*0.5;}
+    },350);
+  }
 },{passive:true});
 
 /* Handle iOS dynamic safe area changes (phone call bar, hotspot bar) */
@@ -3789,7 +3796,7 @@ if(window.visualViewport){
     var windowH = window.innerHeight;
     _kbHeight = Math.max(0, windowH - vh - (window.visualViewport.offsetTop||0));
 
-    var allOverlays = document.querySelectorAll('.modal-overlay.show, .modal-overlay[style*="display:flex"], #authOverlay, #paywallOverlay');
+    var allOverlays = document.querySelectorAll('.modal-overlay.show, .modal-overlay[style*="display:flex"], #authOverlay, #paywallOverlay, .bottom-sheet.show, [id*="Sheet"].show, [id*="Modal"].show');
     allOverlays.forEach(function(overlay){
       if(!overlay || overlay.style.display==='none' || overlay.classList.contains('hidden')) return;
       if(_kbHeight > 50){
