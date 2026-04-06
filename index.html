@@ -34,6 +34,13 @@ function _initGoogleMaps(){
   if(typeof _initPlacesInputs==='function')_initPlacesInputs();
   if(typeof mapSheetOpen!=='undefined'&&mapSheetOpen&&!mapReady&&typeof initMap==='function')setTimeout(initMap,100);
 }
+// Fallback: if Maps SDK already loaded before this script ran (iOS resume from cache),
+// fire _initGoogleMaps immediately instead of waiting for the callback that already fired.
+(function _checkMapsAlreadyLoaded(){
+  if(typeof google!=='undefined'&&google.maps&&google.maps.places&&!window._googleMapsReady){
+    _initGoogleMaps();
+  }
+})();
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
