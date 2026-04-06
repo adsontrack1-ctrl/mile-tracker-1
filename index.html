@@ -1876,11 +1876,12 @@ async function _upgradeClick(plan){
   /* Native iOS: use RevenueCat IAP instead of Stripe */
   if(window.__MYMILESAI_NATIVE__){
     showToast(_i('clock'),'Loading plans...',2000);
-    _rcGetOfferings(function(pkgs){
-      if(!pkgs||!pkgs.length){showToast(_i('warn'),'No plans available',2000);return;}
-      var pkg=pkgs[0];
-      _rcPurchase(pkg.id,function(isPro){if(isPro){showToast(_i('ccheck'),'Welcome to Pro!',3000);_hideSubscribeModal();}},function(msg,cancelled){if(!cancelled)showToast(_i('warn'),'Purchase failed: '+msg,3000);});
-    });
+    window._onRCPurchaseDone=function(isPro,cancelled,err){
+      if(cancelled)return;
+      if(isPro){showToast(_i('ccheck'),'Welcome to Pro!',4000);_hideSubscribeModal();}
+      else showToast(_i('warn'),err||'Purchase failed',3000);
+    };
+    window.ReactNativeWebView.postMessage(JSON.stringify({type:'rcPurchase',plan:plan||'pro'}));
     return;
   }
   // Agreement checkbox must be checked before proceeding to payment
@@ -1930,6 +1931,13 @@ async function _restorePurchase(){
 
 // ── Stripe customer portal ──────────────────────────────────────────
 async function _openCustomerPortal(){
+  if(window.__MYMILESAI_NATIVE__){
+    window._onRCRestoreDone=function(isPro){
+      showToast(isPro?_i('ccheck'):_i('warn'),isPro?'Pro restored!':'No subscription found',3000);
+    };
+    window.ReactNativeWebView.postMessage(JSON.stringify({type:'rcRestore'}));
+    return;
+  }
   if(!currentUser){_showToast('Please sign in first','#EF4444');return;}
   _showToast('Opening billing portal...','#6366f1');
   try{
