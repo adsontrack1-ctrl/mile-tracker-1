@@ -3361,7 +3361,7 @@ var SMART_STOP_MS=300000; // 5 min continuous stationary → end trip
 var _stationaryStart=0; // timestamp when device became stationary
 var _startAddr=''; // captured start address via reverse geocode
 var _startAddrLocked=false; // true once we have a quality start address
-var _wakeLock=null; // Wake Lock handle for background tracking
+var _wakeLock=null,_wakeLockListener=null; // Wake Lock handle for background tracking
 var _gpsPermState='unknown'; // 'granted','denied','prompt','unknown'
 // Smart start: collect accurate readings before geocoding
 var _startReadings=[]; // {lat,lng,accuracy} readings with accuracy<20m
@@ -3453,25 +3453,79 @@ function requestGPSPermission(){
   },{enableHighAccuracy:true,timeout:10000});
 }
 
+/* ── IndexedDB Trip State (survives WebView freeze) ── */
+var _idb=null;
+function openTripDB(){
+  if(_idb)return Promise.resolve(_idb);
+  return new Promise(function(res,rej){
+    var req=indexedDB.open('mymilesai_trip',1);
+    req.onupgradeneeded=function(e){e.target.result.createObjectStore('state',{keyPath:'key'});};
+    req.onsuccess=function(e){_idb=e.target.result;res(_idb);};
+    req.onerror=function(){rej(req.error);};
+  });
+}
+function saveTripState(state){
+  openTripDB().then(function(db){
+    var tx=db.transaction('state','readwrite');
+    tx.objectStore('state').put({key:'active',tracking:state.tracking,trackStart:state.trackStart,totalDist:state.totalDist,savedAt:state.savedAt});
+  }).catch(function(e){console.warn('[MMAI] IDB save fail',e);});
+}
+function loadTripState(){
+  return openTripDB().then(function(db){
+    return new Promise(function(res){
+      var tx=db.transaction('state','readonly');
+      var req=tx.objectStore('state').get('active');
+      req.onsuccess=function(){res(req.result||null);};
+      req.onerror=function(){res(null);};
+    });
+  }).catch(function(){return null;});
+}
+function clearTripState(){
+  openTripDB().then(function(db){
+    var tx=db.transaction('state','readwrite');
+    tx.objectStore('state').delete('active');
+  }).catch(function(){});
+}
+
 /* ── WAKE LOCK — keep tracking when screen off ── */
 function acquireWakeLock(){
   if(!('wakeLock' in navigator))return;
   navigator.wakeLock.request('screen').then(function(lock){
     _wakeLock=lock;
     lock.addEventListener('release',function(){_wakeLock=null;});
-  }).catch(function(){});
+    /* Auto re-acquire when tab becomes visible — iOS releases on background */
+    if(_wakeLockListener)document.removeEventListener('visibilitychange',_wakeLockListener);
+    _wakeLockListener=function(){
+      if(document.visibilityState==='visible'&&tracking&&!_wakeLock){
+        navigator.wakeLock.request('screen').then(function(l){_wakeLock=l;l.addEventListener('release',function(){_wakeLock=null;});})
+          .catch(function(){});
+      }
+    };
+    document.addEventListener('visibilitychange',_wakeLockListener);
+  }).catch(function(e){console.warn('[MMAI] WakeLock failed:',e);});
 }
 function releaseWakeLock(){
+  if(_wakeLockListener){document.removeEventListener('visibilitychange',_wakeLockListener);_wakeLockListener=null;}
   if(_wakeLock){try{_wakeLock.release();}catch(e){}_wakeLock=null;}
 }
-// Re-acquire on visibility change (browsers release wake lock when tab hidden)
+// Visibility recovery: watchPosition + IDB trip resume
 document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='visible'&&tracking){
-    acquireWakeLock();
-    // Re-start watchPosition in case browser killed it (not needed on native)
-    if(!watchId&&navigator.geolocation&&!window.__MYMILESAI_NATIVE__){
-      watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
+  if(document.visibilityState!=='visible')return;
+  /* Re-start watchPosition if browser killed it while backgrounded */
+  if(tracking&&!window.__MYMILESAI_NATIVE__){
+    if(!watchId||watchId===null){
+      console.log('[MMAI] Recovering watchPosition after background');
+      watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
     }
+  }
+  /* Check IDB — if trip was active when we were frozen, restore it */
+  if(!tracking&&!window.__MYMILESAI_NATIVE__){
+    loadTripState().then(function(state){
+      if(state&&state.tracking){
+        console.log('[MMAI] Resuming interrupted trip from IDB');
+        startTracking();
+      }
+    });
   }
 });
 
@@ -3692,6 +3746,14 @@ function startTracking(){
     window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'RECORDING'}));
   }
   acquireWakeLock();
+  /* Save trip state to IndexedDB so it survives WebView freeze */
+  saveTripState({tracking:true,trackStart:trackStart,totalDist:totalDist,savedAt:Date.now()});
+  /* Register background sync with service worker */
+  if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+    navigator.serviceWorker.ready.then(function(reg){
+      if('sync' in reg)reg.sync.register('gps-flush').catch(function(){});
+    });
+  }
   clearRoute();
   document.getElementById('trackLive').classList.add('show');
   document.getElementById('heroStatus').classList.remove('mon');
@@ -4325,6 +4387,7 @@ function stopTracking(){
   tracking=false;_paused=false;_autoState='IDLE';_stationaryStart=0;
   if(window._liveStatInt){clearInterval(window._liveStatInt);window._liveStatInt=null;}
   releaseWakeLock();
+  clearTripState(); /* Remove from IDB — trip is done */
   // Notify native app
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
     window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'IDLE'}));
@@ -6747,22 +6810,26 @@ updateDebugPanel();
 
 /* ── Service Worker ──
    In native wrapper: skip SW (WebView handles caching).
-   On web: register SW for offline support; also clean stale blob: SWs. */
+   On web: register SW for offline support + background sync. */
 if('serviceWorker' in navigator && !window.__MYMILESAI_NATIVE__){
   navigator.serviceWorker.getRegistrations().then(function(regs){
     regs.forEach(function(reg){
       if(reg.active && reg.active.scriptURL && reg.active.scriptURL.startsWith('blob:')){
-        reg.unregister().then(function(){console.log('[MyMilesAI] Cleared stale blob SW');});
+        reg.unregister();
       }
     });
   }).catch(function(){});
-  if(location.protocol==='https:'){
-    navigator.serviceWorker.register('./sw.js').then(function(reg){
-      console.log('[MyMilesAI] SW registered, scope:',reg.scope);
-    }).catch(function(e){
-      console.log('[MyMilesAI] SW register failed:',e.message);
-    });
-  }
+  navigator.serviceWorker.register('./sw.js',{scope:'./'})
+    .then(function(reg){
+      console.log('[MMAI] SW registered, scope:',reg.scope);
+      /* Listen for messages from SW (e.g. GPS flush requests) */
+      navigator.serviceWorker.addEventListener('message',function(e){
+        if(e.data&&e.data.type==='SW_GPS_FLUSH'&&tracking){
+          saveTripState({tracking:true,trackStart:trackStart,totalDist:totalDist,savedAt:Date.now()});
+        }
+      });
+    })
+    .catch(function(err){console.warn('[MMAI] SW registration failed:',err);});
 }
 
 /* ===== PHASE 2: RECEIPT SCANNING, QUICKBOOKS, REIMBURSEMENT, CPA, AUDIT DEFENSE, TOLL/FUEL (#06-#11) ===== */
