@@ -865,21 +865,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 </div></div>
 
 <!-- GPS DEBUG INDICATOR -->
-<div class="gps-debug collapsed" id="gpsDebug">
-  <button class="gps-debug-toggle" onclick="document.getElementById('gpsDebug').classList.toggle('collapsed')">
-    <span class="gps-debug-dot" id="gpsDebugDot"></span>
-    <span id="gpsDebugLabel">GPS</span>
-    <span style="margin-left:auto;font-size:9px;opacity:.5">▼</span>
-  </button>
-  <div class="gps-debug-body" id="gpsDebugBody">
-    <b>State:</b> <span id="gdbState">—</span><br>
-    <b>Perm:</b> <span id="gdbPerm">—</span><br>
-    <b>Speed:</b> <span id="gdbSpeed">—</span><br>
-    <b>Accuracy:</b> <span id="gdbAcc">—</span><br>
-    <b>Coords:</b> <span id="gdbCoords">—</span><br>
-    <b>Stationary:</b> <span id="gdbPause">—</span>
-  </div>
-</div>
+<!-- GPS debug panel removed in Build 107 -->
 
 <!-- AI CHAT FAB -->
 <button class="ai-fab" id="aiFab" onclick="toggleAIChat()" title="AI Assistant">
@@ -1023,8 +1009,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
 <!-- MODALS -->
 <div class="modal-overlay" id="editModal"><div class="modal"><div class="modal-handle"></div><div class="modal-title">Edit Trip</div>
-  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">From</label><input type="text" class="inp" id="editFrom" placeholder="From address..."></div>
-  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">To</label><input type="text" class="inp" id="editTo" placeholder="To address..."></div>
+  <div class="iw" style="position:relative"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">From</label><input type="text" class="inp" id="editFrom" placeholder="From address..." oninput="onAddrType('editFrom','editFromDD')" autocomplete="off"><div class="add-dd" id="editFromDD"></div></div>
+  <div class="iw" style="position:relative"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">To</label><input type="text" class="inp" id="editTo" placeholder="To address..." oninput="onAddrType('editTo','editToDD')" autocomplete="off"><div class="add-dd" id="editToDD"></div></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px" id="editDistLabel">Miles</label><input type="number" class="inp" id="editMi" step="0.1"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Category</label><div style="display:flex;gap:8px"><button class="cls ob" id="eBiz" onclick="setEC('biz')" style="flex:1"><span class="cls-d"></span>Business</button><button class="cls" id="ePer" onclick="setEC('pers')" style="flex:1"><span class="cls-d"></span>Personal</button></div></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Purpose</label><select class="inp" id="editPurpose" style="appearance:auto;padding-right:8px"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical Appointment</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select></div>
@@ -3195,25 +3181,30 @@ function changeStatsMonth(dir){
 }
 
 function recalcStatsForMonth(month,year){
-  var totalBiz=0,totalPer=0,totalDed=0,totalTrips=0;
+  var totalBiz=0,totalPer=0,totalDed=0,totalTrips=0,unclCount=0;
   TRIPS.forEach(function(t){
     var d=t.ts?new Date(t.ts):null;
     if(!d||d.getMonth()!==month||d.getFullYear()!==year)return;
     var mi=convMi(t.mi);
     if(t.type==='biz'){totalBiz+=mi;}
     else if(t.type==='pers'){totalPer+=mi;}
+    if(t.type==='uncl')unclCount++;
     totalDed+=_tripDeduction(t);
     totalTrips++;
   });
-  var u=LOC.unit,c=LOC.currency;
+  var c=LOC.currency;
+  var totalAll=totalBiz+totalPer;
+  var bizPct=totalAll>0?Math.round(totalBiz/totalAll*100):0;
+  // Hero stats
   var hsBiz=document.getElementById('hsBiz');if(hsBiz)hsBiz.textContent=totalBiz.toFixed(1);
   var hsPer=document.getElementById('hsPer');if(hsPer)hsPer.textContent=totalPer.toFixed(1);
   var hsDed=document.getElementById('hsDed');if(hsDed)hsDed.textContent=c+(totalDed).toFixed(2);
-  // Update stats tab if visible
-  var statsContent=document.getElementById('tab-stats');
-  if(statsContent&&statsContent.style.display!=='none'){
-    recalcStats();
-  }
+  // Stats card values
+  var sb=document.getElementById('sBiz');if(sb)sb.textContent=totalBiz.toFixed(1);
+  var sp=document.getElementById('sPer');if(sp)sp.textContent=totalPer.toFixed(1);
+  var sd=document.getElementById('sDedVal');if(sd)sd.textContent=c+totalDed.toFixed(2);
+  var st=document.getElementById('sTripCount');if(st)st.textContent=totalTrips;
+  var dp=document.getElementById('sDedProg');if(dp){dp.dataset.width=bizPct+'%';dp.style.width=bizPct+'%';}
 }
 
 function recalcStatsForPeriod(period){
