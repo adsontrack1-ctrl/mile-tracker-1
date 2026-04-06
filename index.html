@@ -5,6 +5,8 @@
 <!-- v1773360735-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16.png">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.harijasllc.workers.dev https://api.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src blob:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade">
@@ -14,8 +16,12 @@
 <meta name="application-name" content="MyMilesAI">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
 <meta name="description" content="Smart mileage tracking for tax deductions. Auto-detect trips, classify business vs personal, export CRA/IRS reports.">
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MyMilesAI%22%2C%22short_name%22%3A%22MyMilesAI%22%2C%22description%22%3A%22Smart%20mileage%20tracking%20for%20tax%20deductions%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230C0C1D%22%2C%22theme_color%22%3A%22%230C0C1D%22%2C%22categories%22%3A%5B%22business%22%2C%22finance%22%2C%22productivity%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25230C0C1D%27%2F%253E%253Cpath%2520d%3D%27M340%2520180c-4-12-15-20-27-20H199c-12%25200-22%25208-27%252020L140%2520280v150c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18v-18h224v18c0%252010%25208%252018%252018%252018h18c10%25200%252018-8%252018-18V280l-32-100zM190%2520340c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zm132%25200c-15%25200-27-12-27-27s12-27%252027-27%252027%252012%252027%252027-12%252027-27%252027zM172%2520262l27-82h114l27%252082H172z%27%2520fill%3D%27%2523D6006E%27%2F%253E%253Ctext%2520x%3D%27256%27%2520y%3D%27470%27%2520text-anchor%3D%27middle%27%2520fill%3D%27%23fff%27%2520font-family%3D%27system-ui%27%2520font-size%3D%2780%27%2520font-weight%3D%27800%27%253EMyMilesAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230C0C1D'/%3E%3Cpath d='M340 180c-4-12-15-20-27-20H199c-12 0-22 8-27 20L140 280v150c0 10 8 18 18 18h18c10 0 18-8 18-18v-18h224v18c0 10 8 18 18 18h18c10 0 18-8 18-18V280l-32-100zM190 340c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zm132 0c-15 0-27-12-27-27s12-27 27-27 27 12 27 27-12 27-27 27zM172 262l27-82h114l27 82H172z' fill='%23D6006E'/%3E%3Ctext x='256' y='470' text-anchor='middle' fill='%23fff' font-family='system-ui' font-size='80' font-weight='800'%3EMyMilesAI%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MyMilesAI">
 <title>MyMilesAI Rel 5.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -3453,6 +3459,62 @@ function requestGPSPermission(){
   },{enableHighAccuracy:true,timeout:10000});
 }
 
+/* ── Trip UUID + Offline Sync Queue ── */
+function _genTripId(){
+  try{return crypto.randomUUID();}catch(e){
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
+      var r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);
+    });
+  }
+}
+function _getPendingQueue(){
+  try{return JSON.parse(localStorage.getItem('mmai_pending_sync')||'[]');}catch(e){return[];}
+}
+function _savePendingQueue(q){
+  try{localStorage.setItem('mmai_pending_sync',JSON.stringify(q));}catch(e){}
+}
+function _addToPendingQueue(trip){
+  var q=_getPendingQueue();
+  if(!q.find(function(t){return t.tripId===trip.tripId;})){q.push(trip);}
+  _savePendingQueue(q);
+  console.log('[MMAI] Added to offline queue. Queue size:',q.length);
+}
+function _removeFromPendingQueue(tripId){
+  var q=_getPendingQueue().filter(function(t){return t.tripId!==tripId;});
+  _savePendingQueue(q);
+}
+async function _flushPendingQueue(){
+  var q=_getPendingQueue();
+  if(!q.length)return;
+  if(!navigator.onLine){console.log('[MMAI] Offline — queue flush deferred');return;}
+  console.log('[MMAI] Flushing',q.length,'pending trips to Supabase');
+  for(var i=0;i<q.length;i++){
+    var trip=q[i];
+    try{
+      if(!_sb){return;}
+      var ur=await _sb.auth.getUser();
+      var user=ur&&ur.data&&ur.data.user;
+      if(!user){return;}
+      var row={
+        user_id:user.id,trip_id:trip.tripId,from_addr:trip.from,to_addr:trip.to,
+        miles:trip.mi,type:trip.type,date:trip.date,ts:trip.ts,
+        purpose:trip.purpose||'',notes:trip.notes||'',vehicle_id:trip.vehicleId||null
+      };
+      var res=await _sb.from('trips').upsert(row,{onConflict:'trip_id'});
+      if(!res.error){
+        _removeFromPendingQueue(trip.tripId);
+        console.log('[MMAI] Flushed trip',trip.tripId);
+      } else {
+        console.warn('[MMAI] Flush error for',trip.tripId,res.error.message);
+      }
+    }catch(e){console.warn('[MMAI] Flush exception',e.message);}
+  }
+}
+window.addEventListener('online',function(){
+  console.log('[MMAI] Back online — flushing pending queue');
+  setTimeout(_flushPendingQueue,2000);
+});
+
 /* ── IndexedDB Trip State (survives WebView freeze) ── */
 var _idb=null;
 function openTripDB(){
@@ -4514,6 +4576,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     }
   }
   var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
+  var newTripId=_genTripId();
   var type='uncl';
   var freq=getFreqRouteType(fromAddr,toAddr);
   if(freq)type=freq;
@@ -4523,7 +4586,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     try{var lu=localStorage.getItem('mymilesai_last_vehicle');if(lu&&_vehicles.find(function(v){return v.id===lu;}))return lu;}catch(e){}
     return _getDefaultVehicleId();
   })();
-  TRIPS.unshift({id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId});
+  TRIPS.unshift({tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:timeStr,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId});
   try{if(_gpsVehId)localStorage.setItem('mymilesai_last_vehicle',_gpsVehId);}catch(e){}
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   // Update frequent location memory from GPS coordinates so Named Places populate automatically
@@ -4535,6 +4598,8 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     _updateFreqLoc(_startPos.lat,_startPos.lng,fromAddr);
   }
   renderTrips();renderAlerts();saveTripsToStorage();
+  /* Sync to Supabase — queue for offline retry if it fails */
+  (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u)return;var row={user_id:u.id,trip_id:_t.tripId,from_addr:_t.from,to_addr:_t.to,miles:_t.mi,type:_t.type,date:_t.date,ts:_t.ts,purpose:_t.purpose||'',notes:_t.notes||'',vehicle_id:_t.vehicleId||null};_sb.from('trips').upsert(row,{onConflict:'trip_id'}).then(function(res){if(res.error){_addToPendingQueue(_t);}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(){_addToPendingQueue(_t);});}).catch(function(){_addToPendingQueue(_t);});})();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
   recordTripEnd();
   // Always ask user to confirm trip type after every trip
@@ -5383,6 +5448,7 @@ function _doSaveManual(){
   var tripDateStr=_fmt(tripDate);
   var tripTs=tripDate.getTime();
   var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
+  var newTripId=_genTripId();
   var autoType=addCat;
   if(autoType==='uncl'){
     var freq=getFreqRouteType(f,t);
@@ -5400,7 +5466,7 @@ function _doSaveManual(){
     try{var lu=localStorage.getItem('mymilesai_last_vehicle');if(lu&&_vehicles.find(function(v){return v.id===lu;}))return lu;}catch(e){}
     return _getDefaultVehicleId();
   })();
-  TRIPS.unshift({id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:!!CAT_DEDUCTIBLE[autoType],purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT,vehicleId:_manVehId});
+  TRIPS.unshift({tripId:newTripId,id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:!!CAT_DEDUCTIBLE[autoType],purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT,vehicleId:_manVehId});
   try{if(_manVehId)localStorage.setItem('mymilesai_last_vehicle',_manVehId);}catch(e){}
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
@@ -5409,6 +5475,8 @@ function _doSaveManual(){
   showToast(_i('ccheck'),'Trip saved · '+dist+' '+LOC.unit);
   recordTripEnd();
   saveTripsToStorage();
+  /* Sync to Supabase — queue for offline retry if it fails */
+  (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u)return;var row={user_id:u.id,trip_id:_t.tripId,from_addr:_t.from,to_addr:_t.to,miles:_t.mi,type:_t.type,date:_t.date,ts:_t.ts,purpose:_t.purpose||'',notes:_t.notes||'',vehicle_id:_t.vehicleId||null};_sb.from('trips').upsert(row,{onConflict:'trip_id'}).then(function(res){if(res.error){_addToPendingQueue(_t);}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(){_addToPendingQueue(_t);});}).catch(function(){_addToPendingQueue(_t);});})();
   closeAddTrip();
 }
 // Close dropdowns on outside click
@@ -6811,6 +6879,9 @@ if(autoDetect){
 }
 updateAutoBtn();
 updateDebugPanel();
+
+/* Flush any trips that failed to sync last session */
+setTimeout(_flushPendingQueue,3000);
 
 /* Auto-resume monitoring if user had it enabled before app was killed */
 if(autoDetect&&!tracking){

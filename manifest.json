@@ -1,0 +1,40 @@
+{
+  "name": "MyMilesAI",
+  "short_name": "MyMilesAI",
+  "description": "Smart mileage tracking for tax deductions",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0C0C1D",
+  "theme_color": "#0C0C1D",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Start tracking",
+      "short_name": "Track",
+      "description": "Start recording a trip immediately",
+      "url": "./?action=start",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
