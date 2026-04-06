@@ -636,6 +636,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <!-- LIVE TRACKING -->
     <div class="track-live" id="trackLive">
       <div class="tl-top"><div class="tl-badge" id="gpsBadge"><span class="rdot"></span>Recording Trip</div><div class="tl-timer" id="trackTimer">00:00</div></div>
+      <div id="trackVehiclePill" onclick="_showVehiclePicker(function(id){document.getElementById('trackVehiclePill').querySelector('span').textContent=_getVehicleName(id)||'Tap to set vehicle';})" style="display:none;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--bord);border-radius:20px;padding:4px 10px 4px 8px;cursor:pointer;font-size:12px;color:var(--ink2);margin:4px auto 0;width:fit-content"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><span>Tap to set vehicle</span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
       <div class="tl-stats">
         <div class="tls"><div class="tls-v" id="trackDist">0.0</div><div class="tls-l" id="trackDistU">miles</div></div>
         <div class="tls"><div class="tls-v" id="trackSpeed">0</div><div class="tls-l" id="trackSpeedU">mph</div></div>
@@ -1013,6 +1014,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div class="iw" style="position:relative"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">To</label><input type="text" class="inp" id="editTo" placeholder="To address..." oninput="onAddrType('editTo','editToDD')" autocomplete="off"><div class="add-dd" id="editToDD"></div></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px" id="editDistLabel">Miles</label><input type="number" class="inp" id="editMi" step="0.1"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Category</label><div style="display:flex;gap:8px"><button class="cls ob" id="eBiz" onclick="setEC('biz')" style="flex:1"><span class="cls-d"></span>Business</button><button class="cls" id="ePer" onclick="setEC('pers')" style="flex:1"><span class="cls-d"></span>Personal</button></div></div>
+  <div class="iw" id="editVehicleWrap" style="display:none"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Vehicle</label><select class="inp" id="editVehicleSel" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bord);background:var(--card);color:var(--ink1);font-size:14px;appearance:auto"></select></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Purpose</label><select class="inp" id="editPurpose" style="appearance:auto;padding-right:8px"><option value="">— Select —</option><option value="Client Meeting">Client Meeting</option><option value="Office Commute">Office Commute</option><option value="Airport Run">Airport Run</option><option value="Supplies">Supplies</option><option value="Site Visit">Site Visit</option><option value="Delivery">Delivery</option><option value="Errands">Errands</option><option value="Medical">Medical Appointment</option><option value="Shopping">Shopping</option><option value="Gym">Gym</option><option value="School Drop-off">School Drop-off</option><option value="Other">Other</option></select></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Notes <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><input type="text" class="inp" id="editNotes" placeholder="Add a note..." maxlength="100"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Toll Cost <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="editTollCurrency">$</span><input type="number" class="inp" id="editToll" step="0.01" min="0" placeholder="0.00" style="flex:1"></div></div>
@@ -3871,6 +3873,9 @@ function startTracking(){
   acquireWakeLock();
   /* Save trip state to IndexedDB so it survives WebView freeze */
   saveTripState({tracking:true,trackStart:trackStart,totalDist:totalDist,savedAt:Date.now()});
+  /* Show vehicle pill on tracking screen */
+  var _vPill=document.getElementById('trackVehiclePill');
+  if(_vPill&&_vehicles&&_vehicles.length>0){_vPill.style.display='flex';var _vn=_getVehicleName(_gpsVehId);_vPill.querySelector('span').textContent=_vn||'Tap to set vehicle';}
   /* Register background sync with service worker */
   if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
     navigator.serviceWorker.ready.then(function(reg){
@@ -4515,6 +4520,7 @@ function stopTracking(){
   if(window._liveStatInt){clearInterval(window._liveStatInt);window._liveStatInt=null;}
   releaseWakeLock();
   clearTripState(); /* Remove from IDB — trip is done */
+  var _vPill=document.getElementById('trackVehiclePill');if(_vPill)_vPill.style.display='none';
   // Notify native app
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
     window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'IDLE'}));
@@ -5571,7 +5577,7 @@ function returnTrip(id){
   document.getElementById('addNote').value='Return trip';
 }
 var _editOrigFrom='',_editOrigTo='',_editOrigDist='';
-function openEdit(id){id=isNaN(id)?id:+id;curTrip=TRIPS.find(t=>+t.id===+id);if(!curTrip)return;_editOrigFrom=curTrip.from;_editOrigTo=curTrip.to;_editOrigDist=tripDist(curTrip.mi);document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';document.getElementById('editToll').value=curTrip.tollCost||'';document.getElementById('editFuel').value=curTrip.fuelCost||'';_renderEditReceipts();var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');}
+function openEdit(id){id=isNaN(id)?id:+id;curTrip=TRIPS.find(t=>+t.id===+id);if(!curTrip)return;_editOrigFrom=curTrip.from;_editOrigTo=curTrip.to;_editOrigDist=tripDist(curTrip.mi);document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';document.getElementById('editToll').value=curTrip.tollCost||'';document.getElementById('editFuel').value=curTrip.fuelCost||'';_renderEditReceipts();var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');/* Populate vehicle dropdown */var vSel=document.getElementById('editVehicleSel');if(vSel){vSel.innerHTML='<option value="">No vehicle</option>';_vehicles.forEach(function(v){var opt=document.createElement('option');opt.value=v.id;opt.textContent=v.name||v.id;vSel.appendChild(opt);});vSel.value=curTrip.vehicleId||'';document.getElementById('editVehicleWrap').style.display=_vehicles.length>0?'':'none';}}
 function closeEdit(){document.getElementById('editModal').classList.remove('show');curTrip=null;}
 function setEC(c){document.getElementById('eBiz').classList.remove('ob');document.getElementById('ePer').classList.remove('op');if(c==='biz')document.getElementById('eBiz').classList.add('ob');else document.getElementById('ePer').classList.add('op');}
 function _finalizeSaveEdit(){
@@ -5592,6 +5598,8 @@ function saveEdit(){
   curTrip.notes=document.getElementById('editNotes').value;
   curTrip.tollCost=parseFloat(document.getElementById('editToll').value)||0;
   curTrip.fuelCost=parseFloat(document.getElementById('editFuel').value)||0;
+  var vSelEl=document.getElementById('editVehicleSel');
+  if(vSelEl){curTrip.vehicleId=vSelEl.value||null;if(curTrip.vehicleId)try{localStorage.setItem('mymilesai_last_vehicle',curTrip.vehicleId);}catch(e){}}
   var edv=document.getElementById('editDate').value;
   if(edv){var nd=new Date(edv+'T12:00:00');curTrip.date=_fmt(nd);curTrip.day=_rel(nd);curTrip.ts=nd.getTime();}
   // If from/to changed but user did NOT manually edit distance, recalculate
@@ -7318,6 +7326,36 @@ function _quickSwitchVehicle(){
     setTimeout(function(){btn.style.background='';btn.style.color='';},600);
   }
 }
+function _showVehiclePicker(onSelect){
+  if(!_vehicles||_vehicles.length<2)return;
+  var bd=document.createElement('div');bd.id='_vehPickerBd';bd.onclick=_closeVehiclePicker;
+  bd.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9998';
+  document.body.appendChild(bd);
+  var sheet=document.createElement('div');sheet.id='_vehPickerSheet';
+  sheet.style.cssText='position:fixed;bottom:0;left:0;right:0;background:var(--card);border-radius:18px 18px 0 0;padding:20px 16px 40px;z-index:9999;box-shadow:0 -4px 24px rgba(0,0,0,0.15)';
+  var html='<div style="width:36px;height:4px;background:var(--bord);border-radius:2px;margin:0 auto 16px"></div>'
+    +'<div style="font-size:15px;font-weight:700;color:var(--ink1);margin-bottom:12px">Switch vehicle</div>';
+  var curVehId=localStorage.getItem('mymilesai_last_vehicle')||'';
+  _vehicles.forEach(function(v){
+    var isAct=(v.id===curVehId);
+    html+='<div onclick="_pickVehicle(\''+v.id+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;margin-bottom:8px;cursor:pointer;background:'+(isAct?'var(--vi-s,rgba(103,58,183,0.08))':'var(--bg2)')+';border:1.5px solid '+(isAct?'var(--vi)':'var(--bord)')+'"><span style="font-size:14px;font-weight:'+(isAct?'700':'500')+';color:var(--ink1)">'+_esc(v.name)+'</span>'+(isAct?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--vi)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</div>';
+  });
+  html+='<button onclick="_closeVehiclePicker()" style="width:100%;padding:12px;border-radius:12px;background:var(--bg2);border:none;font-size:14px;color:var(--ink2);margin-top:4px;cursor:pointer">Cancel</button>';
+  sheet.innerHTML=html;
+  document.body.appendChild(sheet);
+  window._vehPickerCb=onSelect;
+}
+window._pickVehicle=function(vehicleId){
+  try{localStorage.setItem('mymilesai_last_vehicle',vehicleId);}catch(e){}
+  _closeVehiclePicker();
+  if(window._vehPickerCb)window._vehPickerCb(vehicleId);
+  var vName=_getVehicleName(vehicleId);
+  if(vName)showToast(_i('car'),'Switched to '+vName,2500);
+};
+window._closeVehiclePicker=function(){
+  var s=document.getElementById('_vehPickerSheet');var b=document.getElementById('_vehPickerBd');
+  if(s)s.remove();if(b)b.remove();
+};
 
 // ── Excel Export (.xlsx) ──
 function exportExcel(){
