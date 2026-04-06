@@ -4834,16 +4834,9 @@ var _placesSessionToken=null;
 
 var _mapsReadyCbs=[];
 function _ensureMapsLoaded(cb){
-  if(cb)_mapsReadyCbs.push(cb);
-  if(_googleMapsReady){if(cb){try{cb();}catch(e){}}return;}
-  if(typeof google!=='undefined'&&google.maps){
-    _googleMapsReady=true;
-    var pending=_mapsReadyCbs.splice(0);
-    pending.forEach(function(fn){try{fn();}catch(e){}});
-    if(cb){try{cb();}catch(e){}}
-    return;
-  }
-  /* Maps script is in <head> — cb is queued, will fire when _initGoogleMaps() runs */
+  if(!cb) return;
+  if(_googleMapsReady){try{cb();}catch(e){} return;}
+  _mapsReadyCbs.push(cb);
 }
 
 function onAddrType(inpId,ddId){
@@ -4884,7 +4877,6 @@ function onAddrType(inpId,ddId){
 
 function _geocodeWhenReady(query,inpId,ddId,attempt){
   if(_googleMapsReady&&typeof google!=='undefined'&&google.maps&&google.maps.places){
-    // Re-read current input value in case user kept typing while Maps was loading
     var inp=document.getElementById(inpId);
     var currentVal=inp?inp.value.trim():query;
     if(currentVal.length>=3) geocodeAddr(currentVal,inpId,ddId);
@@ -4892,6 +4884,12 @@ function _geocodeWhenReady(query,inpId,ddId,attempt){
   }
   if(attempt<40){
     setTimeout(function(){_geocodeWhenReady(query,inpId,ddId,attempt+1);},250);
+  } else {
+    _ensureMapsLoaded(function(){
+      var inp=document.getElementById(inpId);
+      var currentVal=inp?inp.value.trim():query;
+      if(currentVal&&currentVal.length>=3) geocodeAddr(currentVal,inpId,ddId);
+    });
   }
 }
 function geocodeAddr(query,inpId,ddId){
@@ -5413,7 +5411,7 @@ function openAddTrip(){
   var _emm=String(_eh.getMinutes()).padStart(2,'0');
   document.getElementById('addStartTime').value=_hh+':'+_mm;
   document.getElementById('addEndTime').value=_ehh+':'+_emm;
-  _ensureMapsLoaded();
+  _placesSessionToken=null;
   fromCoords=null;toCoords=null;clearTimeout(_autoGeoFrom);clearTimeout(_autoGeoTo);
   var defCat=getDefaultCat();
   setAddCat(defCat==='uncl'?'biz':defCat);
