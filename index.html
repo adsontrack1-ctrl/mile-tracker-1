@@ -1506,8 +1506,8 @@ function _selectCountry(country){
   // Show/update tax rate label
   var lbl=document.getElementById('authTaxRateLabel');
   if(lbl){
-    lbl.style.display='';
-    lbl.textContent=(country==='CA'?'CRA 2026 Rate · $0.73/km · Tax deductible':'IRS 2026 Rate · $0.70/mi · Tax deductible');
+    if(country==='CA'){lbl.style.display='none';}
+    else{lbl.style.display='';lbl.textContent='IRS 2026 Rate · $0.70/mi · Tax deductible';}
   }
   // Update tagline
   var tagline=document.querySelector('.auth-tagline');
@@ -6212,9 +6212,9 @@ function toggleNotifSetting(el,key){
 }
 function loadNotifSettings(){
   try{var s=JSON.parse(localStorage.getItem('mymilesai_notif_settings')||'null');if(s)_notifSettings=s;}catch(e){}
-  if(_notifSettings.trip)document.getElementById('notifTripTgl').classList.add('on');else document.getElementById('notifTripTgl').classList.remove('on');
-  if(_notifSettings.weekly)document.getElementById('notifWeeklyTgl').classList.add('on');else document.getElementById('notifWeeklyTgl').classList.remove('on');
-  if(_notifSettings.milestone)document.getElementById('notifMilestoneTgl').classList.add('on');else document.getElementById('notifMilestoneTgl').classList.remove('on');
+  var elT=document.getElementById('notifTripTgl');if(elT){if(_notifSettings.trip)elT.classList.add('on');else elT.classList.remove('on');}
+  var elW=document.getElementById('notifWeeklyTgl');if(elW){if(_notifSettings.weekly)elW.classList.add('on');else elW.classList.remove('on');}
+  var elM=document.getElementById('notifMilestoneTgl');if(elM){if(_notifSettings.milestone)elM.classList.add('on');else elM.classList.remove('on');}
 }
 
 /* ===== SETTINGS PERSISTENCE ===== */
