@@ -4198,6 +4198,10 @@ function toggleAutoDetect(el){
   el.classList.toggle('on');
   autoDetect=el.classList.contains('on');
   try{localStorage.setItem('mymilesai_autodetect',autoDetect?'1':'0');}catch(e){}
+  /* Mirror to native AsyncStorage */
+  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    window.ReactNativeWebView.postMessage(JSON.stringify({type:'autoDetectState',enabled:autoDetect}));
+  }
   if(autoDetect){
     startAutoMonitoring();
     showToast(_i('pin'),'Auto-detect ON — will start recording when driving');
@@ -6807,6 +6811,13 @@ if(autoDetect){
 }
 updateAutoBtn();
 updateDebugPanel();
+
+/* Auto-resume monitoring if user had it enabled before app was killed */
+if(autoDetect&&!tracking){
+  setTimeout(function(){
+    if(!tracking&&autoDetect&&!autoWatchId)startAutoMonitoring();
+  },1500);
+}
 
 /* ── Service Worker ──
    In native wrapper: skip SW (WebView handles caching).
