@@ -1119,8 +1119,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="auth-tagline">Track every mile. Claim every dollar.</div>
     <div class="auth-trust">
       <span>Privacy-first</span>
-      <span>US + Canada</span>
       <span>30-sec setup</span>
+    </div>
+    <div id="authCountryPicker" style="display:flex;gap:8px;justify-content:center;margin:-8px 0 12px;">
+      <button id="authCountryUSA" onclick="_selectCountry('US')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;border:2px solid #2563EB;background:rgba(37,99,235,.08);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:#2563EB;transition:all .2s;">&#127482;&#127480; USA</button>
+      <button id="authCountryCA" onclick="_selectCountry('CA')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:#6B7280;transition:all .2s;">&#127464;&#127462; Canada</button>
     </div>
     <div id="authPricingPreview" style="background:linear-gradient(135deg,#f0f4ff,#faf5ff);border:1px solid #e0e7ff;border-radius:16px;padding:14px 16px;margin-bottom:20px;text-align:left;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -1153,7 +1156,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
           <div id="authBizYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
         </div>
       </div>
-      <div id="authTaxRateLabel" style="font-size:10px;color:#6366f1;font-weight:700;margin-top:6px;text-align:center;">IRS 2026 Rate · $0.70/mi · Tax deductible</div><div style="font-size:10px;color:#9ca3af;margin-top:4px;text-align:center;">✓ 10-day free trial · No credit card required · Prices in USD</div>
+      <div id="authTaxRateLabel" style="font-size:10px;color:#6366f1;font-weight:700;margin-top:6px;text-align:center;display:none;">IRS 2026 Rate · $0.70/mi · Tax deductible</div><div style="font-size:10px;color:#9ca3af;margin-top:4px;text-align:center;">✓ 10-day free trial · No credit card required · Prices in USD</div>
     </div>
     <div id="authEmailStep">
       <button class="auth-btn auth-btn-google" onclick="_authCheckAgreeFirst('google')" id="authGoogleBtn">
@@ -1487,6 +1490,38 @@ function _renderPricing(){
 try{_renderPricing();}catch(e){}
 // ── UI helpers ───────────────────────────────────────────────────────
 var _selectedAuthPlan = 'pro';
+
+// ── Country selector on auth screen ──
+function _selectCountry(country){
+  localStorage.setItem('mymilesai_userCountry',country);
+  var usBtn=document.getElementById('authCountryUSA');
+  var caBtn=document.getElementById('authCountryCA');
+  if(country==='US'){
+    if(usBtn){usBtn.style.border='2px solid #2563EB';usBtn.style.background='rgba(37,99,235,.08)';usBtn.style.color='#2563EB';}
+    if(caBtn){caBtn.style.border='1.5px solid #e5e7eb';caBtn.style.background='#fff';caBtn.style.color='#6B7280';}
+  } else {
+    if(caBtn){caBtn.style.border='2px solid #2563EB';caBtn.style.background='rgba(37,99,235,.08)';caBtn.style.color='#2563EB';}
+    if(usBtn){usBtn.style.border='1.5px solid #e5e7eb';usBtn.style.background='#fff';usBtn.style.color='#6B7280';}
+  }
+  // Show/update tax rate label
+  var lbl=document.getElementById('authTaxRateLabel');
+  if(lbl){
+    lbl.style.display='';
+    lbl.textContent=(country==='CA'?'CRA 2026 Rate · $0.73/km · Tax deductible':'IRS 2026 Rate · $0.70/mi · Tax deductible');
+  }
+  // Update tagline
+  var tagline=document.querySelector('.auth-tagline');
+  if(tagline)tagline.textContent=(country==='CA'?'Track every kilometre. Claim every dollar.':'Track every mile. Claim every dollar.');
+  // Apply locale
+  if(typeof setLocale==='function')setLocale(country,true);
+  if(typeof _updateAuthTaxLabel==='function')_updateAuthTaxLabel(country);
+}
+
+// Restore country on page load
+(function(){
+  var saved=localStorage.getItem('mymilesai_userCountry');
+  if(saved)setTimeout(function(){_selectCountry(saved);},100);
+})()
 function _updateAuthTaxLabel(country){
   var lbl=document.getElementById('authTaxRateLabel');
   if(lbl){
