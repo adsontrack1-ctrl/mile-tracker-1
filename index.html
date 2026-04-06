@@ -3387,6 +3387,16 @@ try{_lastTripEnd=parseInt(localStorage.getItem('mymilesai_last_trip_end'))||0;}c
 function _isNativeGPS(){
   return !!(window.__MYMILESAI_NATIVE__||window.__nativeGPSGranted);
 }
+// Safe getCurrentPosition — on native, use cached coords from __nativeGPS__ to avoid iOS bundle-path dialog
+function _safeGetCurrentPosition(success,error,opts){
+  if(window.__MYMILESAI_NATIVE__){
+    if(lastGpsLat!=null){success({coords:{latitude:lastGpsLat,longitude:lastGpsLng,speed:0,accuracy:10}});}
+    else if(error){error({code:2,message:'No cached GPS yet'});}
+    return;
+  }
+  if(navigator.geolocation)navigator.geolocation.getCurrentPosition(success,error,opts);
+  else if(error)error({code:2,message:'Geolocation not available'});
+}
 function checkGPSPermission(){
   // On native, GPS is always managed natively — skip WebView permission check
   if(_isNativeGPS()){
@@ -5018,6 +5028,7 @@ function _calcDistCore(){
 var lastGpsLat=null,lastGpsLng=null;
 // Track user GPS in background for template prefill
 function trackGpsBackground(){
+  if(window.__MYMILESAI_NATIVE__)return;
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(p){
       lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
@@ -5066,7 +5077,7 @@ function useTemplate(type){
     setAddCat('biz');
     document.getElementById('addFrom').value='Getting location...';
     document.getElementById('addDistStatus').textContent='Finding nearest '+type+'...';
-    navigator.geolocation.getCurrentPosition(function(p){
+    _safeGetCurrentPosition(function(p){
       lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
       fromCoords={lat:p.coords.latitude,lng:p.coords.longitude};
       var dest;
@@ -5591,13 +5602,11 @@ function updateMapPos(lat,lng){
 }
 function recenterMap(){
   if(!mapReady)return;
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(function(p){
-      var pos={lat:p.coords.latitude,lng:p.coords.longitude};
-      map.setCenter(pos);map.setZoom(16);
-      if(userMarker){if(typeof userMarker.position!=='undefined'){userMarker.position=pos;}else if(typeof userMarker.setPosition==='function'){userMarker.setPosition(pos);}}
-    });
-  }
+  _safeGetCurrentPosition(function(p){
+    var pos={lat:p.coords.latitude,lng:p.coords.longitude};
+    map.setCenter(pos);map.setZoom(16);
+    if(userMarker){if(typeof userMarker.position!=='undefined'){userMarker.position=pos;}else if(typeof userMarker.setPosition==='function'){userMarker.setPosition(pos);}}
+  });
 }
 function clearRoute(){if(routeLine)routeLine.setPath([]);}
 function updateMapTrackBtn(){
@@ -5844,8 +5853,7 @@ function updateTemplateDists(){
   ['tmplOffDist','tmplCliDist','tmplAirDist'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.textContent='...';
   });
-  if(!navigator.geolocation)return;
-  navigator.geolocation.getCurrentPosition(function(pos){
+  _safeGetCurrentPosition(function(pos){
     var lat=pos.coords.latitude,lng=pos.coords.longitude;
     lastGpsLat=lat;lastGpsLng=lng;
     var u=LOC.unit;
@@ -5917,8 +5925,7 @@ function updateTemplateDists(){
 }
 // Auto-refresh GPS for template distances
 function _refreshTemplateDists(){
-  if(!navigator.geolocation)return;
-  navigator.geolocation.getCurrentPosition(function(p){
+  _safeGetCurrentPosition(function(p){
     lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
     updateTemplateDists();
   },function(){},{enableHighAccuracy:true,timeout:10000});
@@ -6596,13 +6603,11 @@ function obNext(step){
   }
   // Step 3: GPS permission
   if(step===3){
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(function(p){
-        lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
-        updateTemplateDists();
-        showToast(_i('pin'),'GPS access granted');
-      },function(){if(!_isNativeGPS())showToast(_i('pin'),'GPS denied — you can enable later in Settings');});
-    }
+    _safeGetCurrentPosition(function(p){
+      lastGpsLat=p.coords.latitude;lastGpsLng=p.coords.longitude;
+      updateTemplateDists();
+      showToast(_i('pin'),'GPS access granted');
+    },function(){if(!_isNativeGPS())showToast(_i('pin'),'GPS denied — you can enable later in Settings');});
   }
   // Step 4: Odometer → finish
   if(step===4){
