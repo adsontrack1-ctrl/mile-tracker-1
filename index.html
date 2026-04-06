@@ -1010,8 +1010,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
 <!-- MODALS -->
 <div class="modal-overlay" id="editModal"><div class="modal"><div class="modal-handle"></div><div class="modal-title">Edit Trip</div>
-  <div class="iw" style="position:relative"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">From</label><input type="text" class="inp" id="editFrom" placeholder="From address..." oninput="onAddrType('editFrom','editFromDD')" autocomplete="off"><div class="add-dd" id="editFromDD"></div></div>
-  <div class="iw" style="position:relative"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">To</label><input type="text" class="inp" id="editTo" placeholder="To address..." oninput="onAddrType('editTo','editToDD')" autocomplete="off"><div class="add-dd" id="editToDD"></div></div>
+  <div class="iw" style="position:relative"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">From</label><input type="text" class="inp" id="editFrom" placeholder="From address..." oninput="onAddrType('editFrom','editFromDD');_editRecalcDist();" autocomplete="off"><div class="add-dd" id="editFromDD"></div></div>
+  <div class="iw" style="position:relative"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">To</label><input type="text" class="inp" id="editTo" placeholder="To address..." oninput="onAddrType('editTo','editToDD');_editRecalcDist();" autocomplete="off"><div class="add-dd" id="editToDD"></div></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px" id="editDistLabel">Miles</label><input type="number" class="inp" id="editMi" step="0.1"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Category</label><div style="display:flex;gap:8px"><button class="cls ob" id="eBiz" onclick="setEC('biz')" style="flex:1"><span class="cls-d"></span>Business</button><button class="cls" id="ePer" onclick="setEC('pers')" style="flex:1"><span class="cls-d"></span>Personal</button></div></div>
   <div class="iw" id="editVehicleWrap" style="display:none"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Vehicle</label><select class="inp" id="editVehicleSel" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bord);background:var(--card);color:var(--ink1);font-size:14px;appearance:auto"></select></div>
@@ -5641,6 +5641,22 @@ function returnTrip(id){
   document.getElementById('addNote').value='Return trip';
 }
 var _editOrigFrom='',_editOrigTo='',_editOrigDist='';
+var _editDistTimer=null;
+function _editRecalcDist(){
+  clearTimeout(_editDistTimer);
+  _editDistTimer=setTimeout(function(){
+    var f=document.getElementById('editFrom').value.trim();
+    var t=document.getElementById('editTo').value.trim();
+    if(f.length<3||t.length<3)return;
+    var mi=document.getElementById('editMi');
+    _getGoogleDistance(f,t,function(distMi,err){
+      if(distMi&&distMi>0&&mi){
+        var d=_useKm()?(distMi*1.60934).toFixed(1):distMi.toFixed(1);
+        mi.value=d;
+      }
+    });
+  },800);
+}
 function openEdit(id){id=isNaN(id)?id:+id;curTrip=TRIPS.find(t=>+t.id===+id);if(!curTrip)return;_editOrigFrom=curTrip.from;_editOrigTo=curTrip.to;_editOrigDist=tripDist(curTrip.mi);document.getElementById('editFrom').value=curTrip.from;document.getElementById('editTo').value=curTrip.to;document.getElementById('editMi').value=tripDist(curTrip.mi);setEC(curTrip.type==='biz'?'biz':'pers');document.getElementById('editPurpose').value=curTrip.purpose||'';document.getElementById('editNotes').value=curTrip.notes||'';document.getElementById('editToll').value=curTrip.tollCost||'';document.getElementById('editFuel').value=curTrip.fuelCost||'';_renderEditReceipts();var ed=document.getElementById('editDate');if(curTrip.ts){var dt=new Date(curTrip.ts);ed.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}else{ed.value='';}document.getElementById('editModal').classList.add('show');/* Populate vehicle dropdown */var vSel=document.getElementById('editVehicleSel');if(vSel){vSel.innerHTML='<option value="">No vehicle</option>';_vehicles.forEach(function(v){var opt=document.createElement('option');opt.value=v.id;opt.textContent=v.name||v.id;vSel.appendChild(opt);});vSel.value=curTrip.vehicleId||'';document.getElementById('editVehicleWrap').style.display=_vehicles.length>0?'':'none';}}
 function closeEdit(){document.getElementById('editModal').classList.remove('show');curTrip=null;}
 function setEC(c){document.getElementById('eBiz').classList.remove('ob');document.getElementById('ePer').classList.remove('op');if(c==='biz')document.getElementById('eBiz').classList.add('ob');else document.getElementById('ePer').classList.add('op');}
