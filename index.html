@@ -135,15 +135,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .track-stop:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(239,61,88,.25);}
 
 /* GPS DEBUG */
-.gps-debug{position:fixed;bottom:160px;right:8px;z-index:199;font-family:var(--f);font-size:10px;background:rgba(12,12,29,.88);color:#6EE7B7;border-radius:10px;padding:0;max-width:180px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);transition:all .3s;overflow:hidden;}
-.gps-debug.collapsed .gps-debug-body{display:none;}
-.gps-debug-toggle{display:flex;align-items:center;gap:5px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:10px;color:#6EE7B7;background:none;border:none;width:100%;}
-.gps-debug-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.gps-debug-dot.green{background:#6EE7B7;box-shadow:0 0 6px rgba(110,231,183,.6);}
-.gps-debug-dot.yellow{background:#FCD34D;box-shadow:0 0 6px rgba(252,211,77,.6);}
-.gps-debug-dot.red{background:#FCA5A5;box-shadow:0 0 6px rgba(252,165,165,.6);}
-.gps-debug-body{padding:4px 10px 8px;line-height:1.6;color:rgba(255,255,255,.7);}
-.gps-debug-body b{color:#fff;font-weight:600;}
+/* GPS debug panel removed */
 
 /* FREQUENT LOCATION CHIPS */
 .freq-loc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:2px;}
@@ -703,7 +695,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 
   <!-- TAB 3: STATS -->
   <div class="tab" id="tab-stats">
-    <div class="sh"><span class="sh-t">Statistics</span><div style="display:flex;align-items:center;gap:8px"><button onclick="changeStatsMonth(-1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8249;</button><span class="sh-pill" id="statsPeriod">Loading...</span><button onclick="changeStatsMonth(1)" style="background:none;border:none;color:var(--vi);font-size:18px;cursor:pointer;padding:0 4px">&#8250;</button></div></div>
+    <div class="sh"><span class="sh-t">Statistics</span><div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 0;"><button onclick="changeStatsMonth(-1)" style="font-size:32px;padding:10px 20px;min-width:54px;min-height:54px;border-radius:14px;background:#EEF2FF;border:2px solid #6366f1;color:#4F46E5;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1;">&#8249;</button><span class="sh-pill" id="statsPeriod" style="font-size:19px;font-weight:700;color:#1a1a2e;padding:10px 24px;background:#f5f5ff;border-radius:12px;min-width:140px;text-align:center;display:inline-block;">Loading...</span><button onclick="changeStatsMonth(1)" style="font-size:32px;padding:10px 20px;min-width:54px;min-height:54px;border-radius:14px;background:#EEF2FF;border:2px solid #6366f1;color:#4F46E5;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1;">&#8250;</button></div></div>
     <div class="tf-row"><button class="tf a" onclick="switchStatsPeriod(this,'day')">Day</button><button class="tf" onclick="switchStatsPeriod(this,'week')">Week</button><button class="tf" onclick="switchStatsPeriod(this,'month')">Month</button><button class="tf" onclick="switchStatsPeriod(this,'year')">Year</button></div>
     <div class="ins-grid">
       <div class="ins-row">
@@ -1501,6 +1493,15 @@ function _selectCountry(country){
   // Apply locale
   if(typeof setLocale==='function')setLocale(country,true);
   if(typeof _updateAuthTaxLabel==='function')_updateAuthTaxLabel(country);
+  // Sync country to Supabase profile settings
+  if(_sb&&currentUser&&currentUser.id){
+    try{
+      var _s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
+      _s.locale=country;_s.localeSetByUser=true;
+      localStorage.setItem('mymilesai_settings',JSON.stringify(_s));
+      _sb.from('profiles').update({settings:_s}).eq('id',currentUser.id).then(function(){});
+    }catch(e){}
+  }
 }
 
 // Restore country on page load
@@ -1719,9 +1720,12 @@ async function ensureProfile(user){
     if(_restoredLocale&&typeof setLocale==='function'){
       try{
         setLocale(_restoredLocale,false);
+        localStorage.setItem('mymilesai_userCountry',_restoredLocale);
+        if(typeof _selectCountry==='function')_selectCountry(_restoredLocale);
         var _uSel=document.getElementById('unitSel');
         if(_uSel)_uSel.value=_restoredLocale;
         if(typeof applyLocale==='function')applyLocale();
+        if(typeof recalcStats==='function')recalcStats();
         console.log('[Locale] Restored on login: '+_restoredLocale);
       }catch(e){}
     }
@@ -3176,35 +3180,40 @@ function changeStatsMonth(dir){
   if(_statsViewMonth>11){_statsViewMonth=0;_statsViewYear++;}
   if(_statsViewMonth<0){_statsViewMonth=11;_statsViewYear--;}
   _updateStatsPeriodLabel();
-  var activeTab=document.querySelector('.stat-tab.active,.tab-period.active,[data-period].active');
   recalcStatsForMonth(_statsViewMonth,_statsViewYear);
 }
 
 function recalcStatsForMonth(month,year){
-  var totalBiz=0,totalPer=0,totalDed=0,totalTrips=0,unclCount=0;
-  TRIPS.forEach(function(t){
+  // Filter trips for the selected month
+  var totalBiz=0,totalPer=0,totalDed=0,totalTrips=0;
+  for(var i=0;i<TRIPS.length;i++){
+    var t=TRIPS[i];
     var d=t.ts?new Date(t.ts):null;
-    if(!d||d.getMonth()!==month||d.getFullYear()!==year)return;
+    if(!d||d.getMonth()!==month||d.getFullYear()!==year)continue;
     var mi=convMi(t.mi);
-    if(t.type==='biz'){totalBiz+=mi;}
-    else if(t.type==='pers'){totalPer+=mi;}
-    if(t.type==='uncl')unclCount++;
+    if(t.type==='biz')totalBiz+=mi;
+    else if(t.type==='pers')totalPer+=mi;
     totalDed+=_tripDeduction(t);
     totalTrips++;
-  });
+  }
   var c=LOC.currency;
   var totalAll=totalBiz+totalPer;
   var bizPct=totalAll>0?Math.round(totalBiz/totalAll*100):0;
-  // Hero stats
-  var hsBiz=document.getElementById('hsBiz');if(hsBiz)hsBiz.textContent=totalBiz.toFixed(1);
-  var hsPer=document.getElementById('hsPer');if(hsPer)hsPer.textContent=totalPer.toFixed(1);
-  var hsDed=document.getElementById('hsDed');if(hsDed)hsDed.textContent=c+(totalDed).toFixed(2);
-  // Stats card values
-  var sb=document.getElementById('sBiz');if(sb)sb.textContent=totalBiz.toFixed(1);
-  var sp=document.getElementById('sPer');if(sp)sp.textContent=totalPer.toFixed(1);
-  var sd=document.getElementById('sDedVal');if(sd)sd.textContent=c+totalDed.toFixed(2);
-  var st=document.getElementById('sTripCount');if(st)st.textContent=totalTrips;
-  var dp=document.getElementById('sDedProg');if(dp){dp.dataset.width=bizPct+'%';dp.style.width=bizPct+'%';}
+  var perPct=totalAll>0?100-bizPct:0;
+  // Update DOM in rAF for instant response
+  requestAnimationFrame(function(){
+    var hsBiz=document.getElementById('hsBiz');if(hsBiz)hsBiz.textContent=totalBiz.toFixed(1);
+    var hsPer=document.getElementById('hsPer');if(hsPer)hsPer.textContent=totalPer.toFixed(1);
+    var hsDed=document.getElementById('hsDed');if(hsDed)hsDed.textContent=c+totalDed.toFixed(2);
+    var sb=document.getElementById('sBiz');if(sb)sb.textContent=totalBiz.toFixed(1);
+    var sp=document.getElementById('sPer');if(sp)sp.textContent=totalPer.toFixed(1);
+    var sd=document.getElementById('sDedVal');if(sd)sd.textContent=c+totalDed.toFixed(2);
+    var st=document.getElementById('sTripCount');if(st)st.textContent=totalTrips;
+    var bt=document.getElementById('sBizTrend');if(bt){bt.textContent=bizPct+'%';bt.className='ins-trend '+(bizPct>=50?'up':'dn');}
+    var pt=document.getElementById('sPerTrend');if(pt){pt.textContent=perPct+'%';pt.className='ins-trend '+(perPct>=50?'up':'dn');}
+    var dp=document.getElementById('sDedProg');if(dp){dp.dataset.width=bizPct+'%';dp.style.width=bizPct+'%';}
+    var tp=document.getElementById('sTripProg');if(tp){var pct=Math.min(totalTrips/20*100,100);tp.dataset.width=pct+'%';tp.style.width=pct+'%';}
+  });
 }
 
 function recalcStatsForPeriod(period){
@@ -3899,24 +3908,7 @@ try{
   _pendingAutoSave=null;_autoSaveShown=false;
 }
 
-/* ── GPS DEBUG PANEL UPDATE ── */
-function updateDebugPanel(){
-  var dot=document.getElementById('gpsDebugDot');
-  var label=document.getElementById('gpsDebugLabel');
-  if(!dot||!label)return;
-  var state=_signalLost?'SIGNAL LOST':tracking?(_paused?'PAUSED':'RECORDING'):((autoDetect&&autoWatchId)?'MONITORING':'IDLE');
-  dot.className='gps-debug-dot '+(_signalLost?'red':tracking?((_paused)?'yellow':'green'):((autoDetect&&autoWatchId)?'green':'red'));
-  label.textContent='GPS: '+state;
-  var el=document.getElementById('gdbState');if(el)el.textContent=state;
-  el=document.getElementById('gdbPerm');if(el)el.textContent=_gpsPermState;
-  el=document.getElementById('gdbPause');
-  if(el){
-    if(_stationaryStart>0){
-      var secs=Math.floor((Date.now()-_stationaryStart)/1000);
-      el.textContent=secs+'s / '+(SMART_STOP_MS/1000)+'s';
-    } else {el.textContent='moving';}
-  }
-}
+function updateDebugPanel(){}
 
 function onPos(p){
   var spd=p.coords.speed;
