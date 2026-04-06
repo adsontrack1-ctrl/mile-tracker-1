@@ -34,15 +34,17 @@ function _initGoogleMaps(){
   if(typeof _initPlacesInputs==='function')_initPlacesInputs();
   if(typeof mapSheetOpen!=='undefined'&&mapSheetOpen&&!mapReady&&typeof initMap==='function')setTimeout(initMap,100);
 }
-// Fallback: if Maps SDK already loaded before this script ran (iOS resume from cache),
-// fire _initGoogleMaps immediately instead of waiting for the callback that already fired.
-(function _checkMapsAlreadyLoaded(){
-  if(typeof google!=='undefined'&&google.maps&&google.maps.places&&!window._googleMapsReady){
-    _initGoogleMaps();
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
+<script>
+(function _pollMapsReady(){
+  if(typeof google!=='undefined'&&google.maps&&google.maps.places){
+    if(!window._googleMapsReady) _initGoogleMaps();
+  } else {
+    setTimeout(_pollMapsReady,200);
   }
 })();
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE&libraries=places&callback=_initGoogleMaps" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
@@ -4851,7 +4853,6 @@ function onAddrType(inpId,ddId){
   var dd=document.getElementById(ddId);
   var v=inp.value.trim();
 
-  _ensureMapsLoaded(function(){/* Maps ready — geocode will work */});
   calcDistance();
 
   if(v.length<2){dd.classList.remove('show');dd.innerHTML='';return;}
@@ -4907,8 +4908,7 @@ function geocodeAddr(query,inpId,ddId){
   if(!_googleMapsReady||!google||!google.maps||!google.maps.places){
     // Maps not ready — queue this search and retry
     // Critical on native iOS where SDK loads after user starts typing
-    _ensureMapsLoaded();
-    _geocodeWhenReady(query,inpId,ddId,0);
+    _ensureMapsLoaded(function(){_geocodeWhenReady(query,inpId,ddId,0);});
     return;
   }
 
