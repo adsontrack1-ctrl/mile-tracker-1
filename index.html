@@ -6211,10 +6211,16 @@ function toggleNotifSetting(el,key){
   try{localStorage.setItem('mymilesai_notif_settings',JSON.stringify(_notifSettings));}catch(e){}
 }
 function loadNotifSettings(){
-  try{var s=JSON.parse(localStorage.getItem('mymilesai_notif_settings')||'null');if(s)_notifSettings=s;}catch(e){}
-  var elT=document.getElementById('notifTripTgl');if(elT){if(_notifSettings.trip)elT.classList.add('on');else elT.classList.remove('on');}
-  var elW=document.getElementById('notifWeeklyTgl');if(elW){if(_notifSettings.weekly)elW.classList.add('on');else elW.classList.remove('on');}
-  var elM=document.getElementById('notifMilestoneTgl');if(elM){if(_notifSettings.milestone)elM.classList.add('on');else elM.classList.remove('on');}
+  try{
+    var s=JSON.parse(localStorage.getItem('mymilesai_notif_settings')||'{}');
+    if(s&&typeof s==='object'){_notifSettings=s;}
+  }catch(e){}
+  var elT=document.getElementById('notifTripTgl');
+  if(elT)elT.classList.toggle('on',!!_notifSettings.trip);
+  var elW=document.getElementById('notifWeeklyTgl');
+  if(elW)elW.classList.toggle('on',!!_notifSettings.weekly);
+  var elM=document.getElementById('notifMilestoneTgl');
+  if(elM)elM.classList.toggle('on',!!_notifSettings.milestone);
 }
 
 /* ===== SETTINGS PERSISTENCE ===== */
