@@ -27,6 +27,9 @@
 function _initGoogleMaps(){
   window._googleMapsReady=true;
   window._mapsLoading=false;
+  window.gm_authFailure=function(){
+    console.warn('MyMilesAI: gm_authFailure suppressed — running in native WKWebView');
+  };
   if(window._mapsReadyCbs){
     var cbs=window._mapsReadyCbs.splice(0);
     cbs.forEach(function(cb){try{cb();}catch(e){}});
@@ -5250,21 +5253,21 @@ function _calcDistCore(){
         status.textContent='Driving distance (via roads)';
         status.classList.add('calculated');
       } else {
-        // Fallback to Haversine only if Distance Matrix fails
-        var R=6371;
-        var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
-        var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
-        var a=Math.sin(dLat/2)*Math.sin(dLat/2)+
-              Math.cos(fromCoords.lat*Math.PI/180)*Math.cos(toCoords.lat*Math.PI/180)*
-              Math.sin(dLng/2)*Math.sin(dLng/2);
-        var fallbackKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.2;
-        var fallbackDisplay=useKm?fallbackKm.toFixed(1):(fallbackKm/1.60934).toFixed(1);
-        addDistVal=parseFloat(fallbackDisplay);
-        distInp.value=fallbackDisplay;
-        distInp.classList.add('filled');
-        badge.classList.add('active');badge.textContent=LOC.unit;
-        status.textContent='Estimated distance (offline)';
-        status.classList.add('calculated');
+        // Distance Matrix failed — try again with address strings directly
+        _getGoogleDistance(f,t,function(distMi2,err2){
+          if(distMi2!==null){
+            var displayDist2=useKm?(distMi2*1.60934).toFixed(1):distMi2.toFixed(1);
+            addDistVal=parseFloat(displayDist2);
+            distInp.value=displayDist2;
+            distInp.classList.add('filled');
+            badge.classList.add('active');badge.textContent=LOC.unit;
+            status.textContent='Exact driving distance (Google Maps)';
+            status.classList.add('calculated');
+          } else {
+            status.textContent='Could not calculate distance — enter manually';
+            status.classList.remove('calculated');
+          }
+        });
       }
     });
     return;
