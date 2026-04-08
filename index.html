@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0C0C1D">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16.png">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://places.googleapis.com https://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.harijasllc.workers.dev https://api.stripe.com https://routes.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src 'self' blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'nonce-mmai2026' https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://places.googleapis.com https://routes.googleapis.com https://dxpuuiqibtizewbbffjk.supabase.co wss://dxpuuiqibtizewbbffjk.supabase.co https://mymilesai-ai.harijasllc.workers.dev https://api.stripe.com; frame-src https://js.stripe.com; worker-src 'self' blob:; upgrade-insecure-requests">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,7 +23,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
 <title>MyMilesAI Rel 5.6</title>
-<script>
+<script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
   window._mapsLoading=false;
@@ -621,7 +621,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 <div class="phone" role="application" aria-label="MyMilesAI mileage tracker"><div class="scroll" role="main">
 
   <div class="hdr">
-    <div class="hdr-l"><div class="hdr-av" id="hdrAv">S</div><div><div class="hdr-greet" id="hdrGreet"><script>document.write((function(){var h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening';})())</script></div><div class="hdr-name" id="hdrName">Welcome back</div></div></div>
+    <div class="hdr-l"><div class="hdr-av" id="hdrAv">S</div><div><div class="hdr-greet" id="hdrGreet"><script nonce="mmai2026">document.write((function(){var h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':'Good evening';})())</script></div><div class="hdr-name" id="hdrName">Welcome back</div></div></div>
     <div class="hdr-r"><span id="syncStatusDot" title="Synced" style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-flex;align-self:center;transition:background 0.5s;cursor:help;margin-right:2px"></span>
     <div class="hdr-btn" style="position:relative;display:inline-flex;align-items:center;justify-content:center" onclick="switchTabId('tab-alerts')" id="hdrBellIco" aria-label="Notifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="hdr-dot"></div></div><div class="hdr-btn" onclick="goToSettings()" aria-label="Settings" style="display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg></div></div>
   </div>
@@ -857,14 +857,14 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 127</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 128</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
       <div class="sr" onclick="confirmDeleteAccount()"><div><h4 style="color:var(--coral)">Delete My Account</h4><p>Permanently delete all data</p></div><span class="sr-link" style="color:var(--coral)">Delete →</span></div>
     </div>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
-    <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+    <div class="app-footer">MyMilesAI © <script nonce="mmai2026">document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
   </div>
 
   <!-- TAB 4: ALERTS -->
@@ -1371,7 +1371,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-<script>
+<script nonce="mmai2026">
 /* ── Global Error Handler v109b ── */
 (function(){
   var _errQueue=[];
@@ -3781,6 +3781,36 @@ function requestGPSPermission(){
 }
 
 /* ── Trip UUID + Offline Sync Queue ── */
+/* ── Address encryption (Build 128 groundwork — wired in Build 129) ── */
+async function _encryptAddress(address, userKey) {
+  if (!address || !userKey) return address;
+  try {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(userKey.padEnd(32, '0').slice(0, 32));
+    const cryptoKey = await window.crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']);
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, encoder.encode(address));
+    const combined = new Uint8Array(iv.length + encrypted.byteLength);
+    combined.set(iv);
+    combined.set(new Uint8Array(encrypted), iv.length);
+    return btoa(String.fromCharCode.apply(null, combined));
+  } catch(e) { console.warn('[Encrypt]', e.message); return address; }
+}
+async function _decryptAddress(encryptedAddress, userKey) {
+  if (!encryptedAddress || !userKey) return encryptedAddress;
+  try {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(userKey.padEnd(32, '0').slice(0, 32));
+    const cryptoKey = await window.crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['decrypt']);
+    const combined = Uint8Array.from(atob(encryptedAddress), c => c.charCodeAt(0));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const decrypted = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, data);
+    return new TextDecoder().decode(decrypted);
+  } catch(e) { console.warn('[Decrypt]', e.message); return encryptedAddress; }
+}
+/* TODO: wire _encryptAddress into trip saves in Build 129 */
+
 function _genTripId(){
   try{return crypto.randomUUID();}catch(e){
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
