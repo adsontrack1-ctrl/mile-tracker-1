@@ -505,16 +505,15 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .toast.show{top:max(calc(env(safe-area-inset-top, 20px) + 12px), 60px);}
 .toast-icon{font-size:18px;flex-shrink:0;}
 .toast-text{flex:1;line-height:1.3;}
-/* SWIPE CLASSIFY */
+/* SWIPE CLASSIFY (MileIQ-style) */
 .swipe-wrap{position:relative;overflow:hidden;border-radius:var(--r2);margin-bottom:8px;}
-.swipe-bg{position:absolute;top:0;bottom:0;display:flex;align-items:center;font-size:13px;font-weight:800;letter-spacing:.5px;padding:0 24px;color:#fff;z-index:0;transition:opacity .2s;}
-.swipe-bg.biz{left:0;right:50%;background:linear-gradient(90deg,var(--vi),rgba(108,60,224,.7));justify-content:flex-start;}
-.swipe-bg.per{right:0;left:50%;background:linear-gradient(270deg,var(--mag),rgba(214,0,110,.7));justify-content:flex-end;}
-.swipe-card{position:relative;z-index:1;touch-action:pan-y;transition:transform .3s cubic-bezier(.22,1,.36,1);cursor:grab;}
-.swipe-card.dragging{transition:none;cursor:grabbing;}
-.swipe-hint{text-align:center;padding:6px 0 2px;font-size:10px;font-weight:600;color:var(--ink4);letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:6px;}
-.swipe-hint::before{content:var(--swipe-left,'← Business');color:var(--vi);font-weight:700;}
-.swipe-hint::after{content:var(--swipe-right,'Personal →');color:var(--mag);font-weight:700;}
+.swipe-card{position:relative;z-index:1;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;}
+.swipe-card.snapping{transition:transform .3s cubic-bezier(.25,.46,.45,.94),opacity .3s ease;}
+.swipe-card.flying-out{transition:transform .4s cubic-bezier(.55,0,1,.45),opacity .4s ease;}
+.swipe-card.dragging{cursor:grabbing;}
+.swipe-overlay{position:absolute;top:0;left:0;right:0;bottom:0;border-radius:inherit;display:flex;align-items:center;padding:0 24px;opacity:0;pointer-events:none;font-weight:800;font-size:18px;letter-spacing:2px;z-index:2;transition:opacity .12s ease;}
+.swipe-overlay.business{background:rgba(214,0,110,.15);color:#D6006E;justify-content:flex-start;}
+.swipe-overlay.personal{background:rgba(108,60,224,.15);color:#6C3CE0;justify-content:flex-end;}
 /* WORK DAY BUTTONS */
 .wd-btn{width:30px;height:30px;border-radius:50%;border:none;font-size:11px;font-weight:700;background:var(--ink6);color:var(--ink3);cursor:pointer;transition:all .2s;}
 .wd-btn.a{background:var(--vi);color:#fff;}
@@ -690,7 +689,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <span style="font-size:11px;color:var(--ink4)" id="ytdGoal">Goal: $5,000</span>
   </div>
 </div>
-<div class="sh"><span class="sh-t">Recent Trips</span><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div>
+<div class="sh"><span class="sh-t">Recent Trips</span><div style="display:flex;align-items:center;gap:10px"><button id="classifyAllBtn" onclick="openClassifyStack()" style="display:none;font-size:11px;font-weight:700;padding:5px 11px;border:none;border-radius:100px;background:linear-gradient(135deg,#6C3CE0,#D6006E);color:#fff;cursor:pointer">⚡ Classify All</button><span class="sh-link" onclick="switchTabId('tab-trips')">See all →</span></div></div>
     <div class="trips" id="recentTrips"></div>
     <div class="sh"><span class="sh-t">Quick Templates</span></div>
     <div class="tmpl-r">
@@ -858,7 +857,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 121</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 126</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
     </div>
@@ -1039,6 +1038,20 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Date</label><input type="date" class="inp" id="editDate" style="padding:10px 16px"></div>
   <div class="modal-row"><button class="modal-cancel" onclick="closeEdit()">Cancel</button><button class="cta" onclick="saveEdit()" style="flex:1">Save</button></div>
 </div></div>
+<!-- Quick-Classify Stack Overlay -->
+<div id="classifyStackOverlay" style="display:none;position:fixed;inset:0;background:rgba(12,12,29,.92);z-index:9500;flex-direction:column;align-items:center;justify-content:flex-start;padding:env(safe-area-inset-top,40px) 16px 24px">
+  <div style="width:100%;max-width:393px;display:flex;align-items:center;justify-content:space-between;padding:8px 4px 16px;color:#fff">
+    <button onclick="closeClassifyStack()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer">✕</button>
+    <div id="csProgress" style="font-size:13px;font-weight:700;opacity:.85">0 of 0</div>
+    <button onclick="csSkip()" style="background:none;border:none;color:#fff;font-size:13px;font-weight:700;opacity:.85;cursor:pointer">Skip →</button>
+  </div>
+  <div id="csCardArea" style="position:relative;width:100%;max-width:360px;flex:1;display:flex;align-items:center;justify-content:center;min-height:340px"></div>
+  <div style="display:flex;gap:14px;width:100%;max-width:360px;margin-top:14px">
+    <button onclick="csClassify('pers')" style="flex:1;padding:14px;border-radius:14px;background:rgba(108,60,224,.18);border:1.5px solid #6C3CE0;color:#a78bfa;font-weight:800;font-size:14px;cursor:pointer">← PERSONAL 👤</button>
+    <button onclick="csClassify('biz')" style="flex:1;padding:14px;border-radius:14px;background:rgba(214,0,110,.18);border:1.5px solid #D6006E;color:#f472b6;font-weight:800;font-size:14px;cursor:pointer">💼 BUSINESS →</button>
+  </div>
+  <div style="margin-top:14px;font-size:11px;color:#9898B0;text-align:center">Tip: swipe the card or tap a button</div>
+</div>
 <div class="modal-overlay" id="delModal"><div class="modal del-modal"><div class="modal-handle"></div><div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Delete Trip</div><div class="del-msg">Are you sure? This can't be undone.</div><div class="del-route" id="delRoute"></div><div class="modal-row"><button class="modal-cancel" onclick="closeDel()">Cancel</button><button class="btn-del-confirm" onclick="confirmDel()">Delete</button></div></div></div>
 
 <!-- CLASSIFY PROMPT -->
@@ -2324,10 +2337,8 @@ function tripCard(t,wide){
   const bigUnit=t.ded?'saved':LOC.label;
   const subDist=t.ded?`<div class="trip-mi-sub">${d} ${LOC.label}</div>`:'';
   var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${vehTag}${purposeTag}${expTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button>${t.type==='uncl'?`<button class="ta-btn" onclick="askAIAboutTrip(${t.id})" style="font-size:11px;padding:4px 8px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:6px">AI</button>`:''}</div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
-  if(t.type==='uncl' && wide){
-    return `<div class="swipe-wrap"><div class="swipe-bg biz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Business</div><div class="swipe-bg per"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal</div><div class="swipe-card" data-swipe-id="${t.id}">${card}</div><div class="swipe-hint"></div></div>`;
-  }
-  return card;
+  /* Wrap EVERY card in swipe-wrap so any trip can be reclassified by swiping */
+  return `<div class="swipe-wrap"><div class="swipe-overlay business">💼 BUSINESS ✓</div><div class="swipe-overlay personal">PERSONAL ✓ 👤</div><div class="swipe-card" data-swipe-id="${t.id}" data-swipe-type="${t.type}">${card}</div></div>`;
 }
 function askAIAboutTrip(tripId){
   var t=TRIPS.find(function(x){return x.id===tripId;});if(!t)return;
@@ -2374,6 +2385,7 @@ function renderTrips(){
   _updateStreak();
   _updateYTD();
   bindSwipeCards();
+  if(typeof _updateClassifyAllBtn==='function')_updateClassifyAllBtn();
   if(_activeFilter!=='all')applyFilter();
 }
 
@@ -2393,33 +2405,210 @@ function _searchTrips(q){
   });
   list.innerHTML=html;bindSwipeCards();
 }
+function _hapticTap(style){
+  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
+    try{window.ReactNativeWebView.postMessage(JSON.stringify({type:'haptic',style:style||'medium'}));}catch(e){}
+  }
+}
 function bindSwipeCards(){
   document.querySelectorAll('.swipe-card').forEach(function(card){
-    var startX=0,curX=0,dragging=false,tid=parseInt(card.dataset.swipeId);
-    function onStart(x){startX=x;curX=0;dragging=true;card.classList.add('dragging');}
-    function onMove(x){
+    if(card.dataset.swipeBound==='1')return;
+    card.dataset.swipeBound='1';
+    var startX=0,startY=0,curX=0,dragging=false,locked=false;
+    var tid=parseInt(card.dataset.swipeId);
+    var wrap=card.parentNode;
+    var bizOverlay=wrap.querySelector('.swipe-overlay.business');
+    var perOverlay=wrap.querySelector('.swipe-overlay.personal');
+    function reset(){
+      card.classList.remove('dragging');
+      card.classList.add('snapping');
+      card.style.transform='';card.style.opacity='1';card.style.boxShadow='';
+      if(bizOverlay)bizOverlay.style.opacity='0';
+      if(perOverlay)perOverlay.style.opacity='0';
+      setTimeout(function(){card.classList.remove('snapping');},320);
+    }
+    function flyOut(direction,type){
+      card.classList.remove('dragging');
+      card.classList.add('flying-out');
+      var off=direction>0?'120%':'-120%';
+      var rot=direction>0?'15deg':'-15deg';
+      card.style.transform='translateX('+off+') rotate('+rot+')';
+      card.style.opacity='0';
+      _hapticTap('medium');
+      var label=type==='biz'?'Business':'Personal';
+      showToast(type==='biz'?_i('brief'):_i('user'),'Classified as '+label+' ✓',2000);
+      setTimeout(function(){
+        clsTrip(tid,type);
+      },380);
+    }
+    function onStart(x,y){
+      startX=x;startY=y;curX=0;dragging=true;locked=false;
+      card.classList.remove('snapping');
+      card.classList.add('dragging');
+    }
+    function onMove(x,y){
       if(!dragging)return;
-      curX=x-startX;curX=Math.max(-150,Math.min(150,curX));
-      card.style.transform='translateX('+curX+'px) rotate('+(curX*0.05)+'deg)';
-      card.style.opacity=1-Math.abs(curX)/300;
+      var dx=x-startX,dy=y-startY;
+      // Lock direction: if vertical wins early, abort swipe (let the page scroll)
+      if(!locked){
+        if(Math.abs(dy)>Math.abs(dx)+8&&Math.abs(dy)>10){
+          dragging=false;card.classList.remove('dragging');return;
+        }
+        if(Math.abs(dx)>6)locked=true;
+      }
+      curX=Math.max(-260,Math.min(260,dx));
+      var rot=curX*0.08;
+      card.style.transform='translateX('+curX+'px) rotate('+rot+'deg)';
+      var w=card.offsetWidth||320;
+      var pct=Math.min(1,Math.abs(curX)/(w*0.4));
+      if(curX>0){
+        if(bizOverlay)bizOverlay.style.opacity=pct;
+        if(perOverlay)perOverlay.style.opacity='0';
+        card.style.boxShadow='0 0 0 2px rgba(214,0,110,'+(pct*0.4)+')';
+      } else if(curX<0){
+        if(perOverlay)perOverlay.style.opacity=pct;
+        if(bizOverlay)bizOverlay.style.opacity='0';
+        card.style.boxShadow='0 0 0 2px rgba(108,60,224,'+(pct*0.4)+')';
+      } else {
+        if(bizOverlay)bizOverlay.style.opacity='0';
+        if(perOverlay)perOverlay.style.opacity='0';
+        card.style.boxShadow='';
+      }
     }
     function onEnd(){
-      if(!dragging)return;dragging=false;card.classList.remove('dragging');
-      if(curX<-80){card.style.transform='translateX(-120%) rotate(-10deg)';card.style.opacity='0';
-        setTimeout(function(){clsTrip(tid,'pers');},300);
-      } else if(curX>80){card.style.transform='translateX(120%) rotate(10deg)';card.style.opacity='0';
-        setTimeout(function(){clsTrip(tid,'biz');},300);
-      } else {card.style.transform='';card.style.opacity='1';}
+      if(!dragging)return;dragging=false;
+      var w=card.offsetWidth||320;
+      var threshold=w*0.4;
+      if(curX>threshold){flyOut(1,'biz');}
+      else if(curX<-threshold){flyOut(-1,'pers');}
+      else{reset();}
       curX=0;
     }
-    card.addEventListener('touchstart',function(e){onStart(e.touches[0].clientX);},{passive:true});
-    card.addEventListener('touchmove',function(e){onMove(e.touches[0].clientX);},{passive:true});
+    card.addEventListener('touchstart',function(e){onStart(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+    card.addEventListener('touchmove',function(e){onMove(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
     card.addEventListener('touchend',onEnd);
-    card.addEventListener('mousedown',function(e){onStart(e.clientX);e.preventDefault();});
-    card.addEventListener('mousemove',function(e){onMove(e.clientX);});
+    card.addEventListener('touchcancel',function(){if(dragging){dragging=false;reset();}});
+    card.addEventListener('mousedown',function(e){if(e.target.closest('button'))return;onStart(e.clientX,e.clientY);e.preventDefault();});
+    card.addEventListener('mousemove',function(e){onMove(e.clientX,e.clientY);});
     card.addEventListener('mouseup',onEnd);
-    card.addEventListener('mouseleave',function(){if(dragging){dragging=false;card.classList.remove('dragging');card.style.transform='';card.style.opacity='1';curX=0;}});
+    card.addEventListener('mouseleave',function(){if(dragging){dragging=false;reset();}});
   });
+}
+
+/* ── Quick-Classify Stack View (MileIQ-style full-screen card stack) ── */
+var _csQueue=[],_csIdx=0;
+function _csUnclassifiedTrips(){
+  return TRIPS.filter(function(t){return t.type==='uncl';});
+}
+function _updateClassifyAllBtn(){
+  var btn=document.getElementById('classifyAllBtn');
+  if(!btn)return;
+  var n=_csUnclassifiedTrips().length;
+  if(n>0){btn.style.display='inline-block';btn.textContent='⚡ Classify '+n;}
+  else{btn.style.display='none';}
+}
+function openClassifyStack(){
+  _csQueue=_csUnclassifiedTrips();
+  if(_csQueue.length===0){showToast(_i('ccheck'),'All trips already classified!',2500);return;}
+  _csIdx=0;
+  document.getElementById('classifyStackOverlay').style.display='flex';
+  _csRender();
+}
+function closeClassifyStack(){
+  document.getElementById('classifyStackOverlay').style.display='none';
+  _updateClassifyAllBtn();
+}
+function _csRender(){
+  var area=document.getElementById('csCardArea');
+  var prog=document.getElementById('csProgress');
+  if(!area)return;
+  if(_csIdx>=_csQueue.length){
+    area.innerHTML='<div style="text-align:center;color:#fff;padding:40px 20px"><div style="font-size:48px">🎉</div><div style="margin-top:16px;font-size:18px;font-weight:700">All done!</div><div style="margin-top:8px;font-size:13px;color:#9898B0">Every trip classified.</div><button onclick="closeClassifyStack()" style="margin-top:24px;padding:12px 32px;border-radius:100px;background:linear-gradient(135deg,#6C3CE0,#D6006E);border:none;color:#fff;font-weight:700;cursor:pointer">Done</button></div>';
+    prog.textContent=_csQueue.length+' of '+_csQueue.length;
+    return;
+  }
+  prog.textContent=(_csIdx+1)+' of '+_csQueue.length;
+  var t=_csQueue[_csIdx];
+  var safeFrom=_esc(t.from||'');
+  var safeTo=_esc(t.to||'');
+  var d=tripDist(t.mi);
+  var dateStr=t.date||t.day||'';
+  area.innerHTML='<div id="csCard" style="width:100%;background:#fff;border-radius:20px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative;overflow:hidden">'
+    +'<div style="font-size:11px;color:#6B7280;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">'+_esc(dateStr)+'</div>'
+    +'<div style="font-size:32px;font-weight:800;color:#1a1a2e;letter-spacing:-1px;line-height:1">'+d+' <span style="font-size:14px;color:#6B7280;font-weight:600">'+LOC.label+'</span></div>'
+    +'<div style="margin-top:18px;padding-top:18px;border-top:1px solid #f1f5f9">'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:8px;height:8px;border-radius:50%;background:#6C3CE0;flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:10px;color:#6B7280;font-weight:600">FROM</div><div style="font-size:13px;color:#1a1a2e;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+safeFrom+'</div></div></div>'
+    +'<div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:#D6006E;flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:10px;color:#6B7280;font-weight:600">TO</div><div style="font-size:13px;color:#1a1a2e;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+safeTo+'</div></div></div>'
+    +'</div>'
+    +'<div class="cs-overlay biz" style="position:absolute;inset:0;background:rgba(214,0,110,.18);color:#D6006E;font-weight:900;font-size:30px;letter-spacing:3px;display:flex;align-items:center;justify-content:flex-start;padding:0 32px;opacity:0;pointer-events:none;border-radius:inherit">💼 BUSINESS</div>'
+    +'<div class="cs-overlay per" style="position:absolute;inset:0;background:rgba(108,60,224,.18);color:#6C3CE0;font-weight:900;font-size:30px;letter-spacing:3px;display:flex;align-items:center;justify-content:flex-end;padding:0 32px;opacity:0;pointer-events:none;border-radius:inherit">PERSONAL 👤</div>'
+    +'</div>';
+  _bindCsSwipe();
+}
+function _bindCsSwipe(){
+  var card=document.getElementById('csCard');
+  if(!card)return;
+  var sx=0,sy=0,cx=0,drag=false,locked=false;
+  var biz=card.querySelector('.cs-overlay.biz');
+  var per=card.querySelector('.cs-overlay.per');
+  function start(x,y){sx=x;sy=y;cx=0;drag=true;locked=false;card.style.transition='none';}
+  function move(x,y){
+    if(!drag)return;
+    var dx=x-sx,dy=y-sy;
+    if(!locked){
+      if(Math.abs(dy)>Math.abs(dx)+8&&Math.abs(dy)>10){drag=false;return;}
+      if(Math.abs(dx)>6)locked=true;
+    }
+    cx=Math.max(-300,Math.min(300,dx));
+    card.style.transform='translateX('+cx+'px) rotate('+(cx*0.08)+'deg)';
+    var w=card.offsetWidth||320;
+    var pct=Math.min(1,Math.abs(cx)/(w*0.4));
+    if(cx>0){biz.style.opacity=pct;per.style.opacity='0';}
+    else if(cx<0){per.style.opacity=pct;biz.style.opacity='0';}
+    else{biz.style.opacity='0';per.style.opacity='0';}
+  }
+  function end(){
+    if(!drag)return;drag=false;
+    var w=card.offsetWidth||320,th=w*0.4;
+    if(cx>th){csClassify('biz');}
+    else if(cx<-th){csClassify('pers');}
+    else{card.style.transition='transform .3s ease,opacity .3s ease';card.style.transform='';biz.style.opacity='0';per.style.opacity='0';}
+    cx=0;
+  }
+  card.addEventListener('touchstart',function(e){start(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  card.addEventListener('touchmove',function(e){move(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  card.addEventListener('touchend',end);
+  card.addEventListener('mousedown',function(e){start(e.clientX,e.clientY);e.preventDefault();});
+  card.addEventListener('mousemove',function(e){move(e.clientX,e.clientY);});
+  card.addEventListener('mouseup',end);
+}
+function csClassify(type){
+  var card=document.getElementById('csCard');
+  var t=_csQueue[_csIdx];
+  if(!t)return;
+  if(card){
+    card.style.transition='transform .35s cubic-bezier(.55,0,1,.45),opacity .35s ease';
+    card.style.transform='translateX('+(type==='biz'?'120%':'-120%')+') rotate('+(type==='biz'?'15deg':'-15deg')+')';
+    card.style.opacity='0';
+  }
+  _hapticTap('medium');
+  // Apply classification to actual TRIPS array
+  var actualTrip=TRIPS.find(function(x){return x.id===t.id;});
+  if(actualTrip){
+    actualTrip.type=type;
+    actualTrip.ded=!!CAT_DEDUCTIBLE[type];
+    checkFrequentRoute(actualTrip);
+    saveTripsToStorage();
+  }
+  setTimeout(function(){
+    _csIdx++;
+    _csRender();
+    renderTrips();
+  },360);
+}
+function csSkip(){
+  _csIdx++;
+  _csRender();
 }
 
 /* ===== FREQUENT ROUTE DETECTION ===== */
@@ -3740,17 +3929,54 @@ function _updateFreqLoc(lat,lng,address){
   }
   _saveFreqLocs();
 }
+window._pendingNameLocLat=null;
+window._pendingNameLocLng=null;
+window._pendingNameLocAddr='';
+function _saveNamedLocation(){
+  var inp=document.getElementById('freqLocName');
+  var n=inp?inp.value.trim():'';
+  if(!n){
+    var ov=document.querySelector('.modal-overlay.show');
+    if(ov&&ov.querySelector('#freqLocName'))ov.remove();
+    return;
+  }
+  var lat=window._pendingNameLocLat;
+  var lng=window._pendingNameLocLng;
+  var addr=window._pendingNameLocAddr;
+  // Find by tolerance (lat/lng float compare with epsilon)
+  var fl=_freqLocs.find(function(x){return Math.abs(x.lat-lat)<0.0001&&Math.abs(x.lng-lng)<0.0001;});
+  if(fl){fl.label=n;}
+  else{_freqLocs.push({lat:lat,lng:lng,address:addr,label:n,count:1});}
+  _saveFreqLocs();
+  /* Sync to Supabase profiles.named_locations JSONB */
+  if(_sb&&currentUser&&currentUser.id){
+    try{
+      _sb.from('profiles').update({named_locations:_freqLocs.filter(function(x){return x.label;}),updated_at:new Date().toISOString()}).eq('id',currentUser.id).then(function(){}).catch(function(){});
+    }catch(e){}
+  }
+  if(typeof renderFreqLocChips==='function')renderFreqLocChips();
+  showToast(_i('pin'),'Location saved as "'+n+'"',2500);
+  var ov2=document.querySelector('.modal-overlay.show');
+  if(ov2&&ov2.querySelector('#freqLocName'))ov2.remove();
+}
+function _skipNamedLocation(){
+  var ov=document.querySelector('.modal-overlay.show');
+  if(ov&&ov.querySelector('#freqLocName'))ov.remove();
+}
 function _promptNameLocation(loc,address){
   var short=address?address.split(',')[0]:'this location';
+  window._pendingNameLocLat=loc.lat;
+  window._pendingNameLocLng=loc.lng;
+  window._pendingNameLocAddr=address||'';
   var overlay=document.createElement('div');
   overlay.className='modal-overlay show';
   overlay.style.cssText='display:flex;align-items:flex-end;justify-content:center';
   var current=loc.label||'';
   overlay.innerHTML='<div class="modal"><div class="modal-handle"></div><div class="modal-title">Name this location?</div>'
     +'<p style="font-size:13px;color:var(--ink2);margin-bottom:16px">You\'ve visited <b>'+_esc(short)+'</b> '+loc.count+' times. Give it a name for quick access.</p>'
-    +'<div class="iw" style="padding:0;margin-bottom:12px"><input class="inp" id="freqLocName" placeholder="e.g. Home, Office, Client Site" value="'+current.replace(/"/g,'&quot;')+'" style="border-radius:var(--r)"></div>'
-    +'<div class="modal-row"><button class="modal-cancel" onclick="this.closest(\'.modal-overlay\').remove()">Skip</button>'
-    +'<button class="cta" style="flex:1" onclick="(function(el){var n=document.getElementById(\'freqLocName\').value.trim();if(n){var fl=_freqLocs.find(function(x){return x.lat==='+loc.lat+'&&x.lng==='+loc.lng+'});if(fl){fl.label=n;}_saveFreqLocs();}el.closest(\'.modal-overlay\').remove();showToast(_i(\'pin\'),n?\'Location saved as \\\"\'+n+\'\\\"\':\'\');})(this)">Save</button></div></div>';
+    +'<div class="iw" style="padding:0;margin-bottom:12px"><input class="inp" id="freqLocName" placeholder="e.g. Home, Office, Client Site" value="'+current.replace(/"/g,'&quot;')+'" style="border-radius:var(--r)" onkeydown="if(event.key===\'Enter\')_saveNamedLocation()"></div>'
+    +'<div class="modal-row"><button class="modal-cancel" onclick="_skipNamedLocation()">Skip</button>'
+    +'<button class="cta" style="flex:1" onclick="_saveNamedLocation()">Save</button></div></div>';
   document.body.appendChild(overlay);
   setTimeout(function(){var inp=document.getElementById('freqLocName');if(inp)inp.focus();},400);
 }
@@ -3978,14 +4204,60 @@ function startTracking(){
 // and feeds it to either onPos (tracking) or onAutoPos (monitoring).
 // This is the PRIMARY GPS source on native — it bypasses navigator.geolocation
 // so the app appears in iOS Location Services as "MyMilesAI" not "Safari".
+// Dedupe + sanity filters for native GPS (Build 123 fix for 2x distance bug)
+window.__seenGpsTs = window.__seenGpsTs || {};
+window.__seenGpsTsList = window.__seenGpsTsList || [];
+window.__lastNativeCoord = window.__lastNativeCoord || null;
 window.__nativeGPS__ = function(coords) {
   // Receiving native GPS data proves GPS is working — ensure state reflects this
   if(_gpsPermState!=='granted'){
     _gpsPermState='granted';
     updateGPSPermUI();
   }
+  // ── DEDUPE BY TIMESTAMP (root cause of 2x distance bug) ──
+  var ts = coords.ts || coords.timestamp || Date.now();
+  if(window.__seenGpsTs[ts]){
+    // Already processed this exact GPS reading — skip
+    return;
+  }
+  window.__seenGpsTs[ts] = true;
+  window.__seenGpsTsList.push(ts);
+  // Cap memory: keep only last 300 timestamps
+  if(window.__seenGpsTsList.length > 300){
+    var old = window.__seenGpsTsList.shift();
+    delete window.__seenGpsTs[old];
+  }
+  // ── ACCURACY FILTER: reject GPS readings worse than 40m ──
+  var acc = coords.accuracy || 999;
+  if(acc > 40){
+    // Still update last-known for non-distance uses (templates, prefill)
+    lastGpsLat=coords.lat;lastGpsLng=coords.lng;
+    return;
+  }
+  // ── SPEED SANITY: reject implied speed > 150 mph between consecutive points ──
+  if(window.__lastNativeCoord){
+    var prev = window.__lastNativeCoord;
+    var dtSec = (ts - prev.ts) / 1000;
+    if(dtSec > 0 && dtSec < 120){
+      var R = 6371;
+      var dLat = (coords.lat - prev.lat) * Math.PI/180;
+      var dLng = (coords.lng - prev.lng) * Math.PI/180;
+      var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+              Math.cos(prev.lat*Math.PI/180)*Math.cos(coords.lat*Math.PI/180) *
+              Math.sin(dLng/2)*Math.sin(dLng/2);
+      var distMi = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) / 1.60934;
+      var impliedMph = (distMi / dtSec) * 3600;
+      if(impliedMph > 150){
+        // GPS jump — reject
+        lastGpsLat=coords.lat;lastGpsLng=coords.lng;
+        return;
+      }
+    }
+  }
+  window.__lastNativeCoord = {lat:coords.lat, lng:coords.lng, ts:ts};
+
   var fakePos={ coords: { latitude: coords.lat, longitude: coords.lng,
-                     speed: (coords.speed!=null?coords.speed:null), accuracy: coords.accuracy||999 } };
+                     speed: (coords.speed!=null?coords.speed:null), accuracy: acc } };
   if(tracking){
     onPos(fakePos);
   } else if(autoDetect){
@@ -5451,6 +5723,7 @@ function openAddTrip(){
 function closeAddTrip(){
   document.getElementById('addOverlay').classList.remove('show');
   document.getElementById('addSheet').classList.remove('show');
+  var b=document.getElementById('addSaveBtn');if(b){b.disabled=false;b.textContent='Save Trip';}
 }
 function setAddCat(c){
   addCat=c;
@@ -5588,16 +5861,34 @@ function saveManual(){
 function _doSaveManual(){
   var f=document.getElementById('addFrom').value.trim();
   var t=document.getElementById('addTo').value.trim();
+  var btn=document.getElementById('addSaveBtn');
+  function _resetBtn(){if(btn){btn.disabled=false;btn.textContent='Save Trip';}}
   // Validate required fields
-  if(!f){showToast(_i('warn'),'Please enter a starting address');document.getElementById('addFrom').focus();return;}
-  if(!t){showToast(_i('warn'),'Please enter a destination address');document.getElementById('addTo').focus();return;}
-  if(addDistVal===0&&!_manualDistEdit) calcDistance();
-  var rawDist=parseFloat(document.getElementById('addDistInput').value)||addDistVal;
+  if(!f){showToast(_i('warn'),'Please enter a starting address');document.getElementById('addFrom').focus();_resetBtn();return;}
+  if(!t){t='Unknown destination';document.getElementById('addTo').value=t;}
+  // Read distance from input field directly (most reliable source)
+  var rawDist=parseFloat(document.getElementById('addDistInput').value)||addDistVal||0;
+  // If still no distance, try haversine from coords as fallback
+  if(rawDist<=0&&fromCoords&&toCoords){
+    var R=6371;
+    var dLat=(toCoords.lat-fromCoords.lat)*Math.PI/180;
+    var dLng=(toCoords.lng-fromCoords.lng)*Math.PI/180;
+    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(fromCoords.lat*Math.PI/180)*Math.cos(toCoords.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+    var hKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1.2;
+    rawDist=_useKm()?parseFloat(hKm.toFixed(1)):parseFloat((hKm/1.60934).toFixed(1));
+  }
+  // Last resort: prompt user to enter distance manually instead of silent fail
+  if(rawDist<=0){
+    showToast(_i('warn'),'Please enter a distance — addresses could not auto-calculate');
+    var distInp=document.getElementById('addDistInput');
+    if(distInp){distInp.focus();distInp.style.outline='2px solid #EF4444';setTimeout(function(){distInp.style.outline='';},2000);}
+    _resetBtn();
+    return;
+  }
   var mi=_useKm()?rawDist/1.60934:rawDist;
   // Validate distance
-  if(!mi||mi<=0){showToast(_i('warn'),'Distance must be greater than zero');return;}
-  if(mi>500&&!_useKm()){showToast(_i('warn'),'Distance exceeds 500 miles — please verify');return;}
-  if(mi>800&&_useKm()){showToast(_i('warn'),'Distance exceeds 800 km — please verify');return;}
+  if(mi>500&&!_useKm()){showToast(_i('warn'),'Distance exceeds 500 miles — please verify');_resetBtn();return;}
+  if(mi>800&&_useKm()){showToast(_i('warn'),'Distance exceeds 800 km — please verify');_resetBtn();return;}
   // Get selected date
   var dateVal=document.getElementById('addDate').value;
   var tripDate=dateVal?new Date(dateVal+'T12:00:00'):new Date();
@@ -6567,21 +6858,38 @@ function loadNotifSettings(){
 
 /* ===== SETTINGS PERSISTENCE ===== */
 function saveSettings(){
+  // Preserve existing flags so we don't lose localeSetByUser
+  var existing={};
+  try{existing=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');}catch(e){}
   var settings={
     threshold:parseInt(document.getElementById('threshVal').value)||5,
     defaultCat:document.getElementById('defaultCatSel').value,
     rate:parseFloat(document.getElementById('rateVal').value)||LOC.rate,
     pauseTimeout:parseInt(document.getElementById('pauseTimeoutSel').value)||300000,
     locale:LOC.country,
-    savingsGoal:parseInt(document.getElementById('savingsGoalVal').value)||5000
+    localeSetByUser:true, /* fix: settings save = user explicit, so always restore on load */
+    savingsGoal:parseInt(document.getElementById('savingsGoalVal').value)||5000,
+    smartStopMins:existing.smartStopMins
   };
   try{localStorage.setItem('mymilesai_settings',JSON.stringify(settings));}catch(e){}
+  /* Also sync to Supabase profiles (best-effort, silent on failure) */
+  if(_sb&&currentUser&&currentUser.id){
+    try{
+      _sb.from('profiles').update({
+        unit_preference:LOC.unit==='km'?'km':'miles',
+        mileage_rate:settings.rate,
+        currency:LOC.currency,
+        updated_at:new Date().toISOString()
+      }).eq('id',currentUser.id).then(function(){}).catch(function(){});
+    }catch(e){}
+  }
 }
 function loadSettings(){
-  // Restore locale/unit from localStorage first
+  // Restore locale/unit from localStorage first (instant, no flicker)
   try{
     var _ls=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
-    if(_ls.locale&&_ls.localeSetByUser&&typeof setLocale==='function'){
+    /* fix: restore locale even if localeSetByUser flag is missing — it was a stale gate */
+    if(_ls.locale&&typeof setLocale==='function'){
       setLocale(_ls.locale,false);
     }
   }catch(e){}
@@ -6590,9 +6898,7 @@ function loadSettings(){
     if(s){
       if(s.threshold)document.getElementById('threshVal').value=s.threshold;
       if(s.defaultCat)document.getElementById('defaultCatSel').value=s.defaultCat;
-      // Restore locale FIRST, then rate (rate overrides locale default)
-      // Only restore saved locale if user explicitly chose it (not just auto-detected default)
-      if(s.locale&&s.localeSetByUser)setLocale(s.locale);
+      if(s.locale)setLocale(s.locale);
       if(s.rate){document.getElementById('rateVal').value=s.rate;LOC.rate=s.rate;}
       if(s.pauseTimeout){
         document.getElementById('pauseTimeoutSel').value=s.pauseTimeout;
@@ -6605,6 +6911,29 @@ function loadSettings(){
     }
   }catch(e){}
   loadMapAppPref();
+  /* Background: fetch authoritative settings from Supabase profile (overrides localStorage if different) */
+  if(_sb&&currentUser&&currentUser.id){
+    try{
+      _sb.from('profiles').select('unit_preference,mileage_rate,currency').eq('id',currentUser.id).single().then(function(r){
+        if(r&&r.data){
+          var d=r.data;
+          var country=null;
+          if(d.unit_preference==='km')country='CA';
+          else if(d.unit_preference==='miles')country='US';
+          if(country&&country!==LOC.country){
+            setLocale(country,false);
+            try{var _s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');_s.locale=country;_s.localeSetByUser=true;localStorage.setItem('mymilesai_settings',JSON.stringify(_s));}catch(e){}
+            if(typeof recalcStats==='function')recalcStats();
+            if(typeof renderTrips==='function')renderTrips();
+          }
+          if(d.mileage_rate&&d.mileage_rate>0){
+            LOC.rate=parseFloat(d.mileage_rate);
+            var rEl=document.getElementById('rateVal');if(rEl)rEl.value=LOC.rate;
+          }
+        }
+      }).catch(function(){});
+    }catch(e){}
+  }
 }
 loadSettings();
 _initTheme();
