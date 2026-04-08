@@ -713,7 +713,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     style="width:100%;padding:10px 14px;border:1.5px solid var(--ink6);border-radius:var(--rpill);font-size:14px;background:var(--white);color:var(--ink1);box-sizing:border-box;outline:none;-webkit-appearance:none"
     oninput="_searchTrips(this.value)">
 </div>
-<div class="tf-row"><button class="tf a" onclick="switchFilter(this)">All</button><button class="tf" onclick="switchFilter(this)">Business</button><button class="tf" onclick="switchFilter(this)">Personal</button><button class="tf" onclick="switchFilter(this)">Unclass.</button></div>
+<div class="tf-row" id="tripFilterRow"><button class="tf a" data-filter="all" onclick="switchFilter(this)">All <span class="tf-count" data-count="all"></span></button><button class="tf" data-filter="business" onclick="switchFilter(this)">Business <span class="tf-count" data-count="business"></span></button><button class="tf" data-filter="personal" onclick="switchFilter(this)">Personal <span class="tf-count" data-count="personal"></span></button><button class="tf" data-filter="unclassified" onclick="switchFilter(this)">Unclass. <span class="tf-count" data-count="unclassified"></span></button></div>
     <div class="trip-list" id="tripList"></div>
   </div>
 
@@ -2405,6 +2405,7 @@ function renderTrips(){
   _updateYTD();
   bindSwipeCards();
   if(typeof _updateClassifyAllBtn==='function')_updateClassifyAllBtn();
+  _updateFilterCounts();
   if(_activeFilter!=='all')applyFilter();
 }
 
@@ -3448,8 +3449,28 @@ var _activeFilter='all';
 function switchFilter(el){
   el.closest('.tf-row').querySelectorAll('.tf').forEach(f=>f.classList.remove('a'));
   el.classList.add('a');
-  _activeFilter=el.textContent.trim().toLowerCase();
+  // Build 130 fix: read data-filter attribute (textContent broke when label was "Unclass." or had count badges)
+  _activeFilter=el.dataset.filter||'all';
   applyFilter();
+}
+function _updateFilterCounts(){
+  if(!window.TRIPS)return;
+  var counts={all:TRIPS.length,business:0,personal:0,unclassified:0};
+  for(var i=0;i<TRIPS.length;i++){
+    var ty=TRIPS[i].type;
+    if(ty==='biz')counts.business++;
+    else if(ty==='pers')counts.personal++;
+    else counts.unclassified++; // uncl or missing
+  }
+  var spans=document.querySelectorAll('#tripFilterRow .tf-count');
+  for(var k=0;k<spans.length;k++){
+    var key=spans[k].dataset.count;
+    spans[k].textContent=counts[key]!=null?'('+counts[key]+')':'';
+  }
+  console.log('[FILTER TEST] All:', window.TRIPS?.length);
+  console.log('[FILTER TEST] Biz:', window.TRIPS?.filter(t => t.type === 'biz').length);
+  console.log('[FILTER TEST] Pers:', window.TRIPS?.filter(t => t.type === 'pers').length);
+  console.log('[FILTER TEST] Uncl:', window.TRIPS?.filter(t => t.type === 'uncl' || !t.type).length);
 }
 function applyFilter(){
   var val=_activeFilter;
@@ -3467,7 +3488,7 @@ function applyFilter(){
         if(!children[j].classList.contains('trip'))break;
         var tid=parseInt(children[j].dataset.id);
         var tr=TRIPS.find(function(x){return x.id===tid;});
-        if(tr&&((val==='business'&&tr.type==='biz')||(val==='personal'&&tr.type==='pers')||(val==='unclassified'&&tr.type==='uncl'))){hasVisible=true;break;}
+        if(tr&&((val==='business'&&tr.type==='biz')||(val==='personal'&&tr.type==='pers')||(val==='unclassified'&&(tr.type==='uncl'||!tr.type)))){hasVisible=true;break;}
       }
       c.style.display=hasVisible?'':'none';
       continue;
@@ -3478,7 +3499,7 @@ function applyFilter(){
     if(!trip){c.style.display='none';continue;}
     if(val==='business'&&trip.type==='biz')c.style.display='';
     else if(val==='personal'&&trip.type==='pers')c.style.display='';
-    else if(val==='unclassified'&&trip.type==='uncl')c.style.display='';
+    else if(val==='unclassified'&&(trip.type==='uncl'||!trip.type))c.style.display='';
     else c.style.display='none';
   }
 }
