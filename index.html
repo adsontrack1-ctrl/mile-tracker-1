@@ -857,7 +857,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 133</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 134</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -3915,12 +3915,18 @@ function openTripDB(){
   });
 }
 function saveTripState(state){
+  // Build 134: 3-layer persistence — IDB + localStorage + native AsyncStorage (source of truth)
   openTripDB().then(function(db){
     var tx=db.transaction('state','readwrite');
-    tx.objectStore('state').put({key:'active',tracking:state.tracking,trackStart:state.trackStart,totalDist:state.totalDist,savedAt:state.savedAt});
+    tx.objectStore('state').put({key:'active',tracking:state.tracking,trackStart:state.trackStart,totalDist:state.totalDist,savedAt:state.savedAt||Date.now()});
   }).catch(function(e){console.warn('[MMAI] IDB save fail',e);});
-  // Build 132: localStorage backup in case IDB fails or is wiped
   try{localStorage.setItem('mmai_trip_backup',JSON.stringify({tracking:state.tracking,trackStart:state.trackStart,totalDist:state.totalDist,savedAt:state.savedAt||Date.now()}));}catch(e){}
+  // Native AsyncStorage — only persistence that survives iOS force-kill
+  if(window.ReactNativeWebView&&state.totalDist>0){
+    try{
+      window.ReactNativeWebView.postMessage(JSON.stringify({type:'SAVE_TRIP_STATE',tracking:state.tracking,totalDist:state.totalDist,trackStart:state.trackStart,savedAt:state.savedAt||Date.now()}));
+    }catch(e){}
+  }
 }
 function loadTripState(){
   return openTripDB().then(function(db){
@@ -3938,6 +3944,10 @@ function clearTripState(){
     tx.objectStore('state').delete('active');
   }).catch(function(){});
   try{localStorage.removeItem('mmai_trip_backup');}catch(e){}
+  // Build 134: also clear native AsyncStorage
+  if(window.ReactNativeWebView){
+    try{window.ReactNativeWebView.postMessage(JSON.stringify({type:'CLEAR_TRIP_STATE'}));}catch(e){}
+  }
 }
 
 /* ── WAKE LOCK — keep tracking when screen off ── */
@@ -6596,23 +6606,48 @@ function _doRestoreFromState(state){
   }catch(e){console.warn('[Restore] rebind fail',e);return false;}
 }
 function _restoreActiveTripIfNeeded(){
+  // Build 134: priority order — native AsyncStorage > localStorage > IDB
+  // PRIORITY 1: native AsyncStorage state injected by INJECTED_JS before page load
+  if(window.__NATIVE_SAVED_TRIP__){
+    var nstate=window.__NATIVE_SAVED_TRIP__;
+    window.__NATIVE_SAVED_TRIP__=null;
+    if(_doRestoreFromState(nstate)){
+      console.log('[Restore] from native AsyncStorage:',nstate.totalDist,'mi');
+      return;
+    }
+  }
+  // PRIORITY 2: localStorage backup (synchronous, fast)
+  try{
+    var raw=localStorage.getItem('mmai_trip_backup');
+    if(raw){
+      var backup=JSON.parse(raw);
+      if(_doRestoreFromState(backup)){
+        console.log('[Restore] from localStorage:',backup.totalDist,'mi');
+        if(window.ReactNativeWebView){
+          try{window.ReactNativeWebView.postMessage(JSON.stringify({type:'GET_TRIP_STATE'}));}catch(e){}
+        }
+        return;
+      }
+    }
+  }catch(e){}
+  // PRIORITY 3: IndexedDB (async, may have been wiped)
   try{
     loadTripState().then(function(state){
-      if(_doRestoreFromState(state))return;
-      // IDB miss → try localStorage backup
-      try{
-        var raw=localStorage.getItem('mmai_trip_backup');
-        if(raw){_doRestoreFromState(JSON.parse(raw));}
-      }catch(e){}
+      if(_doRestoreFromState(state)){
+        console.log('[Restore] from IndexedDB:',state&&state.totalDist,'mi');
+      } else if(window.ReactNativeWebView){
+        try{window.ReactNativeWebView.postMessage(JSON.stringify({type:'GET_TRIP_STATE'}));}catch(e){}
+      }
     }).catch(function(){
-      try{
-        var raw=localStorage.getItem('mmai_trip_backup');
-        if(raw){_doRestoreFromState(JSON.parse(raw));}
-      }catch(e){}
+      if(window.ReactNativeWebView){
+        try{window.ReactNativeWebView.postMessage(JSON.stringify({type:'GET_TRIP_STATE'}));}catch(e){}
+      }
     });
   }catch(e){console.warn('[Restore] failed',e);}
 }
-setTimeout(_restoreActiveTripIfNeeded,1500);
+setTimeout(_restoreActiveTripIfNeeded,0);
+// Build 134: also re-attempt restore when native pushes state via event
+window.addEventListener('native-trip-state',function(){setTimeout(_restoreActiveTripIfNeeded,0);});
 // Restore user's saved locale preference — don't overwrite with auto-detect
 try{
   var _savedSettings=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
@@ -7602,6 +7637,14 @@ updateDebugPanel();
 
 /* Flush any trips that failed to sync last session */
 setTimeout(_flushPendingQueue,3000);
+// Build 134: guaranteed Supabase delivery — multiple flush triggers
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'){setTimeout(_flushPendingQueue,2000);}
+});
+window.addEventListener('mymilesai-bg-locations',function(){setTimeout(_flushPendingQueue,3000);});
+setInterval(function(){
+  if(navigator.onLine&&_getPendingQueue().length>0){_flushPendingQueue();}
+},60000);
 
 /* Auto-resume monitoring if user had it enabled before app was killed */
 if(autoDetect&&!tracking){
