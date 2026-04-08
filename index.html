@@ -857,9 +857,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 126</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 127</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
+      <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
+      <div class="sr" onclick="confirmDeleteAccount()"><div><h4 style="color:var(--coral)">Delete My Account</h4><p>Permanently delete all data</p></div><span class="sr-link" style="color:var(--coral)">Delete →</span></div>
     </div>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
     <div class="app-footer">MyMilesAI © <script>document.write(new Date().getFullYear())</script> · Made with <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mag)" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
@@ -2036,6 +2038,14 @@ if(_sb){
   _sb.auth.onAuthStateChange(function(event,session){
     if(event==='SIGNED_IN'&&session&&session.user){
       _authHideModal();
+      /* SECURITY: share JWT with native layer for /batch-locations auth */
+      try {
+        window._supabaseSession = session;
+        window.dispatchEvent(new Event('mymilesai-share-session'));
+        if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView&&session.access_token){
+          window.ReactNativeWebView.postMessage(JSON.stringify({type:'sessionToken',token:session.access_token}));
+        }
+      } catch(e) {}
       ensureProfile(session.user).then(function(profile){
         if(profile&&!_isSubscriptionActive(profile)){_showSubscribeModal();}
         else{_hideSubscribeModal();}
@@ -2044,6 +2054,7 @@ if(_sb){
       });
     } else if(event==='SIGNED_OUT'){
       currentUser=null;window.currentUser=null;
+      window._supabaseSession=null;
       var dl=document.getElementById('deviceLimitOverlay');if(dl)dl.remove();
       _authShowModal();
     }
@@ -7171,6 +7182,57 @@ function restoreJSON(input){
   reader.readAsText(input.files[0]);
 }
 
+/* ── GDPR: Export My Data + Delete My Account ── */
+function exportMyData(){
+  try {
+    var data = {
+      exported_at: new Date().toISOString(),
+      version: '5.6',
+      build: 127,
+      trips: typeof TRIPS !== 'undefined' ? TRIPS : [],
+      settings: (function(){try{return JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');}catch(e){return {};}})(),
+      named_locations: typeof _freqLocs !== 'undefined' ? _freqLocs : [],
+      vehicles: typeof _vehicles !== 'undefined' ? _vehicles : [],
+      work_hours: typeof _workHours !== 'undefined' ? _workHours : {},
+      notif_settings: typeof _notifSettings !== 'undefined' ? _notifSettings : {},
+    };
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'mymilesai_data_' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    showToast(_i('ccheck'),'Data exported successfully',3000);
+  } catch(e) {
+    showToast(_i('warn'),'Export failed: '+e.message,3000);
+  }
+}
+function confirmDeleteAccount(){
+  if(confirm('Are you sure you want to permanently delete your account and all data? This cannot be undone.')){
+    if(confirm('FINAL WARNING: This will delete ALL your trips, settings, and account. Are you ABSOLUTELY sure?')){
+      deleteMyAccount();
+    }
+  }
+}
+async function deleteMyAccount(){
+  try {
+    showToast(_i('clock'),'Deleting account...',2000);
+    if(_sb && currentUser && currentUser.id){
+      try { await _sb.from('trips').delete().eq('user_id', currentUser.id); } catch(e){}
+      try { await _sb.from('location_queue').delete().eq('user_id', currentUser.id); } catch(e){}
+      try { await _sb.from('user_sessions').delete().eq('user_id', currentUser.id); } catch(e){}
+      try { await _sb.from('profiles').delete().eq('id', currentUser.id); } catch(e){}
+      try { await _sb.auth.signOut(); } catch(e){}
+    }
+    try { localStorage.clear(); } catch(e){}
+    showToast(_i('ccheck'),'Account deleted. Goodbye!',3000);
+    setTimeout(function(){location.reload();},2500);
+  } catch(e) {
+    showToast(_i('warn'),'Error: '+e.message,3000);
+  }
+}
 function signOut(){
   _showConfirm('Sign Out','Signing out will clear your local session. Your trips and data are safely stored in the cloud and will sync back when you sign in again.','Sign Out','var(--coral)',async function(){
     // Gap 2 fix: remove this device session from Supabase
