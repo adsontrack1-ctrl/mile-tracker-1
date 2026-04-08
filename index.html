@@ -857,7 +857,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 131</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 132</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -3919,6 +3919,8 @@ function saveTripState(state){
     var tx=db.transaction('state','readwrite');
     tx.objectStore('state').put({key:'active',tracking:state.tracking,trackStart:state.trackStart,totalDist:state.totalDist,savedAt:state.savedAt});
   }).catch(function(e){console.warn('[MMAI] IDB save fail',e);});
+  // Build 132: localStorage backup in case IDB fails or is wiped
+  try{localStorage.setItem('mmai_trip_backup',JSON.stringify({tracking:state.tracking,trackStart:state.trackStart,totalDist:state.totalDist,savedAt:state.savedAt||Date.now()}));}catch(e){}
 }
 function loadTripState(){
   return openTripDB().then(function(db){
@@ -3935,6 +3937,7 @@ function clearTripState(){
     var tx=db.transaction('state','readwrite');
     tx.objectStore('state').delete('active');
   }).catch(function(){});
+  try{localStorage.removeItem('mmai_trip_backup');}catch(e){}
 }
 
 /* ── WAKE LOCK — keep tracking when screen off ── */
@@ -4223,7 +4226,11 @@ function startTracking(){
   } else {
     watchId=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   }
-  tracking=true;_autoSaveShown=false;_pendingAutoSave=null;trackStart=Date.now();totalDist=0;positions=[];lastMoving=Date.now();
+  // Build 132: don't reset totalDist/trackStart if we're restoring an interrupted trip
+  tracking=true;_autoSaveShown=false;_pendingAutoSave=null;
+  if(!window._restoringTrip){trackStart=Date.now();totalDist=0;}
+  window._restoringTrip=false;
+  positions=[];lastMoving=Date.now();
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -6557,25 +6564,46 @@ function sendAIChat(){
 /* ===== INIT ===== */
 const detected=detectLocale();
 loadTripsFromStorage(); // Load trips BEFORE locale so renderTrips has data
-// Build 131: restore in-progress trip distance after cold start (works on native + web)
+// Build 132: definitive trip restore — IDB primary + localStorage fallback,
+// relaxed guard (restore even if tracking flag false, as long as totalDist>0),
+// sets _restoringTrip=true BEFORE startTracking so reset is skipped.
+function _doRestoreFromState(state){
+  if(!state)return false;
+  if(!state.tracking && (!state.totalDist||state.totalDist<=0))return false;
+  if(state.savedAt&&Date.now()-state.savedAt>12*3600*1000){clearTripState();return false;}
+  var savedDist=state.totalDist||0;
+  var savedStart=state.trackStart||Date.now();
+  if(savedDist<=0)return false;
+  try{
+    // Set flag and values BEFORE startTracking so its reset is skipped
+    window._restoringTrip=true;
+    totalDist=savedDist;
+    trackStart=savedStart;
+    if(!tracking)startTracking();
+    // Re-assert in case any code path interfered
+    totalDist=savedDist;
+    trackStart=savedStart;
+    var dispDist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
+    var el=document.getElementById('trackDist');if(el)el.textContent=dispDist;
+    console.log('[Restore] Active trip restored:',savedDist,'miles');
+    try{showToast('🔄','Trip restored: '+(_useKm()?(savedDist*1.60934):savedDist).toFixed(1)+' '+LOC.label,3000);}catch(e){}
+    return true;
+  }catch(e){console.warn('[Restore] rebind fail',e);return false;}
+}
 function _restoreActiveTripIfNeeded(){
   try{
     loadTripState().then(function(state){
-      if(!state||!state.tracking)return;
-      // Stale guard: ignore if older than 12h
-      if(state.savedAt&&Date.now()-state.savedAt>12*3600*1000){clearTripState();return;}
-      var savedDist=state.totalDist||0;
-      var savedStart=state.trackStart||Date.now();
-      if(savedDist<=0)return;
+      if(_doRestoreFromState(state))return;
+      // IDB miss → try localStorage backup
       try{
-        if(!tracking)startTracking();
-        // startTracking resets totalDist=0 and trackStart=now — restore AFTER it
-        totalDist=savedDist;
-        trackStart=savedStart;
-        var dispDist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
-        var el=document.getElementById('trackDist');if(el)el.textContent=dispDist;
-      }catch(e){console.warn('[Restore] rebind fail',e);}
-      console.log('[Restore] Active trip restored:',savedDist,'miles');
+        var raw=localStorage.getItem('mmai_trip_backup');
+        if(raw){_doRestoreFromState(JSON.parse(raw));}
+      }catch(e){}
+    }).catch(function(){
+      try{
+        var raw=localStorage.getItem('mmai_trip_backup');
+        if(raw){_doRestoreFromState(JSON.parse(raw));}
+      }catch(e){}
     });
   }catch(e){console.warn('[Restore] failed',e);}
 }
