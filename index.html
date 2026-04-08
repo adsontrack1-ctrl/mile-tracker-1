@@ -4634,7 +4634,7 @@ function onPos(p){
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
   // Only update distance with accurate readings
-  if(positions.length>0&&(accuracy<=100||(window.__MYMILESAI_NATIVE__&&accuracy<=200))){
+  if(!_paused && positions.length>0 && accuracy<=65){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
     if(!isNaN(d)&&d>0&&d<0.5){
