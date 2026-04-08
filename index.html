@@ -4758,25 +4758,13 @@ function checkMissedTrips(){
   _missedTripChecked=true;
 }
 function _checkReviewPrompt(){
+  // Build 135: rating prompt removed — app is paid subscription, no rating popup.
+  // Milestone toast preserved (no "rate us" text, no App Store redirect).
   try{
-    if(localStorage.getItem('mymilesai_reviewed'))return;
     var n=TRIPS.length;
     if(n!==3&&n!==10&&n!==25)return;
-    setTimeout(function(){
-      if(window.__MYMILESAI_NATIVE__&&window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.requestReview){
-        window.webkit.messageHandlers.requestReview.postMessage({});
-        localStorage.setItem('mymilesai_reviewed','1');
-        return;
-      }
-      var msg=n===3?'You just saved your 3rd trip! Loving MyMilesAI?':'You\'ve logged '+n+' trips — amazing work! 🎉';
-      showToast('⭐',msg+' Tap to rate us!',6000);
-      setTimeout(function(){
-        if(confirm(msg+'\n\nWould you rate us 5 stars? It keeps the app free and helps us grow!')){
-          window.open('https://apps.apple.com/app/id6760873036','_blank');
-          localStorage.setItem('mymilesai_reviewed','1');
-        }
-      },500);
-    },2500);
+    var msg=n===3?'You just saved your 3rd trip!':'You\'ve logged '+n+' trips — amazing work! 🎉';
+    setTimeout(function(){showToast('🎉',msg,4000);},2500);
   }catch(e){}
 }
 function recordTripEnd(){
@@ -4983,6 +4971,9 @@ function stopTracking(){
   if(window._liveStatInt){clearInterval(window._liveStatInt);window._liveStatInt=null;}
   releaseWakeLock();
   clearTripState(); /* Remove from IDB — trip is done */
+  // Build 135: hard reset accumulators so next trip starts at 0
+  totalDist=0; positions=[]; window._lastTripPersist=0;
+  var _td=document.getElementById('trackDist');if(_td)_td.textContent='0.00';
   var _vPill=document.getElementById('trackVehiclePill');if(_vPill)_vPill.style.display='none';
   // Notify native app
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
@@ -6038,6 +6029,11 @@ function _doSaveManual(){
   /* Sync to Supabase — queue for offline retry if it fails (Build 130: logging) */
   (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u){console.warn('[TripSave] no user');return;}var row={user_id:u.id,trip_id:_t.tripId,from_addr:_t.from,to_addr:_t.to,miles:_t.mi,type:_t.type,date:_t.date,ts:_t.ts,purpose:_t.purpose||'',notes:_t.notes||'',vehicle_id:_t.vehicleId||null};console.log('[TripSave]',row);_sb.from('trips').upsert(row,{onConflict:'trip_id'}).then(function(res){if(res.error){console.warn('[TripSave] error',res.error);_addToPendingQueue(_t);showToast(_i('warn'),'Trip saved locally — will sync when connected');}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(e){console.warn('[TripSave] catch',e);_addToPendingQueue(_t);showToast(_i('warn'),'Trip saved locally — will sync when connected');});}).catch(function(e){console.warn('[TripSave] auth catch',e);_addToPendingQueue(_t);});})();
   closeAddTrip();
+  // Build 135: reset accumulators after manual save so next trip starts at 0
+  totalDist=0; positions=[]; trackStart=Date.now(); window._lastTripPersist=0;
+  try{clearTripState();}catch(e){}
+  var _td=document.getElementById('trackDist');if(_td)_td.textContent='0.00';
+  console.log('[Save] Trip saved — miles reset to 0');
 }
 // Close dropdowns on outside click
 document.addEventListener('click',function(e){
