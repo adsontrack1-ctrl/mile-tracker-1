@@ -857,7 +857,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 130</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 131</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -3473,34 +3473,42 @@ function _updateFilterCounts(){
   console.log('[FILTER TEST] Uncl:', window.TRIPS?.filter(t => t.type === 'uncl' || !t.type).length);
 }
 function applyFilter(){
+  // Build 131 fix: trip cards are wrapped in .swipe-wrap (not .trip);
+  // ID lives on inner .swipe-card data-swipe-id, not direct child data-id.
   var val=_activeFilter;
   var list=document.getElementById('tripList');
   if(!list)return;
   var children=list.children;
+  function _matches(tr){
+    if(val==='all')return true;
+    if(!tr)return false;
+    if(val==='biz')return tr.type==='biz';
+    if(val==='pers')return tr.type==='pers';
+    if(val==='uncl')return tr.type==='uncl'||!tr.type;
+    return true;
+  }
+  function _wrapTrip(c){
+    if(!c.classList||!c.classList.contains('swipe-wrap'))return null;
+    var sc=c.querySelector('.swipe-card');
+    var tid=sc&&sc.dataset.swipeId;
+    if(tid==null)return null;
+    return TRIPS.find(function(x){return String(x.id)===String(tid);});
+  }
   for(var i=0;i<children.length;i++){
     var c=children[i];
-    // Date group header (not a .trip card)
-    if(!c.classList.contains('trip')){
-      // Look ahead: show header if at least one trip in this group is visible
+    var isWrap=c.classList&&c.classList.contains('swipe-wrap');
+    if(!isWrap){
       if(val==='all'){c.style.display='';continue;}
       var hasVisible=false;
       for(var j=i+1;j<children.length;j++){
-        if(!children[j].classList.contains('trip'))break;
-        var tid=parseInt(children[j].dataset.id);
-        var tr=TRIPS.find(function(x){return x.id===tid;});
-        if(tr&&((val==='biz'&&tr.type==='biz')||(val==='pers'&&tr.type==='pers')||(val==='uncl'&&(tr.type==='uncl'||!tr.type)))){hasVisible=true;break;}
+        var nx=children[j];
+        if(!nx.classList||!nx.classList.contains('swipe-wrap'))break;
+        if(_matches(_wrapTrip(nx))){hasVisible=true;break;}
       }
       c.style.display=hasVisible?'':'none';
       continue;
     }
-    if(val==='all'){c.style.display='';continue;}
-    var id=parseInt(c.dataset.id);
-    var trip=TRIPS.find(function(t){return t.id===id;});
-    if(!trip){c.style.display='none';continue;}
-    if(val==='biz'&&trip.type==='biz')c.style.display='';
-    else if(val==='pers'&&trip.type==='pers')c.style.display='';
-    else if(val==='uncl'&&(trip.type==='uncl'||!trip.type))c.style.display='';
-    else c.style.display='none';
+    c.style.display=_matches(_wrapTrip(c))?'':'none';
   }
 }
 function animateBars(){document.querySelectorAll('.ins-prog-fill[data-width]').forEach(el=>{el.style.width=el.dataset.width;});}
@@ -4607,7 +4615,14 @@ function onPos(p){
   if(positions.length>0&&(accuracy<=100||(window.__MYMILESAI_NATIVE__&&accuracy<=200))){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
-    if(!isNaN(d)&&d>0&&d<0.5){totalDist+=d;} // filter GPS jumps > 0.5mi
+    if(!isNaN(d)&&d>0&&d<0.5){
+      totalDist+=d;
+      // Build 131: persist running total to IDB so it survives app close/reopen
+      if(!window._lastTripPersist||Date.now()-window._lastTripPersist>3000){
+        window._lastTripPersist=Date.now();
+        try{saveTripState({tracking:true,trackStart:trackStart,totalDist:totalDist,savedAt:Date.now()});}catch(e){}
+      }
+    } // filter GPS jumps > 0.5mi
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
@@ -6542,6 +6557,29 @@ function sendAIChat(){
 /* ===== INIT ===== */
 const detected=detectLocale();
 loadTripsFromStorage(); // Load trips BEFORE locale so renderTrips has data
+// Build 131: restore in-progress trip distance after cold start (works on native + web)
+function _restoreActiveTripIfNeeded(){
+  try{
+    loadTripState().then(function(state){
+      if(!state||!state.tracking)return;
+      // Stale guard: ignore if older than 12h
+      if(state.savedAt&&Date.now()-state.savedAt>12*3600*1000){clearTripState();return;}
+      var savedDist=state.totalDist||0;
+      var savedStart=state.trackStart||Date.now();
+      if(savedDist<=0)return;
+      try{
+        if(!tracking)startTracking();
+        // startTracking resets totalDist=0 and trackStart=now — restore AFTER it
+        totalDist=savedDist;
+        trackStart=savedStart;
+        var dispDist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
+        var el=document.getElementById('trackDist');if(el)el.textContent=dispDist;
+      }catch(e){console.warn('[Restore] rebind fail',e);}
+      console.log('[Restore] Active trip restored:',savedDist,'miles');
+    });
+  }catch(e){console.warn('[Restore] failed',e);}
+}
+setTimeout(_restoreActiveTripIfNeeded,1500);
 // Restore user's saved locale preference — don't overwrite with auto-detect
 try{
   var _savedSettings=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
