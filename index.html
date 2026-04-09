@@ -857,7 +857,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 136</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 137</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -1807,7 +1807,9 @@ async function ensureProfile(user){
       profile.name=derived;
     }
     currentUser={id:user.id,email:user.email,profile:profile};
-    window.currentUser=currentUser;
+    window.currentUser=currentUser;window._currentUser=currentUser;
+    // Build 137: pull latest trips from Supabase on login
+    setTimeout(function(){_syncTripsFromSupabase(user.id);},2000);
     // Restore user's locale/unit preference
     // Priority: Supabase profile > localStorage > auto-detect
     var _restoredLocale=null;
@@ -4034,6 +4036,13 @@ function _saveNamedLocation(){
   var lat=window._pendingNameLocLat;
   var lng=window._pendingNameLocLng;
   var addr=window._pendingNameLocAddr;
+  // Build 137: defensive — if coords missing, fall back to last GPS known position
+  if(lat==null||lng==null){
+    console.warn('[NamedLoc] Missing coords — using last known GPS');
+    lat=lastGpsLat||window._kLat||0;
+    lng=lastGpsLng||window._kLng||0;
+  }
+  console.log('[NamedLoc] Saving:',n,lat,lng,addr);
   // Find by tolerance (lat/lng float compare with epsilon)
   var fl=_freqLocs.find(function(x){return Math.abs(x.lat-lat)<0.0001&&Math.abs(x.lng-lng)<0.0001;});
   if(fl){fl.label=n;}
@@ -4241,6 +4250,8 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();totalDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
+  // Build 137: reset Kalman filter on new trip
+  window._kLat=null;window._kLng=null;
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -4560,6 +4571,12 @@ function onPos(p){
   var spd=p.coords.speed;
   var accuracy=p.coords.accuracy||999;
   var lat=p.coords.latitude,lng=p.coords.longitude;
+  // Build 137: Kalman-style coordinate smoothing — eliminates GPS scatter at stops
+  if(window._kLat==null||window._kLng==null){window._kLat=lat;window._kLng=lng;}
+  var K=(accuracy<=20)?0.4:(accuracy<=40)?0.25:0.15;
+  window._kLat=window._kLat*(1-K)+lat*K;
+  window._kLng=window._kLng*(1-K)+lng*K;
+  lat=window._kLat;lng=window._kLng;
   // Track signal status
   _lastPosTime=Date.now();
   if(_signalLost){
@@ -4599,27 +4616,37 @@ function onPos(p){
   }
 
   var spdDisplay;
-  if(accuracy>80){
-    // Poor GPS signal — show signal icon not speed
+  // Build 137: STATIONARY DETECTION — last 3 positions within 15m = stopped
+  var isStationary=false;
+  if(positions.length>=3){
+    var p1=positions[positions.length-1];
+    var p2=positions[positions.length-2];
+    var p3=positions[positions.length-3];
+    var spread=Math.max(
+      haversine(p1.lat,p1.lng,p2.lat,p2.lng),
+      haversine(p2.lat,p2.lng,p3.lat,p3.lng)
+    );
+    isStationary=spread<0.00932; // 15 m in miles
+  }
+  if(_paused||isStationary){
+    spdDisplay='0';
+    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+  } else if(accuracy>80){
     spdDisplay='--';
     document.getElementById('speedUnit').textContent='poor GPS';
   } else {
     var avgSpd=window._spdBuffer.length>=3
       ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
       : spdVal;
-    // SMART CONSISTENCY FILTER: GPS drift = random jumps, real speed = consistent readings
-    var floor=_useKm()?8:5; // Low floor — only kills near-zero drift
+    var floor=_useKm()?8:5;
     if(avgSpd<floor){
       avgSpd=0;
     } else if(window._spdBuffer.length>=3){
-      // Calculate variance of recent readings
       var _mean=window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length;
       var _variance=window._spdBuffer.reduce(function(acc,v){return acc+Math.pow(v-_mean,2);},0)/window._spdBuffer.length;
       var _stdDev=Math.sqrt(_variance);
-      // High variance at low speed = GPS drift noise (readings jumping randomly)
-      // Real movement at any speed = consistent readings (low variance relative to mean)
       if(_mean>0&&_stdDev/_mean>0.6&&_mean<(_useKm()?25:15)){
-        avgSpd=0; // Inconsistent low-speed readings = stationary drift
+        avgSpd=0;
       }
     }
     spdDisplay=avgSpd.toFixed(0);
@@ -7643,6 +7670,37 @@ updateDebugPanel();
 
 /* Flush any trips that failed to sync last session */
 setTimeout(_flushPendingQueue,3000);
+// Build 137: pull latest trips from Supabase + sync on every foreground (max once / 5 min)
+async function _syncTripsFromSupabase(userId){
+  if(!_sb||!userId)return;
+  try{
+    var res=await _sb.from('trips').select('*').eq('user_id',userId).order('ts',{ascending:false}).limit(200);
+    if(res.error||!res.data||res.data.length===0)return;
+    var remoteTrips=res.data.map(function(r){
+      return {id:r.trip_id,tripId:r.trip_id,from:r.from_addr,to:r.to_addr,
+        mi:parseFloat(r.miles)||0,type:r.type||'uncl',date:r.date,ts:r.ts,
+        purpose:r.purpose||'',notes:r.notes||'',vehicleId:r.vehicle_id,
+        ded:!!CAT_DEDUCTIBLE[r.type||'uncl']};
+    });
+    var localIds={};for(var i=0;i<TRIPS.length;i++){localIds[TRIPS[i].tripId]=true;}
+    var toAdd=remoteTrips.filter(function(t){return !localIds[t.tripId];});
+    if(toAdd.length>0){
+      TRIPS=TRIPS.concat(toAdd);
+      TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+      saveTripsToStorage();renderTrips();
+      try{showToast(_i('cloud'),'Synced '+toAdd.length+' trip(s) from cloud',3000);}catch(e){}
+    }
+    console.log('[Sync] Supabase sync complete. Remote:',remoteTrips.length,'Added:',toAdd.length);
+  }catch(e){console.warn('[Sync] Supabase sync failed:',e&&e.message);}
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState!=='visible')return;
+  var lastSync=parseInt(localStorage.getItem('mmai_last_supabase_sync')||'0');
+  if(Date.now()-lastSync>5*60*1000){
+    localStorage.setItem('mmai_last_supabase_sync',Date.now().toString());
+    if(window._currentUser&&window._currentUser.id)_syncTripsFromSupabase(window._currentUser.id);
+  }
+});
 // Build 136: missed-trip nudge — gated, hourly re-check
 setTimeout(_checkMissedTrip,5000);
 setInterval(_checkMissedTrip,60*60*1000);
