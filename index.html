@@ -857,7 +857,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 137</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 138</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4770,30 +4770,7 @@ function clearStaleAlerts(){
     }
   }catch(e){}
 }
-function _checkMissedTrip(){
-  // Build 136: gated to fire at most once per day, weekdays 18:00-21:00, only if no trip today
-  try{
-    var today=new Date().toDateString();
-    if(localStorage.getItem('mmai_missed_notif_shown')===today)return;
-    var dow=new Date().getDay();
-    if(dow===0||dow===6)return; // weekends
-    var hour=new Date().getHours();
-    if(hour<18||hour>=21)return; // 6-9 PM only
-    var todayStr=new Date().toLocaleDateString('en-CA');
-    var hasTripToday=Array.isArray(TRIPS)&&TRIPS.some(function(t){
-      return t.date===todayStr||(t.ts&&new Date(t.ts).toLocaleDateString('en-CA')===todayStr);
-    });
-    if(hasTripToday)return;
-    var lastEnd=0;
-    try{lastEnd=parseInt(localStorage.getItem('mymilesai_last_trip_end')||'0');}catch(e){}
-    var hoursSince=lastEnd>0?(Date.now()-lastEnd)/3600000:999;
-    if(hoursSince<8)return;
-    localStorage.setItem('mmai_missed_notif_shown',today);
-    setTimeout(function(){
-      showToast(_i('warn'),'No trips logged today — did you drive for work?',6000);
-    },3000);
-  }catch(e){}
-}
+// Build 138: _checkMissedTrip removed entirely — no more "did you drive today" nudge.
 function _checkReviewPrompt(){
   // Build 135: rating prompt removed — app is paid subscription, no rating popup.
   // Milestone toast preserved (no "rate us" text, no App Store redirect).
@@ -7701,9 +7678,6 @@ document.addEventListener('visibilitychange',function(){
     if(window._currentUser&&window._currentUser.id)_syncTripsFromSupabase(window._currentUser.id);
   }
 });
-// Build 136: missed-trip nudge — gated, hourly re-check
-setTimeout(_checkMissedTrip,5000);
-setInterval(_checkMissedTrip,60*60*1000);
 // Build 134: guaranteed Supabase delivery — multiple flush triggers
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible'){setTimeout(_flushPendingQueue,2000);}
