@@ -857,7 +857,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 138</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 139</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4250,8 +4250,9 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();totalDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
-  // Build 137: reset Kalman filter on new trip
+  // Build 139: reset all GPS engine state for new trip
   window._kLat=null;window._kLng=null;
+  window._spdHistory=[];window._lastPositionTime=null;window._stationaryStopStart=null;
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -4605,82 +4606,67 @@ function onPos(p){
   }
   var spdVal=_useKm()?(spdMps*3.6):(spdMps*2.237);
 
-  // SMART SPEED FILTER: hide unreliable speed when indoors/poor GPS
-  if(!window._spdBuffer) window._spdBuffer=[];
-  if(accuracy<=80){
-    window._spdBuffer.push(spdVal);
-    if(window._spdBuffer.length>5) window._spdBuffer.shift();
-  } else {
-    // Poor accuracy — clear buffer, don't trust speed
-    window._spdBuffer=[];
-  }
-
-  var spdDisplay;
-  // Build 137: STATIONARY DETECTION — last 3 positions within 15m = stopped
+  // Build 139: STATIONARY DETECTION — 50ft spread = stopped
   var isStationary=false;
   if(positions.length>=3){
-    var p1=positions[positions.length-1];
-    var p2=positions[positions.length-2];
-    var p3=positions[positions.length-3];
-    var spread=Math.max(
-      haversine(p1.lat,p1.lng,p2.lat,p2.lng),
-      haversine(p2.lat,p2.lng,p3.lat,p3.lng)
-    );
-    isStationary=spread<0.00932; // 15 m in miles
+    var _p1=positions[positions.length-1],_p2=positions[positions.length-2],_p3=positions[positions.length-3];
+    var _spreadFt=Math.max(haversine(_p1.lat,_p1.lng,_p2.lat,_p2.lng),haversine(_p2.lat,_p2.lng,_p3.lat,_p3.lng))*5280;
+    isStationary=_spreadFt<50;
   }
-  if(_paused||isStationary){
-    spdDisplay='0';
-    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
-  } else if(accuracy>80){
-    spdDisplay='--';
-    document.getElementById('speedUnit').textContent='poor GPS';
-  } else {
-    var avgSpd=window._spdBuffer.length>=3
-      ? window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length
-      : spdVal;
-    var floor=_useKm()?8:5;
-    if(avgSpd<floor){
-      avgSpd=0;
-    } else if(window._spdBuffer.length>=3){
-      var _mean=window._spdBuffer.reduce(function(a,b){return a+b;},0)/window._spdBuffer.length;
-      var _variance=window._spdBuffer.reduce(function(acc,v){return acc+Math.pow(v-_mean,2);},0)/window._spdBuffer.length;
-      var _stdDev=Math.sqrt(_variance);
-      if(_mean>0&&_stdDev/_mean>0.6&&_mean<(_useKm()?25:15)){
-        avgSpd=0;
-      }
-    }
-    spdDisplay=avgSpd.toFixed(0);
-    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+  // Build 139: 8-point weighted speed with stationary decay
+  if(!window._spdHistory)window._spdHistory=[];
+  if(accuracy<=50&&!isStationary){
+    var rawSpd=_useKm()?(spdMps*3.6):(spdMps*2.237);
+    window._spdHistory.push(rawSpd);
+    if(window._spdHistory.length>8)window._spdHistory.shift();
+  } else if(isStationary||_paused){
+    if(window._spdHistory.length>0)window._spdHistory.shift();
   }
+  var displaySpd=0;
+  if(!isStationary&&!_paused&&window._spdHistory.length>0){
+    var _weights=[1,1,2,2,3,3,4,4].slice(-window._spdHistory.length);
+    var _wSum=0;for(var _wi=0;_wi<_weights.length;_wi++)_wSum+=_weights[_wi];
+    var _wSpd=0;for(var _wi2=0;_wi2<window._spdHistory.length;_wi2++)_wSpd+=window._spdHistory[_wi2]*_weights[_wi2];
+    displaySpd=Math.round(_wSpd/_wSum);
+  }
+  var spdDisplay=(isStationary||_paused)?'0':displaySpd.toString();
+  document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
   document.getElementById('trackSpeed').textContent=spdDisplay;
   document.getElementById('speedNum').textContent=spdDisplay;
   var maxSpd=_useKm()?160:100;
-  var _dispSpd=(spdDisplay==='--'||spdDisplay==='0')?0:parseFloat(spdDisplay);
+  var _dispSpd=parseFloat(spdDisplay)||0;
   var pct=Math.min(_dispSpd/maxSpd,1);
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
-  // Only update distance with accurate readings
-  if(!_paused && positions.length>0 && accuracy<=65){
+  // Build 139: 15-second position gate — skip distance/positions unless 15s elapsed
+  var _now=Date.now();
+  if(window._lastPositionTime&&_now-window._lastPositionTime<15000){
+    return; // speed display already updated above
+  }
+  window._lastPositionTime=_now;
+  // Build 139: distance gate — 40m accuracy, 20m min, 500m max, !paused, !stationary
+  if(!_paused&&!isStationary&&positions.length>0&&accuracy<=40){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
-    if(!isNaN(d)&&d>0.00621&&d<0.5){
+    if(!isNaN(d)&&d>0.01242&&d<0.31){
       totalDist+=d;
-      // Build 131: persist running total to IDB so it survives app close/reopen
       if(!window._lastTripPersist||Date.now()-window._lastTripPersist>3000){
         window._lastTripPersist=Date.now();
         try{saveTripState({tracking:true,trackStart:trackStart,totalDist:totalDist,savedAt:Date.now()});}catch(e){}
       }
-    } // filter GPS jumps > 0.5mi
+    }
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   // SMART START: wait for accuracy<20m, take median of 3 good readings
   _tryLockStartAddress(lat,lng,accuracy);
   updateMapPos(lat,lng);
-  var dist=_useKm()?(totalDist*1.60934).toFixed(2):totalDist.toFixed(2);
+  // Build 139: 0.85 road correction factor (haversine overcounts vs road distance)
+  var corrDist=totalDist*0.85;
+  var dist=_useKm()?(corrDist*1.60934).toFixed(2):corrDist.toFixed(2);
   document.getElementById('trackDist').textContent=dist;
   // Update hero stats with CURRENT TRIP data while tracking
-  var liveDist=_useKm()?totalDist*1.60934:totalDist;
+  var liveDist=_useKm()?corrDist*1.60934:corrDist;
   var liveDed=liveDist*catRate('biz');
   document.getElementById('hsBiz').textContent=liveDist.toFixed(1);
   document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
@@ -4698,48 +4684,40 @@ function onPos(p){
   }
   if(positions.length>1){
     var elapsed=(Date.now()-trackStart-_totalPauseMs)/3600000;
-    var avgDist=_useKm()?totalDist*1.60934:totalDist;
+    var avgDist=_useKm()?corrDist*1.60934:corrDist;
     document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
   }
-  // === SMART PAUSE: 5 min CONTINUOUS stationary → end trip ===
-  var _thEl=document.getElementById('threshVal');
-  var _svT=(function(){try{var s=localStorage.getItem('mymilesai_settings');return s?JSON.parse(s).threshold:5;}catch(e){return 5;}})();
-  var thresh=(_thEl&&parseInt(_thEl.value))||_svT||5;
-  var spdRaw=spdVal;
-  if(spdRaw>=thresh){
-    // Moving — reset stationary timer and end-position collection
-    lastMoving=Date.now();
-    _stationaryStart=0;
-    _endReadings=[];_endCollectStart=0;
-    if(_paused){
-      _totalPauseMs+=(Date.now()-_pauseStart);
-      _paused=false;
-      clearTimeout(_pauseTimeout);
-      document.getElementById('statusText').textContent='Recording...';
-      showToast(_i('ccheck'),'Trip resumed — movement detected',2000);
-    }
-  } else {
-    // Not moving — track continuous stationary time
-    if(_stationaryStart===0){_stationaryStart=Date.now();}
-    var stationarySec=(Date.now()-_stationaryStart)/1000;
-    // SMART END: start collecting end readings when speed < 2mph for 60s
-    var spdMph=_useKm()?spdRaw/1.60934:spdRaw;
+  // Build 139: direct stationary detection replaces spdRaw-based pause
+  if(isStationary&&tracking){
+    if(!window._stationaryStopStart)window._stationaryStopStart=Date.now();
+    var stMs=Date.now()-window._stationaryStopStart;
+    // Collect end readings for geocoding
     var rawAcc=p.coords.accuracy||999;
-    if(spdMph<2){_collectEndReading(lat,lng,rawAcc);}
-    // Enter visual pause after 60s of no movement
-    if(!_paused&&stationarySec>60){
-      _paused=true;
-      _pauseStart=Date.now();
+    if(rawAcc<=40){_collectEndReading(lat,lng,rawAcc);}
+    // Pause after 30s stationary
+    if(stMs>30000&&!_paused){
+      _paused=true;_pauseStart=Date.now();
       document.getElementById('statusText').textContent='Paused — waiting for movement...';
     }
-    // End trip after 5 min CONTINUOUS stationary
-    if(stationarySec*1000>=SMART_STOP_MS&&tracking){
+    // Auto-stop after 5 min continuous stationary
+    if(stMs>=(SMART_STOP_MS||300000)&&tracking){
       _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
       try{navigator.vibrate&&navigator.vibrate([50,30,50]);}catch(e){}
       showToast(_i('park'),'Trip ended — stationary for 5 min',4000);
+      window._stationaryStopStart=null;
       stopTracking();
       return;
     }
+  } else if(!isStationary){
+    window._stationaryStopStart=null;
+    _endReadings=[];_endCollectStart=0;
+    if(_paused){
+      _totalPauseMs+=(Date.now()-_pauseStart);
+      _paused=false;clearTimeout(_pauseTimeout);
+      document.getElementById('statusText').textContent='Recording...';
+      showToast(_i('ccheck'),'Trip resumed — movement detected',2000);
+    }
+    lastMoving=Date.now();
   }
   // Update debug panel
   var gdbSpd=document.getElementById('gdbSpeed');if(gdbSpd)gdbSpd.textContent=spdRaw.toFixed(1)+(_useKm()?' km/h':' mph');
@@ -5047,7 +5025,7 @@ function stopTracking(){
       // It correctly measures detours, road closures, and the real path taken.
       // Do NOT override with routing APIs — they calculate the shortest theoretical
       // path, not the actual path driven.
-      _geocodeEndThenSave(_haversineMi,fromA,toA);
+      _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
     }
 
     // Step 2: Geocode end position, then save
