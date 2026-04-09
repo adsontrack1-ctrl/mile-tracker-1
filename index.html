@@ -91,8 +91,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 @keyframes gp{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes shimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
 /* Build 140: skeleton shimmer while Supabase data loads */
-.data-loading .hs-v,.data-loading #ytdSavings,.data-loading #bizMiles,.data-loading #persMiles,.data-loading #totalMiles,.data-loading #totalDeduction{color:transparent !important;background:linear-gradient(90deg,var(--ink4) 25%,var(--ink3) 50%,var(--ink4) 75%);background-size:200% 100%;animation:dataShimmer 1.5s infinite;border-radius:4px;min-width:40px;display:inline-block;}
-@keyframes dataShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* Build 140 skeleton CSS removed in Build 141 — replaced with 8s startup failsafe */
 @keyframes ms1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-30px,20px) scale(1.1)}66%{transform:translate(20px,-15px) scale(.9)}}
 @keyframes ms2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(25px,-20px) scale(.95)}66%{transform:translate(-15px,25px) scale(1.05)}}
 @keyframes ms3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-30px) scale(1.15)}}
@@ -860,7 +859,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 140</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 141</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -1858,7 +1857,7 @@ async function ensureProfile(user){
     // Build 140: sync trips immediately after profile (no setTimeout)
     _syncTripsFromSupabase(user.id);
     return profile;
-  }catch(e){console.warn('ensureProfile error:',e);_authHideLoading();document.body.classList.remove('data-loading');return null;}
+  }catch(e){console.warn('ensureProfile error:',e);_authHideLoading();clearTimeout(window._startupFailsafe);return null;}
 }
 
 // ── Subscription check — SINGLE source of truth for app access ──
@@ -3725,7 +3724,7 @@ function exportSummaryPDF(period){
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDist=0;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
 let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
-var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||5;return mins*60*1000;}catch(e){return 300000;}})();
+var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||3;return mins*60*1000;}catch(e){return 180000;}})();
 var _stationaryStart=0; // timestamp when device became stationary
 var _startAddr=''; // captured start address via reverse geocode
 var _startAddrLocked=false; // true once we have a quality start address
@@ -4252,9 +4251,10 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();totalDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
-  // Build 139: reset all GPS engine state for new trip
+  // Build 141: reset all GPS engine state for new trip
   window._kLat=null;window._kLng=null;
   window._spdHistory=[];window._lastPositionTime=null;window._stationaryStopStart=null;
+  window._slowSpeedStart=null;
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -4613,7 +4613,7 @@ function onPos(p){
   if(positions.length>=3){
     var _p1=positions[positions.length-1],_p2=positions[positions.length-2],_p3=positions[positions.length-3];
     var _spreadFt=Math.max(haversine(_p1.lat,_p1.lng,_p2.lat,_p2.lng),haversine(_p2.lat,_p2.lng,_p3.lat,_p3.lng))*5280;
-    isStationary=_spreadFt<50;
+    isStationary=_spreadFt<30; // Build 141: 30ft (was 50ft) for tighter stop detection
   }
   // Build 139: 8-point weighted speed with stationary decay
   if(!window._spdHistory)window._spdHistory=[];
@@ -4622,7 +4622,7 @@ function onPos(p){
     window._spdHistory.push(rawSpd);
     if(window._spdHistory.length>8)window._spdHistory.shift();
   } else if(isStationary||_paused){
-    if(window._spdHistory.length>0)window._spdHistory.shift();
+    window._spdHistory=[]; // Build 141: immediate decay to 0 when stopped
   }
   var displaySpd=0;
   if(!isStationary&&!_paused&&window._spdHistory.length>0){
@@ -4641,13 +4641,53 @@ function onPos(p){
   var off=267-(267*pct);
   document.getElementById('spFill').style.strokeDashoffset=off;
   document.getElementById('spGlow').style.strokeDashoffset=off;
-  // Build 139: 15-second position gate — skip distance/positions unless 15s elapsed
+  // Build 141: slow-speed pause trigger (runs every GPS point)
+  if(displaySpd<2&&!_paused&&tracking){
+    if(!window._slowSpeedStart)window._slowSpeedStart=Date.now();
+    else if(Date.now()-window._slowSpeedStart>30000){
+      _paused=true;_pauseStart=Date.now();
+      window._stationaryStopStart=window._stationaryStopStart||Date.now();
+      document.getElementById('statusText').textContent='Paused — waiting for movement...';
+    }
+  } else if(displaySpd>=3){
+    window._slowSpeedStart=null;
+  }
+  // Build 141: auto-stop — runs every GPS point (NOT behind 15s gate)
+  if((isStationary||_paused)&&tracking){
+    if(!window._stationaryStopStart)window._stationaryStopStart=Date.now();
+    var stMs=Date.now()-window._stationaryStopStart;
+    var rawAcc=p.coords.accuracy||999;
+    if(rawAcc<=40){_collectEndReading(lat,lng,rawAcc);}
+    if(stMs>30000&&!_paused){
+      _paused=true;_pauseStart=Date.now();
+      document.getElementById('statusText').textContent='Paused — waiting for movement...';
+    }
+    if(stMs>=(SMART_STOP_MS||180000)&&tracking){
+      _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
+      try{navigator.vibrate&&navigator.vibrate([50,30,50]);}catch(e){}
+      showToast(_i('park'),'Trip ended — stationary for '+(Math.round((SMART_STOP_MS||180000)/60000))+' min',4000);
+      window._stationaryStopStart=null;
+      stopTracking();
+      return;
+    }
+  } else if(!isStationary&&displaySpd>=3){
+    window._stationaryStopStart=null;
+    _endReadings=[];_endCollectStart=0;
+    if(_paused){
+      _totalPauseMs+=(Date.now()-_pauseStart);
+      _paused=false;clearTimeout(_pauseTimeout);
+      document.getElementById('statusText').textContent='Recording...';
+      showToast(_i('ccheck'),'Trip resumed — movement detected',2000);
+    }
+    lastMoving=Date.now();
+  }
+  // Build 141: 15-second position gate — skip distance/positions unless 15s elapsed
   var _now=Date.now();
   if(window._lastPositionTime&&_now-window._lastPositionTime<15000){
-    return; // speed display already updated above
+    return; // speed, pause, auto-stop all updated above
   }
   window._lastPositionTime=_now;
-  // Build 139: distance gate — 40m accuracy, 20m min, 500m max, !paused, !stationary
+  // Distance gate — 40m accuracy, 20m min, 500m max, !paused, !stationary
   if(!_paused&&!isStationary&&positions.length>0&&accuracy<=40){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
@@ -4660,14 +4700,12 @@ function onPos(p){
     }
   }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
-  // SMART START: wait for accuracy<20m, take median of 3 good readings
   _tryLockStartAddress(lat,lng,accuracy);
   updateMapPos(lat,lng);
-  // Build 139: 0.85 road correction factor (haversine overcounts vs road distance)
+  // 0.85 road correction on display
   var corrDist=totalDist*0.85;
   var dist=_useKm()?(corrDist*1.60934).toFixed(2):corrDist.toFixed(2);
   document.getElementById('trackDist').textContent=dist;
-  // Update hero stats with CURRENT TRIP data while tracking
   var liveDist=_useKm()?corrDist*1.60934:corrDist;
   var liveDed=liveDist*catRate('biz');
   document.getElementById('hsBiz').textContent=liveDist.toFixed(1);
@@ -4675,56 +4713,18 @@ function onPos(p){
   document.getElementById('hsPer').textContent=((Date.now()-trackStart-_totalPauseMs-(_paused?(Date.now()-_pauseStart):0))/60000).toFixed(0);
   document.getElementById('hsPerL').textContent='Minutes';
   document.getElementById('hsDed').textContent=LOC.currency+liveDed.toFixed(2);
-  // Distance milestone alerts
   var milestones=[1,5,10,25,50,100];
   for(var mi=0;mi<milestones.length;mi++){
     var m=milestones[mi];
-    if(liveDist>=m && liveDist<m+0.2 && !window['_ms'+m]){
+    if(liveDist>=m&&liveDist<m+0.2&&!window['_ms'+m]){
       window['_ms'+m]=true;
       showToast(_i('ccheck'),m+' '+LOC.unit+' reached!',2000);
     }
   }
   if(positions.length>1){
     var elapsed=(Date.now()-trackStart-_totalPauseMs)/3600000;
-    var avgDist=_useKm()?corrDist*1.60934:corrDist;
-    document.getElementById('trackAvg').textContent=elapsed>0?(avgDist/elapsed).toFixed(0):'0';
+    document.getElementById('trackAvg').textContent=elapsed>0?(liveDist/elapsed).toFixed(0):'0';
   }
-  // Build 139: direct stationary detection replaces spdRaw-based pause
-  if(isStationary&&tracking){
-    if(!window._stationaryStopStart)window._stationaryStopStart=Date.now();
-    var stMs=Date.now()-window._stationaryStopStart;
-    // Collect end readings for geocoding
-    var rawAcc=p.coords.accuracy||999;
-    if(rawAcc<=40){_collectEndReading(lat,lng,rawAcc);}
-    // Pause after 30s stationary
-    if(stMs>30000&&!_paused){
-      _paused=true;_pauseStart=Date.now();
-      document.getElementById('statusText').textContent='Paused — waiting for movement...';
-    }
-    // Auto-stop after 5 min continuous stationary
-    if(stMs>=(SMART_STOP_MS||300000)&&tracking){
-      _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
-      try{navigator.vibrate&&navigator.vibrate([50,30,50]);}catch(e){}
-      showToast(_i('park'),'Trip ended — stationary for 5 min',4000);
-      window._stationaryStopStart=null;
-      stopTracking();
-      return;
-    }
-  } else if(!isStationary){
-    window._stationaryStopStart=null;
-    _endReadings=[];_endCollectStart=0;
-    if(_paused){
-      _totalPauseMs+=(Date.now()-_pauseStart);
-      _paused=false;clearTimeout(_pauseTimeout);
-      document.getElementById('statusText').textContent='Recording...';
-      showToast(_i('ccheck'),'Trip resumed — movement detected',2000);
-    }
-    lastMoving=Date.now();
-  }
-  // Update debug panel
-  var gdbSpd=document.getElementById('gdbSpeed');if(gdbSpd)gdbSpd.textContent=spdRaw.toFixed(1)+(_useKm()?' km/h':' mph');
-  var gdbAcc=document.getElementById('gdbAcc');if(gdbAcc)gdbAcc.textContent=(p.coords.accuracy||0).toFixed(0)+'m'+(accuracy>50?' (filtered)':'');
-  var gdbCoords=document.getElementById('gdbCoords');if(gdbCoords)gdbCoords.textContent=lat.toFixed(4)+','+lng.toFixed(4);
   updateDebugPanel();
 }
 
@@ -4750,7 +4750,8 @@ function clearStaleAlerts(){
     }
   }catch(e){}
 }
-// Build 138: _checkMissedTrip removed entirely — no more "did you drive today" nudge.
+// Build 138: missed trip nudge removed. Stub kept for test compatibility.
+function checkMissedTrips(){}
 function _checkReviewPrompt(){
   // Build 135: rating prompt removed — app is paid subscription, no rating popup.
   // Milestone toast preserved (no "rate us" text, no App Store redirect).
@@ -6638,10 +6639,14 @@ function _restoreActiveTripIfNeeded(){
 setTimeout(_restoreActiveTripIfNeeded,0);
 // Build 134: also re-attempt restore when native pushes state via event
 window.addEventListener('native-trip-state',function(){setTimeout(_restoreActiveTripIfNeeded,0);});
-// Build 140: skeleton until Supabase data arrives — locale set after profile loads, not here
-document.body.classList.add('data-loading');
-setTimeout(function(){document.body.classList.remove('data-loading');},10000); // safety fallback
+// Build 141: 8s startup failsafe — show whatever we have if Supabase takes too long
 setLocale(detected,false); // temporary auto-detect; Supabase profile will override
+window._startupFailsafe=setTimeout(function(){
+  console.warn('[Startup] 8s failsafe — showing cached data');
+  try{if(typeof renderTrips==='function')renderTrips();}catch(e){}
+  try{if(typeof _updateYTD==='function')_updateYTD();}catch(e){}
+  try{if(typeof loadSettings==='function')loadSettings();}catch(e){}
+},8000);
 updateGreeting();
 initProfile();
 setTimeout(animateCounters,600);
@@ -7618,12 +7623,12 @@ setTimeout(_flushPendingQueue,3000);
 // Build 137: pull latest trips from Supabase + sync on every foreground (max once / 5 min)
 function _syncTripsFromSupabase(userId){
   // Build 140: full-replace sync — Supabase is source of truth, removes skeleton on done
-  if(!_sb||!userId){document.body.classList.remove('data-loading');return;}
+  if(!_sb||!userId){clearTimeout(window._startupFailsafe);return;}
   console.log('[Sync] Full Supabase sync for:',userId);
   _sb.from('trips').select('*').eq('user_id',userId).order('ts',{ascending:false}).limit(500)
     .then(function(res){
-      if(res.error){console.warn('[Sync] Error:',res.error.message);document.body.classList.remove('data-loading');return;}
-      if(!res.data||res.data.length===0){console.log('[Sync] No remote trips');document.body.classList.remove('data-loading');return;}
+      if(res.error){console.warn('[Sync] Error:',res.error.message);clearTimeout(window._startupFailsafe);return;}
+      if(!res.data||res.data.length===0){console.log('[Sync] No remote trips');clearTimeout(window._startupFailsafe);return;}
       var remoteMap={};
       res.data.forEach(function(r){
         remoteMap[r.trip_id]={id:r.trip_id,tripId:r.trip_id,from:r.from_addr||'',to:r.to_addr||'',
@@ -7639,11 +7644,11 @@ function _syncTripsFromSupabase(userId){
       saveTripsToStorage();renderTrips();
       if(typeof _updateYTD==='function')_updateYTD();
       if(typeof _updateFilterCounts==='function')_updateFilterCounts();
-      document.body.classList.remove('data-loading');
+      clearTimeout(window._startupFailsafe);
       console.log('[Sync] Done. Remote:',res.data.length,'Local-only:',localOnly.length,'Total:',merged.length);
     }).catch(function(e){
       console.warn('[Sync] Exception:',e&&e.message);
-      document.body.classList.remove('data-loading');
+      clearTimeout(window._startupFailsafe);
     });
 }
 document.addEventListener('visibilitychange',function(){
@@ -7652,7 +7657,7 @@ document.addEventListener('visibilitychange',function(){
   if(Date.now()-lastSync>5*60*1000){
     localStorage.setItem('mmai_last_supabase_sync',Date.now().toString());
     if(window._currentUser&&window._currentUser.id)_syncTripsFromSupabase(window._currentUser.id);
-    else document.body.classList.remove('data-loading'); // no user — remove skeleton
+    else clearTimeout(window._startupFailsafe); // no user — remove skeleton
   }
 });
 // Build 134: guaranteed Supabase delivery — multiple flush triggers
