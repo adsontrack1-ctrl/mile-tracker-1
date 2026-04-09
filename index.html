@@ -1603,7 +1603,7 @@ function _selectCountry(country){
       var _s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');
       _s.locale=country;_s.localeSetByUser=true;
       localStorage.setItem('mymilesai_settings',JSON.stringify(_s));
-      _sb.from('profiles').update({settings:_s}).eq('id',currentUser.id).then(function(){});
+      _sb.from('profiles').update({settings:_s}).eq('id',currentUser.id).then(function(){}).catch(function(e){console.warn('[Profile PATCH setLocale]',e);});
     }catch(e){}
   }
 }
@@ -4052,7 +4052,7 @@ function _saveNamedLocation(){
   /* Sync to Supabase profiles.named_locations JSONB */
   if(_sb&&currentUser&&currentUser.id){
     try{
-      _sb.from('profiles').update({named_locations:_freqLocs.filter(function(x){return x.label;}),updated_at:new Date().toISOString()}).eq('id',currentUser.id).then(function(){}).catch(function(){});
+      _sb.from('profiles').update({named_locations:_freqLocs.filter(function(x){return x.label;})}).eq('id',currentUser.id).then(function(){}).catch(function(e){console.warn('[Profile PATCH namedLoc]',e);});
     }catch(e){}
   }
   if(typeof renderFreqLocChips==='function')renderFreqLocChips();
@@ -7064,9 +7064,8 @@ function saveSettings(){
       _sb.from('profiles').update({
         unit_preference:LOC.unit==='km'?'km':'miles',
         mileage_rate:settings.rate,
-        currency:LOC.currency,
-        updated_at:new Date().toISOString()
-      }).eq('id',currentUser.id).then(function(){}).catch(function(){});
+        currency:LOC.currency
+      }).eq('id',currentUser.id).then(function(){}).catch(function(e){console.warn('[Profile PATCH saveSettings]',e);});
     }catch(e){}
   }
 }
@@ -7621,9 +7620,12 @@ updateDebugPanel();
 /* Flush any trips that failed to sync last session */
 setTimeout(_flushPendingQueue,3000);
 // Build 137: pull latest trips from Supabase + sync on every foreground (max once / 5 min)
+var _syncInProgress=false;
 function _syncTripsFromSupabase(userId){
-  // Build 140: full-replace sync — Supabase is source of truth, removes skeleton on done
+  // Build 141 hotfix: dedup lock + full-replace sync
+  if(_syncInProgress){console.log('[Sync] Already syncing, skipping');return;}
   if(!_sb||!userId){clearTimeout(window._startupFailsafe);return;}
+  _syncInProgress=true;
   console.log('[Sync] Full Supabase sync for:',userId);
   _sb.from('trips').select('*').eq('user_id',userId).order('ts',{ascending:false}).limit(500)
     .then(function(res){
@@ -7646,9 +7648,11 @@ function _syncTripsFromSupabase(userId){
       if(typeof _updateFilterCounts==='function')_updateFilterCounts();
       clearTimeout(window._startupFailsafe);
       console.log('[Sync] Done. Remote:',res.data.length,'Local-only:',localOnly.length,'Total:',merged.length);
+      _syncInProgress=false;
     }).catch(function(e){
       console.warn('[Sync] Exception:',e&&e.message);
       clearTimeout(window._startupFailsafe);
+      _syncInProgress=false;
     });
 }
 document.addEventListener('visibilitychange',function(){
