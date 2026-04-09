@@ -1727,7 +1727,7 @@ async function _authGoogle(){
   if(!_sb)return;_authSetLoading('authGoogleBtn',true);
   try{
     var redirectTo=window.__MYMILESAI_NATIVE__
-      ?'https://dxpuuiqibtizewbbffjk.supabase.co/auth/v1/callback'
+      ?'com.harijasllc.mymilesaiapp://auth/callback'
       :window.location.origin+window.location.pathname;
     // Sign out any existing session first so Google shows account picker
     // This fixes: "already logged in with Google but app shows email screen"
@@ -1743,7 +1743,7 @@ async function _authApple(){
   if(!_sb)return;_authSetLoading('authAppleBtn',true);
   try{
     var redirectTo=window.__MYMILESAI_NATIVE__
-      ?'https://dxpuuiqibtizewbbffjk.supabase.co/auth/v1/callback'
+      ?'com.harijasllc.mymilesaiapp://auth/callback'
       :window.location.origin+window.location.pathname;
     await _sb.auth.signInWithOAuth({provider:'apple',options:{redirectTo:redirectTo}});
   }catch(e){document.getElementById('authErr').textContent=e.message||'Apple sign-in failed';_authSetLoading('authAppleBtn',false);}
