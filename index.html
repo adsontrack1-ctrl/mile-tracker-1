@@ -859,7 +859,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 143</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 144</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -3952,6 +3952,7 @@ function clearTripState(){
     tx.objectStore('state').delete('active');
   }).catch(function(){});
   try{localStorage.removeItem('mmai_trip_backup');}catch(e){}
+  window._tripStartLat=null;window._tripStartLng=null;
   // Build 134: also clear native AsyncStorage
   if(window.ReactNativeWebView){
     try{window.ReactNativeWebView.postMessage(JSON.stringify({type:'CLEAR_TRIP_STATE'}));}catch(e){}
@@ -4256,10 +4257,11 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();totalDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
-  // Build 141: reset all GPS engine state for new trip
+  // Build 144: reset all GPS engine state for new trip
   window._kLat=null;window._kLng=null;
   window._spdHistory=[];window._lastPositionTime=null;window._stationaryStopStart=null;
   window._slowSpeedStart=null;
+  window._tripStartLat=null;window._tripStartLng=null;
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -4712,6 +4714,11 @@ function onPos(p){
       }
     }
   }
+  // Build 144: capture first GPS point as trip start coords for Routes API
+  if(positions.length===0){
+    window._tripStartLat=lat;window._tripStartLng=lng;
+    console.log('[TripStart] GPS coords:',lat,lng);
+  }
   positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
   _tryLockStartAddress(lat,lng,accuracy);
   updateMapPos(lat,lng);
@@ -5035,13 +5042,24 @@ function stopTracking(){
       finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
     }
 
-    // Step 1: Use haversine accumulation as the trip distance
+    // Build 144: Use Google Routes API as sole distance source, haversine*0.85 as fallback
     function _getRoadDistanceThenSave(fromA,toA){
-      // GPS haversine accumulation (totalDist) IS the actual miles driven.
-      // It correctly measures detours, road closures, and the real path taken.
-      // Do NOT override with routing APIs — they calculate the shortest theoretical
-      // path, not the actual path driven.
-      _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
+      var _startC=(window._tripStartLat&&window._tripStartLng)?{lat:window._tripStartLat,lng:window._tripStartLng}:null;
+      var _endC=endPos||(positions.length>0?{lat:positions[positions.length-1].lat,lng:positions[positions.length-1].lng}:null);
+      if(_startC&&_endC&&_googleMapsReady){
+        showToast(_i('pin'),'Calculating trip distance...',2000);
+        _getGoogleDistance(_startC,_endC,function(routesMi,err){
+          if(routesMi&&routesMi>0){
+            console.log('[TripEnd] Routes API:',routesMi.toFixed(2),'mi');
+            _geocodeEndThenSave(routesMi,fromA,toA);
+          } else {
+            console.warn('[TripEnd] Routes API failed:',err,'— haversine fallback');
+            _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
+          }
+        });
+      } else {
+        _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
+      }
     }
 
     // Step 2: Geocode end position, then save
@@ -5128,7 +5146,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   }
   renderTrips();renderAlerts();saveTripsToStorage();
   /* Sync to Supabase — queue for offline retry if it fails (Build 130: logging) */
-  (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u){console.warn('[TripSave] no user');return;}var row={user_id:u.id,trip_id:_t.tripId,from_addr:_t.from,to_addr:_t.to,miles:_t.mi,type:_t.type,date:_t.date,ts:_t.ts,purpose:_t.purpose||'',notes:_t.notes||'',vehicle_id:_t.vehicleId||null};console.log('[TripSave]',row);_sb.from('trips').upsert(row,{onConflict:'trip_id'}).then(function(res){if(res.error){console.warn('[TripSave] error',res.error);_addToPendingQueue(_t);showToast(_i('warn'),'Trip saved locally — will sync when connected');}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(e){console.warn('[TripSave] catch',e);_addToPendingQueue(_t);showToast(_i('warn'),'Trip saved locally — will sync when connected');});}).catch(function(e){console.warn('[TripSave] auth catch',e);_addToPendingQueue(_t);});})();
+  (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u){console.warn('[TripSave] no user');return;}var row={user_id:u.id,trip_id:_t.tripId,from_addr:_t.from,to_addr:_t.to,miles:_t.mi,type:_t.type,date:_t.date,ts:_t.ts,purpose:_t.purpose||'',notes:_t.notes||'',vehicle_id:_t.vehicleId||null};console.log('[TripSave]',row);_sb.from('trips').upsert(row,{onConflict:'trip_id'}).then(function(res){if(res.error){console.warn('[TripSave] error',res.error);_addToPendingQueue(_t);if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(e){console.warn('[TripSave] catch',e);_addToPendingQueue(_t);if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');});}).catch(function(e){console.warn('[TripSave] auth catch',e);_addToPendingQueue(_t);});})();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
   /* AI trip categorization (fire and forget) */
   (function(){var _t=TRIPS[0];if(!_t||!_t.from||!_t.to||_t.type!=='uncl')return;fetch('https://mymilesai-ai.harijasllc.workers.dev/categorize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:_t.from,to:_t.to,time:_t.time,day:new Date().toLocaleDateString('en-US',{weekday:'long'}),history:TRIPS.slice(1,6).map(function(t){return{from:t.from,to:t.to,type:t.type};})})}).then(function(r){return r.json();}).then(function(data){if(data.type&&data.confidence>0.8&&_t.type==='uncl'){_t.type=data.type;_t.ded=!!CAT_DEDUCTIBLE[data.type];saveTripsToStorage();renderTrips();showToast(_i('user'),'AI: '+CAT_LABELS[data.type]+' ('+Math.round(data.confidence*100)+'%)',3000);}}).catch(function(){});})();
@@ -6035,7 +6053,7 @@ function _doSaveManual(){
   recordTripEnd();
   saveTripsToStorage();
   /* Sync to Supabase — queue for offline retry if it fails (Build 130: logging) */
-  (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u){console.warn('[TripSave] no user');return;}var row={user_id:u.id,trip_id:_t.tripId,from_addr:_t.from,to_addr:_t.to,miles:_t.mi,type:_t.type,date:_t.date,ts:_t.ts,purpose:_t.purpose||'',notes:_t.notes||'',vehicle_id:_t.vehicleId||null};console.log('[TripSave]',row);_sb.from('trips').upsert(row,{onConflict:'trip_id'}).then(function(res){if(res.error){console.warn('[TripSave] error',res.error);_addToPendingQueue(_t);showToast(_i('warn'),'Trip saved locally — will sync when connected');}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(e){console.warn('[TripSave] catch',e);_addToPendingQueue(_t);showToast(_i('warn'),'Trip saved locally — will sync when connected');});}).catch(function(e){console.warn('[TripSave] auth catch',e);_addToPendingQueue(_t);});})();
+  (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u){console.warn('[TripSave] no user');return;}var row={user_id:u.id,trip_id:_t.tripId,from_addr:_t.from,to_addr:_t.to,miles:_t.mi,type:_t.type,date:_t.date,ts:_t.ts,purpose:_t.purpose||'',notes:_t.notes||'',vehicle_id:_t.vehicleId||null};console.log('[TripSave]',row);_sb.from('trips').upsert(row,{onConflict:'trip_id'}).then(function(res){if(res.error){console.warn('[TripSave] error',res.error);_addToPendingQueue(_t);if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(e){console.warn('[TripSave] catch',e);_addToPendingQueue(_t);if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');});}).catch(function(e){console.warn('[TripSave] auth catch',e);_addToPendingQueue(_t);});})();
   closeAddTrip();
   // Build 135: reset accumulators after manual save so next trip starts at 0
   totalDist=0; positions=[]; trackStart=Date.now(); window._lastTripPersist=0;
