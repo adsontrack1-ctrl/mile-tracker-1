@@ -859,7 +859,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 147</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 148</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4379,8 +4379,11 @@ window.__nativeGPS__ = function(coords) {
   }
   window.__lastNativeCoord = {lat:coords.lat, lng:coords.lng, ts:ts};
 
+  // Build 148: pass speedAccuracy from CLLocationManager for validation
   var fakePos={ coords: { latitude: coords.lat, longitude: coords.lng,
-                     speed: (coords.speed!=null?coords.speed:null), accuracy: acc } };
+                     speed: (typeof coords.speed==='number')?coords.speed:-1,
+                     speedAccuracy: (typeof coords.speedAccuracy==='number')?coords.speedAccuracy:-1,
+                     accuracy: acc } };
   if(tracking){
     onPos(fakePos);
     // Build 132: throttled persistence directly in native GPS path
@@ -4603,22 +4606,25 @@ function onPos(p){
   } else if(accuracy<=50){
     _lastGoodPos={lat:lat,lng:lng,accuracy:accuracy};
   }
-  // ═══ SPEED ENGINE — Build 147: CLLocationManager speed direct, EMA α=0.5 ═══
+  // ═══ SPEED ENGINE — Build 148: CLLocation speedAccuracy validation, α=0.6 EMA ═══
   var clSpeed=(typeof p.coords.speed==='number')?p.coords.speed:-1;
-  var isMoving=clSpeed>=0.3; // 0.3 m/s = 0.67 mph — CLLocation true threshold
+  var clSpeedAcc=(typeof p.coords.speedAccuracy==='number')?p.coords.speedAccuracy:-1;
+  // Apple: speedAccuracy>=0 = valid, <0 = invalid. speed<0 = stationary.
+  var speedValid=(clSpeed>=0)&&(clSpeedAcc>=0||clSpeedAcc===-1);
+  var isMoving=speedValid&&(clSpeed>=0.5);
   var spdMps=isMoving?clSpeed:0;
   if(!window.__spdEMA)window.__spdEMA=0;
   if(isMoving&&!_paused){
     var rawDisplay=_useKm()?(spdMps*3.6):(spdMps*2.237);
-    window.__spdEMA=window.__spdEMA===0?rawDisplay:window.__spdEMA*0.5+rawDisplay*0.5;
+    window.__spdEMA=(window.__spdEMA===0)?rawDisplay:(window.__spdEMA*0.4+rawDisplay*0.6);
   } else {
     window.__spdEMA=0;
   }
-  var displaySpd=(!isMoving||_paused)?0:Math.round(window.__spdEMA);
+  var displaySpd=(isMoving&&!_paused)?Math.round(window.__spdEMA):0;
   var isStationary=!isMoving;
   if(window.__MYMILESAI_NATIVE__){
     var _sn=document.getElementById('speedNum');var _ts=document.getElementById('trackSpeed');var _su=document.getElementById('speedUnit');
-    if(_sn)_sn.textContent=displaySpd;if(_ts)_ts.textContent=displaySpd;if(_su)_su.textContent=_useKm()?'km/h':'mph';
+    if(_sn)_sn.textContent=String(displaySpd);if(_ts)_ts.textContent=String(displaySpd);if(_su)_su.textContent=_useKm()?'km/h':'mph';
     var _maxSpd=_useKm()?160:100;var _pct=Math.min(displaySpd/_maxSpd,1);var _off=Math.round(267-(267*_pct));
     var _sf=document.getElementById('spFill');var _sg=document.getElementById('spGlow');
     if(_sf)_sf.style.strokeDashoffset=_off;if(_sg)_sg.style.strokeDashoffset=_off;
@@ -4627,19 +4633,20 @@ function onPos(p){
     if(_sn2)_sn2.textContent='0';if(_ts2)_ts2.textContent='0';
   }
   // ═══ END SPEED ENGINE ═══
-  // PAUSE: 5s stopped = pause, instant unpause
+  // PAUSE: 5s stopped = pause, moving = instant resume
   if(!isMoving&&!_paused&&tracking){
     if(!window._stationaryStopStart)window._stationaryStopStart=Date.now();
-    if(Date.now()-window._stationaryStopStart>5000){
+    if((Date.now()-window._stationaryStopStart)>5000){
       _paused=true;_pauseStart=Date.now();
       document.getElementById('statusText').textContent='Paused — waiting for movement...';
     }
   } else if(isMoving){
+    window._stationaryStopStart=null;
     if(_paused){_totalPauseMs+=(Date.now()-_pauseStart);_paused=false;clearTimeout(_pauseTimeout);
+      window.__spdEMA=0;
       document.getElementById('statusText').textContent='Recording...';
       showToast(_i('ccheck'),'Trip resumed — movement detected',2000);
     }
-    window._stationaryStopStart=null;window.__spdEMA=0;
     _endReadings=[];_endCollectStart=0;lastMoving=Date.now();
   }
   // AUTO-STOP timer
