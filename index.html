@@ -859,7 +859,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 145</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 146</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4262,8 +4262,7 @@ function startTracking(){
   positions=[];lastMoving=Date.now();
   // Build 144: reset all GPS engine state for new trip
   window._kLat=null;window._kLng=null;
-  window._spdHistory=[];window._lastPositionTime=null;window._stationaryStopStart=null;
-  window._slowSpeedStart=null;
+  window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
   window._tripStartLat=null;window._tripStartLng=null;
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
@@ -4604,100 +4603,60 @@ function onPos(p){
   } else if(accuracy<=50){
     _lastGoodPos={lat:lat,lng:lng,accuracy:accuracy};
   }
-  // Use GPS speed if available and positive, else calculate from positions
-  var spdMps=0;
-  if(typeof spd==='number'&&spd>=0&&spd!==null){
-    spdMps=spd;
-  } else if(positions.length>0){
-    var prev=positions[positions.length-1];
-    var dt=(Date.now()-prev.time)/1000;
-    if(dt>0){
-      var dMi=haversine(prev.lat,prev.lng,lat,lng);
-      spdMps=dMi*1609.34/dt;
-    }
-  }
-  var spdVal=_useKm()?(spdMps*3.6):(spdMps*2.237);
-
-  // Build 139: STATIONARY DETECTION — 50ft spread = stopped
-  var isStationary=false;
-  if(positions.length>=3){
-    var _p1=positions[positions.length-1],_p2=positions[positions.length-2],_p3=positions[positions.length-3];
-    var _spreadFt=Math.max(haversine(_p1.lat,_p1.lng,_p2.lat,_p2.lng),haversine(_p2.lat,_p2.lng,_p3.lat,_p3.lng))*5280;
-    isStationary=_spreadFt<30; // Build 141: 30ft (was 50ft) for tighter stop detection
-  }
-  // Build 139: 8-point weighted speed with stationary decay
-  if(!window._spdHistory)window._spdHistory=[];
-  // Build 142: spdMps>0.5 threshold (1.1mph) filters GPS Doppler noise at stops
-  if(accuracy<=50&&!isStationary&&spdMps>0.5){
-    var rawSpd=_useKm()?(spdMps*3.6):(spdMps*2.237);
-    window._spdHistory.push(rawSpd);
-    if(window._spdHistory.length>8)window._spdHistory.shift();
-  } else if(isStationary||_paused||spdMps<=0.5){
-    window._spdHistory=[];
-  }
-  var displaySpd=0;
-  if(!isStationary&&!_paused&&window._spdHistory.length>0){
-    var _weights=[1,1,2,2,3,3,4,4].slice(-window._spdHistory.length);
-    var _wSum=0;for(var _wi=0;_wi<_weights.length;_wi++)_wSum+=_weights[_wi];
-    var _wSpd=0;for(var _wi2=0;_wi2<window._spdHistory.length;_wi2++)_wSpd+=window._spdHistory[_wi2]*_weights[_wi2];
-    displaySpd=Math.round(_wSpd/_wSum);
-  }
-  var spdDisplay=(isStationary||_paused)?'0':displaySpd.toString();
-  // Build 143: speed display only reliable on native iOS (web GPS speed is noisy)
-  if(window.__MYMILESAI_NATIVE__){
-    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
-    document.getElementById('trackSpeed').textContent=spdDisplay;
-    document.getElementById('speedNum').textContent=spdDisplay;
+  // ═══ SPEED ENGINE — Build 146: trust iOS Core Location speed directly ═══
+  var rawSpeed=(typeof spd==='number'&&spd!==null)?spd:-1;
+  var isMoving=rawSpeed>=0.5; // 0.5 m/s = 1.1 mph threshold
+  if(!window.__spdSmoothed)window.__spdSmoothed=0;
+  if(isMoving&&!_paused){
+    var rawDisplay=_useKm()?(rawSpeed*3.6):(rawSpeed*2.237);
+    window.__spdSmoothed=window.__spdSmoothed*0.6+rawDisplay*0.4; // α=0.4 exponential
   } else {
-    document.getElementById('speedNum').textContent='0';
-    document.getElementById('trackSpeed').textContent='0';
-    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+    window.__spdSmoothed=0; // INSTANT zero when stopped
   }
-  var maxSpd=_useKm()?160:100;
-  var _dispSpd=parseFloat(spdDisplay)||0;
-  var pct=Math.min(_dispSpd/maxSpd,1);
-  var off=267-(267*pct);
-  document.getElementById('spFill').style.strokeDashoffset=off;
-  document.getElementById('spGlow').style.strokeDashoffset=off;
-  // Build 141: slow-speed pause trigger (runs every GPS point)
-  if(displaySpd<2&&!_paused&&tracking){
-    if(!window._slowSpeedStart)window._slowSpeedStart=Date.now();
-    else if(Date.now()-window._slowSpeedStart>30000){
-      _paused=true;_pauseStart=Date.now();
-      window._stationaryStopStart=window._stationaryStopStart||Date.now();
-      document.getElementById('statusText').textContent='Paused — waiting for movement...';
-    }
-  } else if(displaySpd>=3){
-    window._slowSpeedStart=null;
+  var spdMps=rawSpeed>=0?rawSpeed:0;
+  var displaySpd=isMoving&&!_paused?Math.round(window.__spdSmoothed):0;
+  var spdDisplay=displaySpd.toString();
+  var isStationary=!isMoving;
+  // Display: native iOS only
+  if(window.__MYMILESAI_NATIVE__){
+    var _sn=document.getElementById('speedNum');var _ts=document.getElementById('trackSpeed');var _su=document.getElementById('speedUnit');
+    if(_sn)_sn.textContent=spdDisplay;if(_ts)_ts.textContent=spdDisplay;if(_su)_su.textContent=_useKm()?'km/h':'mph';
+  } else {
+    var _sn2=document.getElementById('speedNum');var _ts2=document.getElementById('trackSpeed');
+    if(_sn2)_sn2.textContent='0';if(_ts2)_ts2.textContent='0';
   }
-  // Build 141: auto-stop — runs every GPS point (NOT behind 15s gate)
-  if((isStationary||_paused)&&tracking){
+  var maxSpd=_useKm()?160:100;var pct=Math.min(displaySpd/maxSpd,1);var off=267-(267*pct);
+  var _sf=document.getElementById('spFill');var _sg=document.getElementById('spGlow');
+  if(_sf)_sf.style.strokeDashoffset=off;if(_sg)_sg.style.strokeDashoffset=off;
+  // ═══ END SPEED ENGINE ═══
+  // INSTANT PAUSE: 5s stopped = pause, instant unpause on movement
+  if(!isMoving&&!_paused&&tracking){
     if(!window._stationaryStopStart)window._stationaryStopStart=Date.now();
-    var stMs=Date.now()-window._stationaryStopStart;
-    var rawAcc=p.coords.accuracy||999;
-    if(rawAcc<=40){_collectEndReading(lat,lng,rawAcc);}
-    if(stMs>30000&&!_paused){
+    if(Date.now()-window._stationaryStopStart>5000){
       _paused=true;_pauseStart=Date.now();
       document.getElementById('statusText').textContent='Paused — waiting for movement...';
     }
-    if(stMs>=(SMART_STOP_MS||180000)&&tracking){
-      _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
-      try{navigator.vibrate&&navigator.vibrate([50,30,50]);}catch(e){}
-      showToast(_i('park'),'Trip ended — stationary for '+(Math.round((SMART_STOP_MS||180000)/60000))+' min',4000);
-      window._stationaryStopStart=null;
-      stopTracking();
-      return;
-    }
-  } else if(!isStationary&&displaySpd>=3){
-    window._stationaryStopStart=null;
+  } else if(isMoving){
+    window._stationaryStopStart=null;window.__spdSmoothed=0;
     _endReadings=[];_endCollectStart=0;
-    if(_paused){
-      _totalPauseMs+=(Date.now()-_pauseStart);
-      _paused=false;clearTimeout(_pauseTimeout);
+    if(_paused){_totalPauseMs+=(Date.now()-_pauseStart);_paused=false;clearTimeout(_pauseTimeout);
       document.getElementById('statusText').textContent='Recording...';
       showToast(_i('ccheck'),'Trip resumed — movement detected',2000);
     }
     lastMoving=Date.now();
+  }
+  // AUTO-STOP timer (runs every GPS point)
+  if((!isMoving||_paused)&&tracking){
+    if(!window._stationaryStopStart)window._stationaryStopStart=Date.now();
+    var stMs=Date.now()-window._stationaryStopStart;
+    var rawAcc=p.coords.accuracy||999;
+    if(rawAcc<=40){_collectEndReading(lat,lng,rawAcc);}
+    if(stMs>=(SMART_STOP_MS||180000)&&tracking){
+      _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
+      try{navigator.vibrate&&navigator.vibrate([50,30,50]);}catch(e){}
+      showToast(_i('park'),'Trip ended — stationary for '+(Math.round((SMART_STOP_MS||180000)/60000))+' min',4000);
+      window._stationaryStopStart=null;stopTracking();return;
+    }
   }
   // Build 141: 15-second position gate — skip distance/positions unless 15s elapsed
   var _now=Date.now();
@@ -4706,7 +4665,7 @@ function onPos(p){
   }
   window._lastPositionTime=_now;
   // Distance gate — 40m accuracy, 20m min, 500m max, !paused, !stationary
-  if(!_paused&&!isStationary&&positions.length>0&&accuracy<=40){
+  if(!_paused&&isMoving&&positions.length>0&&accuracy<=40){
     var last=positions[positions.length-1];
     var d=haversine(last.lat,last.lng,lat,lng);
     if(!isNaN(d)&&d>0.01242&&d<0.31){
