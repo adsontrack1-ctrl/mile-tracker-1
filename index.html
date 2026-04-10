@@ -859,7 +859,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 142</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 143</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -2350,8 +2350,9 @@ function tripCard(t,wide){
     else if(t.ts){var _dd=new Date(t.ts);var _mm=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];_shortDate=_mm[_dd.getMonth()]+' '+_dd.getDate();}
     else if(t.date){_shortDate=t.date.split(',')[0];}
   } catch(e) {}
+  // Build 143: date tag top-right, badge below it
   var _dateTag=_shortDate?'<div class="trip-date-tag" style="position:absolute;top:8px;right:10px;font-size:11px;font-weight:700;color:var(--ink3);background:rgba(255,255,255,.85);padding:2px 8px;border-radius:100px;backdrop-filter:blur(4px);z-index:3">'+_esc(_shortDate)+'</div>':'';
-  var _mapDiv='<div class="trip-map" style="position:relative">'+_dateTag+'<div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+(wide?340:290)+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>';
+  var _mapDiv='<div class="trip-map" style="position:relative">'+_dateTag+'<div class="trip-map-bg '+t.type+'"></div><div class="trip-map-grid"></div><svg viewBox="'+vb+'" preserveAspectRatio="none"><path d="'+safePath+'" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"'+dash+'/><circle cx="20" cy="'+pathStartY+'" r="5" fill="#0C0C1D" stroke="#fff" stroke-width="2"/><circle cx="'+(wide?340:290)+'" cy="'+pathEndXY+'" r="5" fill="'+dotFill+'" stroke="#fff" stroke-width="2"/></svg><div class="trip-map-badge '+t.type+'" style="top:'+(_shortDate?'28px':'8px')+'">'+badge+'</div><div class="trip-map-time">'+safeTime+'</div></div>';
   // Business trips: show $ saved as big number, distance as sub-label
   // Personal/unclassified: show distance as big number (no deduction)
   const dedAmt=t.ded?(parseFloat(d)*catRate(t.type)):0;
@@ -3074,11 +3075,15 @@ function recalcStats(){
   var bizPct=totalAll>0?Math.round(totalBiz/totalAll*100):0;
   var perPct=totalAll>0?100-bizPct:0;
 
-  // Hero stats
+  // Build 143: hero stats show 0 when idle, current trip stats when tracking
   var _hb=document.getElementById('hsBiz'),_hp=document.getElementById('hsPer'),_hd=document.getElementById('hsDed');
-  if(_hb)_hb.textContent=totalBiz.toFixed(1);
-  if(_hp)_hp.textContent=totalPer.toFixed(1);
-  if(_hd)_hd.textContent=LOC.currency+ded.toFixed(2);
+  if(tracking){
+    // During active trip: onPos() handles hero updates directly — don't overwrite here
+  } else {
+    if(_hb)_hb.textContent='0';
+    if(_hp)_hp.textContent='0';
+    if(_hd)_hd.textContent=LOC.currency+'0';
+  }
 
   // Statistics card values
   var _sb=document.getElementById('sBiz'),_sp=document.getElementById('sPer'),_sd=document.getElementById('sDedVal'),_st=document.getElementById('sTripCount');
@@ -4633,9 +4638,16 @@ function onPos(p){
     displaySpd=Math.round(_wSpd/_wSum);
   }
   var spdDisplay=(isStationary||_paused)?'0':displaySpd.toString();
-  document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
-  document.getElementById('trackSpeed').textContent=spdDisplay;
-  document.getElementById('speedNum').textContent=spdDisplay;
+  // Build 143: speed display only reliable on native iOS (web GPS speed is noisy)
+  if(window.__MYMILESAI_NATIVE__){
+    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+    document.getElementById('trackSpeed').textContent=spdDisplay;
+    document.getElementById('speedNum').textContent=spdDisplay;
+  } else {
+    document.getElementById('speedNum').textContent='0';
+    document.getElementById('trackSpeed').textContent='0';
+    document.getElementById('speedUnit').textContent=_useKm()?'km/h':'mph';
+  }
   var maxSpd=_useKm()?160:100;
   var _dispSpd=parseFloat(spdDisplay)||0;
   var pct=Math.min(_dispSpd/maxSpd,1);
