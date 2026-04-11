@@ -5047,15 +5047,21 @@ function stopTracking(){
         : (_sp.length>0 ? {lat:_sp[0].lat,lng:_sp[0].lng} : null);
       var _endC=endPos || window._savedEndPos
         || (_sp.length>0 ? {lat:_sp[_sp.length-1].lat,lng:_sp[_sp.length-1].lng} : null);
-      if(_startC&&_endC&&_googleMapsReady){
+      if(fromA&&toA&&fromA.indexOf('GPS (')<0&&toA.indexOf('GPS (')<0&&fromA.length>5&&toA.length>5&&_googleMapsReady){
         showToast(_i('pin'),'Calculating trip distance...',2000);
-        _getGoogleDistance(_startC,_endC,function(routesMi,err){
+        _getGoogleDistance(fromA,toA,function(routesMi,err){
           if(routesMi&&routesMi>0){
-            console.log('[TripEnd] Routes API:',routesMi.toFixed(2),'mi');
+            console.log('[TripEnd] Routes API (addr):',routesMi.toFixed(2),'mi');
             _geocodeEndThenSave(routesMi,fromA,toA);
           } else {
-            console.warn('[TripEnd] Routes API failed:',err,'— haversine fallback');
-            _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
+            console.warn('[TripEnd] Routes API failed:',err,'— coord fallback');
+            if(_startC&&_endC){
+              _getGoogleDistance(_startC,_endC,function(mi2,e2){
+                _geocodeEndThenSave((mi2&&mi2>0)?mi2:_haversineMi*0.85,fromA,toA);
+              });
+            } else {
+              _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
+            }
           }
         });
       } else {
@@ -5117,7 +5123,7 @@ var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   var _snapPos=[];
   // Build 150: use preserved snapshot — real positions[] is cleared at end of stopTracking before we run
-  var _ps=(window._savedPositions&&window._savedPositions.length>=2)?window._savedPositions:positions;
+  var _ps=(window._savedPositions&&window._savedPositions.length>=1)?window._savedPositions:positions;
   if(_ps&&_ps.length>=2){var _st=Math.max(1,Math.floor(_ps.length/80));for(var _pi=0;_pi<_ps.length;_pi+=_st)_snapPos.push({lat:_ps[_pi].lat,lng:_ps[_pi].lng});if(_snapPos[_snapPos.length-1]!==_ps[_ps.length-1])_snapPos.push({lat:_ps[_ps.length-1].lat,lng:_ps[_ps.length-1].lng});}
   if(_gpsTrioSaved)return;
   _gpsTrioSaved=true;
@@ -5560,14 +5566,25 @@ function _getGoogleDistance(origin,destination,cb){
   if(!_googleMapsReady||!google||!google.maps){cb(null,'no_maps');return;}
   var oWaypoint=typeof origin==='string'?{address:origin}:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}};
   var dWaypoint=typeof destination==='string'?{address:destination}:{location:{latLng:{latitude:destination.lat,longitude:destination.lng}}};
-  fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE','X-Goog-FieldMask':'originIndex,destinationIndex,duration,distanceMeters,status'},body:JSON.stringify({origins:[{waypoint:oWaypoint}],destinations:[{waypoint:dWaypoint}],travelMode:'DRIVE'})}).then(function(r){return r.json();}).then(function(data){
-    if(data&&data[0]&&data[0].distanceMeters){
-      var distMi=data[0].distanceMeters/1609.34;
-      cb(distMi,null);
+  fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE',
+      'X-Goog-FieldMask':'originIndex,destinationIndex,duration,distanceMeters,status'
+    },
+    body:JSON.stringify({origins:[{waypoint:oWaypoint}],destinations:[{waypoint:dWaypoint}],travelMode:'DRIVE'})
+  }).then(function(r){
+    if(!r.ok){throw new Error('HTTP_'+r.status);}
+    return r.json();
+  }).then(function(data){
+    var el=data&&Array.isArray(data)&&data[0];
+    if(el&&typeof el.distanceMeters==='number'&&el.distanceMeters>0&&(!el.status||!el.status.code)){
+      cb(el.distanceMeters/1609.34,null);
     } else {
-      cb(null,'ZERO_RESULTS');
+      cb(null,(el&&el.status&&el.status.code)||'ZERO_RESULTS');
     }
-  }).catch(function(){cb(null,'fetch_error');});
+  }).catch(function(e){cb(null,'fetch_error:'+e.message);});
 }
 
 function _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status){
