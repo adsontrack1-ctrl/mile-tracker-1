@@ -514,8 +514,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .swipe-card.flying-out{transition:transform .4s cubic-bezier(.55,0,1,.45),opacity .4s ease;}
 .swipe-card.dragging{cursor:grabbing;}
 .swipe-overlay{position:absolute;top:0;left:0;right:0;bottom:0;border-radius:inherit;display:flex;align-items:center;padding:0 24px;opacity:0;pointer-events:none;font-weight:800;font-size:18px;letter-spacing:2px;z-index:2;transition:opacity .12s ease;}
-.swipe-overlay.business{background:rgba(214,0,110,.15);color:#D6006E;justify-content:flex-start;}
-.swipe-overlay.personal{background:rgba(108,60,224,.15);color:#6C3CE0;justify-content:flex-end;}
+.swipe-overlay.business{background:linear-gradient(135deg,rgba(108,60,224,.22),rgba(108,60,224,.08));color:#6C3CE0;justify-content:flex-start;border:2px solid rgba(108,60,224,.35);border-radius:var(--r2);}
+.swipe-overlay.personal{background:linear-gradient(135deg,rgba(214,0,110,.08),rgba(214,0,110,.22));color:#D6006E;justify-content:flex-end;border:2px solid rgba(214,0,110,.35);border-radius:var(--r2);}
 /* WORK DAY BUTTONS */
 .wd-btn{width:30px;height:30px;border-radius:50%;border:none;font-size:11px;font-weight:700;background:var(--ink6);color:var(--ink3);cursor:pointer;transition:all .2s;}
 .wd-btn.a{background:var(--vi);color:#fff;}
@@ -1038,7 +1038,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Notes <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><input type="text" class="inp" id="editNotes" placeholder="Add a note..." maxlength="100"></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Toll Cost <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="editTollCurrency">$</span><input type="number" class="inp" id="editToll" step="0.01" min="0" placeholder="0.00" style="flex:1"></div></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Fuel Cost <span style="font-weight:400;color:var(--ink4)">(optional)</span></label><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:600;color:var(--ink3)" id="editFuelCurrency">$</span><input type="number" class="inp" id="editFuel" step="0.01" min="0" placeholder="0.00" style="flex:1"></div></div>
-  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Receipts</label><div id="editReceipts" style="margin-bottom:8px"></div><button type="button" class="btn-rd" onclick="_scanReceipt()" style="font-size:12px;padding:6px 14px">📷 Scan Receipt</button></div>
+  <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Receipts</label><div id="editReceipts" style="margin-bottom:8px"></div></div>
   <div class="iw"><label style="font-size:12px;font-weight:700;color:var(--ink3);display:block;margin-bottom:6px">Date</label><input type="date" class="inp" id="editDate" style="padding:10px 16px"></div>
   <div class="modal-row"><button class="modal-cancel" onclick="closeEdit()">Cancel</button><button class="cta" onclick="saveEdit()" style="flex:1">Save</button></div>
 </div></div>
@@ -1051,8 +1051,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
   </div>
   <div id="csCardArea" style="position:relative;width:100%;max-width:360px;flex:1;display:flex;align-items:center;justify-content:center;min-height:340px"></div>
   <div style="display:flex;gap:14px;width:100%;max-width:360px;margin-top:14px">
-    <button onclick="csClassify('pers')" style="flex:1;padding:14px;border-radius:14px;background:rgba(108,60,224,.18);border:1.5px solid #6C3CE0;color:#a78bfa;font-weight:800;font-size:14px;cursor:pointer">← PERSONAL 👤</button>
-    <button onclick="csClassify('biz')" style="flex:1;padding:14px;border-radius:14px;background:rgba(214,0,110,.18);border:1.5px solid #D6006E;color:#f472b6;font-weight:800;font-size:14px;cursor:pointer">💼 BUSINESS →</button>
+    <button onclick="csClassify('pers')" style="flex:1;padding:14px;border-radius:14px;background:rgba(214,0,110,.18);border:1.5px solid #D6006E;color:#f472b6;font-weight:800;font-size:14px;cursor:pointer">← PERSONAL 👤</button>
+    <button onclick="csClassify('biz')" style="flex:1;padding:14px;border-radius:14px;background:rgba(108,60,224,.18);border:1.5px solid #6C3CE0;color:#a78bfa;font-weight:800;font-size:14px;cursor:pointer">💼 BUSINESS →</button>
   </div>
   <div style="margin-top:14px;font-size:11px;color:#9898B0;text-align:center">Tip: swipe the card or tap a button</div>
 </div>
@@ -2276,8 +2276,8 @@ function applyLocale(){
     }
   });
   // Update swipe hint labels to match locale category names
-  document.documentElement.style.setProperty('--swipe-left',"'← Business'");
-  document.documentElement.style.setProperty('--swipe-right',"'Personal →'");
+  document.documentElement.style.setProperty('--swipe-left',"'← Personal'");
+  document.documentElement.style.setProperty('--swipe-right',"'Business →'");
   renderTrips();
   renderAlerts();
 }
@@ -2377,34 +2377,41 @@ function getAITaxInsight(){
   fetch('https://mymilesai-ai.harijasllc.workers.dev/tax-insight',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({totalBusinessMiles:totalMi,totalTrips:bizTrips.length,irsRate:LOC.rate,totalDeduction:totalMi*LOC.rate,year:new Date().getFullYear()})}).then(function(r){return r.json();}).then(function(data){if(data.insight)openInfoModal('AI Tax Insight',data.insight);}).catch(function(){showToast(_i('warn'),'AI unavailable',2000);});
 }
 function renderTrips(){
+  var PAGE=40;
   if(TRIPS.length===0){
     document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px">'+_i('car',48,'var(--vi)')+'<div style="margin-top:16px;font-size:17px;font-weight:700;color:var(--ink1)">Start tracking your miles</div><div style="font-size:13px;margin-top:8px;color:var(--ink3);line-height:1.6">Drive anywhere for work and MyMilesAI will auto-detect and record your trip.</div><div style="margin-top:12px;font-size:13px;background:var(--vi-s);color:var(--vi);font-weight:600;padding:8px 16px;border-radius:var(--rpill);display:inline-block">'+LOC.currency+LOC.rates.biz+'/'+LOC.unit+' tax rate — up to '+LOC.currency+'8,400/yr saved</div></div>';
   } else {
     document.getElementById('recentTrips').innerHTML=TRIPS.slice(0,1).map(t=>tripCard(t,false)).join('');
   }
-  // Swipe queue — unclassified at top
   var uncl=TRIPS.filter(function(t){return t.type==='uncl';});
   var swipeSec=document.getElementById('swipeSection');
   var swipeQ=document.getElementById('swipeQueue');
   if(uncl.length>0){
     swipeSec.style.display='';
     document.getElementById('swipeCount').textContent=uncl.length+' remaining';
-    swipeQ.innerHTML=uncl.map(function(t){return tripCard(t,true);}).join('');
+    swipeQ.innerHTML=uncl.slice(0,10).map(function(t){return tripCard(t,true);}).join('');
   } else {
     swipeSec.style.display='none';
     swipeQ.innerHTML='';
   }
-  // Group trips by day
-  var html='',lastDay='';
-  for(var i=0;i<TRIPS.length;i++){
-    var t=TRIPS[i];
-    if(t.day!==lastDay){
-      lastDay=t.day;
-      html+='<div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:var(--ink4);letter-spacing:.3px'+(i>0?';margin-top:8px':'')+'">'+_esc(t.day)+'</div>';
-    }
-    html+=tripCard(t,true);
+  window._tripsPage=1;
+  window._tripsFiltered=TRIPS;
+  var list=document.getElementById('tripList');
+  if(!list)return;
+  list.innerHTML=_renderTripBatch(window._tripsFiltered,0,PAGE);
+  var old=document.getElementById('_tripSentinel');if(old)old.remove();
+  if(window._tripsFiltered.length>PAGE){
+    var sentinel=document.createElement('div');
+    sentinel.id='_tripSentinel';
+    sentinel.style.cssText='height:60px;display:flex;align-items:center;justify-content:center;color:var(--ink4);font-size:13px;';
+    sentinel.innerHTML='<span>Loading more trips...</span>';
+    list.parentNode.insertBefore(sentinel,list.nextSibling);
+    if(window._tripObserver)window._tripObserver.disconnect();
+    window._tripObserver=new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting){_loadMoreTrips();}
+    },{rootMargin:'200px'});
+    window._tripObserver.observe(sentinel);
   }
-  document.getElementById('tripList').innerHTML=html;
   recalcStats();
   checkEmptyState();
   _updateStreak();
@@ -2415,6 +2422,40 @@ function renderTrips(){
   if(_activeFilter!=='all')applyFilter();
 }
 
+function _renderTripBatch(trips,start,end){
+  var html='',lastDay='';
+  if(start>0){var prev=trips[start-1];if(prev)lastDay=prev.day;}
+  for(var i=start;i<Math.min(end,trips.length);i++){
+    var t=trips[i];
+    if(t.day!==lastDay){
+      lastDay=t.day;
+      html+='<div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:var(--ink4);letter-spacing:.3px'+(i>0?';margin-top:8px':'')+'">'+_esc(t.day)+'</div>';
+    }
+    html+=tripCard(t,true);
+  }
+  return html;
+}
+
+function _loadMoreTrips(){
+  var PAGE=40;
+  var trips=window._tripsFiltered||TRIPS;
+  var loaded=window._tripsPage*PAGE;
+  if(loaded>=trips.length){
+    var s=document.getElementById('_tripSentinel');if(s)s.remove();
+    if(window._tripObserver){window._tripObserver.disconnect();window._tripObserver=null;}
+    return;
+  }
+  var list=document.getElementById('tripList');if(!list)return;
+  var nextEnd=loaded+PAGE;
+  list.innerHTML+=_renderTripBatch(trips,loaded,nextEnd);
+  window._tripsPage++;
+  bindSwipeCards();
+  if(nextEnd>=trips.length){
+    var s2=document.getElementById('_tripSentinel');if(s2)s2.remove();
+    if(window._tripObserver){window._tripObserver.disconnect();window._tripObserver=null;}
+  }
+}
+
 /* ===== SWIPE TO CLASSIFY ===== */
 function _searchTrips(q){
   q=(q||'').trim().toLowerCase();
@@ -2423,13 +2464,24 @@ function _searchTrips(q){
   var filtered=TRIPS.filter(function(t){
     return [(t.from||''),(t.to||''),(t.day||''),(t.notes||''),(t.purpose||'')].some(function(v){return v.toLowerCase().includes(q);});
   });
-  var html='',lastDay='';
   if(filtered.length===0){list.innerHTML='<div style="text-align:center;padding:30px;color:var(--ink4)">No trips match "'+_esc(q)+'"</div>';return;}
-  filtered.forEach(function(t){
-    if(t.day!==lastDay){lastDay=t.day;html+='<div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:var(--ink4)">'+_esc(t.day)+'</div>';}
-    html+=tripCard(t,true);
-  });
-  list.innerHTML=html;bindSwipeCards();
+  window._tripsFiltered=filtered;
+  window._tripsPage=1;
+  list.innerHTML=_renderTripBatch(filtered,0,40);
+  var old=document.getElementById('_tripSentinel');if(old)old.remove();
+  if(filtered.length>40){
+    var sentinel=document.createElement('div');
+    sentinel.id='_tripSentinel';
+    sentinel.style.cssText='height:60px;display:flex;align-items:center;justify-content:center;color:var(--ink4);font-size:13px;';
+    sentinel.innerHTML='<span>Loading more...</span>';
+    list.parentNode.insertBefore(sentinel,list.nextSibling);
+    if(window._tripObserver)window._tripObserver.disconnect();
+    window._tripObserver=new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting){_loadMoreTrips();}
+    },{rootMargin:'200px'});
+    window._tripObserver.observe(sentinel);
+  }
+  bindSwipeCards();
 }
 function _hapticTap(style){
   if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
@@ -2490,11 +2542,11 @@ function bindSwipeCards(){
       if(curX>0){
         if(bizOverlay)bizOverlay.style.opacity=pct;
         if(perOverlay)perOverlay.style.opacity='0';
-        card.style.boxShadow='0 0 0 2px rgba(214,0,110,'+(pct*0.4)+')';
+        card.style.boxShadow='0 0 0 2px rgba(108,60,224,'+(pct*0.4)+')';
       } else if(curX<0){
         if(perOverlay)perOverlay.style.opacity=pct;
         if(bizOverlay)bizOverlay.style.opacity='0';
-        card.style.boxShadow='0 0 0 2px rgba(108,60,224,'+(pct*0.4)+')';
+        card.style.boxShadow='0 0 0 2px rgba(214,0,110,'+(pct*0.4)+')';
       } else {
         if(bizOverlay)bizOverlay.style.opacity='0';
         if(perOverlay)perOverlay.style.opacity='0';
@@ -2566,8 +2618,8 @@ function _csRender(){
     +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:8px;height:8px;border-radius:50%;background:#6C3CE0;flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:10px;color:#6B7280;font-weight:600">FROM</div><div style="font-size:13px;color:#1a1a2e;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+safeFrom+'</div></div></div>'
     +'<div style="display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:#D6006E;flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:10px;color:#6B7280;font-weight:600">TO</div><div style="font-size:13px;color:#1a1a2e;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+safeTo+'</div></div></div>'
     +'</div>'
-    +'<div class="cs-overlay biz" style="position:absolute;inset:0;background:rgba(214,0,110,.18);color:#D6006E;font-weight:900;font-size:30px;letter-spacing:3px;display:flex;align-items:center;justify-content:flex-start;padding:0 32px;opacity:0;pointer-events:none;border-radius:inherit">💼 BUSINESS</div>'
-    +'<div class="cs-overlay per" style="position:absolute;inset:0;background:rgba(108,60,224,.18);color:#6C3CE0;font-weight:900;font-size:30px;letter-spacing:3px;display:flex;align-items:center;justify-content:flex-end;padding:0 32px;opacity:0;pointer-events:none;border-radius:inherit">PERSONAL 👤</div>'
+    +'<div class="cs-overlay biz" style="position:absolute;inset:0;background:rgba(108,60,224,.18);color:#6C3CE0;font-weight:900;font-size:30px;letter-spacing:3px;display:flex;align-items:center;justify-content:flex-start;padding:0 32px;opacity:0;pointer-events:none;border-radius:inherit">💼 BUSINESS</div>'
+    +'<div class="cs-overlay per" style="position:absolute;inset:0;background:rgba(214,0,110,.18);color:#D6006E;font-weight:900;font-size:30px;letter-spacing:3px;display:flex;align-items:center;justify-content:flex-end;padding:0 32px;opacity:0;pointer-events:none;border-radius:inherit">PERSONAL 👤</div>'
     +'</div>';
   _bindCsSwipe();
 }
@@ -3483,43 +3535,37 @@ function _updateFilterCounts(){
   console.log('[FILTER TEST] Uncl:', window.TRIPS?.filter(t => t.type === 'uncl' || !t.type).length);
 }
 function applyFilter(){
-  // Build 131 fix: trip cards are wrapped in .swipe-wrap (not .trip);
-  // ID lives on inner .swipe-card data-swipe-id, not direct child data-id.
   var val=_activeFilter;
   var list=document.getElementById('tripList');
   if(!list)return;
-  var children=list.children;
-  function _matches(tr){
-    if(val==='all')return true;
-    if(!tr)return false;
-    if(val==='biz')return tr.type==='biz';
-    if(val==='pers')return tr.type==='pers';
-    if(val==='uncl')return tr.type==='uncl'||!tr.type;
+  // Filter the full TRIPS array — not just what's in DOM
+  var filtered=val==='all'?TRIPS:TRIPS.filter(function(t){
+    if(val==='biz')return t.type==='biz';
+    if(val==='pers')return t.type==='pers';
+    if(val==='uncl')return t.type==='uncl'||!t.type;
     return true;
+  });
+  // Use paginated render so all matching trips are accessible via scroll
+  window._tripsFiltered=filtered;
+  window._tripsPage=1;
+  list.innerHTML=filtered.length===0
+    ?'<div style="text-align:center;padding:30px;color:var(--ink4)">No '+val+' trips found</div>'
+    :_renderTripBatch(filtered,0,40);
+  // Remove old sentinel
+  var old=document.getElementById('_tripSentinel');if(old)old.remove();
+  if(filtered.length>40){
+    var sentinel=document.createElement('div');
+    sentinel.id='_tripSentinel';
+    sentinel.style.cssText='height:60px;display:flex;align-items:center;justify-content:center;color:var(--ink4);font-size:13px;';
+    sentinel.innerHTML='<span>Loading more trips...</span>';
+    list.parentNode.insertBefore(sentinel,list.nextSibling);
+    if(window._tripObserver)window._tripObserver.disconnect();
+    window._tripObserver=new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting){_loadMoreTrips();}
+    },{rootMargin:'200px'});
+    window._tripObserver.observe(sentinel);
   }
-  function _wrapTrip(c){
-    if(!c.classList||!c.classList.contains('swipe-wrap'))return null;
-    var sc=c.querySelector('.swipe-card');
-    var tid=sc&&sc.dataset.swipeId;
-    if(tid==null)return null;
-    return TRIPS.find(function(x){return String(x.id)===String(tid);});
-  }
-  for(var i=0;i<children.length;i++){
-    var c=children[i];
-    var isWrap=c.classList&&c.classList.contains('swipe-wrap');
-    if(!isWrap){
-      if(val==='all'){c.style.display='';continue;}
-      var hasVisible=false;
-      for(var j=i+1;j<children.length;j++){
-        var nx=children[j];
-        if(!nx.classList||!nx.classList.contains('swipe-wrap'))break;
-        if(_matches(_wrapTrip(nx))){hasVisible=true;break;}
-      }
-      c.style.display=hasVisible?'':'none';
-      continue;
-    }
-    c.style.display=_matches(_wrapTrip(c))?'':'none';
-  }
+  bindSwipeCards();
 }
 function animateBars(){document.querySelectorAll('.ins-prog-fill[data-width]').forEach(el=>{el.style.width=el.dataset.width;});}
 function switchStatsPeriod(el,period){
