@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 162</title>
+<title>MyMilesAI — Build 163</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -319,10 +319,10 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .td.eb{background:var(--vi);box-shadow:0 0 0 3px var(--vi-s2);}.td.ep{background:var(--mag);box-shadow:0 0 0 3px var(--mag-s2);}.td.eu{background:var(--amber);box-shadow:0 0 0 3px var(--amber-s2);}
 .tl-line{width:2px;flex:1;min-height:18px;margin:3px 0;border-radius:2px;}
 .tl-line.biz{background:linear-gradient(var(--ink),var(--vi));}.tl-line.pers{background:linear-gradient(var(--ink),var(--mag));}.tl-line.uncl{background:repeating-linear-gradient(180deg,var(--amber) 0,var(--amber) 4px,transparent 4px,transparent 8px);}
-.trip-addrs{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.trip-addrs{flex-grow:1;flex-shrink:1;flex-basis:0%;display:flex;flex-direction:column;gap:4px;min-width:0;width:0;overflow:hidden;}
 .ta-lbl{font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px;}
 .ta-name{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.trip-mi{text-align:center;flex-shrink:0;min-width:90px;padding:10px 12px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.trip-mi{text-align:center;flex-grow:0;flex-shrink:0;flex-basis:auto;min-width:90px;padding:10px 12px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .trip-mi.biz-bg{background:var(--vi-s,rgba(108,60,224,.08));}.trip-mi.pers-bg{background:var(--mag-s,rgba(214,0,110,.06));}.trip-mi.uncl-bg{background:var(--amber-s,rgba(224,141,0,.08));}
 .trip-mi-v{font-family:var(--fd);font-size:28px;font-weight:800;letter-spacing:-1.5px;line-height:1;}
 .trip-mi-v.biz{color:var(--vi)}.trip-mi-v.pers{color:var(--mag)}.trip-mi-v.uncl{color:var(--amber)}
@@ -860,7 +860,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 162</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 163</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
