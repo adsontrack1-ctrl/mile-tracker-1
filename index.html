@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 154</title>
+<title>MyMilesAI — Build 155</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -859,7 +859,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 154</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 155</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -1131,60 +1131,76 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 </style>
 <div class="auth-overlay hidden" id="authOverlay">
   <div class="auth-card">
-    <div class="auth-icon-pill">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/><circle cx="6.5" cy="15.5" r="1.5"/><circle cx="17.5" cy="15.5" r="1.5"/><path d="M5 11l1.5-4.5h11L19 11H5z"/></svg>
-    </div>
-    <div class="auth-logo-row">
-      <span class="auth-logo-sans">MyMiles</span><span class="auth-logo-serif">AI</span>
-    </div>
-    <div class="auth-tagline">Track every mile. Claim every dollar.</div>
-    <div class="auth-trust">
-      <span>Privacy-first</span>
-      <span>30-sec setup</span>
-    </div>
-    <div id="authCountryPicker" style="display:flex;gap:8px;justify-content:center;margin:-8px 0 12px;">
-      <button id="authCountryUSA" onclick="_selectCountry('US')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;border:2px solid #2563EB;background:rgba(37,99,235,.08);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:#2563EB;transition:all .2s;">&#127482;&#127480; USA</button>
-      <button id="authCountryCA" onclick="_selectCountry('CA')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:#6B7280;transition:all .2s;">&#127464;&#127462; Canada</button>
-    </div>
-    <div id="authPricingPreview" style="background:linear-gradient(135deg,#f0f4ff,#faf5ff);border:1px solid #e0e7ff;border-radius:16px;padding:14px 16px;margin-bottom:20px;text-align:left;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:.5px;">PLANS</span>
-        <span id="authDiscountBadge" style="display:none;font-size:10px;font-weight:800;color:#fff;background:linear-gradient(135deg,#ef4444,#f97316);padding:2px 8px;border-radius:100px;letter-spacing:.5px;"></span>
+    <!-- PAGE 0: Landing — country, plan, two buttons -->
+    <div id="authPageLanding">
+      <div class="auth-icon-pill">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/><circle cx="6.5" cy="15.5" r="1.5"/><circle cx="17.5" cy="15.5" r="1.5"/><path d="M5 11l1.5-4.5h11L19 11H5z"/></svg>
       </div>
-      <div style="display:flex;gap:8px;">
-        <div id="authPlanPro" onclick="_selectAuthPlan('pro')" style="flex:1;background:#fff;border-radius:10px;padding:10px;border:2px solid #6366f1;cursor:pointer;transition:all .2s;box-shadow:0 0 0 3px rgba(99,102,241,.15);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <div style="font-size:11px;font-weight:700;color:#374151;">Pro <span style="color:#9ca3af;font-weight:400;">· 1 device</span></div>
-            <div id="authPlanProCheck" style="width:14px;height:14px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;"><svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:3px;">
-            <span id="authProOrigPrice" style="display:none;font-size:11px;color:#9ca3af;text-decoration:line-through;"></span>
-            <span id="authProPrice" style="font-size:18px;font-weight:800;color:#6366f1;"></span>
-            <span style="font-size:10px;color:#9ca3af;">/mo</span>
-          </div>
-          <div id="authProYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
-        </div>
-        <div id="authPlanBiz" onclick="_selectAuthPlan('business')" style="flex:1;background:#fff;border-radius:10px;padding:10px;border:1.5px solid #e5e7eb;cursor:pointer;transition:all .2s;opacity:0.7;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <div style="font-size:11px;font-weight:700;color:#374151;">Business <span style="color:#9ca3af;font-weight:400;">· 10 devices</span></div>
-            <div id="authPlanBizCheck" style="width:14px;height:14px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;"><svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:3px;">
-            <span id="authBizOrigPrice" style="display:none;font-size:11px;color:#9ca3af;text-decoration:line-through;"></span>
-            <span id="authBizPrice" style="font-size:18px;font-weight:800;color:#6366f1;"></span>
-            <span style="font-size:10px;color:#9ca3af;">/mo</span>
-          </div>
-          <div id="authBizYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
-        </div>
+      <div class="auth-logo-row">
+        <span class="auth-logo-sans">MyMiles</span><span class="auth-logo-serif">AI</span>
       </div>
-      <div id="authTaxRateLabel" style="font-size:10px;color:#6366f1;font-weight:700;margin-top:6px;text-align:center;display:none;">IRS 2026 Rate · $0.70/mi · Tax deductible</div><div style="font-size:10px;color:#9ca3af;margin-top:4px;text-align:center;">✓ 10-day free trial · No credit card required · Prices in USD</div>
+      <div class="auth-tagline">Track every mile. Claim every dollar.</div>
+      <div class="auth-trust">
+        <span>Privacy-first</span>
+        <span>30-sec setup</span>
+      </div>
+      <div id="authCountryPicker" style="display:flex;gap:8px;justify-content:center;margin:-8px 0 12px;">
+        <button id="authCountryUSA" onclick="_selectCountry('US')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;border:2px solid #2563EB;background:rgba(37,99,235,.08);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:#2563EB;transition:all .2s;">&#127482;&#127480; USA</button>
+        <button id="authCountryCA" onclick="_selectCountry('CA')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:#6B7280;transition:all .2s;">&#127464;&#127462; Canada</button>
+      </div>
+      <div id="authPricingPreview" style="background:linear-gradient(135deg,#f0f4ff,#faf5ff);border:1px solid #e0e7ff;border-radius:16px;padding:14px 16px;margin-bottom:20px;text-align:left;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:.5px;">PLANS</span>
+          <span id="authDiscountBadge" style="display:none;font-size:10px;font-weight:800;color:#fff;background:linear-gradient(135deg,#ef4444,#f97316);padding:2px 8px;border-radius:100px;letter-spacing:.5px;"></span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div id="authPlanPro" onclick="_selectAuthPlan('pro')" style="flex:1;background:#fff;border-radius:10px;padding:10px;border:2px solid #6366f1;cursor:pointer;transition:all .2s;box-shadow:0 0 0 3px rgba(99,102,241,.15);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <div style="font-size:11px;font-weight:700;color:#374151;">Pro <span style="color:#9ca3af;font-weight:400;">· 1 device</span></div>
+              <div id="authPlanProCheck" style="width:14px;height:14px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;"><svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:3px;">
+              <span id="authProOrigPrice" style="display:none;font-size:11px;color:#9ca3af;text-decoration:line-through;"></span>
+              <span id="authProPrice" style="font-size:18px;font-weight:800;color:#6366f1;"></span>
+              <span style="font-size:10px;color:#9ca3af;">/mo</span>
+            </div>
+            <div id="authProYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
+          </div>
+          <div id="authPlanBiz" onclick="_selectAuthPlan('business')" style="flex:1;background:#fff;border-radius:10px;padding:10px;border:1.5px solid #e5e7eb;cursor:pointer;transition:all .2s;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <div style="font-size:11px;font-weight:700;color:#374151;">Business <span style="color:#9ca3af;font-weight:400;">· 10 devices</span></div>
+              <div id="authPlanBizCheck" style="width:14px;height:14px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;"><svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:3px;">
+              <span id="authBizOrigPrice" style="display:none;font-size:11px;color:#9ca3af;text-decoration:line-through;"></span>
+              <span id="authBizPrice" style="font-size:18px;font-weight:800;color:#6366f1;"></span>
+              <span style="font-size:10px;color:#9ca3af;">/mo</span>
+            </div>
+            <div id="authBizYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
+          </div>
+        </div>
+        <div id="authTaxRateLabel" style="font-size:10px;color:#6366f1;font-weight:700;margin-top:6px;text-align:center;display:none;">IRS 2026 Rate · $0.70/mi · Tax deductible</div>
+        <div style="font-size:10px;color:#9ca3af;margin-top:4px;text-align:center;">&#10003; 10-day free trial · No credit card required · Prices in USD</div>
+      </div>
+      <button class="auth-btn auth-btn-cta" onclick="_authStart('signup')">Create Account</button>
+      <button class="auth-btn" onclick="_authStart('signin')" style="background:#F4F4F4;color:#1a1a2e;font-weight:600">Sign In</button>
+      <div class="auth-footer">By continuing you accept our <span onclick="openInfoModal('Privacy','See Privacy Policy in Settings.')" style="color:#2563EB;cursor:pointer;">Privacy Policy</span></div>
     </div>
-    <div id="authEmailStep">
-      <button class="auth-btn auth-btn-google" onclick="_authCheckAgreeFirst('google')" id="authGoogleBtn">
+
+    <!-- PAGE 1: Email + SSO -->
+    <div id="authPageEmail" style="display:none">
+      <div style="display:flex;align-items:center;margin-bottom:20px;gap:8px">
+        <span class="auth-back" onclick="_authBack()" style="margin:0;font-size:20px;padding:0 4px">&#8592;</span>
+        <div id="authStepDots1" class="auth-step-dots" style="display:flex;gap:6px;flex:1"></div>
+        <span id="authModeLabel1" style="font-size:12px;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:.5px"></span>
+      </div>
+      <h3 id="authEmailTitle" style="font-size:20px;font-weight:700;color:#111827;margin:0 0 6px"></h3>
+      <p style="color:#6B7280;font-size:14px;margin:0 0 20px">We&#8217;ll send a verification code to your email</p>
+      <button class="auth-btn auth-btn-google" onclick="_authGoogle()" id="authGoogleBtn">
         <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09A6.97 6.97 0 015.47 12c0-.72.13-1.42.37-2.09V7.07H2.18A11.97 11.97 0 001 12c0 1.94.46 3.77 1.18 5.07l3.66-2.98z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         Continue with Google
       </button>
-      <button class="auth-btn auth-btn-apple" onclick="_authCheckAgreeFirst('apple')" id="authAppleBtn">
+      <button class="auth-btn auth-btn-apple" onclick="_authApple()" id="authAppleBtn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
         Continue with Apple
       </button>
@@ -1193,10 +1209,18 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
         <input type="email" class="auth-input" id="authEmail" placeholder="you@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')_authSendOtp()" onfocus="_scrollInputIntoView(this)">
       </div>
-      <button class="auth-btn auth-btn-cta" onclick="_authCheckAgreeFirst('email')" id="authSendBtn">Send Magic Code →</button>
+      <button class="auth-btn auth-btn-cta" onclick="_authSendOtp()" id="authSendBtn">Send Verification Code &#8594;</button>
       <div class="auth-err" id="authErr"></div>
     </div>
-    <div id="authOtpStep" style="display:none">
+
+    <!-- PAGE 2: OTP -->
+    <div id="authPageOtp" style="display:none">
+      <div style="display:flex;align-items:center;margin-bottom:20px;gap:8px">
+        <span class="auth-back" onclick="_authBack()" style="margin:0;font-size:20px;padding:0 4px">&#8592;</span>
+        <div id="authStepDots2" class="auth-step-dots" style="display:flex;gap:6px;flex:1"></div>
+        <span id="authModeLabel2" style="font-size:12px;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:.5px"></span>
+      </div>
+      <h3 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 6px">Check your email</h3>
       <div style="font-size:14px;color:#6B7280;margin-bottom:4px;">Enter the 6-digit code sent to</div>
       <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:16px;" id="authOtpEmail"></div>
       <div class="auth-otp-row" id="authOtpRow">
@@ -1209,16 +1233,41 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       </div>
       <button class="auth-btn auth-btn-cta" onclick="_authVerifyOtp()" id="authVerifyBtn">Verify Code</button>
       <div class="auth-err" id="authOtpErr"></div>
-      <span class="auth-back" onclick="_authShowEmail()">← Back to email</span>
+      <button onclick="_authResendOtp()" style="width:100%;padding:12px;background:none;border:none;color:#2563eb;font-size:14px;cursor:pointer;font-weight:600">Resend code</button>
     </div>
-    <div style="display:flex;align-items:flex-start;gap:10px;margin:14px 0 4px;text-align:left;">
-      <input type="checkbox" id="authAgreementChk" style="width:18px;height:18px;min-width:18px;margin-top:1px;accent-color:#2563EB;cursor:pointer;" onchange="_authChkChanged()">
-      <label for="authAgreementChk" style="font-size:12px;color:#6B7280;line-height:1.5;cursor:pointer;">
-        I agree to the <span onclick="event.preventDefault();openInfoModal('Terms','See full Terms in Settings.')" style="color:#2563EB;font-weight:600;text-decoration:underline;">Terms</span> and <span onclick="event.preventDefault();openInfoModal('Privacy','See Privacy Policy in Settings.')" style="color:#2563EB;font-weight:600;text-decoration:underline;">Privacy Policy</span>, including the 10-day free trial, annual billing, and no-refund policy.
+
+    <!-- PAGE 3: Agreement (signup only) -->
+    <div id="authPageAgree" style="display:none">
+      <div style="display:flex;align-items:center;margin-bottom:20px;gap:8px">
+        <span class="auth-back" onclick="_authBack()" style="margin:0;font-size:20px;padding:0 4px">&#8592;</span>
+        <div id="authStepDots3" class="auth-step-dots" style="display:flex;gap:6px;flex:1"></div>
+        <span id="authModeLabel3" style="font-size:12px;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:.5px"></span>
+      </div>
+      <h3 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 6px">One last step</h3>
+      <p style="color:#6B7280;font-size:14px;margin:0 0 16px">Review and accept our terms to continue</p>
+      <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;height:200px;overflow-y:auto;font-size:13px;color:#555;line-height:1.6;margin-bottom:20px;text-align:left;">
+        <strong>Terms of Service &amp; Privacy Policy</strong><br><br>
+        MyMilesAI (by Harijas LLC) automatically tracks your vehicle mileage for IRS tax deduction purposes.<br><br>
+        <strong>Data we collect:</strong> GPS location during active trips, trip distance and timestamps, start/end addresses for IRS compliance.<br><br>
+        <strong>Data retention:</strong> 7 years as required by IRS Publication 463.<br><br>
+        <strong>Your rights:</strong> You may export or delete your data at any time from Settings.<br><br>
+        <strong>Subscription:</strong> $6.99/month or $69.99/year. 10-day free trial. Cancel anytime.<br><br>
+        <strong>Single device:</strong> Account is licensed for use on one device at a time.<br><br>
+        By continuing you agree to these terms and our full <a href="https://mymilesai.com/privacy" target="_blank" style="color:#2563eb">Privacy Policy</a>.
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;margin-bottom:16px">
+        <input type="checkbox" id="authAgreeCheck" style="width:20px;height:20px;min-width:20px;margin-top:2px;accent-color:#2563eb">
+        <span style="font-size:14px;color:#333;text-align:left">I have read and agree to the Terms of Service and Privacy Policy</span>
       </label>
+      <div id="authAgreeErr" style="display:none;font-size:12px;color:#EF4444;margin-bottom:8px;text-align:center;">Please agree to the Terms to continue</div>
+      <button class="auth-btn auth-btn-cta" onclick="_authCompleteSignup()" id="authAgreeBtn">Create My Account</button>
     </div>
-    <div id="authAgreeErr" style="display:none;font-size:12px;color:#EF4444;margin-bottom:8px;text-align:center;">Please agree to the Terms to continue</div>
-    <div class="auth-footer">No password required · Privacy-first · Free to start</div>
+
+    <!-- PAGE 4: Loading -->
+    <div id="authPageLoading" style="display:none;text-align:center;padding:32px 0">
+      <div class="auth-spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto 16px"></div>
+      <p id="authLoadingMsg" style="color:#6B7280;font-size:15px;margin:0"></p>
+    </div>
   </div>
 </div>
 <!-- Subscribe / Paywall — 2 plans: Pro + Business, both with 10-day trial -->
@@ -1627,18 +1676,9 @@ function _updateAuthTaxLabel(country){
   if(tagline)tagline.textContent=(country==='CA'?'Track every kilometre. Claim every dollar.':'Track every mile. Claim every dollar.');
   window._appCountry=country;
 }
-function _authChkChanged(){var err=document.getElementById('authAgreeErr');if(err)err.style.display='none';}
-function _authCheckAgreeFirst(method){
-  var chk=document.getElementById('authAgreementChk');
-  if(!chk||!chk.checked){
-    var err=document.getElementById('authAgreeErr');
-    if(err){err.style.display='block';setTimeout(function(){err.style.display='none';},3000);}
-    return;
-  }
-  if(method==='google')_authGoogle();
-  else if(method==='apple')_authApple();
-  else if(method==='email')_authSendOtp();
-}
+// ═══ AUTH v2 — Dual-mode (signup/signin) state machine ═══
+var _authMode = 'signup';
+var _authStep = 'landing';
 function _selectAuthPlan(plan){
   _selectedAuthPlan = plan;
   var proPlan=document.getElementById('authPlanPro');
@@ -1657,41 +1697,85 @@ function _selectAuthPlan(plan){
     if(proCheck)proCheck.style.background='#e5e7eb';
   }
 }
-function _authShowModal(){var o=document.getElementById('authOverlay');if(o){o.classList.remove('hidden');o.style.display='flex';}_authHideLoading();}
-function _authHideModal(){var o=document.getElementById('authOverlay');if(o){o.classList.add('hidden');o.style.display='none';}_authHideLoading();}
-function _authShowEmail(){document.getElementById('authEmailStep').style.display='';document.getElementById('authOtpStep').style.display='none';document.getElementById('authErr').textContent='';}
-function _authSetLoading(btnId,loading){var btn=document.getElementById(btnId);if(!btn)return;btn.disabled=loading;if(loading){btn.dataset.origText=btn.textContent;btn.innerHTML='<span class="auth-spinner"></span>';}else{btn.textContent=btn.dataset.origText||btn.textContent;}}
-function _authShowLoading(){
-  var o=document.getElementById('authOverlay');if(!o)return;
-  o.classList.remove('hidden');o.style.display='flex';
-  var card=o.querySelector('.auth-card');
-  if(card&&!document.getElementById('authLoadingSpinner')){
-    var s=document.createElement('div');s.id='authLoadingSpinner';
-    s.style.cssText='position:absolute;inset:0;background:rgba(250,250,247,.92);display:flex;align-items:center;justify-content:center;border-radius:24px;z-index:10;';
-    s.innerHTML='<div class="auth-spinner" style="width:32px;height:32px;border-width:3px;border-color:rgba(0,0,0,.08);border-top-color:#2563EB;"></div>';
-    card.style.position='relative';card.appendChild(s);
+// ── Auth v2: Show/Hide overlay ──
+function _authShowModal(){var o=document.getElementById('authOverlay');if(o){o.classList.remove('hidden');o.style.display='flex';}}
+function _authHideModal(){var o=document.getElementById('authOverlay');if(o){o.classList.add('hidden');o.style.display='none';}}
+
+// ── Auth v2: Page navigation ──
+function _authShowPage(page){
+  ['authPageLanding','authPageEmail','authPageOtp','authPageAgree','authPageLoading'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  var target=document.getElementById('authPage'+page);
+  if(target)target.style.display=(page==='Loading'?'block':'block');
+}
+function _authStart(mode){
+  _authMode=mode;
+  _authStep='email';
+  // Update all mode labels and email title
+  var mLabel=mode==='signup'?'SIGN UP':'SIGN IN';
+  var eTitle=mode==='signup'?'Create your account':'Welcome back';
+  document.querySelectorAll('[id^=authModeLabel]').forEach(function(el){el.textContent=mLabel;});
+  var et=document.getElementById('authEmailTitle');if(et)et.textContent=eTitle;
+  _authUpdateDots();
+  _authShowPage('Email');
+  document.getElementById('authErr').textContent='';
+  setTimeout(function(){var e=document.getElementById('authEmail');if(e)e.focus();},100);
+}
+function _authBack(){
+  if(_authStep==='email'){
+    _authStep='landing';
+    _authShowPage('Landing');
+  } else if(_authStep==='otp'){
+    _authStep='email';
+    _authUpdateDots();
+    _authShowPage('Email');
+  } else if(_authStep==='agree'){
+    _authStep='otp';
+    _authUpdateDots();
+    _authShowPage('Otp');
   }
 }
-function _authHideLoading(){var s=document.getElementById('authLoadingSpinner');if(s)s.remove();}
+function _authUpdateDots(){
+  var totalSteps=_authMode==='signup'?3:2;
+  var stepMap={email:0,otp:1,agree:2};
+  var current=stepMap[_authStep]||0;
+  var html='';
+  for(var i=0;i<totalSteps;i++){
+    var w=i===current?'24px':'8px';
+    var bg=i===current?'#2563EB':'#E0E0E0';
+    html+='<div style="width:'+w+';height:8px;border-radius:4px;background:'+bg+';transition:all .3s"></div>';
+  }
+  document.querySelectorAll('.auth-step-dots').forEach(function(el){el.innerHTML=html;});
+}
+
+// ── Auth v2: Utility functions ──
+function _authSetLoading(btnId,loading){var btn=document.getElementById(btnId);if(!btn)return;btn.disabled=loading;if(loading){btn.dataset.origText=btn.textContent;btn.innerHTML='<span class="auth-spinner"></span>';}else{btn.textContent=btn.dataset.origText||btn.textContent;}}
+function _authShowLoading(msg){
+  _authShowPage('Loading');
+  var el=document.getElementById('authLoadingMsg');
+  if(el)el.textContent=msg||'Loading...';
+}
+function _authHideLoading(){/* no-op: loading is a page now, just switch pages */}
 function _showToast(msg,color){
   var t=document.createElement('div');
   t.style.cssText='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:'+(color||'#111827')+';color:#fff;padding:14px 28px;border-radius:14px;font-size:14px;font-weight:700;z-index:9999999;box-shadow:0 8px 32px rgba(0,0,0,.2);white-space:nowrap;font-family:system-ui,-apple-system,sans-serif;';
   t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},5000);
 }
 
-// ── Auth flows ───────────────────────────────────────────────────────
+// ── Auth v2: OTP email flow ──
 async function _authSendOtp(){
   var email=document.getElementById('authEmail').value.trim();
   if(!email||!email.includes('@')){document.getElementById('authErr').textContent='Please enter a valid email';return;}
   document.getElementById('authErr').textContent='';
   _authSetLoading('authSendBtn',true);
   try{
-    // emailRedirectTo:null forces Supabase to send a 6-digit code, not a magic link
     var result=await _sb.auth.signInWithOtp({email:email,options:{shouldCreateUser:true,emailRedirectTo:null}});
     if(result.error)throw result.error;
     _authPendingEmail=email;
-    document.getElementById('authEmailStep').style.display='none';
-    document.getElementById('authOtpStep').style.display='';
+    _authStep='otp';
+    _authUpdateDots();
+    _authShowPage('Otp');
     document.getElementById('authOtpEmail').textContent=email;
     document.getElementById('authOtpErr').textContent='';
     var inputs=document.querySelectorAll('#authOtpRow input');
@@ -1714,30 +1798,85 @@ async function _authVerifyOtp(){
   try{
     var result=await _sb.auth.verifyOtp({email:_authPendingEmail,token:token,type:'email'});
     if(result.error)throw result.error;
-    // Session is now live — hide auth modal and boot the app
-    var session=result.data&&result.data.session;
-    if(session){
-      document.getElementById('authModal').style.display='none';
-      if(typeof initApp==='function')initApp(session.user);
-      else if(typeof _onSignedIn==='function')_onSignedIn(session.user);
-      showToast('Welcome back! ✓','#22c55e');
-    }
-  }catch(e){document.getElementById('authOtpErr').textContent=e.message||'Invalid code — try again';}
+    // OTP verified — session is live. onAuthStateChange will fire SIGNED_IN.
+    // For signup: check if agreement needed (onAuthStateChange handles this).
+    // For signin: onAuthStateChange handles everything.
+    // Just show loading and let the auth state listener take over.
+    _authShowLoading(_authMode==='signup'?'Setting up your account...':'Signing you in...');
+  }catch(e){
+    document.getElementById('authOtpErr').textContent=e.message||'Invalid code — try again';
+    _authShowPage('Otp');
+  }
   _authSetLoading('authVerifyBtn',false);
 }
+async function _authResendOtp(){
+  if(!_authPendingEmail)return;
+  try{
+    await _sb.auth.signInWithOtp({email:_authPendingEmail,options:{shouldCreateUser:true,emailRedirectTo:null}});
+    _showToast('Code resent to '+_authPendingEmail,'#16a34a');
+  }catch(e){_showToast('Could not resend — try again','#EF4444');}
+}
+
+// ── Auth v2: Agreement step (signup only) ──
+async function _authCompleteSignup(){
+  var chk=document.getElementById('authAgreeCheck');
+  if(!chk||!chk.checked){
+    var err=document.getElementById('authAgreeErr');
+    if(err){err.style.display='block';setTimeout(function(){err.style.display='none';},3000);}
+    return;
+  }
+  _authShowLoading('Setting up your account...');
+  try{
+    var userResp=await _sb.auth.getUser();
+    var user=userResp&&userResp.data&&userResp.data.user;
+    if(!user){_showToast('Session lost — please try again','#EF4444');_authShowPage('Landing');return;}
+    // Record agreement in profiles
+    try{
+      await _sb.from('profiles').upsert({
+        id:user.id,email:user.email,
+        agreement_signed:true,
+        agreement_date:new Date().toISOString(),
+        agreement_version:'1.0'
+      },{onConflict:'id'});
+    }catch(e){console.warn('[agreement]',e);}
+    // Insert license record (safety: table may not exist yet)
+    try{
+      var existing=await _sb.from('licenses').select('id').eq('user_id',user.id).single();
+      if(!existing||!existing.data){
+        await _sb.from('licenses').insert({
+          user_id:user.id,
+          signup_source:window.__MYMILESAI_NATIVE__?'ios_app':'web',
+          billing_path:window.__MYMILESAI_NATIVE__?'revenuecat':'stripe',
+          device_model:navigator.userAgent,device_os:navigator.platform,
+          install_date:new Date().toISOString(),app_version:'5.6'
+        });
+      }
+    }catch(e){console.warn('[licenses]',e);}
+    // Agreement done — let onAuthStateChange handle the rest (ensureProfile, subscription, trips)
+    // Force a re-check by calling ensureProfile directly
+    _authHideModal();
+    if(typeof ensureProfile==='function'){
+      var profile=await ensureProfile(user);
+      if(profile&&!_isSubscriptionActive(profile)){_showSubscribeModal();}
+      else{_hideSubscribeModal();}
+      setTimeout(function(){if(typeof _pullTripsFromSupabase==='function')_pullTripsFromSupabase();},500);
+    }
+    _showToast('Welcome to MyMilesAI!','#16a34a');
+  }catch(e){console.warn('[_authCompleteSignup]',e);_showToast('Error: '+(e.message||'Setup failed'),'#EF4444');_authShowPage('Agree');}
+}
+
+// ── Auth v2: OAuth flows (unchanged from v1) ──
 async function _authGoogle(){
   if(!_sb)return;_authSetLoading('authGoogleBtn',true);
   try{
     var redirectTo=window.__MYMILESAI_NATIVE__
       ?'com.harijasllc.mymilesaiapp://auth/callback'
       :window.location.origin+window.location.pathname;
-    // Sign out any existing session first so Google shows account picker
-    // This fixes: "already logged in with Google but app shows email screen"
     try{await _sb.auth.signOut({scope:'local'});}catch(ex){}
     await _sb.auth.signInWithOAuth({provider:'google',options:{
       redirectTo:redirectTo,
       skipBrowserRedirect:false,
-      queryParams:{prompt:'select_account'}  // force Google account picker every time
+      queryParams:{prompt:'select_account'}
     }});
   }catch(e){document.getElementById('authErr').textContent=e.message||'Google sign-in failed';_authSetLoading('authGoogleBtn',false);}
 }
@@ -2052,9 +2191,21 @@ if(_sb){
         }
       } catch(e) {}
       ensureProfile(session.user).then(function(profile){
+        // Auth v2: signup mode + no agreement → show agreement step
+        if(_authMode==='signup'){
+          try{
+            if(!profile||!profile.agreement_signed){
+              _authStep='agree';
+              _authUpdateDots();
+              _authShowPage('Agree');
+              _authShowModal();
+              return;
+            }
+          }catch(e){}
+        }
+        _authHideModal();
         if(profile&&!_isSubscriptionActive(profile)){_showSubscribeModal();}
         else{_hideSubscribeModal();}
-        // Pull trips from Supabase on every login
         setTimeout(function(){_pullTripsFromSupabase();},500);
       });
     } else if(event==='SIGNED_OUT'){
@@ -2078,7 +2229,7 @@ if(_sb){
   // 3. No Supabase: offline mode
   if(!_sb){_authHideModal();return;}
   // 4. Bug 6 fix: show loading while checking session
-  _authShowLoading();
+  _authShowModal();_authShowPage('Loading');var _lm=document.getElementById('authLoadingMsg');if(_lm)_lm.textContent='Checking session\u2026';
   try{
     var sessionResp=await _sb.auth.getSession();
     var session=sessionResp&&sessionResp.data&&sessionResp.data.session;
@@ -2102,8 +2253,8 @@ if(_sb){
       if(profile&&_isSubscriptionActive(profile)){_hideSubscribeModal();}
       else if(profile){_showSubscribeModal();}
     } else {
-      // 8. Not logged in
-      _authShowModal();
+      // 8. Not logged in — show landing
+      _authShowModal();_authShowPage('Landing');
     }
   }catch(e){console.warn('Auth boot error:',e);_authHideModal();}
 })();
