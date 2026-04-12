@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 163 -->
+<!-- Build 164 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 163</title>
+<title>MyMilesAI — Build 164</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -860,7 +860,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 163</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 164</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4493,8 +4493,8 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();totalDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
-  // Build 144: reset all GPS engine state for new trip
-  window._kLat=null;window._kLng=null;
+  // Build 164: reset all GPS engine state for new trip
+  window._kLat=null;window._kLng=null;window._kAccLat=null;window._kAccLng=null;
   window.__spdEMA=0;window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
   window._tripStartLat=null;window._tripStartLng=null;
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
@@ -4583,9 +4583,9 @@ window.__nativeGPS__ = function(coords) {
     var old = window.__seenGpsTsList.shift();
     delete window.__seenGpsTs[old];
   }
-  // ── ACCURACY FILTER: reject GPS readings worse than 40m ──
+  // ── ACCURACY FILTER: reject GPS readings worse than 15m (Build 164) ──
   var acc = coords.accuracy || 999;
-  if(acc > 40){
+  if(acc > 15){
     // Still update last-known for non-distance uses (templates, prefill)
     lastGpsLat=coords.lat;lastGpsLng=coords.lng;
     return;
@@ -4816,36 +4816,98 @@ try{
 function updateDebugPanel(){}
 
 function onPos(p){
-  var spd=p.coords.speed;
+  var rawLat=p.coords.latitude,rawLng=p.coords.longitude;
   var accuracy=p.coords.accuracy||999;
-  var lat=p.coords.latitude,lng=p.coords.longitude;
-  // Build 137: Kalman-style coordinate smoothing — eliminates GPS scatter at stops
-  if(window._kLat==null||window._kLng==null){window._kLat=lat;window._kLng=lng;}
-  var K=(accuracy<=20)?0.4:(accuracy<=40)?0.25:0.15;
-  window._kLat=window._kLat*(1-K)+lat*K;
-  window._kLng=window._kLng*(1-K)+lng*K;
-  lat=window._kLat;lng=window._kLng;
+  var clSpeed=(typeof p.coords.speed==='number')?p.coords.speed:-1;
+  var clSpeedAcc=(typeof p.coords.speedAccuracy==='number')?p.coords.speedAccuracy:-1;
+  var _now=Date.now();
+
+  // ═══ BUILD 164: GPS ACCURACY GATE ═══
+  // Hard reject accuracy > 15m
+  if(accuracy>15){
+    // Exception: if speed is valid and accuracy <= 15m we keep it (handled by not being here)
+    // If speed is null/negative AND accuracy > 10m, also reject
+    if(clSpeed<0||clSpeed===null){
+      // no valid speed — reject anything > 10m
+      if(accuracy>10){ return; }
+    } else {
+      // has valid speed but accuracy > 15m — reject
+      return;
+    }
+  }
+
+  // ═══ TELEPORT DETECTION ═══
+  // Reject positions that jump > 50m from last known position in < 2 seconds
+  if(_lastGoodPos&&_lastGoodPos.ts){
+    var dtMs=_now-_lastGoodPos.ts;
+    if(dtMs>0&&dtMs<2000){
+      var jumpDist=haversine(_lastGoodPos.lat,_lastGoodPos.lng,rawLat,rawLng)*1609.34; // miles to meters
+      if(jumpDist>50){
+        return; // teleport — discard
+      }
+    }
+  }
+
+  // ═══ KALMAN FILTER (2D position) ═══
+  // Process noise Q = 0.001, Measurement noise R = accuracy^2 (adaptive)
+  var Q=0.001;
+  var R_noise=accuracy*accuracy;
+  if(window._kLat==null||window._kLng==null){
+    // Initialize Kalman state
+    window._kLat=rawLat;window._kLng=rawLng;
+    window._kAccLat=R_noise;window._kAccLng=R_noise;
+  } else {
+    // Predict step: increase uncertainty by process noise
+    window._kAccLat+=Q;
+    window._kAccLng+=Q;
+    // Update step: Kalman gain K = P / (P + R)
+    var KLat=window._kAccLat/(window._kAccLat+R_noise);
+    var KLng=window._kAccLng/(window._kAccLng+R_noise);
+    // Correct position estimate
+    window._kLat=window._kLat+KLat*(rawLat-window._kLat);
+    window._kLng=window._kLng+KLng*(rawLng-window._kLng);
+    // Update uncertainty
+    window._kAccLat=(1-KLat)*window._kAccLat;
+    window._kAccLng=(1-KLng)*window._kAccLng;
+  }
+  var lat=window._kLat;
+  var lng=window._kLng;
+
+  // Update last good position (with timestamp for teleport detection)
+  _lastGoodPos={lat:lat,lng:lng,accuracy:accuracy,ts:_now};
+
   // Track signal status
-  _lastPosTime=Date.now();
+  _lastPosTime=_now;
   if(_signalLost){
     _signalLost=false;
     document.getElementById('statusText').textContent=_paused?'Paused — waiting for movement...':'Recording...';
     showToast(_i('sat'),'GPS signal restored',2000);
   }
-  // ACCURACY FILTER: ignore readings worse than 50m for position tracking
-  if(accuracy>50&&_lastGoodPos){
-    // Use last good position for display but don't update distance
-    lat=_lastGoodPos.lat;lng=_lastGoodPos.lng;
-  } else if(accuracy<=50){
-    _lastGoodPos={lat:lat,lng:lng,accuracy:accuracy};
-  }
-  // ═══ SPEED ENGINE — Build 148: CLLocation speedAccuracy validation, α=0.6 EMA ═══
-  var clSpeed=(typeof p.coords.speed==='number')?p.coords.speed:-1;
-  var clSpeedAcc=(typeof p.coords.speedAccuracy==='number')?p.coords.speedAccuracy:-1;
-  // Apple: speedAccuracy>=0 = valid, <0 = invalid. speed<0 = stationary.
+
+  // ═══ SPEED DETECTION ═══
+  // Primary: CLLocation speed when available and >= 0
+  // Fallback: compute from last 2 positions
   var speedValid=(clSpeed>=0)&&(clSpeedAcc>=0||clSpeedAcc===-1);
-  var isMoving=speedValid&&(clSpeed>=0.5);
-  var spdMps=isMoving?clSpeed:0;
+  var computedSpeed=-1;
+  if(!speedValid&&positions.length>0){
+    var prevPos=positions[positions.length-1];
+    var dtSec=(_now-prevPos.ts)/1000;
+    if(dtSec>0&&dtSec<30){
+      computedSpeed=(haversine(prevPos.lat,prevPos.lng,lat,lng)*1609.34)/dtSec; // m/s
+    }
+  }
+  var effectiveSpeed=speedValid?clSpeed:computedSpeed;
+  var isMoving=effectiveSpeed>=0.45; // 0.45 m/s ≈ 1 mph
+
+  // 8 consecutive seconds of !isMoving = stationary
+  if(!isMoving){
+    if(!window._stationaryStopStart)window._stationaryStopStart=_now;
+  } else {
+    window._stationaryStopStart=null;
+  }
+  var isStationary=(!isMoving&&window._stationaryStopStart&&(_now-window._stationaryStopStart)>=8000);
+
+  var spdMps=isMoving?effectiveSpeed:0;
   if(!window.__spdEMA)window.__spdEMA=0;
   if(isMoving&&!_paused){
     var rawDisplay=_useKm()?(spdMps*3.6):(spdMps*2.237);
@@ -4854,7 +4916,8 @@ function onPos(p){
     window.__spdEMA=0;
   }
   var displaySpd=(isMoving&&!_paused)?Math.round(window.__spdEMA):0;
-  var isStationary=!isMoving;
+
+  // ═══ SPEEDOMETER DISPLAY ═══
   if(window.__MYMILESAI_NATIVE__){
     var _sn=document.getElementById('speedNum');var _ts=document.getElementById('trackSpeed');var _su=document.getElementById('speedUnit');
     if(_sn)_sn.textContent=String(displaySpd);if(_ts)_ts.textContent=String(displaySpd);if(_su)_su.textContent=_useKm()?'km/h':'mph';
@@ -4865,72 +4928,76 @@ function onPos(p){
     var _sn2=document.getElementById('speedNum');var _ts2=document.getElementById('trackSpeed');
     if(_sn2)_sn2.textContent='0';if(_ts2)_ts2.textContent='0';
   }
-  // ═══ END SPEED ENGINE ═══
-  // PAUSE: 5s stopped = pause, moving = instant resume
-  if(!isMoving&&!_paused&&tracking){
-    if(!window._stationaryStopStart)window._stationaryStopStart=Date.now();
-    if((Date.now()-window._stationaryStopStart)>5000){
-      _paused=true;_pauseStart=Date.now();
-      // Build 150: dedicated timer that GPS jitter CANNOT reset (unlike _stationaryStopStart)
-      window._pauseStoppedStart=window._pauseStoppedStart||Date.now();
-      document.getElementById('statusText').textContent='Paused — waiting for movement...';
-    }
-  } else if(isMoving){
-    window._stationaryStopStart=null;
-    if(_paused){_totalPauseMs+=(Date.now()-_pauseStart);_paused=false;clearTimeout(_pauseTimeout);
+
+  // ═══ PAUSE / RESUME (8s stationary = pause) ═══
+  if(isStationary&&!_paused&&tracking){
+    _paused=true;_pauseStart=_now;
+    window._pauseStoppedStart=window._pauseStoppedStart||_now;
+    document.getElementById('statusText').textContent='Paused — waiting for movement...';
+  } else if(isMoving&&!isStationary){
+    if(_paused){
+      _totalPauseMs+=(_now-_pauseStart);_paused=false;clearTimeout(_pauseTimeout);
       window.__spdEMA=0;
-      // Build 150: genuine resume — clear the dedicated auto-stop timer
       window._pauseStoppedStart=null;
       document.getElementById('statusText').textContent='Recording...';
       showToast(_i('ccheck'),'Trip resumed — movement detected',2000);
     }
-    _endReadings=[];_endCollectStart=0;lastMoving=Date.now();
+    _endReadings=[];_endCollectStart=0;lastMoving=_now;
   }
-  // Build 150: root-cause auto-stop — uses dedicated _pauseStoppedStart that GPS jitter cannot reset
-  if(_paused && tracking && window._pauseStoppedStart){
-    var _stoppedMs=Date.now()-window._pauseStoppedStart;
+
+  // ═══ AUTO-STOP (dedicated timer immune to GPS jitter) ═══
+  if(_paused&&tracking&&window._pauseStoppedStart){
+    var _stoppedMs=_now-window._pauseStoppedStart;
     if(_stoppedMs>=SMART_STOP_MS){
       console.log('[AutoStop] Stationary for',Math.round(_stoppedMs/1000)+'s — auto-stopping');
       window._pauseStoppedStart=null;
-      _totalPauseMs+=(_paused?(Date.now()-_pauseStart):0);
+      _totalPauseMs+=(_paused?(_now-_pauseStart):0);
       try{navigator.vibrate&&navigator.vibrate([50,30,50]);}catch(e){}
       showToast(_i('car'),'Trip auto-saved — stopped after '+Math.round(_stoppedMs/60000)+' min',4000);
       stopTracking();
       return;
     }
   }
-  // Build 150: still collect stable end readings while stationary (was inside deleted auto-stop block)
-  if((!isMoving||_paused)&&tracking){
-    var rawAcc2=p.coords.accuracy||999;
-    if(rawAcc2<=40){_collectEndReading(lat,lng,rawAcc2);}
+
+  // Collect stable end readings while stationary
+  if(isStationary&&tracking){
+    if(accuracy<=15){_collectEndReading(lat,lng,accuracy);}
   }
-  // Build 141: 15-second position gate — skip distance/positions unless 15s elapsed
-  var _now=Date.now();
-  if(window._lastPositionTime&&_now-window._lastPositionTime<15000){
-    return; // speed, pause, auto-stop all updated above
-  }
-  window._lastPositionTime=_now;
-  // Distance gate — 40m accuracy, 20m min, 500m max, !paused, !stationary
-  if(!_paused&&isMoving&&positions.length>0&&accuracy<=40){
-    var last=positions[positions.length-1];
-    var d=haversine(last.lat,last.lng,lat,lng);
-    if(!isNaN(d)&&d>0.01242&&d<0.31){
-      totalDist+=d;
-      if(!window._lastTripPersist||Date.now()-window._lastTripPersist>3000){
-        window._lastTripPersist=Date.now();
-        try{saveTripState({tracking:true,trackStart:trackStart,totalDist:totalDist,savedAt:Date.now()});}catch(e){}
-      }
-    }
-  }
-  // Build 144: capture first GPS point as trip start coords for Routes API
+
+  // ═══ POSITION RECORDING (only when moving) ═══
+  if(!isMoving){ return; } // speed/pause/auto-stop updated above; skip recording
+
+  // Capture first GPS point as trip start coords for Routes API
   if(positions.length===0){
     window._tripStartLat=lat;window._tripStartLng=lng;
     console.log('[TripStart] GPS coords:',lat,lng);
+    positions.push({lat:lat,lng:lng,ts:_now,accuracy:accuracy,speed:effectiveSpeed});
+    _tryLockStartAddress(lat,lng,accuracy);
+    updateMapPos(lat,lng);
+  } else {
+    var lastPos=positions[positions.length-1];
+    var distFromLast=haversine(lastPos.lat,lastPos.lng,lat,lng)*1609.34; // meters
+    var timeFromLast=_now-lastPos.ts; // ms
+
+    // Minimum 5m between recorded points (filter GPS drift at stops)
+    // Maximum 30s gap (force record to maintain track continuity)
+    if(distFromLast>=5||timeFromLast>=30000){
+      // Accumulate distance (in miles) — only for genuine movement
+      var dMi=haversine(lastPos.lat,lastPos.lng,lat,lng);
+      if(!isNaN(dMi)&&dMi>0&&dMi<0.31){
+        totalDist+=dMi;
+        if(!window._lastTripPersist||_now-window._lastTripPersist>3000){
+          window._lastTripPersist=_now;
+          try{saveTripState({tracking:true,trackStart:trackStart,totalDist:totalDist,savedAt:_now});}catch(e){}
+        }
+      }
+      positions.push({lat:lat,lng:lng,ts:_now,accuracy:accuracy,speed:effectiveSpeed});
+      _tryLockStartAddress(lat,lng,accuracy);
+      updateMapPos(lat,lng);
+    }
   }
-  positions.push({lat:lat,lng:lng,time:Date.now(),accuracy:accuracy});
-  _tryLockStartAddress(lat,lng,accuracy);
-  updateMapPos(lat,lng);
-  // 0.85 road correction on display
+
+  // ═══ LIVE DISPLAY UPDATE ═══
   var corrDist=totalDist*0.85;
   var dist=_useKm()?(corrDist*1.60934).toFixed(2):corrDist.toFixed(2);
   document.getElementById('trackDist').textContent=dist;
@@ -4938,7 +5005,7 @@ function onPos(p){
   var liveDed=liveDist*catRate('biz');
   document.getElementById('hsBiz').textContent=liveDist.toFixed(1);
   document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
-  document.getElementById('hsPer').textContent=((Date.now()-trackStart-_totalPauseMs-(_paused?(Date.now()-_pauseStart):0))/60000).toFixed(0);
+  document.getElementById('hsPer').textContent=((_now-trackStart-_totalPauseMs-(_paused?(_now-_pauseStart):0))/60000).toFixed(0);
   document.getElementById('hsPerL').textContent='Minutes';
   document.getElementById('hsDed').textContent=LOC.currency+liveDed.toFixed(2);
   var milestones=[1,5,10,25,50,100];
@@ -4950,7 +5017,7 @@ function onPos(p){
     }
   }
   if(positions.length>1){
-    var elapsed=(Date.now()-trackStart-_totalPauseMs)/3600000;
+    var elapsed=(_now-trackStart-_totalPauseMs)/3600000;
     document.getElementById('trackAvg').textContent=elapsed>0?(liveDist/elapsed).toFixed(0):'0';
   }
   updateDebugPanel();
@@ -5265,30 +5332,49 @@ function stopTracking(){
       finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
     }
 
-    // Build 144: Use Google Routes API as sole distance source, haversine*0.85 as fallback
+    // Build 164: Routes API as PRIMARY distance source — always use coords, overwrite GPS distance
     function _getRoadDistanceThenSave(fromA,toA){
-      // Build 150: fall back to preserved snapshot if positions has been reset
       var _sp=window._savedPositions||positions;
       var _startC=(window._tripStartLat&&window._tripStartLng)
         ? {lat:window._tripStartLat,lng:window._tripStartLng}
         : (_sp.length>0 ? {lat:_sp[0].lat,lng:_sp[0].lng} : null);
       var _endC=endPos || window._savedEndPos
         || (_sp.length>0 ? {lat:_sp[_sp.length-1].lat,lng:_sp[_sp.length-1].lng} : null);
-      if(fromA&&toA&&fromA.indexOf('GPS (')<0&&toA.indexOf('GPS (')<0&&fromA.length>5&&toA.length>5&&_googleMapsReady){
-        showToast(_i('pin'),'Calculating trip distance...',2000);
+
+      // Always try coord-based Routes API first (most reliable)
+      if(_startC&&_endC&&_googleMapsReady){
+        showToast(_i('pin'),'Calculating road distance...',2000);
+        _getGoogleDistance(_startC,_endC,function(routesMi,err){
+          if(routesMi&&routesMi>0){
+            console.log('[TripEnd] Routes API (coords):',routesMi.toFixed(2),'mi — OVERWRITING GPS distance',_haversineMi.toFixed(2),'mi');
+            _geocodeEndThenSave(routesMi,fromA,toA);
+          } else {
+            console.warn('[TripEnd] Routes API coord failed:',err,'— trying address fallback');
+            // Fallback: try address-based if we have real addresses
+            if(fromA&&toA&&fromA.indexOf('GPS (')<0&&toA.indexOf('GPS (')<0&&fromA.length>5&&toA.length>5){
+              _getGoogleDistance(fromA,toA,function(mi2,e2){
+                if(mi2&&mi2>0){
+                  console.log('[TripEnd] Routes API (addr):',mi2.toFixed(2),'mi');
+                  _geocodeEndThenSave(mi2,fromA,toA);
+                } else {
+                  console.warn('[TripEnd] Routes API addr also failed:',e2,'— using GPS*0.85');
+                  _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
+                }
+              });
+            } else {
+              _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
+            }
+          }
+        });
+      } else if(fromA&&toA&&fromA.indexOf('GPS (')<0&&toA.indexOf('GPS (')<0&&fromA.length>5&&toA.length>5&&_googleMapsReady){
+        // No coords available — try address-based
+        showToast(_i('pin'),'Calculating road distance...',2000);
         _getGoogleDistance(fromA,toA,function(routesMi,err){
           if(routesMi&&routesMi>0){
             console.log('[TripEnd] Routes API (addr):',routesMi.toFixed(2),'mi');
             _geocodeEndThenSave(routesMi,fromA,toA);
           } else {
-            console.warn('[TripEnd] Routes API failed:',err,'— coord fallback');
-            if(_startC&&_endC){
-              _getGoogleDistance(_startC,_endC,function(mi2,e2){
-                _geocodeEndThenSave((mi2&&mi2>0)?mi2:_haversineMi*0.85,fromA,toA);
-              });
-            } else {
-              _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
-            }
+            _geocodeEndThenSave(_haversineMi*0.85,fromA,toA);
           }
         });
       } else {
