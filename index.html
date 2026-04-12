@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 161</title>
+<title>MyMilesAI — Build 162</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -311,8 +311,8 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .trip-map-badge.pers{background:rgba(214,0,110,.1);color:var(--mag);border:1px solid rgba(214,0,110,.12);}
 .trip-map-badge.uncl{background:rgba(224,141,0,.12);color:var(--amber);border:1px solid rgba(224,141,0,.15);}
 .trip-map-time{position:absolute;top:10px;left:10px;padding:5px 12px;border-radius:var(--rpill);font-size:10px;font-weight:700;background:rgba(255,255,255,.88);color:var(--ink2);z-index:2;backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,.05);box-shadow:var(--s1);}
-.trip-body{padding:14px 16px 8px;}
-.trip-route{display:flex;gap:12px;margin-bottom:4px;}
+.trip-body{padding:14px 16px 8px;display:flex;flex-direction:column;}
+.trip-route{display:flex;gap:12px;margin-bottom:4px;width:100%;}
 .trip-dots{display:flex;flex-direction:column;align-items:center;padding-top:4px;flex-shrink:0;}
 .td{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .td.s{border:3px solid var(--ink);background:var(--white);}
@@ -860,7 +860,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 161</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 162</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
