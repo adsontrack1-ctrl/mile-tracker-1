@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 167 -->
+<!-- Build 168 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 167</title>
+<title>MyMilesAI — Build 168</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -862,7 +862,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 167</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 168</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4121,7 +4121,7 @@ async function _flushPendingQueue(){
       if(!_sb){return;}
       var ur=await _sb.auth.getUser();
       var user=(ur&&ur.data&&ur.data.user)||window._currentUser;
-      if(!user||!user.id){console.warn('[Flush] No user — skipping');return;}
+      if(!user||!user.id){console.warn('[Flush] No user — skipping trip',i);continue;}
       var row={
         user_id:user.id,from_addr:trip.from||'',to_addr:trip.to||'',
         miles:parseFloat(trip.mi)||0,type:trip.type||'uncl',
@@ -4473,7 +4473,7 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();totalDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
-  // Build 166: reset all GPS engine state for new trip
+  // Build 168: reset all GPS engine state for new trip
   window._kLat=null;window._kLng=null;window._kAccLat=null;window._kAccLng=null;
   window.__spdEMA=0;window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
   window._tripStartLat=null;window._tripStartLng=null;
@@ -4563,7 +4563,7 @@ window.__nativeGPS__ = function(coords) {
     var old = window.__seenGpsTsList.shift();
     delete window.__seenGpsTs[old];
   }
-  // ── ACCURACY FILTER: reject GPS readings worse than 15m (Build 166) ──
+  // ── ACCURACY FILTER: reject GPS readings worse than 15m (Build 168) ──
   var acc = coords.accuracy || 999;
   if(acc > 15){
     // Still update last-known for non-distance uses (templates, prefill)
@@ -5836,28 +5836,20 @@ function _tryGoogleDistance(){
 }
 
 function _getGoogleDistance(origin,destination,cb){
-  if(!_googleMapsReady||!google||!google.maps){cb(null,'no_maps');return;}
-  var oWaypoint=typeof origin==='string'?{address:origin}:{location:{latLng:{latitude:origin.lat,longitude:origin.lng}}};
-  var dWaypoint=typeof destination==='string'?{address:destination}:{location:{latLng:{latitude:destination.lat,longitude:destination.lng}}};
-  fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'X-Goog-Api-Key':'AIzaSyAmdIn2U1A-aSpB1-0vXIVUDK1J5icG_GE',
-      'X-Goog-FieldMask':'originIndex,destinationIndex,duration,distanceMeters,status'
-    },
-    body:JSON.stringify({origins:[{waypoint:oWaypoint}],destinations:[{waypoint:dWaypoint}],travelMode:'DRIVE'})
-  }).then(function(r){
-    if(!r.ok){throw new Error('HTTP_'+r.status);}
-    return r.json();
-  }).then(function(data){
-    var el=data&&Array.isArray(data)&&data[0];
-    if(el&&typeof el.distanceMeters==='number'&&el.distanceMeters>0&&(!el.status||!el.status.code)){
-      cb(el.distanceMeters/1609.34,null);
-    } else {
-      cb(null,(el&&el.status&&el.status.code)||'ZERO_RESULTS');
-    }
-  }).catch(function(e){cb(null,'fetch_error:'+e.message);});
+  // Build 168: Directions REST API replaces Routes Matrix API
+  // origin/destination can be: string (address), {lat,lng} (coords)
+  var oStr=typeof origin==='string'?encodeURIComponent(origin):(origin.lat+','+origin.lng);
+  var dStr=typeof destination==='string'?encodeURIComponent(destination):(destination.lat+','+destination.lng);
+  fetch('https://maps.googleapis.com/maps/api/directions/json?origin='+oStr+'&destination='+dStr+'&mode=driving&key='+_MAPS_KEY)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.status==='OK'&&data.routes&&data.routes[0]&&data.routes[0].legs&&data.routes[0].legs[0]&&data.routes[0].legs[0].distance){
+        var meters=data.routes[0].legs[0].distance.value;
+        cb(meters/1609.34,null);
+      } else {
+        cb(null,data.status||'NO_ROUTE');
+      }
+    }).catch(function(e){cb(null,'fetch_error:'+e.message);});
 }
 
 function _fallbackHaversine(oLat,oLng,dLat,dLng,distInp,badge,status){
