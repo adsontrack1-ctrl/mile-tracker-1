@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 174 -->
+<!-- Build 175 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 174</title>
+<title>MyMilesAI — Build 175</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -862,7 +862,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 174</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 175</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4373,19 +4373,24 @@ function _tryLockStartAddress(lat,lng,accuracy){
   var freqLabel=_getFreqLocLabel(best.lat,best.lng);
   if(freqLabel){_startAddr=freqLabel;return;}
   _startAddr='Locating...';
-  // Build 167: Google Maps Geocoding REST API (works without JS SDK loaded)
-  fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+best.lat+','+best.lng+'&key='+_MAPS_KEY)
+  // Build 175: Geocoding REST API — prefer street_address/premise over locality
+  fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+best.lat+','+best.lng+'&result_type=street_address|premise|subpremise|route&key='+_MAPS_KEY)
     .then(function(r){return r.json();})
     .then(function(data){
-      if(data.status==='OK'&&data.results&&data.results[0]){
+      if(data.status==='OK'&&data.results&&data.results.length>0){
         var addr=data.results[0].formatted_address;
-        if(_isHighwayAddress(addr)){
-          _snapToNearestPlace(best.lat,best.lng,function(placeName){
-            _startAddr=placeName||addr;
+        _startAddr=addr;
+      } else if(data.status==='ZERO_RESULTS'){
+        // Retry without result_type filter
+        return fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+best.lat+','+best.lng+'&key='+_MAPS_KEY)
+          .then(function(r2){return r2.json();})
+          .then(function(d2){
+            if(d2.status==='OK'&&d2.results&&d2.results[0]){
+              _startAddr=d2.results[0].formatted_address;
+            } else {
+              _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
+            }
           });
-        } else {
-          _startAddr=addr;
-        }
       } else {
         _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
       }
@@ -5310,6 +5315,7 @@ function stopTracking(){
 
     // Core save function — called after both road distance and geocoding resolve
     function _doSave(finalMi,finalFromAddr,finalToAddr){
+      finalMi=parseFloat(finalMi.toFixed(2)); // round to 2 decimals
       var finalDist=_useKm()?(finalMi*1.60934):finalMi;
       _updateFreqLoc(endPos?endPos.lat:lastGpsLat,endPos?endPos.lng:lastGpsLng,finalToAddr);
       var _sp=window._savedPositions||[];
@@ -5317,40 +5323,54 @@ function stopTracking(){
       finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
     }
 
-    // Build 167: Directions REST API for road distance, Geocoding REST API for end address
+    // Build 175: Routes API (CORS-safe) for road distance — replaces Directions REST (no CORS)
     function _getDirectionsAndSave(fromA,toA){
       var startLat=window._tripStartLat;var startLng=window._tripStartLng;
       var eLat=window._tripEndLat;var eLng=window._tripEndLng;
+      var gpsMi=parseFloat(_haversineMi.toFixed(2));
 
       if(!startLat||!startLng||!eLat||!eLng){
-        console.warn('[TripEnd] Missing coords — using GPS distance');
-        _geocodeEndThenSave(_haversineMi,fromA,toA);
+        console.warn('[TripEnd] Missing coords — GPS:',gpsMi,'mi');
+        _geocodeEndThenSave(gpsMi,fromA,toA);
         return;
       }
       showToast(_i('pin'),'Calculating road distance...',2000);
-      fetch('https://maps.googleapis.com/maps/api/directions/json?origin='+startLat+','+startLng+'&destination='+eLat+','+eLng+'&mode=driving&key='+_MAPS_KEY)
-        .then(function(r){return r.json();})
+      fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'X-Goog-Api-Key':_MAPS_KEY,
+          'X-Goog-FieldMask':'routes.distanceMeters,routes.duration'
+        },
+        body:JSON.stringify({
+          origin:{location:{latLng:{latitude:startLat,longitude:startLng}}},
+          destination:{location:{latLng:{latitude:eLat,longitude:eLng}}},
+          travelMode:'DRIVE'
+        })
+      })
+        .then(function(r){
+          if(!r.ok) throw new Error('HTTP_'+r.status);
+          return r.json();
+        })
         .then(function(data){
-          if(data.routes&&data.routes[0]&&data.routes[0].legs&&data.routes[0].legs[0]&&data.routes[0].legs[0].distance){
-            var meters=data.routes[0].legs[0].distance.value;
-            var directionsMi=meters*0.000621371;
-            // Anomaly protection: if Routes distance differs >50% from GPS, keep GPS
-            var ratio=_haversineMi>0?(directionsMi/_haversineMi):1;
+          if(data.routes&&data.routes[0]&&typeof data.routes[0].distanceMeters==='number'){
+            var routesMi=parseFloat((data.routes[0].distanceMeters/1609.34).toFixed(2));
+            var ratio=gpsMi>0?(routesMi/gpsMi):1;
             if(ratio<0.5||ratio>1.5){
-              console.warn('[TripEnd] Directions API anomaly:',directionsMi.toFixed(2),'mi vs GPS',_haversineMi.toFixed(2),'mi (ratio:',ratio.toFixed(2),') — keeping GPS');
-              _geocodeEndThenSave(_haversineMi,fromA,toA);
+              console.warn('[Routes] Anomaly: Routes='+routesMi+'mi vs GPS='+gpsMi+'mi (ratio:'+ratio.toFixed(2)+') — keeping GPS');
+              _geocodeEndThenSave(gpsMi,fromA,toA);
             } else {
-              console.log('[TripEnd] Directions API:',directionsMi.toFixed(2),'mi ('+meters+'m) — OVERWRITING GPS',_haversineMi.toFixed(2),'mi');
-              _geocodeEndThenSave(directionsMi,fromA,toA);
+              console.log('[Routes] Correction: GPS='+gpsMi+'mi, Routes='+routesMi+'mi, Saved='+routesMi+'mi');
+              _geocodeEndThenSave(routesMi,fromA,toA);
             }
           } else {
-            console.warn('[TripEnd] Directions API no route — using GPS distance');
-            _geocodeEndThenSave(_haversineMi,fromA,toA);
+            console.warn('[Routes] No route in response — GPS:',gpsMi,'mi');
+            _geocodeEndThenSave(gpsMi,fromA,toA);
           }
         })
         .catch(function(e){
-          console.warn('[TripEnd] Directions API error:',e.message,'— using GPS distance');
-          _geocodeEndThenSave(_haversineMi,fromA,toA);
+          console.warn('[Routes] Error:',e.message,'— GPS:',gpsMi,'mi');
+          _geocodeEndThenSave(gpsMi,fromA,toA);
         });
     }
 
@@ -5365,20 +5385,23 @@ function stopTracking(){
         var _geoTimeout=setTimeout(function(){
           if(!_geoDone&&!_gpsTrioSaved){_geoDone=true;_doSave(finalMi,fromA,toA);}
         },5000);
-        fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+endPos.lat+','+endPos.lng+'&key='+_MAPS_KEY)
+        fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+endPos.lat+','+endPos.lng+'&result_type=street_address|premise|subpremise|route&key='+_MAPS_KEY)
           .then(function(r){return r.json();})
           .then(function(data){
             if(_geoDone)return;
+            // If street-level filter returned nothing, retry without filter
+            if(data.status==='ZERO_RESULTS'){
+              return fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+endPos.lat+','+endPos.lng+'&key='+_MAPS_KEY)
+                .then(function(r2){return r2.json();});
+            }
+            return data;
+          })
+          .then(function(data){
+            if(!data||_geoDone)return;
             _geoDone=true;clearTimeout(_geoTimeout);
             if(data.status==='OK'&&data.results&&data.results[0]){
               var endAddr=data.results[0].formatted_address;
-              if(endPos.accuracy>30||_isHighwayAddress(endAddr)){
-                _snapToNearestPlace(endPos.lat,endPos.lng,function(placeName){
-                  _doSave(finalMi,fromA,placeName||endAddr);
-                });
-              } else {
-                _doSave(finalMi,fromA,endAddr);
-              }
+              _doSave(finalMi,fromA,endAddr);
             } else {
               _doSave(finalMi,fromA,toA);
             }
