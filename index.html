@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 176 -->
+<!-- Build 177 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 176</title>
+<title>MyMilesAI — Build 177</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -862,7 +862,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 176</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 177</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -3960,7 +3960,7 @@ function exportSummaryPDF(period){
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],totalDist=0;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
 let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
-var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||3;return mins*60*1000;}catch(e){return 180000;}})();
+var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||3;return Math.max(mins*60*1000,120000);}catch(e){return 180000;}})();
 var _stationaryStart=0; // timestamp when device became stationary
 var _startAddr=''; // captured start address via reverse geocode
 var _startAddrLocked=false; // true once we have a quality start address
@@ -4868,7 +4868,8 @@ function onPos(p){
   } else {
     window._stationaryStopStart=null;
   }
-  var isStationary=(!isMoving&&window._stationaryStopStart&&(_now-window._stationaryStopStart)>=8000);
+  // Build 177: 120s stationary threshold — red lights/traffic (30-90s) will NOT pause trip
+  var isStationary=(!isMoving&&window._stationaryStopStart&&(_now-window._stationaryStopStart)>=120000);
 
   var spdMps=isMoving?effectiveSpeed:0;
   if(!window.__spdEMA)window.__spdEMA=0;
@@ -4930,14 +4931,51 @@ function onPos(p){
   // ═══ POSITION RECORDING (only when moving) ═══
   if(!isMoving){ return; } // speed/pause/auto-stop updated above; skip recording
 
-  // Capture first GPS point as trip start coords for Routes API
+  // Build 177: Capture first GPS point, but refine after 10s for better accuracy
   if(positions.length===0){
-    window._tripStartLat=lat;window._tripStartLng=lng;
-    console.log('[TripStart] GPS coords:',lat,lng);
+    // Check last known position from previous trip end — if within 200m and fresh (<30 min), use it
+    var lastKnown=null;
+    try{
+      var lk=localStorage.getItem('mmai_last_known_pos');
+      if(lk){
+        var lkp=JSON.parse(lk);
+        var ageMin=(Date.now()-(lkp.ts||0))/60000;
+        if(ageMin<30&&lkp.lat&&lkp.lng){
+          var distM=haversine(lkp.lat,lkp.lng,lat,lng)*1609.34;
+          if(distM<200){
+            lastKnown=lkp;
+            console.log('[TripStart] Using last known position (within',distM.toFixed(0)+'m, age',ageMin.toFixed(1)+'min):',lkp.lat,lkp.lng);
+          }
+        }
+      }
+    }catch(e){}
+    if(lastKnown){
+      window._tripStartLat=lastKnown.lat;window._tripStartLng=lastKnown.lng;
+      window._tripStartAccuracy=lastKnown.accuracy||accuracy;
+    } else {
+      window._tripStartLat=lat;window._tripStartLng=lng;
+      window._tripStartAccuracy=accuracy;
+    }
+    window._tripStartTime=_now;
+    window._tripStart10sLocked=false;
+    console.log('[TripStart] GPS coords:',window._tripStartLat,window._tripStartLng,'accuracy:',window._tripStartAccuracy);
     positions.push({lat:lat,lng:lng,ts:_now,accuracy:accuracy,speed:effectiveSpeed});
-    _tryLockStartAddress(lat,lng,accuracy);
+    _tryLockStartAddress(window._tripStartLat,window._tripStartLng,window._tripStartAccuracy);
     updateMapPos(lat,lng);
   } else {
+    // Build 177: 10-second re-evaluation — if current position is more accurate AND within 500m,
+    // use it as the real start (GPS has had time to lock)
+    if(!window._tripStart10sLocked&&window._tripStartTime&&(_now-window._tripStartTime)>=10000){
+      window._tripStart10sLocked=true;
+      var distFromStartM=haversine(window._tripStartLat,window._tripStartLng,lat,lng)*1609.34;
+      if(distFromStartM<500&&accuracy<window._tripStartAccuracy){
+        console.log('[TripStart] Refined start to 10s position (',distFromStartM.toFixed(0)+'m, accuracy',accuracy,'vs',window._tripStartAccuracy,')');
+        window._tripStartLat=lat;window._tripStartLng=lng;window._tripStartAccuracy=accuracy;
+        // Re-trigger geocode with refined coords
+        _startAddrLocked=false;_startReadings=[];
+        _tryLockStartAddress(lat,lng,accuracy);
+      }
+    }
     var lastPos=positions[positions.length-1];
     var distFromLast=haversine(lastPos.lat,lastPos.lng,lat,lng)*1609.34; // meters
     var timeFromLast=_now-lastPos.ts; // ms
@@ -5286,6 +5324,13 @@ function stopTracking(){
     var _tripEndLat=endPos?endPos.lat:(positions.length>0?positions[positions.length-1].lat:null);
     var _tripEndLng=endPos?endPos.lng:(positions.length>0?positions[positions.length-1].lng:null);
     window._tripEndLat=_tripEndLat;window._tripEndLng=_tripEndLng;
+    // Build 177: store last known position for next trip start
+    if(_tripEndLat&&_tripEndLng){
+      try{localStorage.setItem('mmai_last_known_pos',JSON.stringify({
+        lat:_tripEndLat,lng:_tripEndLng,
+        accuracy:endPos?endPos.accuracy:20,ts:Date.now()
+      }));}catch(e){}
+    }
     var toAddr='';
     if(endPos){toAddr='GPS ('+endPos.lat.toFixed(4)+', '+endPos.lng.toFixed(4)+')';}
 
@@ -5305,6 +5350,8 @@ function stopTracking(){
       var eLat=window._tripEndLat;var eLng=window._tripEndLng;
       var gpsMi=parseFloat(_haversineMi.toFixed(2));
 
+      console.warn('[ROUTES] === ABOUT TO CALL ROUTES API ===');
+      console.warn('[ROUTES] API key prefix:',(_MAPS_KEY||'').substr(0,10)+'...');
       console.warn('[ROUTES] GPS distance:',gpsMi,'mi');
       console.warn('[ROUTES] Start:',startLat,startLng);
       console.warn('[ROUTES] End:',eLat,eLng);
@@ -5337,20 +5384,25 @@ function stopTracking(){
         .then(function(data){
           console.warn('[ROUTES] Body:',JSON.stringify(data));
           if(data.routes&&data.routes[0]&&typeof data.routes[0].distanceMeters==='number'){
-            console.warn('[ROUTES] distanceMeters:',data.routes[0].distanceMeters);
-            var routesMi=parseFloat((data.routes[0].distanceMeters*0.000621371).toFixed(1));
-            console.warn('[ROUTES] Routes miles:',routesMi);
-            // Build 176: ALWAYS use Routes API result — it IS Google Maps distance.
-            // No anomaly guard — GPS is inherently ±5-15% off; Routes is the ground truth.
+            var dm=data.routes[0].distanceMeters;
+            var routesMi=parseFloat((dm*0.000621371).toFixed(1));
+            console.warn('[ROUTES] === SUCCESS === distanceMeters:',dm,'miles:',routesMi);
             console.warn('[ROUTES] FINAL SAVED:',routesMi,'mi (was GPS:',gpsMi,'mi)');
             _geocodeEndThenSave(routesMi,fromA,toA);
+          } else if(data.error){
+            console.warn('[ROUTES] === API ERROR ===',data.error.code,data.error.status,data.error.message);
+            if((data.error.message||'').toLowerCase().indexOf('routes api')>-1||(data.error.status||'')==='PERMISSION_DENIED'){
+              console.warn('[ROUTES] HINT: Enable Routes API in Google Cloud Console for this key');
+            }
+            _geocodeEndThenSave(gpsMi,fromA,toA);
           } else {
             console.warn('[ROUTES] No route in response — SAVING GPS:',gpsMi,'mi');
             _geocodeEndThenSave(gpsMi,fromA,toA);
           }
         })
         .catch(function(e){
-          console.warn('[ROUTES] FAILED:',e.message,'— SAVING GPS:',gpsMi,'mi');
+          console.warn('[ROUTES] === FAILED ===',e.message,e.stack);
+          console.warn('[ROUTES] SAVING GPS:',gpsMi,'mi');
           _geocodeEndThenSave(gpsMi,fromA,toA);
         });
     }
