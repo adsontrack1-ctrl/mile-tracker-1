@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 185 -->
+<!-- Build 186 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 185</title>
+<title>MyMilesAI — Build 186</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -880,7 +880,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 185</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 186</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -8373,32 +8373,39 @@ async function _syncWithSupabase(userId){
     }
     if(matched>0)console.log('[Sync] Matched',matched,'legacy local trips to remote by content');
 
-    // STEP 4: Merge — update local entries whose trip_uid matches remote
-    var mergedCount=0;
+    // STEP 4 (Build 186): Rebuild TRIPS with no trip_uid duplicates.
+    // Walks locals first (preserving local-only fields like path), overlays remote data
+    // when trip_uid matches, then appends any remote-only rows. Atomic swap at the end
+    // guarantees the same trip_uid cannot appear twice — fixes the "1 on Supabase, 2 on phone" bug.
+    var merged=[];
+    var seenUids={};
+    var mergedCount=0,addedCount=0,localDupesDropped=0;
+
     for(var mi=0;mi<TRIPS.length;mi++){
       var t2=TRIPS[mi];
+      if(t2.trip_uid&&seenUids[t2.trip_uid]){localDupesDropped++;continue;}
+      if(t2.trip_uid)seenUids[t2.trip_uid]=true;
+
       if(t2.trip_uid&&remoteByUid[t2.trip_uid]){
         var r2=remoteByUid[t2.trip_uid];
-        TRIPS[mi].mi=parseFloat(r2.miles)||TRIPS[mi].mi;
-        TRIPS[mi].from=r2.from_addr||TRIPS[mi].from;
-        TRIPS[mi].to=r2.to_addr||TRIPS[mi].to;
-        TRIPS[mi].type=r2.type||TRIPS[mi].type;
-        TRIPS[mi].ded=!!r2.deductible;
-        TRIPS[mi].synced=true;
+        t2.mi=parseFloat(r2.miles)||t2.mi;
+        t2.from=r2.from_addr||t2.from;
+        t2.to=r2.to_addr||t2.to;
+        t2.type=r2.type||t2.type;
+        t2.ded=!!r2.deductible;
+        t2.synced=true;
         delete remoteByUid[t2.trip_uid];
         mergedCount++;
       }
+      merged.push(t2);
     }
-    console.log('[Sync] Merged',mergedCount,'trips from remote');
 
-    // STEP 5: Add remote-only trips
-    var addedCount=0;
-    // Build 184: pre-build a Set of all trip_uids already in TRIPS to prevent duplicates
-    var _existingUids=new Set(TRIPS.map(function(t){return t.trip_uid;}).filter(Boolean));
-    Object.keys(remoteByUid).forEach(function(uid){
-      if(_existingUids.has(uid)){console.log('[Sync] Skipped duplicate trip_uid:',uid);return;}
-      var r=remoteByUid[uid];
-      TRIPS.push({
+    var remoteKeys=Object.keys(remoteByUid);
+    for(var rk=0;rk<remoteKeys.length;rk++){
+      var r=remoteByUid[remoteKeys[rk]];
+      if(seenUids[r.trip_uid])continue;
+      seenUids[r.trip_uid]=true;
+      merged.push({
         trip_uid:r.trip_uid,tripId:String(r.id),id:r.id,
         from:r.from_addr||'',to:r.to_addr||'',
         mi:parseFloat(r.miles)||0,type:r.type||'uncl',
@@ -8412,8 +8419,10 @@ async function _syncWithSupabase(userId){
         synced:true,path:randomPath()
       });
       addedCount++;
-    });
-    if(addedCount>0)console.log('[Sync] Added',addedCount,'remote-only trips');
+    }
+
+    TRIPS=merged;
+    console.log('[Sync] Merge: merged='+mergedCount+', remote-only added='+addedCount+', local dupes dropped='+localDupesDropped);
 
     // STEP 6: Backfill trip_uid for remaining unmatched local trips
     var backfilled=0;
