@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 177 -->
+<!-- Build 178 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 177</title>
+<title>MyMilesAI — Build 178</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -862,7 +862,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 177</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 178</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -7234,22 +7234,38 @@ function _decStore(key){
 }
 
 function saveTripsToStorage(){
-  try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
-  // Build 176: no auto-bulk-push. Individual trip saves go through upsert in finishSaveTrackedTrip / _doSaveManual.
-  // _syncWithSupabase on foreground handles unsynced trips. Keep jsonbin cloud sync for legacy users.
+  // Build 178: surface errors; fall back to plain localStorage if _encStore fails
+  try{
+    _encStore('mymilesai_trips',JSON.stringify(TRIPS));
+    localStorage.setItem('mymilesai_last_save',Date.now().toString());
+  }catch(e){
+    console.warn('[saveTripsToStorage] _encStore failed:',e&&e.message,'— trying plain localStorage');
+    try{
+      localStorage.setItem('mymilesai_trips_plain',JSON.stringify(TRIPS));
+      localStorage.setItem('mymilesai_last_save',Date.now().toString());
+    }catch(e2){
+      console.error('[saveTripsToStorage] PLAIN FAILED TOO:',e2&&e2.message);
+    }
+  }
   if(_syncTimer)clearTimeout(_syncTimer);
   _syncTimer=setTimeout(function(){_pushToCloud();},2000);
 }
 
 async function _pullTripsFromSupabase(){
+  // Build 178: delegated to _syncWithSupabase (which preserves trip_uid).
+  // Old implementation was stripping trip_uid via _mergeTrips → causing constant duplicates.
+  if(!_sb||!currentUser)return;
+  return _syncWithSupabase(currentUser.id);
+}
+async function _legacy_pullTripsFromSupabase_DISABLED(){
   if(!_sb||!currentUser)return;
   try{
     _showSyncStatus('Syncing...',true);
-    // Build 145: match actual DB columns
     var result=await _sb.from('trips').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
     if(result.error)throw result.error;
     if(!result.data||!result.data.length){_showSyncStatus('No cloud trips found',false);return;}
     var cloudTrips=result.data.map(function(r){return{
+      trip_uid:r.trip_uid,synced:true,
       id:String(r.id),tripId:String(r.id),from:r.from_addr||'',to:r.to_addr||'',
       mi:parseFloat(r.miles)||0,type:r.type||'uncl',ded:!!r.deductible,
       date:r.trip_date||'',day:r.trip_date?r.trip_date.split(',')[0]:'',
@@ -8048,119 +8064,161 @@ if(autoDetect){
 updateAutoBtn();
 updateDebugPanel();
 
-// Build 176: unified sync — pull first, then push unsynced. Dedupe by trip_uid.
+// Build 178: unified sync — pull ALL pages, mutate TRIPS[i] explicitly, verify persistence
 var _syncInProgress=false;
 async function _syncWithSupabase(userId){
   if(!_sb||!userId||_syncInProgress){console.log('[Sync] Skipped — in progress or missing args');return;}
   _syncInProgress=true;
   try{
-    // A) PULL first
-    console.log('[Sync] Pulling remote trips for user',userId);
-    var res=await _sb.from('trips').select('*').eq('user_id',userId).order('id',{ascending:false}).limit(500);
-    if(res.error){console.warn('[Sync] Pull error:',res.error.message);}
-    else if(res.data){
-      console.log('[Sync] Pulled',res.data.length,'remote trips');
+    // A) PULL ALL remote trips via pagination (was .limit(500) — user has 34K+ rows)
+    console.log('[Sync] === PULLING all remote trips for user',userId);
+    var allRemote=[];
+    var pageSize=1000;var from=0;var more=true;
+    while(more){
+      var res=await _sb.from('trips').select('*').eq('user_id',userId).order('id',{ascending:false}).range(from,from+pageSize-1);
+      if(res.error){console.warn('[Sync] Pull error page',from,':',res.error.message);break;}
+      if(!res.data||res.data.length===0){more=false;break;}
+      allRemote=allRemote.concat(res.data);
+      console.log('[Sync] Page',from/pageSize,'→',res.data.length,'rows (total so far:',allRemote.length+')');
+      if(res.data.length<pageSize){more=false;}
+      from+=pageSize;
+      // Safety stop at 10K rows to avoid runaway
+      if(from>=10000){console.warn('[Sync] Hit 10K row safety limit');break;}
+    }
+    console.log('[Sync] === PULL COMPLETE:',allRemote.length,'remote trips');
 
-      // STEP 1: Backfill trip_uid for legacy remote rows (NULL trip_uid).
-      // Without this, onConflict can never match them → every sync creates duplicates.
-      var legacyRemote=res.data.filter(function(r){return !r.trip_uid;});
-      if(legacyRemote.length>0){
-        console.warn('[Sync] Backfilling trip_uid for',legacyRemote.length,'legacy remote rows');
-        for(var lri=0;lri<legacyRemote.length;lri++){
-          var lr=legacyRemote[lri];
-          var newLegacyUid='legacy-'+lr.id;
+    // STEP 1: Backfill trip_uid for legacy remote rows (NULL trip_uid).
+    var legacyRemote=allRemote.filter(function(r){return !r.trip_uid;});
+    if(legacyRemote.length>0){
+      console.warn('[Sync] === Backfilling trip_uid for',legacyRemote.length,'legacy remote rows ===');
+      var backfillOk=0,backfillFail=0;
+      for(var lri=0;lri<legacyRemote.length;lri++){
+        var lr=legacyRemote[lri];
+        var newLegacyUid='legacy-'+lr.id;
+        try{
           var upd=await _sb.from('trips').update({trip_uid:newLegacyUid}).eq('id',lr.id);
-          if(!upd.error){lr.trip_uid=newLegacyUid;}
-          else{console.warn('[Sync] Failed to backfill id',lr.id,':',upd.error.message);}
-        }
+          if(!upd.error){lr.trip_uid=newLegacyUid;backfillOk++;}
+          else{backfillFail++;if(backfillFail<5)console.warn('[Sync] Backfill fail id',lr.id,':',upd.error.message);}
+        }catch(e){backfillFail++;}
       }
-
-      // STEP 2: Index remote rows by trip_uid (now all have one)
-      var remoteByUid={};
-      res.data.forEach(function(r){if(r.trip_uid)remoteByUid[r.trip_uid]=r;});
-
-      // STEP 3: Match legacy LOCAL trips (no trip_uid) to legacy REMOTE rows by content.
-      // Prevents creating duplicates when we push local trips that already exist remotely.
-      TRIPS.forEach(function(t){
-        if(!t.trip_uid){
-          var match=res.data.find(function(r){
-            if(!r.trip_uid||!r.trip_uid.indexOf||r.trip_uid.indexOf('legacy-')!==0)return false;
-            var rDate=r.trip_date||'';
-            var tDate=t.ts?new Date(t.ts).toLocaleDateString('en-CA'):'';
-            return r.from_addr===t.from&&r.to_addr===t.to
-              &&Math.abs((parseFloat(r.miles)||0)-(parseFloat(t.mi)||0))<0.5
-              &&(rDate===tDate||!rDate||!tDate);
-          });
-          if(match){
-            t.trip_uid=match.trip_uid;
-            t.synced=true;
-            console.log('[Sync] Matched legacy local trip to remote:',t.trip_uid);
-          }
-        }
-      });
-
-      // STEP 4: Merge — update local entries whose trip_uid matches remote
-      TRIPS.forEach(function(t){
-        if(t.trip_uid&&remoteByUid[t.trip_uid]){
-          var r=remoteByUid[t.trip_uid];
-          t.mi=parseFloat(r.miles)||t.mi;
-          t.from=r.from_addr||t.from;
-          t.to=r.to_addr||t.to;
-          t.type=r.type||t.type;
-          t.ded=!!r.deductible;
-          t.synced=true;
-          delete remoteByUid[t.trip_uid];
-        }
-      });
-
-      // STEP 5: Add remote-only trips
-      Object.keys(remoteByUid).forEach(function(uid){
-        var r=remoteByUid[uid];
-        TRIPS.push({
-          trip_uid:r.trip_uid,tripId:String(r.id),id:r.id,
-          from:r.from_addr||'',to:r.to_addr||'',
-          mi:parseFloat(r.miles)||0,type:r.type||'uncl',
-          ded:!!r.deductible,date:r.trip_date||'',
-          day:r.trip_date?r.trip_date.split(',')[0]:'',
-          time:r.trip_time||'',
-          ts:r.created_at?new Date(r.created_at).getTime():Date.now(),
-          purpose:r.purpose||'',notes:r.notes||'',
-          startLat:r.start_lat,startLng:r.start_lng,
-          endLat:r.end_lat,endLng:r.end_lng,
-          synced:true,path:randomPath()
-        });
-      });
-      TRIPS.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
-      saveTripsToStorage();renderTrips();
-      if(typeof _updateYTD==='function')_updateYTD();
-      if(typeof _updateFilterCounts==='function')_updateFilterCounts();
+      console.log('[Sync] Backfill done: ok='+backfillOk+', fail='+backfillFail);
     }
 
-    // STEP 6: Generate trip_uid for any remaining legacy local trips (not matched above)
+    // STEP 2: Index remote rows by trip_uid
+    var remoteByUid={};
+    allRemote.forEach(function(r){if(r.trip_uid)remoteByUid[r.trip_uid]=r;});
+
+    // STEP 3: Match legacy LOCAL trips (no trip_uid) to legacy REMOTE rows by content.
+    var matched=0;
+    for(var ti=0;ti<TRIPS.length;ti++){
+      if(!TRIPS[ti].trip_uid){
+        var t=TRIPS[ti];
+        var match=null;
+        for(var ari=0;ari<allRemote.length;ari++){
+          var r=allRemote[ari];
+          if(!r.trip_uid||typeof r.trip_uid!=='string'||r.trip_uid.indexOf('legacy-')!==0)continue;
+          var rDate=r.trip_date||'';
+          var tDate=t.ts?new Date(t.ts).toLocaleDateString('en-CA'):'';
+          if(r.from_addr===t.from&&r.to_addr===t.to
+              &&Math.abs((parseFloat(r.miles)||0)-(parseFloat(t.mi)||0))<0.5
+              &&(rDate===tDate||!rDate||!tDate)){
+            match=r;break;
+          }
+        }
+        if(match){
+          TRIPS[ti].trip_uid=match.trip_uid;
+          TRIPS[ti].synced=true;
+          matched++;
+        }
+      }
+    }
+    if(matched>0)console.log('[Sync] Matched',matched,'legacy local trips to remote by content');
+
+    // STEP 4: Merge — update local entries whose trip_uid matches remote
+    var mergedCount=0;
+    for(var mi=0;mi<TRIPS.length;mi++){
+      var t2=TRIPS[mi];
+      if(t2.trip_uid&&remoteByUid[t2.trip_uid]){
+        var r2=remoteByUid[t2.trip_uid];
+        TRIPS[mi].mi=parseFloat(r2.miles)||TRIPS[mi].mi;
+        TRIPS[mi].from=r2.from_addr||TRIPS[mi].from;
+        TRIPS[mi].to=r2.to_addr||TRIPS[mi].to;
+        TRIPS[mi].type=r2.type||TRIPS[mi].type;
+        TRIPS[mi].ded=!!r2.deductible;
+        TRIPS[mi].synced=true;
+        delete remoteByUid[t2.trip_uid];
+        mergedCount++;
+      }
+    }
+    console.log('[Sync] Merged',mergedCount,'trips from remote');
+
+    // STEP 5: Add remote-only trips
+    var addedCount=0;
+    Object.keys(remoteByUid).forEach(function(uid){
+      var r=remoteByUid[uid];
+      TRIPS.push({
+        trip_uid:r.trip_uid,tripId:String(r.id),id:r.id,
+        from:r.from_addr||'',to:r.to_addr||'',
+        mi:parseFloat(r.miles)||0,type:r.type||'uncl',
+        ded:!!r.deductible,date:r.trip_date||'',
+        day:r.trip_date?r.trip_date.split(',')[0]:'',
+        time:r.trip_time||'',
+        ts:r.created_at?new Date(r.created_at).getTime():Date.now(),
+        purpose:r.purpose||'',notes:r.notes||'',
+        startLat:r.start_lat,startLng:r.start_lng,
+        endLat:r.end_lat,endLng:r.end_lng,
+        synced:true,path:randomPath()
+      });
+      addedCount++;
+    });
+    if(addedCount>0)console.log('[Sync] Added',addedCount,'remote-only trips');
+
+    // STEP 6: Backfill trip_uid for remaining unmatched local trips
     var backfilled=0;
-    TRIPS.forEach(function(t){
-      if(!t.trip_uid){
-        t.trip_uid=_genTripId();
-        t.synced=false;
+    for(var bi=0;bi<TRIPS.length;bi++){
+      if(!TRIPS[bi].trip_uid){
+        TRIPS[bi].trip_uid=_genTripId();
+        TRIPS[bi].synced=false;
         backfilled++;
       }
-    });
-    if(backfilled>0){console.log('[Sync] Backfilled trip_uid for',backfilled,'unmatched legacy local trips');saveTripsToStorage();}
+    }
+    if(backfilled>0)console.log('[Sync] Backfilled trip_uid for',backfilled,'unmatched local trips');
+
+    TRIPS.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
+    saveTripsToStorage();renderTrips();
+    if(typeof _updateYTD==='function')_updateYTD();
+    if(typeof _updateFilterCounts==='function')_updateFilterCounts();
+
+    // Verify persistence
+    var withUid=TRIPS.filter(function(t){return t.trip_uid;}).length;
+    var syncedCount=TRIPS.filter(function(t){return t.synced===true;}).length;
+    console.log('[Sync] VERIFY: TRIPS total='+TRIPS.length+', with trip_uid='+withUid+', synced='+syncedCount);
 
     // B) PUSH only unsynced trips
     var unsynced=TRIPS.filter(function(t){return t.trip_uid&&t.synced!==true;});
-    console.log('[Sync] Pushing',unsynced.length,'unsynced trips');
-    for(var i=0;i<unsynced.length;i++){
-      var t=unsynced[i];
-      var row=_buildTripRow(t,userId);
-      var up=await _sb.from('trips').upsert(row,{onConflict:'trip_uid'});
-      if(!up.error){
-        t.synced=true;
-        console.log('[Sync] ✓ Pushed trip_uid',t.trip_uid);
-      } else {
-        console.warn('[Sync] Push failed for trip_uid',t.trip_uid,':',up.error.message);
-      }
+    console.log('[Sync] === PUSHING',unsynced.length,'unsynced trips ===');
+    var pushOk=0,pushFail=0;
+    for(var pi=0;pi<unsynced.length;pi++){
+      var ut=unsynced[pi];
+      var row=_buildTripRow(ut,userId);
+      try{
+        var up=await _sb.from('trips').upsert(row,{onConflict:'trip_uid'});
+        if(!up.error){
+          // CRITICAL: find the actual TRIPS[i] by trip_uid and mutate directly
+          for(var fi=0;fi<TRIPS.length;fi++){
+            if(TRIPS[fi].trip_uid===ut.trip_uid){
+              TRIPS[fi].synced=true;
+              break;
+            }
+          }
+          pushOk++;
+        } else {
+          pushFail++;
+          if(pushFail<5)console.warn('[Sync] Push fail trip_uid',ut.trip_uid,':',up.error.message);
+        }
+      }catch(e){pushFail++;}
     }
+    console.log('[Sync] === PUSH DONE: ok='+pushOk+', fail='+pushFail+' ===');
     saveTripsToStorage();
   }catch(e){
     console.warn('[Sync] Exception:',e&&e.message);
