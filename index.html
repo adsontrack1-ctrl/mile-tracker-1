@@ -5331,17 +5331,12 @@ function stopTracking(){
           console.warn('[ROUTES] Body:',JSON.stringify(data));
           if(data.routes&&data.routes[0]&&typeof data.routes[0].distanceMeters==='number'){
             console.warn('[ROUTES] distanceMeters:',data.routes[0].distanceMeters);
-            var routesMi=parseFloat((data.routes[0].distanceMeters*0.000621371).toFixed(2));
+            var routesMi=parseFloat((data.routes[0].distanceMeters*0.000621371).toFixed(1));
             console.warn('[ROUTES] Routes miles:',routesMi);
-            var ratio=gpsMi>0?(routesMi/gpsMi):1;
-            console.warn('[ROUTES] Ratio:',ratio.toFixed(3));
-            if(ratio<0.5||ratio>1.5){
-              console.warn('[ROUTES] ANOMALY — keeping GPS. SAVING:',gpsMi,'mi');
-              _geocodeEndThenSave(gpsMi,fromA,toA);
-            } else {
-              console.warn('[ROUTES] SAVING:',routesMi,'mi (was GPS:',gpsMi,'mi)');
-              _geocodeEndThenSave(routesMi,fromA,toA);
-            }
+            // Build 176: ALWAYS use Routes API result — it IS Google Maps distance.
+            // No anomaly guard — GPS is inherently ±5-15% off; Routes is the ground truth.
+            console.warn('[ROUTES] FINAL SAVED:',routesMi,'mi (was GPS:',gpsMi,'mi)');
+            _geocodeEndThenSave(routesMi,fromA,toA);
           } else {
             console.warn('[ROUTES] No route in response — SAVING GPS:',gpsMi,'mi');
             _geocodeEndThenSave(gpsMi,fromA,toA);
@@ -8043,6 +8038,17 @@ async function _syncWithSupabase(userId){
       if(typeof _updateYTD==='function')_updateYTD();
       if(typeof _updateFilterCounts==='function')_updateFilterCounts();
     }
+
+    // Backfill trip_uid for old trips that don't have one
+    var backfilled=0;
+    TRIPS.forEach(function(t){
+      if(!t.trip_uid){
+        t.trip_uid=_genTripId();
+        t.synced=false;
+        backfilled++;
+      }
+    });
+    if(backfilled>0){console.log('[Sync] Backfilled trip_uid for',backfilled,'legacy trips');saveTripsToStorage();}
 
     // B) PUSH only unsynced trips
     var unsynced=TRIPS.filter(function(t){return t.trip_uid&&t.synced!==true;});
