@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 178 -->
+<!-- Build 179 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 178</title>
+<title>MyMilesAI — Build 179</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -100,6 +100,17 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 @keyframes slideUp{from{transform:translateX(-50%) translateY(100%)}to{transform:translateX(-50%) translateY(0)}}
 @keyframes slideUpModal{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes pulse-rec{0%,100%{box-shadow:0 4px 20px rgba(0,168,112,.3)}50%{box-shadow:0 4px 28px rgba(0,168,112,.5),0 0 0 6px rgba(0,168,112,.08)}}
+
+/* TRIAL BANNER (Build 179) — only shows on days 8-10 (3 days or less) */
+.trial-banner{display:none;margin:8px 16px 0;padding:10px 14px;background:linear-gradient(135deg,rgba(224,141,0,.08),rgba(239,61,88,.06));border:1px solid rgba(224,141,0,.2);border-radius:var(--r);align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink2);box-shadow:var(--s1);}
+.trial-banner.show{display:flex;animation:tabIn .3s ease;}
+.trial-banner-icon{font-size:16px;flex-shrink:0;}
+.trial-banner-text{flex:1;min-width:0;line-height:1.4;}
+.trial-banner-text strong{color:var(--amber);font-weight:800;}
+.trial-banner-upgrade{padding:6px 12px;border-radius:var(--rpill);background:linear-gradient(135deg,var(--vi),var(--mag));color:#fff;border:none;font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.trial-banner-upgrade:hover{transform:translateY(-1px);box-shadow:var(--s2);}
+.trial-banner-dismiss{width:24px;height:24px;border-radius:50%;background:transparent;border:none;color:var(--ink4);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;}
+.trial-banner-dismiss:hover{color:var(--ink2);background:rgba(0,0,0,.04);}
 
 /* HEADER */
 .hdr{padding-top:env(safe-area-inset-top);display:flex;align-items:center;justify-content:space-between;padding:max(12px,env(safe-area-inset-top)) 20px 10px;position:sticky;top:0;z-index:100;background:rgba(246,247,249,.85);backdrop-filter:blur(24px) saturate(2);}
@@ -630,6 +641,13 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="hdr-r"><span id="syncStatusDot" title="Synced" style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-flex;align-self:center;transition:background 0.5s;cursor:help;margin-right:2px"></span>
     <div class="hdr-btn" style="position:relative;display:inline-flex;align-items:center;justify-content:center" onclick="switchTabId('tab-alerts')" id="hdrBellIco" aria-label="Notifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="hdr-dot"></div></div><div class="hdr-btn" onclick="goToSettings()" aria-label="Settings" style="display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-2.82 1.18V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00-1.18-2.82H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 002.82-1.18V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 001.18 2.82H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg></div></div>
   </div>
+  <!-- Build 179: Trial banner — only visible on days 8-10 (3 days or less) -->
+  <div class="trial-banner" id="trialBanner">
+    <span class="trial-banner-icon">⏰</span>
+    <span class="trial-banner-text" id="trialBannerText"></span>
+    <button class="trial-banner-upgrade" onclick="_showSubscribeModal()">Upgrade →</button>
+    <button class="trial-banner-dismiss" onclick="_dismissTrialBanner()" aria-label="Dismiss">×</button>
+  </div>
 
   <!-- TAB 1: DRIVE -->
   <div class="tab active" id="tab-drive">
@@ -862,7 +880,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 178</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 179</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -2020,6 +2038,8 @@ async function ensureProfile(user){
     }
     // Update subscription UI in Settings
     if(typeof _updateSubUI==='function')_updateSubUI(profile);
+    // Build 179: check trial status — shows banner on days 8-10, auto-charges on day 10+
+    if(typeof _checkTrialStatus==='function')_checkTrialStatus(user.id);
     // Bug 3 fix: register device for ALL tiers (including free/unsubscribed)
     var tier=(profile&&profile.subscription_tier)||'free';
     var allowed=await _registerDevice(user.id,tier);
@@ -2189,6 +2209,137 @@ function _updateSubUI(profile){
     if(expiryRow)expiryRow.style.display='none';
     if(manageRow)manageRow.style.display='none';
     if(upgradeRow)upgradeRow.style.display='';
+  }
+}
+
+// ═══ Build 179: Trial expiry + auto-charge logic ═══
+function _calculateEndDate(trialStart, plan){
+  var start=new Date(trialStart);
+  if(plan==='monthly'){
+    start.setMonth(start.getMonth()+1);
+    start.setDate(start.getDate()+10);
+  } else if(plan==='yearly'){
+    start.setFullYear(start.getFullYear()+1);
+    start.setDate(start.getDate()+10);
+  } else {
+    // Default to monthly
+    start.setMonth(start.getMonth()+1);
+    start.setDate(start.getDate()+10);
+  }
+  return start.toISOString();
+}
+
+function _showTrialBanner(daysLeft){
+  if(sessionStorage.getItem('mmai_trial_banner_dismissed')==='1')return;
+  var banner=document.getElementById('trialBanner');
+  var txt=document.getElementById('trialBannerText');
+  if(!banner||!txt)return;
+  var plural=daysLeft===1?'day':'days';
+  txt.innerHTML=daysLeft===1
+    ? '<strong>Last day</strong> of your free trial'
+    : '<strong>'+daysLeft+' '+plural+'</strong> left in free trial';
+  banner.classList.add('show');
+}
+
+function _dismissTrialBanner(){
+  var banner=document.getElementById('trialBanner');
+  if(banner)banner.classList.remove('show');
+  try{sessionStorage.setItem('mmai_trial_banner_dismissed','1');}catch(e){}
+}
+
+async function _attemptAutoCharge(userId, license){
+  console.log('[Trial] Attempting auto-charge for',userId,'billing_path:',license.billing_path);
+  try{
+    if(license.billing_path==='revenuecat'||window.__MYMILESAI_NATIVE__){
+      // iOS: check RevenueCat entitlement — Apple handles auto-charge
+      if(window.ReactNativeWebView){
+        window._onRCEntitlement=async function(isPro){
+          if(isPro){
+            console.log('[Trial] RevenueCat entitlement active — activating license');
+            await _activateLicenseAfterCharge(userId,license);
+          } else {
+            console.warn('[Trial] RevenueCat entitlement inactive — showing paywall');
+            _showSubscribeModal();
+          }
+        };
+        window.ReactNativeWebView.postMessage(JSON.stringify({type:'rcCheckEntitlement'}));
+      }
+    } else {
+      // Web: check Stripe via Cloudflare Worker
+      var resp=await fetch('https://mymilesai-ai.harijasllc.workers.dev/check-subscription',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({userId:userId})
+      });
+      var data=await resp.json();
+      if(data&&data.active){
+        console.log('[Trial] Stripe subscription active — activating license');
+        await _activateLicenseAfterCharge(userId,license);
+      } else {
+        console.warn('[Trial] Stripe subscription not active — showing paywall. Status:',data&&data.status);
+        _showSubscribeModal();
+      }
+    }
+  }catch(e){
+    console.warn('[Trial] Auto-charge check failed:',e.message);
+  }
+}
+
+async function _activateLicenseAfterCharge(userId, license){
+  try{
+    var plan=license.plan||'monthly';
+    await _sb.from('licenses').update({
+      status:'active',
+      trial_end:null
+    }).eq('user_id',userId);
+    await _sb.from('subscriptions').upsert({
+      user_id:userId,
+      status:'active',
+      plan:plan,
+      current_period_start:new Date().toISOString(),
+      current_period_end:_calculateEndDate(license.trial_start,plan)
+    },{onConflict:'user_id'});
+    console.log('[Trial] License activated');
+    showToast(_i('ccheck'),'Welcome to Pro!',3000);
+    // Hide trial banner
+    var banner=document.getElementById('trialBanner');
+    if(banner)banner.classList.remove('show');
+  }catch(e){
+    console.warn('[Trial] Failed to activate license:',e.message);
+  }
+}
+
+async function _checkTrialStatus(userId){
+  if(!_sb||!userId)return;
+  try{
+    var res=await _sb.from('licenses')
+      .select('status, plan, trial_start, trial_end, billing_path')
+      .eq('user_id',userId)
+      .single();
+    if(res.error){
+      // Table may not have these columns yet (migration pending) — fail silently
+      console.log('[Trial] licenses query error (OK if migration pending):',res.error.message);
+      return;
+    }
+    var license=res.data;
+    if(!license){console.log('[Trial] No license row found');return;}
+    console.log('[Trial] License status:',license.status,'plan:',license.plan,'trial_end:',license.trial_end);
+    if(license.status==='trial'&&license.trial_end){
+      var trialEnd=new Date(license.trial_end);
+      var now=new Date();
+      var daysLeft=Math.ceil((trialEnd-now)/(1000*60*60*24));
+      console.log('[Trial] Days left:',daysLeft);
+      if(daysLeft<=0){
+        // Trial expired — attempt auto-charge
+        _attemptAutoCharge(userId,license);
+      } else if(daysLeft<=3){
+        // Days 8-10: show small banner
+        _showTrialBanner(daysLeft);
+      }
+      // Days 1-7 (daysLeft > 3): show nothing
+    }
+  }catch(e){
+    console.warn('[Trial] Check failed:',e.message);
   }
 }
 // ── Device limit modal ───────────────────────────────────────────────
