@@ -4096,7 +4096,12 @@ function _genTripId(){
 }
 // Build 176: pending queue removed — replaced by trip_uid + synced flag + _syncWithSupabase
 function _buildTripRow(t, userId){
-  return {
+  // Safety net: GUARANTEE trip_uid is never null/undefined when sent to Supabase
+  if(!t.trip_uid){
+    t.trip_uid=_genTripId();
+    console.warn('[_buildTripRow] Generated missing trip_uid:',t.trip_uid);
+  }
+  var row={
     trip_uid: t.trip_uid,
     user_id: userId,
     from_addr: t.from||'', to_addr: t.to||'',
@@ -4112,6 +4117,8 @@ function _buildTripRow(t, userId){
     end_lat: parseFloat(t.endLat)||0,
     end_lng: parseFloat(t.endLng)||0
   };
+  console.log('[_buildTripRow] trip_uid in payload:',row.trip_uid);
+  return row;
 }
 window.addEventListener('online',function(){
   console.log('[MMAI] Back online — triggering sync');
@@ -8001,9 +8008,46 @@ async function _syncWithSupabase(userId){
     if(res.error){console.warn('[Sync] Pull error:',res.error.message);}
     else if(res.data){
       console.log('[Sync] Pulled',res.data.length,'remote trips');
+
+      // STEP 1: Backfill trip_uid for legacy remote rows (NULL trip_uid).
+      // Without this, onConflict can never match them → every sync creates duplicates.
+      var legacyRemote=res.data.filter(function(r){return !r.trip_uid;});
+      if(legacyRemote.length>0){
+        console.warn('[Sync] Backfilling trip_uid for',legacyRemote.length,'legacy remote rows');
+        for(var lri=0;lri<legacyRemote.length;lri++){
+          var lr=legacyRemote[lri];
+          var newLegacyUid='legacy-'+lr.id;
+          var upd=await _sb.from('trips').update({trip_uid:newLegacyUid}).eq('id',lr.id);
+          if(!upd.error){lr.trip_uid=newLegacyUid;}
+          else{console.warn('[Sync] Failed to backfill id',lr.id,':',upd.error.message);}
+        }
+      }
+
+      // STEP 2: Index remote rows by trip_uid (now all have one)
       var remoteByUid={};
       res.data.forEach(function(r){if(r.trip_uid)remoteByUid[r.trip_uid]=r;});
-      // Merge: update local entries whose trip_uid matches remote
+
+      // STEP 3: Match legacy LOCAL trips (no trip_uid) to legacy REMOTE rows by content.
+      // Prevents creating duplicates when we push local trips that already exist remotely.
+      TRIPS.forEach(function(t){
+        if(!t.trip_uid){
+          var match=res.data.find(function(r){
+            if(!r.trip_uid||!r.trip_uid.indexOf||r.trip_uid.indexOf('legacy-')!==0)return false;
+            var rDate=r.trip_date||'';
+            var tDate=t.ts?new Date(t.ts).toLocaleDateString('en-CA'):'';
+            return r.from_addr===t.from&&r.to_addr===t.to
+              &&Math.abs((parseFloat(r.miles)||0)-(parseFloat(t.mi)||0))<0.5
+              &&(rDate===tDate||!rDate||!tDate);
+          });
+          if(match){
+            t.trip_uid=match.trip_uid;
+            t.synced=true;
+            console.log('[Sync] Matched legacy local trip to remote:',t.trip_uid);
+          }
+        }
+      });
+
+      // STEP 4: Merge — update local entries whose trip_uid matches remote
       TRIPS.forEach(function(t){
         if(t.trip_uid&&remoteByUid[t.trip_uid]){
           var r=remoteByUid[t.trip_uid];
@@ -8016,7 +8060,8 @@ async function _syncWithSupabase(userId){
           delete remoteByUid[t.trip_uid];
         }
       });
-      // Add remote-only trips
+
+      // STEP 5: Add remote-only trips
       Object.keys(remoteByUid).forEach(function(uid){
         var r=remoteByUid[uid];
         TRIPS.push({
@@ -8039,7 +8084,7 @@ async function _syncWithSupabase(userId){
       if(typeof _updateFilterCounts==='function')_updateFilterCounts();
     }
 
-    // Backfill trip_uid for old trips that don't have one
+    // STEP 6: Generate trip_uid for any remaining legacy local trips (not matched above)
     var backfilled=0;
     TRIPS.forEach(function(t){
       if(!t.trip_uid){
@@ -8048,7 +8093,7 @@ async function _syncWithSupabase(userId){
         backfilled++;
       }
     });
-    if(backfilled>0){console.log('[Sync] Backfilled trip_uid for',backfilled,'legacy trips');saveTripsToStorage();}
+    if(backfilled>0){console.log('[Sync] Backfilled trip_uid for',backfilled,'unmatched legacy local trips');saveTripsToStorage();}
 
     // B) PUSH only unsynced trips
     var unsynced=TRIPS.filter(function(t){return t.trip_uid&&t.synced!==true;});
