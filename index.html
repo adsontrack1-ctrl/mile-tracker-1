@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 175 -->
+<!-- Build 176 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 175</title>
+<title>MyMilesAI — Build 176</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -862,7 +862,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 175</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 176</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -2025,10 +2025,8 @@ async function ensureProfile(user){
     var allowed=await _registerDevice(user.id,tier);
     if(!allowed){_authHideLoading();_showDeviceLimitModal(tier);return profile;}
     _authHideLoading();
-    // Build 140: sync trips immediately after profile (no setTimeout)
-    _syncTripsFromSupabase(user.id);
-    // Build 150: flush any offline-queued trips 3s after login sync
-    setTimeout(_flushPendingQueue, 3000);
+    // Build 176: unified pull+push sync
+    _syncWithSupabase(user.id);
     return profile;
   }catch(e){console.warn('ensureProfile error:',e);_authHideLoading();clearTimeout(window._startupFailsafe);return null;}
 }
@@ -4096,63 +4094,30 @@ function _genTripId(){
     });
   }
 }
-function _getPendingQueue(){
-  try{return JSON.parse(localStorage.getItem('mmai_pending_sync')||'[]');}catch(e){return[];}
-}
-function _savePendingQueue(q){
-  try{localStorage.setItem('mmai_pending_sync',JSON.stringify(q));}catch(e){}
-}
-function _addToPendingQueue(trip){
-  var q=_getPendingQueue();
-  if(!q.find(function(t){return t.tripId===trip.tripId;})){q.push(trip);}
-  _savePendingQueue(q);
-  console.log('[MMAI] Added to offline queue. Queue size:',q.length);
-}
-function _removeFromPendingQueue(tripId){
-  var q=_getPendingQueue().filter(function(t){return t.tripId!==tripId;});
-  _savePendingQueue(q);
-}
-async function _flushPendingQueue(){
-  var q=_getPendingQueue();
-  if(!q.length)return;
-  if(!navigator.onLine){console.log('[MMAI] Offline — queue flush deferred');return;}
-  console.log('[MMAI] Flushing',q.length,'pending trips to Supabase');
-  for(var i=0;i<q.length;i++){
-    var trip=q[i];
-    try{
-      if(!_sb){return;}
-      var ur=await _sb.auth.getUser();
-      var user=(ur&&ur.data&&ur.data.user)||window._currentUser;
-      if(!user||!user.id){console.warn('[Flush] No user — skipping trip',i);continue;}
-      var row={
-        user_id:user.id,from_addr:trip.from||'',to_addr:trip.to||'',
-        miles:parseFloat(trip.mi)||0,type:trip.type||'uncl',
-        trip_date:(function(){
-          if(trip.ts){return new Date(trip.ts).toLocaleDateString('en-CA');}
-          return new Date().toLocaleDateString('en-CA');
-        })(),trip_time:(function(){
-          if(trip.ts){return new Date(trip.ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
-          return new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-        })(),
-        deductible:trip.type==='biz',
-        purpose:trip.purpose||'',notes:trip.notes||'',
-        start_lat:parseFloat(trip.startLat)||0,start_lng:parseFloat(trip.startLng)||0,
-        end_lat:parseFloat(trip.endLat)||0,end_lng:parseFloat(trip.endLng)||0
-      };
-      var res=await _sb.from('trips').insert(row);
-      if(!res.error){
-        _removeFromPendingQueue(trip.tripId);
-        console.log('[DB SAVE OK] trip flushed to Supabase');
-      } else {
-        console.error('[DB SAVE FAILED]',JSON.stringify(res.error));
-        console.error('[DB ROW WAS]',JSON.stringify(row));
-      }
-    }catch(e){console.warn('[MMAI] Flush exception',e.message);}
-  }
+// Build 176: pending queue removed — replaced by trip_uid + synced flag + _syncWithSupabase
+function _buildTripRow(t, userId){
+  return {
+    trip_uid: t.trip_uid,
+    user_id: userId,
+    from_addr: t.from||'', to_addr: t.to||'',
+    miles: parseFloat(t.mi)||0, type: t.type||'uncl',
+    trip_date: (t.ts ? new Date(t.ts) : new Date()).toLocaleDateString('en-CA'),
+    trip_time: t.time
+      ? t.time.split(' ')[0]
+      : (t.ts ? new Date(t.ts) : new Date()).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+    deductible: t.type==='biz',
+    purpose: t.purpose||'', notes: t.notes||'',
+    start_lat: parseFloat(t.startLat)||0,
+    start_lng: parseFloat(t.startLng)||0,
+    end_lat: parseFloat(t.endLat)||0,
+    end_lng: parseFloat(t.endLng)||0
+  };
 }
 window.addEventListener('online',function(){
-  console.log('[MMAI] Back online — flushing pending queue');
-  setTimeout(_flushPendingQueue,2000);
+  console.log('[MMAI] Back online — triggering sync');
+  if(window._currentUser&&window._currentUser.id){
+    setTimeout(function(){_syncWithSupabase(window._currentUser.id);},2000);
+  }
 });
 
 /* ── IndexedDB Trip State (survives WebView freeze) ── */
@@ -4373,29 +4338,33 @@ function _tryLockStartAddress(lat,lng,accuracy){
   var freqLabel=_getFreqLocLabel(best.lat,best.lng);
   if(freqLabel){_startAddr=freqLabel;return;}
   _startAddr='Locating...';
-  // Build 175: Geocoding REST API — prefer street_address/premise over locality
-  fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+best.lat+','+best.lng+'&result_type=street_address|premise|subpremise|route&key='+_MAPS_KEY)
+  // Build 176: Geocoding with type priority + coord validation
+  if(!best.lat||!best.lng||best.lat===0||best.lng===0){
+    console.warn('[GEOCODE] Bad start coords:',best.lat,best.lng);
+    _startAddr='GPS ('+(best.lat||0).toFixed(4)+', '+(best.lng||0).toFixed(4)+')';
+    return;
+  }
+  fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+best.lat+','+best.lng+'&key='+_MAPS_KEY)
     .then(function(r){return r.json();})
     .then(function(data){
       if(data.status==='OK'&&data.results&&data.results.length>0){
-        var addr=data.results[0].formatted_address;
-        _startAddr=addr;
-      } else if(data.status==='ZERO_RESULTS'){
-        // Retry without result_type filter
-        return fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+best.lat+','+best.lng+'&key='+_MAPS_KEY)
-          .then(function(r2){return r2.json();})
-          .then(function(d2){
-            if(d2.status==='OK'&&d2.results&&d2.results[0]){
-              _startAddr=d2.results[0].formatted_address;
-            } else {
-              _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
-            }
-          });
+        var types=['street_address','premise','route','intersection','neighborhood','sublocality','locality'];
+        var pick=null;
+        for(var ti=0;ti<types.length&&!pick;ti++){
+          for(var ri=0;ri<data.results.length;ri++){
+            if(data.results[ri].types.indexOf(types[ti])>-1){pick=data.results[ri];break;}
+          }
+        }
+        if(!pick)pick=data.results[0];
+        console.log('[GEOCODE start] Selected',pick.types.join(','),'—',pick.formatted_address);
+        _startAddr=pick.formatted_address;
       } else {
+        console.warn('[GEOCODE start] Status:',data.status);
         _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
       }
     })
-    .catch(function(){
+    .catch(function(e){
+      console.warn('[GEOCODE start] Failed:',e.message);
       _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
     });
 }
@@ -5323,17 +5292,22 @@ function stopTracking(){
       finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
     }
 
-    // Build 175: Routes API (CORS-safe) for road distance — replaces Directions REST (no CORS)
+    // Build 176: Routes API (CORS-safe computeRoutes) + full debug logging
     function _getDirectionsAndSave(fromA,toA){
       var startLat=window._tripStartLat;var startLng=window._tripStartLng;
       var eLat=window._tripEndLat;var eLng=window._tripEndLng;
       var gpsMi=parseFloat(_haversineMi.toFixed(2));
 
+      console.warn('[ROUTES] GPS distance:',gpsMi,'mi');
+      console.warn('[ROUTES] Start:',startLat,startLng);
+      console.warn('[ROUTES] End:',eLat,eLng);
+
       if(!startLat||!startLng||!eLat||!eLng){
-        console.warn('[TripEnd] Missing coords — GPS:',gpsMi,'mi');
+        console.warn('[ROUTES] Missing coords — using GPS');
         _geocodeEndThenSave(gpsMi,fromA,toA);
         return;
       }
+      console.warn('[ROUTES] Calling computeRoutes...');
       showToast(_i('pin'),'Calculating road distance...',2000);
       fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
         method:'POST',
@@ -5349,27 +5323,32 @@ function stopTracking(){
         })
       })
         .then(function(r){
+          console.warn('[ROUTES] Status:',r.status);
           if(!r.ok) throw new Error('HTTP_'+r.status);
           return r.json();
         })
         .then(function(data){
+          console.warn('[ROUTES] Body:',JSON.stringify(data));
           if(data.routes&&data.routes[0]&&typeof data.routes[0].distanceMeters==='number'){
-            var routesMi=parseFloat((data.routes[0].distanceMeters/1609.34).toFixed(2));
+            console.warn('[ROUTES] distanceMeters:',data.routes[0].distanceMeters);
+            var routesMi=parseFloat((data.routes[0].distanceMeters*0.000621371).toFixed(2));
+            console.warn('[ROUTES] Routes miles:',routesMi);
             var ratio=gpsMi>0?(routesMi/gpsMi):1;
+            console.warn('[ROUTES] Ratio:',ratio.toFixed(3));
             if(ratio<0.5||ratio>1.5){
-              console.warn('[Routes] Anomaly: Routes='+routesMi+'mi vs GPS='+gpsMi+'mi (ratio:'+ratio.toFixed(2)+') — keeping GPS');
+              console.warn('[ROUTES] ANOMALY — keeping GPS. SAVING:',gpsMi,'mi');
               _geocodeEndThenSave(gpsMi,fromA,toA);
             } else {
-              console.log('[Routes] Correction: GPS='+gpsMi+'mi, Routes='+routesMi+'mi, Saved='+routesMi+'mi');
+              console.warn('[ROUTES] SAVING:',routesMi,'mi (was GPS:',gpsMi,'mi)');
               _geocodeEndThenSave(routesMi,fromA,toA);
             }
           } else {
-            console.warn('[Routes] No route in response — GPS:',gpsMi,'mi');
+            console.warn('[ROUTES] No route in response — SAVING GPS:',gpsMi,'mi');
             _geocodeEndThenSave(gpsMi,fromA,toA);
           }
         })
         .catch(function(e){
-          console.warn('[Routes] Error:',e.message,'— GPS:',gpsMi,'mi');
+          console.warn('[ROUTES] FAILED:',e.message,'— SAVING GPS:',gpsMi,'mi');
           _geocodeEndThenSave(gpsMi,fromA,toA);
         });
     }
@@ -5385,30 +5364,38 @@ function stopTracking(){
         var _geoTimeout=setTimeout(function(){
           if(!_geoDone&&!_gpsTrioSaved){_geoDone=true;_doSave(finalMi,fromA,toA);}
         },5000);
-        fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+endPos.lat+','+endPos.lng+'&result_type=street_address|premise|subpremise|route&key='+_MAPS_KEY)
+        // Build 176: coord validation + type-priority selection
+        if(!endPos.lat||!endPos.lng||endPos.lat===0||endPos.lng===0){
+          console.warn('[GEOCODE] Bad end coords:',endPos.lat,endPos.lng);
+          _geoDone=true;clearTimeout(_geoTimeout);
+          _doSave(finalMi,fromA,toA);
+          return;
+        }
+        fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+endPos.lat+','+endPos.lng+'&key='+_MAPS_KEY)
           .then(function(r){return r.json();})
           .then(function(data){
             if(_geoDone)return;
-            // If street-level filter returned nothing, retry without filter
-            if(data.status==='ZERO_RESULTS'){
-              return fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+endPos.lat+','+endPos.lng+'&key='+_MAPS_KEY)
-                .then(function(r2){return r2.json();});
-            }
-            return data;
-          })
-          .then(function(data){
-            if(!data||_geoDone)return;
             _geoDone=true;clearTimeout(_geoTimeout);
-            if(data.status==='OK'&&data.results&&data.results[0]){
-              var endAddr=data.results[0].formatted_address;
-              _doSave(finalMi,fromA,endAddr);
+            if(data.status==='OK'&&data.results&&data.results.length>0){
+              var types=['street_address','premise','route','intersection','neighborhood','sublocality','locality'];
+              var pick=null;
+              for(var ti=0;ti<types.length&&!pick;ti++){
+                for(var ri=0;ri<data.results.length;ri++){
+                  if(data.results[ri].types.indexOf(types[ti])>-1){pick=data.results[ri];break;}
+                }
+              }
+              if(!pick)pick=data.results[0];
+              console.log('[GEOCODE end] Selected',pick.types.join(','),'—',pick.formatted_address);
+              _doSave(finalMi,fromA,pick.formatted_address);
             } else {
+              console.warn('[GEOCODE end] Status:',data.status);
               _doSave(finalMi,fromA,toA);
             }
           })
-          .catch(function(){
+          .catch(function(e){
             if(_geoDone)return;
             _geoDone=true;clearTimeout(_geoTimeout);
+            console.warn('[GEOCODE end] Failed:',e.message);
             _doSave(finalMi,fromA,toA);
           });
       } else {
@@ -5450,7 +5437,8 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     return _getDefaultVehicleId();
   })();
   var _elapsedPart=timeStr.indexOf('\u00b7')>=0?timeStr.substring(timeStr.indexOf('\u00b7')):(elapsed+' min');
-  TRIPS.unshift({tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+_elapsedPart,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId,startLat:window._tripStartLat||null,startLng:window._tripStartLng||null,endLat:window._tripEndLat||null,endLng:window._tripEndLng||null});
+  var _newUid=_genTripId();
+  TRIPS.unshift({trip_uid:_newUid,synced:false,tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+_elapsedPart,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId,startLat:window._tripStartLat||null,startLng:window._tripStartLng||null,endLat:window._tripEndLat||null,endLng:window._tripEndLng||null});
   try{if(_gpsVehId)localStorage.setItem('mymilesai_last_vehicle',_gpsVehId);}catch(e){}
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   // Update frequent location memory from GPS coordinates so Named Places populate automatically
@@ -5463,8 +5451,30 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     _updateFreqLoc(_startPos.lat,_startPos.lng,fromAddr);
   }
   renderTrips();renderAlerts();saveTripsToStorage();
-  /* Sync to Supabase — Build 167: includes coords + proper date/time */
-  (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=(r&&r.data&&r.data.user)||window._currentUser;if(!u||!u.id){console.warn('[TripSave] no user');return;}var row={user_id:u.id,from_addr:_t.from||'',to_addr:_t.to||'',miles:parseFloat(_t.mi)||0,type:_t.type||'uncl',trip_date:new Date().toLocaleDateString('en-CA'),trip_time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),deductible:_t.type==='biz',purpose:_t.purpose||'',notes:_t.notes||'',start_lat:parseFloat(_t.startLat)||0,start_lng:parseFloat(_t.startLng)||0,end_lat:parseFloat(_t.endLat)||0,end_lng:parseFloat(_t.endLng)||0};console.log('[TripSave]',row);_sb.from('trips').insert(row).then(function(res){if(res.error){console.warn('[TripSave] error',res.error);_addToPendingQueue(_t);if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(e){console.warn('[TripSave] catch',e);_addToPendingQueue(_t);if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');});}).catch(function(e){console.warn('[TripSave] auth catch',e);_addToPendingQueue(_t);});})();
+  /* Sync to Supabase — Build 176: upsert by trip_uid, sets synced flag */
+  (function(){
+    var _t=TRIPS[0];
+    if(!_sb||!_sb.auth)return;
+    _sb.auth.getUser().then(function(r){
+      var u=(r&&r.data&&r.data.user)||window._currentUser;
+      if(!u||!u.id){console.warn('[TripSave] no user — trip kept as unsynced for retry');return;}
+      var row=_buildTripRow(_t,u.id);
+      console.log('[TripSave] upserting',row);
+      _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
+        if(res.error){
+          console.warn('[TripSave] upsert error',res.error);
+          if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
+        } else {
+          _t.synced=true;
+          saveTripsToStorage();
+          console.log('[TripSave] ✓ synced trip_uid',_t.trip_uid);
+        }
+      }).catch(function(e){
+        console.warn('[TripSave] upsert catch',e);
+        if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
+      });
+    }).catch(function(e){console.warn('[TripSave] auth catch',e);});
+  })();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
   /* AI trip categorization (fire and forget) */
   (function(){var _t=TRIPS[0];if(!_t||!_t.from||!_t.to||_t.type!=='uncl')return;fetch('https://mymilesai-ai.harijasllc.workers.dev/categorize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:_t.from,to:_t.to,time:_t.time,day:new Date().toLocaleDateString('en-US',{weekday:'long'}),history:TRIPS.slice(1,6).map(function(t){return{from:t.from,to:t.to,type:t.type};})})}).then(function(r){return r.json();}).then(function(data){if(data.type&&data.confidence>0.8&&_t.type==='uncl'){_t.type=data.type;_t.ded=!!CAT_DEDUCTIBLE[data.type];saveTripsToStorage();renderTrips();showToast(_i('user'),'AI: '+CAT_LABELS[data.type]+' ('+Math.round(data.confidence*100)+'%)',3000);}}).catch(function(){});})();
@@ -5476,8 +5486,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   // Always ask user to confirm trip type after every trip
   setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
   _gpsTrioSaved=false;
-  // Build 148: flush pending queue immediately after save (catches auth failures)
-  setTimeout(_flushPendingQueue,500);
+  // Build 176: unsynced trips retried via _syncWithSupabase on next foreground
 }
 var _classifyCountdown=null;
 function showClassifyPrompt(tripId,from,to,dist,autoType){
@@ -6366,7 +6375,8 @@ function _doSaveManual(){
     try{var lu=localStorage.getItem('mymilesai_last_vehicle');if(lu&&_vehicles.find(function(v){return v.id===lu;}))return lu;}catch(e){}
     return _getDefaultVehicleId();
   })();
-  TRIPS.unshift({tripId:newTripId,id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:!!CAT_DEDUCTIBLE[autoType],purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT,vehicleId:_manVehId,startLat:(fromCoords?fromCoords.lat:null),startLng:(fromCoords?fromCoords.lng:null),endLat:(toCoords?toCoords.lat:null),endLng:(toCoords?toCoords.lng:null)});
+  var _manUid=_genTripId();
+  TRIPS.unshift({trip_uid:_manUid,synced:false,tripId:newTripId,id:newId,from:f,to:t,mi:mi,type:autoType,time:timeLabel,day:tripDay,date:tripDateStr,ts:tripTs,ded:!!CAT_DEDUCTIBLE[autoType],purpose:purpose,notes:notes,path:randomPath(),startTime:startT,endTime:endT,vehicleId:_manVehId,startLat:(fromCoords?fromCoords.lat:null),startLng:(fromCoords?fromCoords.lng:null),endLat:(toCoords?toCoords.lat:null),endLng:(toCoords?toCoords.lng:null)});
   try{if(_manVehId)localStorage.setItem('mymilesai_last_vehicle',_manVehId);}catch(e){}
   if(autoType!=='uncl')checkFrequentRoute(TRIPS[0]);
   renderTrips();
@@ -6375,8 +6385,27 @@ function _doSaveManual(){
   showToast(_i('ccheck'),'Trip saved · '+dist+' '+LOC.unit);
   recordTripEnd();
   saveTripsToStorage();
-  /* Sync to Supabase — Build 167: includes coords + proper date/time */
-  (function(){var _t=TRIPS[0];if(!_sb||!_sb.auth)return;_sb.auth.getUser().then(function(r){var u=(r&&r.data&&r.data.user)||window._currentUser;if(!u||!u.id){console.warn('[TripSave] no user');return;}var row={user_id:u.id,from_addr:_t.from||'',to_addr:_t.to||'',miles:parseFloat(_t.mi)||0,type:_t.type||'uncl',trip_date:new Date().toLocaleDateString('en-CA'),trip_time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),deductible:_t.type==='biz',purpose:_t.purpose||'',notes:_t.notes||'',start_lat:parseFloat(_t.startLat)||0,start_lng:parseFloat(_t.startLng)||0,end_lat:parseFloat(_t.endLat)||0,end_lng:parseFloat(_t.endLng)||0};console.log('[TripSave]',row);_sb.from('trips').insert(row).then(function(res){if(res.error){console.warn('[TripSave] error',res.error);_addToPendingQueue(_t);if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');}else{_removeFromPendingQueue(_t.tripId);}}).catch(function(e){console.warn('[TripSave] catch',e);_addToPendingQueue(_t);if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');});}).catch(function(e){console.warn('[TripSave] auth catch',e);_addToPendingQueue(_t);});})();
+  /* Sync to Supabase — Build 176: upsert by trip_uid */
+  (function(){
+    var _t=TRIPS[0];
+    if(!_sb||!_sb.auth)return;
+    _sb.auth.getUser().then(function(r){
+      var u=(r&&r.data&&r.data.user)||window._currentUser;
+      if(!u||!u.id){console.warn('[TripSave] no user — kept unsynced');return;}
+      var row=_buildTripRow(_t,u.id);
+      console.log('[TripSave] upserting',row);
+      _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
+        if(res.error){
+          console.warn('[TripSave] upsert error',res.error);
+          if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
+        } else {
+          _t.synced=true;
+          saveTripsToStorage();
+          console.log('[TripSave] ✓ synced trip_uid',_t.trip_uid);
+        }
+      }).catch(function(e){console.warn('[TripSave] upsert catch',e);});
+    }).catch(function(e){console.warn('[TripSave] auth catch',e);});
+  })();
   closeAddTrip();
   // Build 135: reset accumulators after manual save so next trip starts at 0
   totalDist=0; positions=[]; trackStart=Date.now(); window._lastTripPersist=0;
@@ -7152,34 +7181,10 @@ function _decStore(key){
 
 function saveTripsToStorage(){
   try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));localStorage.setItem('mymilesai_last_save',Date.now().toString());}catch(e){}
-  // Debounce cloud sync — wait 2s after last change
+  // Build 176: no auto-bulk-push. Individual trip saves go through upsert in finishSaveTrackedTrip / _doSaveManual.
+  // _syncWithSupabase on foreground handles unsynced trips. Keep jsonbin cloud sync for legacy users.
   if(_syncTimer)clearTimeout(_syncTimer);
-  _syncTimer=setTimeout(function(){_pushToCloud();_pushTripsToSupabase();},2000);
-}
-
-async function _pushTripsToSupabase(){
-  if(!_sb||!currentUser||!TRIPS.length)return;
-  try{
-    // Build 167: match actual DB schema with coords + proper date/time
-    var rows=TRIPS.map(function(t){return{
-      user_id:currentUser.id,
-      from_addr:t.from||'',to_addr:t.to||'',
-      miles:parseFloat(t.mi)||0,type:t.type||'uncl',deductible:t.type==='biz',
-      trip_date:(function(){
-        if(t.ts){return new Date(t.ts).toLocaleDateString('en-CA');}
-        return new Date().toLocaleDateString('en-CA');
-      })(),trip_time:(function(){
-        if(t.ts){return new Date(t.ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
-        return t.time||'';
-      })(),
-      purpose:t.purpose||'',notes:t.notes||'',
-      start_lat:parseFloat(t.startLat)||0,start_lng:parseFloat(t.startLng)||0,
-      end_lat:parseFloat(t.endLat)||0,end_lng:parseFloat(t.endLng)||0
-    };});
-    var result=await _sb.from('trips').insert(rows);
-    if(result.error)throw result.error;
-    _showSyncStatus('Synced to cloud ✓',true);
-  }catch(e){console.warn('Supabase trip push failed:',e.message);_showSyncStatus('Sync failed — saved locally',false);}
+  _syncTimer=setTimeout(function(){_pushToCloud();},2000);
 }
 
 async function _pullTripsFromSupabase(){
@@ -7989,64 +7994,96 @@ if(autoDetect){
 updateAutoBtn();
 updateDebugPanel();
 
-/* Flush any trips that failed to sync last session */
-setTimeout(_flushPendingQueue,3000);
-// Build 137: pull latest trips from Supabase + sync on every foreground (max once / 5 min)
+// Build 176: unified sync — pull first, then push unsynced. Dedupe by trip_uid.
 var _syncInProgress=false;
-function _syncTripsFromSupabase(userId){
-  // Build 141 hotfix: dedup lock + full-replace sync
-  if(_syncInProgress){console.log('[Sync] Already syncing, skipping');return;}
-  if(!_sb||!userId){clearTimeout(window._startupFailsafe);return;}
+async function _syncWithSupabase(userId){
+  if(!_sb||!userId||_syncInProgress){console.log('[Sync] Skipped — in progress or missing args');return;}
   _syncInProgress=true;
-  console.log('[Sync] Full Supabase sync for:',userId);
-  _sb.from('trips').select('*').eq('user_id',userId).order('created_at',{ascending:false}).limit(500)
-    .then(function(res){
-      if(res.error){console.warn('[Sync] Error:',res.error.message);clearTimeout(window._startupFailsafe);return;}
-      if(!res.data||res.data.length===0){console.log('[Sync] No remote trips');clearTimeout(window._startupFailsafe);return;}
-      var remoteMap={};
-      res.data.forEach(function(r){
-        // Build 145: read actual DB columns
-        remoteMap[r.id]={id:r.id,tripId:String(r.id),from:r.from_addr||'',to:r.to_addr||'',
-          mi:parseFloat(r.miles)||0,type:r.type||'uncl',
-          date:r.trip_date||'',day:r.trip_date?r.trip_date.split(',')[0]:'',
-          time:r.trip_time||'',ts:r.created_at?new Date(r.created_at).getTime():0,
-          purpose:r.purpose||'',notes:r.notes||'',
-          ded:!!CAT_DEDUCTIBLE[r.type||'uncl'],path:randomPath()};
+  try{
+    // A) PULL first
+    console.log('[Sync] Pulling remote trips for user',userId);
+    var res=await _sb.from('trips').select('*').eq('user_id',userId).order('id',{ascending:false}).limit(500);
+    if(res.error){console.warn('[Sync] Pull error:',res.error.message);}
+    else if(res.data){
+      console.log('[Sync] Pulled',res.data.length,'remote trips');
+      var remoteByUid={};
+      res.data.forEach(function(r){if(r.trip_uid)remoteByUid[r.trip_uid]=r;});
+      // Merge: update local entries whose trip_uid matches remote
+      TRIPS.forEach(function(t){
+        if(t.trip_uid&&remoteByUid[t.trip_uid]){
+          var r=remoteByUid[t.trip_uid];
+          t.mi=parseFloat(r.miles)||t.mi;
+          t.from=r.from_addr||t.from;
+          t.to=r.to_addr||t.to;
+          t.type=r.type||t.type;
+          t.ded=!!r.deductible;
+          t.synced=true;
+          delete remoteByUid[t.trip_uid];
+        }
       });
-      // Keep local-only trips (not yet synced) + replace everything else from remote
-      var localOnly=TRIPS.filter(function(t){return t.tripId&&!remoteMap[t.tripId];});
-      var merged=Object.keys(remoteMap).map(function(k){return remoteMap[k];}).concat(localOnly);
-      merged.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
-      TRIPS=merged;
+      // Add remote-only trips
+      Object.keys(remoteByUid).forEach(function(uid){
+        var r=remoteByUid[uid];
+        TRIPS.push({
+          trip_uid:r.trip_uid,tripId:String(r.id),id:r.id,
+          from:r.from_addr||'',to:r.to_addr||'',
+          mi:parseFloat(r.miles)||0,type:r.type||'uncl',
+          ded:!!r.deductible,date:r.trip_date||'',
+          day:r.trip_date?r.trip_date.split(',')[0]:'',
+          time:r.trip_time||'',
+          ts:r.created_at?new Date(r.created_at).getTime():Date.now(),
+          purpose:r.purpose||'',notes:r.notes||'',
+          startLat:r.start_lat,startLng:r.start_lng,
+          endLat:r.end_lat,endLng:r.end_lng,
+          synced:true,path:randomPath()
+        });
+      });
+      TRIPS.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
       saveTripsToStorage();renderTrips();
       if(typeof _updateYTD==='function')_updateYTD();
       if(typeof _updateFilterCounts==='function')_updateFilterCounts();
-      clearTimeout(window._startupFailsafe);
-      console.log('[Sync] Done. Remote:',res.data.length,'Local-only:',localOnly.length,'Total:',merged.length);
-      _syncInProgress=false;
-    }).catch(function(e){
-      console.warn('[Sync] Exception:',e&&e.message);
-      clearTimeout(window._startupFailsafe);
-      _syncInProgress=false;
-    });
+    }
+
+    // B) PUSH only unsynced trips
+    var unsynced=TRIPS.filter(function(t){return t.trip_uid&&t.synced!==true;});
+    console.log('[Sync] Pushing',unsynced.length,'unsynced trips');
+    for(var i=0;i<unsynced.length;i++){
+      var t=unsynced[i];
+      var row=_buildTripRow(t,userId);
+      var up=await _sb.from('trips').upsert(row,{onConflict:'trip_uid'});
+      if(!up.error){
+        t.synced=true;
+        console.log('[Sync] ✓ Pushed trip_uid',t.trip_uid);
+      } else {
+        console.warn('[Sync] Push failed for trip_uid',t.trip_uid,':',up.error.message);
+      }
+    }
+    saveTripsToStorage();
+  }catch(e){
+    console.warn('[Sync] Exception:',e&&e.message);
+  }finally{
+    clearTimeout(window._startupFailsafe);
+    _syncInProgress=false;
+  }
 }
+// Back-compat: old callers reference _syncTripsFromSupabase
+function _syncTripsFromSupabase(userId){return _syncWithSupabase(userId);}
+
+// Initial sync on load
+setTimeout(function(){
+  if(window._currentUser&&window._currentUser.id)_syncWithSupabase(window._currentUser.id);
+},3000);
+
+// Foreground sync (max once / 5 min)
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState!=='visible')return;
   var lastSync=parseInt(localStorage.getItem('mmai_last_supabase_sync')||'0');
   if(Date.now()-lastSync>5*60*1000){
     localStorage.setItem('mmai_last_supabase_sync',Date.now().toString());
-    if(window._currentUser&&window._currentUser.id)_syncTripsFromSupabase(window._currentUser.id);
-    else clearTimeout(window._startupFailsafe); // no user — remove skeleton
+    if(window._currentUser&&window._currentUser.id)_syncWithSupabase(window._currentUser.id);
+    else clearTimeout(window._startupFailsafe);
   }
 });
-// Build 134: guaranteed Supabase delivery — multiple flush triggers
-document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='visible'){setTimeout(_flushPendingQueue,2000);}
-});
-window.addEventListener('mymilesai-bg-locations',function(){setTimeout(_flushPendingQueue,3000);});
-setInterval(function(){
-  if(navigator.onLine&&_getPendingQueue().length>0){_flushPendingQueue();}
-},60000);
 
 /* Auto-resume monitoring if user had it enabled before app was killed */
 if(autoDetect&&!tracking){
