@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 179 -->
+<!-- Build 180 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 179</title>
+<title>MyMilesAI — Build 180</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -828,7 +828,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
       <div class="sr"><div><h4>Appearance</h4><p>App theme</p></div><div style="display:flex;gap:8px"><button onclick="_setTheme('auto')" id="themeAuto" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--vi);background:var(--vi-s);font-size:13px;cursor:pointer;font-weight:700;color:var(--vi)">Auto</button><button onclick="_setTheme('light')" id="themeLight" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);font-size:13px;cursor:pointer">☀️ Light</button><button onclick="_setTheme('dark')" id="themeDark" style="padding:6px 14px;border-radius:var(--rpill);border:1.5px solid var(--ink6);background:var(--white);font-size:13px;cursor:pointer">🌙 Dark</button></div></div>
-<div class="sr"><div><h4>Distance unit</h4><p>Auto-detected by region</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value,true);saveSettings()"><option value="US">Miles (US)</option><option value="CA">Kilometers (CA)</option><option value="UK">Miles (UK)</option><option value="AU">Kilometres (AU)</option></select></div>
+<div class="sr"><div><h4>Country & Units</h4><p>Auto-detected — change to override</p></div><select class="sr-sel" id="unitSel" onchange="setLocale(this.value,true);saveSettings()"><option value="US">🇺🇸 United States · Miles</option><option value="CA">🇨🇦 Canada · km</option><option value="UK">🇬🇧 United Kingdom · Miles</option><option value="AU">🇦🇺 Australia · km</option><option value="NZ">🇳🇿 New Zealand · km</option><option value="IN">🇮🇳 India · km</option><option value="DE">🇩🇪 Germany · km</option><option value="FR">🇫🇷 France · km</option><option value="MX">🇲🇽 Mexico · km</option></select></div>
       <div class="sr"><div><h4>Speed threshold</h4><p id="threshLbl">Min mph to detect</p></div><input type="number" class="sr-n" value="8" id="threshVal" onchange="saveSettings()"></div>
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
 
@@ -880,7 +880,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 179</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 180</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -1165,9 +1165,28 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
         <span>Privacy-first</span>
         <span>30-sec setup</span>
       </div>
-      <div id="authCountryPicker" style="display:flex;gap:8px;justify-content:center;margin:-8px 0 12px;">
-        <button id="authCountryUSA" onclick="_selectCountry('US')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;border:2px solid #2563EB;background:rgba(37,99,235,.08);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:#2563EB;transition:all .2s;">&#127482;&#127480; USA</button>
-        <button id="authCountryCA" onclick="_selectCountry('CA')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;color:#6B7280;transition:all .2s;">&#127464;&#127462; Canada</button>
+      <!-- Build 180: auto-detected country display + Change link -->
+      <div id="authCountryAuto" style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:-8px 0 12px;">
+        <div id="authCountryLabel" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.12);font-family:var(--f);font-size:12px;font-weight:700;color:#2563EB;">
+          <span id="authCountryFlag">🇺🇸</span>
+          <span id="authCountryName">United States</span>
+          <span style="color:#9CA3AF;font-weight:400;">·</span>
+          <span id="authCountryUnit">Miles</span>
+          <span style="color:#9CA3AF;font-weight:400;">·</span>
+          <span id="authCountryRate">$0.70/mi</span>
+        </div>
+        <a href="#" onclick="event.preventDefault();_toggleCountryPicker();" id="authCountryChange" style="font-size:11px;color:#6B7280;text-decoration:underline;font-weight:500;cursor:pointer;">Change country</a>
+        <select id="authCountryPickerSel" onchange="_selectCountry(this.value);" style="display:none;padding:8px 14px;border-radius:12px;border:1.5px solid #e5e7eb;background:#fff;font-family:var(--f);font-size:13px;font-weight:600;color:#111827;cursor:pointer;margin-top:4px;">
+          <option value="US">🇺🇸 United States · Miles · $0.70/mi</option>
+          <option value="CA">🇨🇦 Canada · km · $0.73/km</option>
+          <option value="UK">🇬🇧 United Kingdom · Miles · £0.45/mi</option>
+          <option value="AU">🇦🇺 Australia · km · A$0.88/km</option>
+          <option value="NZ">🇳🇿 New Zealand · km · $0.99/km</option>
+          <option value="IN">🇮🇳 India · km · ₹8.00/km</option>
+          <option value="DE">🇩🇪 Germany · km · €0.30/km</option>
+          <option value="FR">🇫🇷 France · km · €0.603/km</option>
+          <option value="MX">🇲🇽 Mexico · km · $0.93/km</option>
+        </select>
       </div>
       <div id="authPricingPreview" style="background:linear-gradient(135deg,#f0f4ff,#faf5ff);border:1px solid #e0e7ff;border-radius:16px;padding:14px 16px;margin-bottom:20px;text-align:left;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -1643,27 +1662,38 @@ try{_renderPricing();}catch(e){}
 // ── UI helpers ───────────────────────────────────────────────────────
 var _selectedAuthPlan = 'pro';
 
-// ── Country selector on auth screen ──
-function _selectCountry(country){
-  localStorage.setItem('mymilesai_userCountry',country);
-  var usBtn=document.getElementById('authCountryUSA');
-  var caBtn=document.getElementById('authCountryCA');
-  if(country==='US'){
-    if(usBtn){usBtn.style.border='2px solid #2563EB';usBtn.style.background='rgba(37,99,235,.08)';usBtn.style.color='#2563EB';}
-    if(caBtn){caBtn.style.border='1.5px solid #e5e7eb';caBtn.style.background='#fff';caBtn.style.color='#6B7280';}
+// Build 180: country selector — now supports all LOCALES, auto-detected by default
+function _toggleCountryPicker(){
+  var sel=document.getElementById('authCountryPickerSel');
+  var link=document.getElementById('authCountryChange');
+  if(!sel)return;
+  if(sel.style.display==='none'){
+    sel.style.display='';
+    if(link)link.textContent='Hide';
   } else {
-    if(caBtn){caBtn.style.border='2px solid #2563EB';caBtn.style.background='rgba(37,99,235,.08)';caBtn.style.color='#2563EB';}
-    if(usBtn){usBtn.style.border='1.5px solid #e5e7eb';usBtn.style.background='#fff';usBtn.style.color='#6B7280';}
+    sel.style.display='none';
+    if(link)link.textContent='Change country';
   }
-  // Show/update tax rate label
-  var lbl=document.getElementById('authTaxRateLabel');
-  if(lbl){
-    if(country==='CA'){lbl.style.display='none';}
-    else{lbl.style.display='';lbl.textContent='IRS 2026 Rate · $0.70/mi · Tax deductible';}
-  }
+}
+
+function _selectCountry(country){
+  if(!LOCALES[country])country='US';
+  var loc=LOCALES[country];
+  localStorage.setItem('mymilesai_userCountry',country);
+  // Update the auto-detected display
+  var flag=document.getElementById('authCountryFlag');
+  var name=document.getElementById('authCountryName');
+  var unit=document.getElementById('authCountryUnit');
+  var rate=document.getElementById('authCountryRate');
+  if(flag)flag.textContent=loc.flag;
+  if(name)name.textContent=loc.name;
+  if(unit)unit.textContent=loc.unit==='mi'?'Miles':'km';
+  if(rate)rate.textContent=loc.currency+loc.rate.toFixed(loc.rate<1?2:2)+'/'+loc.unit;
+  var sel=document.getElementById('authCountryPickerSel');
+  if(sel)sel.value=country;
   // Update tagline
   var tagline=document.querySelector('.auth-tagline');
-  if(tagline)tagline.textContent=(country==='CA'?'Track every kilometre. Claim every dollar.':'Track every mile. Claim every dollar.');
+  if(tagline)tagline.textContent=loc.tagline||'Track every mile. Claim every dollar.';
   // Apply locale
   if(typeof setLocale==='function')setLocale(country,true);
   if(typeof _updateAuthTaxLabel==='function')_updateAuthTaxLabel(country);
@@ -1678,23 +1708,28 @@ function _selectCountry(country){
   }
 }
 
-// Restore country on page load
+// Build 180: auto-detect country on page load (user override via Change link)
 (function(){
   var saved=localStorage.getItem('mymilesai_userCountry');
-  if(saved)setTimeout(function(){_selectCountry(saved);},100);
+  var detected=saved||(typeof detectLocale==='function'?detectLocale():'US');
+  console.log('[Locale] Detected country:',detected,saved?'(from localStorage)':'(auto-detected)');
+  setTimeout(function(){_selectCountry(detected);},100);
 })()
+
 function _updateAuthTaxLabel(country){
+  var loc=LOCALES[country]||LOCALES.US;
   var lbl=document.getElementById('authTaxRateLabel');
   if(lbl){
-    if(country==='CA') lbl.textContent='CRA 2026 Rate · $0.73/km · Tax deductible';
-    else lbl.textContent='IRS 2026 Rate · $0.70/mi · Tax deductible';
+    lbl.textContent=loc.taxLabel+' · '+loc.currency+loc.rate.toFixed(2)+'/'+loc.unit+' · Tax deductible';
+    lbl.style.display='';
   }
   var al=document.getElementById('auditDefenseLabel');
   var ad=document.getElementById('auditDefenseDesc');
-  if(al)al.textContent=(country==='CA'?'CRA Audit Defense Pack':'IRS Audit Defense Pack');
-  if(ad)ad.textContent=(country==='CA'?'CRA-ready documentation if you get audited':'IRS-ready documentation if you get audited');
+  var authName={US:'IRS',CA:'CRA',UK:'HMRC',AU:'ATO',IN:'IT Dept',DE:'Finanzamt',FR:'DGFIP',NZ:'IRD',MX:'SAT'}[country]||'Tax';
+  if(al)al.textContent=authName+' Audit Defense Pack';
+  if(ad)ad.textContent=authName+'-ready documentation if you get audited';
   var tagline=document.querySelector('.auth-tagline');
-  if(tagline)tagline.textContent=(country==='CA'?'Track every kilometre. Claim every dollar.':'Track every mile. Claim every dollar.');
+  if(tagline)tagline.textContent=loc.tagline||'Track every mile. Claim every dollar.';
   window._appCountry=country;
 }
 // ═══ AUTH v2 — Dual-mode (signup/signin) state machine ═══
@@ -2519,22 +2554,51 @@ park:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="curren
 };var svg=(m[n]||'').replace(/SZ/g,s);if(c)svg=svg.replace(/currentColor/g,c);return svg;}
 
 /* ===== LOCALE ENGINE ===== */
+// Build 180: expanded locales + auto-detect from device region/timezone
 var LOCALES={
-  US:{unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.70,med:.21,char:.14}},
-  CA:{unit:'km',label:'kilometers',speed:'km/h',rate:.73,flag:'🇨🇦',country:'CA',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate',rates:{biz:.73,med:.73,char:.73}},
-  UK:{unit:'mi',label:'miles',speed:'mph',rate:.45,flag:'🇬🇧',country:'UK',conv:1,currency:'£',taxLabel:'HMRC 2026 Rate',rates:{biz:.45,med:0,char:0}},
-  AU:{unit:'km',label:'kilometres',speed:'km/h',rate:.88,flag:'🇦🇺',country:'AU',conv:1.60934,currency:'A$',taxLabel:'ATO 2025-26 Rate',rates:{biz:.88,med:0,char:0}}
+  US:{unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',name:'United States',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.70,med:.21,char:.14},tagline:'Track every mile. Claim every dollar.'},
+  CA:{unit:'km',label:'kilometers',speed:'km/h',rate:.73,flag:'🇨🇦',country:'CA',name:'Canada',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate',rates:{biz:.73,med:.73,char:.73},tagline:'Track every kilometre. Claim every dollar.'},
+  UK:{unit:'mi',label:'miles',speed:'mph',rate:.45,flag:'🇬🇧',country:'UK',name:'United Kingdom',conv:1,currency:'£',taxLabel:'HMRC 2026 Rate',rates:{biz:.45,med:0,char:0},tagline:'Track every mile. Claim every pound.'},
+  AU:{unit:'km',label:'kilometres',speed:'km/h',rate:.88,flag:'🇦🇺',country:'AU',name:'Australia',conv:1.60934,currency:'A$',taxLabel:'ATO 2025-26 Rate',rates:{biz:.88,med:0,char:0},tagline:'Track every kilometre. Claim every dollar.'},
+  IN:{unit:'km',label:'kilometers',speed:'km/h',rate:8.00,flag:'🇮🇳',country:'IN',name:'India',conv:1.60934,currency:'₹',taxLabel:'IT 2026 Rate',rates:{biz:8.00,med:0,char:0},tagline:'Track every kilometre. Claim every rupee.'},
+  DE:{unit:'km',label:'kilometer',speed:'km/h',rate:.30,flag:'🇩🇪',country:'DE',name:'Germany',conv:1.60934,currency:'€',taxLabel:'EStG 2026 Rate',rates:{biz:.30,med:0,char:0},tagline:'Track every kilometre. Claim every euro.'},
+  FR:{unit:'km',label:'kilomètres',speed:'km/h',rate:.603,flag:'🇫🇷',country:'FR',name:'France',conv:1.60934,currency:'€',taxLabel:'DGFIP 2026 Rate',rates:{biz:.603,med:0,char:0},tagline:'Track every kilometre. Claim every euro.'},
+  NZ:{unit:'km',label:'kilometres',speed:'km/h',rate:.99,flag:'🇳🇿',country:'NZ',name:'New Zealand',conv:1.60934,currency:'$',taxLabel:'IRD 2026 Rate',rates:{biz:.99,med:0,char:0},tagline:'Track every kilometre. Claim every dollar.'},
+  MX:{unit:'km',label:'kilómetros',speed:'km/h',rate:.93,flag:'🇲🇽',country:'MX',name:'Mexico',conv:1.60934,currency:'$',taxLabel:'SAT 2026 Rate',rates:{biz:.93,med:0,char:0},tagline:'Track every kilometre. Claim every peso.'}
 };
 let LOC=LOCALES.US;
 function _useKm(){return LOC.unit==='km';}
+
+// Build 180: richer detection — native region hint > region code > timezone > default
 function detectLocale(){
   try{
+    // 1) Native layer hint (iOS App.js sets window.__DEVICE_REGION__)
+    if(typeof window.__DEVICE_REGION__==='string'){
+      var nr=window.__DEVICE_REGION__.toUpperCase();
+      if(nr==='GB')nr='UK';
+      if(LOCALES[nr])return nr;
+    }
+    // 2) Region code from navigator.language (e.g. 'en-US' → 'US')
+    var lang=navigator.language||'';
+    var region=(lang.split('-')[1]||'').toUpperCase();
+    if(region==='GB')region='UK';
+    if(LOCALES[region])return region;
+    // 3) Timezone fallback
     var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
-    if(tz.startsWith('America/Toronto')||tz.startsWith('America/Vancouver')||tz.startsWith('America/Winnipeg')||tz.startsWith('America/Edmonton')||tz.startsWith('America/Halifax')||tz.startsWith('America/St_Johns')||tz.startsWith('America/Regina')||tz.includes('Canada'))return'CA';
-    if(tz.startsWith('Europe/London')||tz.startsWith('Europe/Belfast'))return'UK';
-    if(tz.startsWith('Australia/'))return'AU';
+    var tzMap={
+      'America/Toronto':'CA','America/Vancouver':'CA','America/Edmonton':'CA',
+      'America/Winnipeg':'CA','America/Halifax':'CA','America/St_Johns':'CA','America/Regina':'CA',
+      'Europe/London':'UK','Europe/Belfast':'UK',
+      'Europe/Berlin':'DE','Europe/Munich':'DE',
+      'Europe/Paris':'FR',
+      'Asia/Kolkata':'IN','Asia/Calcutta':'IN',
+      'Pacific/Auckland':'NZ',
+      'America/Mexico_City':'MX','America/Monterrey':'MX'
+    };
+    if(tzMap[tz])return tzMap[tz];
+    if(tz.indexOf('Canada')>-1)return'CA';
+    if(tz.indexOf('Australia/')===0)return'AU';
   }catch(e){}
-  try{var l=navigator.language||'';if(l==='en-CA'||l==='fr-CA')return'CA';if(l==='en-GB')return'UK';if(l==='en-AU')return'AU';}catch(e){}
   return'US';
 }
 function _setTheme(t){
