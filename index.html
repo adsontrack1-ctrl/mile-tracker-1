@@ -4116,6 +4116,8 @@ function _buildTripRow(t, userId){
     start_lng: parseFloat(t.startLng)||0,
     end_lat: parseFloat(t.endLat)||0,
     end_lng: parseFloat(t.endLng)||0
+    // Note: 'estimated' is a local-only flag, not a DB column. Retry loop in
+    // _syncWithSupabase clears it when Routes API eventually succeeds.
   };
   console.log('[_buildTripRow] trip_uid in payload:',row.trip_uid);
   return row;
@@ -5357,10 +5359,12 @@ function stopTracking(){
       console.warn('[ROUTES] End:',eLat,eLng);
 
       if(!startLat||!startLng||!eLat||!eLng){
-        console.warn('[ROUTES] Missing coords — using GPS');
-        _geocodeEndThenSave(gpsMi,fromA,toA);
+        console.warn('[ROUTES] Missing coords — using GPS*1.3 estimate');
+        window._tripEstimated=true;
+        _geocodeEndThenSave(parseFloat((gpsMi*1.3).toFixed(1)),fromA,toA);
         return;
       }
+      window._tripEstimated=false;
       console.warn('[ROUTES] Calling computeRoutes...');
       showToast(_i('pin'),'Calculating road distance...',2000);
       fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
@@ -5394,16 +5398,23 @@ function stopTracking(){
             if((data.error.message||'').toLowerCase().indexOf('routes api')>-1||(data.error.status||'')==='PERMISSION_DENIED'){
               console.warn('[ROUTES] HINT: Enable Routes API in Google Cloud Console for this key');
             }
-            _geocodeEndThenSave(gpsMi,fromA,toA);
+            var est1=parseFloat((gpsMi*1.3).toFixed(1));
+            console.warn('[ROUTES] Fallback GPS*1.3 =',est1,'mi (estimated)');
+            window._tripEstimated=true;
+            _geocodeEndThenSave(est1,fromA,toA);
           } else {
-            console.warn('[ROUTES] No route in response — SAVING GPS:',gpsMi,'mi');
-            _geocodeEndThenSave(gpsMi,fromA,toA);
+            var est2=parseFloat((gpsMi*1.3).toFixed(1));
+            console.warn('[ROUTES] No route in response — fallback GPS*1.3 =',est2,'mi (estimated)');
+            window._tripEstimated=true;
+            _geocodeEndThenSave(est2,fromA,toA);
           }
         })
         .catch(function(e){
           console.warn('[ROUTES] === FAILED ===',e.message,e.stack);
-          console.warn('[ROUTES] SAVING GPS:',gpsMi,'mi');
-          _geocodeEndThenSave(gpsMi,fromA,toA);
+          var est3=parseFloat((gpsMi*1.3).toFixed(1));
+          console.warn('[ROUTES] Fallback GPS*1.3 =',est3,'mi (estimated)');
+          window._tripEstimated=true;
+          _geocodeEndThenSave(est3,fromA,toA);
         });
     }
 
@@ -5492,7 +5503,8 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   })();
   var _elapsedPart=timeStr.indexOf('\u00b7')>=0?timeStr.substring(timeStr.indexOf('\u00b7')):(elapsed+' min');
   var _newUid=_genTripId();
-  TRIPS.unshift({trip_uid:_newUid,synced:false,tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+_elapsedPart,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId,startLat:window._tripStartLat||null,startLng:window._tripStartLng||null,endLat:window._tripEndLat||null,endLng:window._tripEndLng||null});
+  TRIPS.unshift({trip_uid:_newUid,synced:false,estimated:!!window._tripEstimated,tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+_elapsedPart,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId,startLat:window._tripStartLat||null,startLng:window._tripStartLng||null,endLat:window._tripEndLat||null,endLng:window._tripEndLng||null});
+  window._tripEstimated=false;
   try{if(_gpsVehId)localStorage.setItem('mymilesai_last_vehicle',_gpsVehId);}catch(e){}
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   // Update frequent location memory from GPS coordinates so Named Places populate automatically
@@ -8220,6 +8232,49 @@ async function _syncWithSupabase(userId){
     }
     console.log('[Sync] === PUSH DONE: ok='+pushOk+', fail='+pushFail+' ===');
     saveTripsToStorage();
+
+    // C) RETRY estimated trips — call Routes API again for trips where it previously failed
+    var estimated=TRIPS.filter(function(t){return t.estimated===true&&t.startLat&&t.endLat;});
+    if(estimated.length>0){
+      console.log('[Sync] === RETRYING',estimated.length,'estimated trips ===');
+      var retryOk=0,retryFail=0;
+      for(var ei=0;ei<estimated.length;ei++){
+        var et=estimated[ei];
+        try{
+          var retryRes=await fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json',
+              'X-Goog-Api-Key':_MAPS_KEY,
+              'X-Goog-FieldMask':'routes.distanceMeters'
+            },
+            body:JSON.stringify({
+              origin:{location:{latLng:{latitude:parseFloat(et.startLat),longitude:parseFloat(et.startLng)}}},
+              destination:{location:{latLng:{latitude:parseFloat(et.endLat),longitude:parseFloat(et.endLng)}}},
+              travelMode:'DRIVE'
+            })
+          });
+          var retryData=await retryRes.json();
+          if(retryData.routes&&retryData.routes[0]&&typeof retryData.routes[0].distanceMeters==='number'){
+            var correctedMi=parseFloat((retryData.routes[0].distanceMeters*0.000621371).toFixed(1));
+            for(var ri=0;ri<TRIPS.length;ri++){
+              if(TRIPS[ri].trip_uid===et.trip_uid){
+                TRIPS[ri].mi=correctedMi;
+                TRIPS[ri].estimated=false;
+                break;
+              }
+            }
+            await _sb.from('trips').update({miles:correctedMi}).eq('trip_uid',et.trip_uid);
+            console.log('[Sync] ✓ Corrected estimated trip',et.trip_uid,':',correctedMi,'mi');
+            retryOk++;
+          } else {
+            retryFail++;
+          }
+        }catch(e){retryFail++;}
+      }
+      console.log('[Sync] === RETRY DONE: ok='+retryOk+', still-estimated='+retryFail+' ===');
+      if(retryOk>0)saveTripsToStorage();
+    }
   }catch(e){
     console.warn('[Sync] Exception:',e&&e.message);
   }finally{
@@ -8235,8 +8290,12 @@ setTimeout(function(){
   if(window._currentUser&&window._currentUser.id)_syncWithSupabase(window._currentUser.id);
 },3000);
 
-// Foreground sync (max once / 5 min)
+// Build 178: visibilitychange — save on hidden, sync on visible (max once / 5 min)
 document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden'){
+    try{saveTripsToStorage();console.warn('[SYNC] App backgrounded — state saved');}catch(e){}
+    return;
+  }
   if(document.visibilityState!=='visible')return;
   var lastSync=parseInt(localStorage.getItem('mmai_last_supabase_sync')||'0');
   if(Date.now()-lastSync>5*60*1000){
@@ -8244,6 +8303,11 @@ document.addEventListener('visibilitychange',function(){
     if(window._currentUser&&window._currentUser.id)_syncWithSupabase(window._currentUser.id);
     else clearTimeout(window._startupFailsafe);
   }
+});
+
+// Build 178: offline event listener — informational log only
+window.addEventListener('offline',function(){
+  console.warn('[SYNC] Network lost — trips will queue in localStorage until online');
 });
 
 /* Auto-resume monitoring if user had it enabled before app was killed */
