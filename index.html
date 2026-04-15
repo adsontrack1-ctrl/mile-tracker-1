@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 191 -->
+<!-- Build 193 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 191</title>
+<title>MyMilesAI — Build 193</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -833,7 +833,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="sr"><div><h4>Default category</h4><p>New trips default to</p></div><select class="sr-sel" id="defaultCatSel" onchange="saveSettings()"><option value="uncl">Unclassified</option><option value="biz">Business</option><option value="pers">Personal</option></select></div>
 
       <div class="sr"><div><h4>Smart stop timer</h4><p>Auto-stop trip after stationary</p></div><select class="sr-sel" id="pauseTimeoutSel" onchange="updatePauseTimeout()"><option value="120000">2 min</option><option value="180000">3 min</option><option value="300000" selected>5 min</option><option value="480000">8 min</option><option value="600000">10 min</option></select></div>
-      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--vi)" id="rateVal">$0.70/mi</div></div>
+      <div class="sr"><div><h4 id="rateLabel">IRS rate</h4><p id="rateDesc">Per mile deduction</p></div><div style="display:flex;align-items:center;gap:4px;font-weight:700;color:var(--vi)" id="rateVal">$0.725/mi</div></div>
     </div>
     <div class="set-hdr">Odometer</div>
     <div class="set">
@@ -880,9 +880,9 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 191</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 193</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
-      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
+      <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
       <div class="sr" onclick="confirmDeleteAccount()"><div><h4 style="color:var(--coral)">Delete My Account</h4><p>Permanently delete all data</p></div><span class="sr-link" style="color:var(--coral)">Delete →</span></div>
     </div>
@@ -1173,11 +1173,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
           <span style="color:#9CA3AF;font-weight:400;">·</span>
           <span id="authCountryUnit">Miles</span>
           <span style="color:#9CA3AF;font-weight:400;">·</span>
-          <span id="authCountryRate">$0.70/mi</span>
+          <span id="authCountryRate">$0.725/mi</span>
         </div>
         <a href="#" onclick="event.preventDefault();_toggleCountryPicker();" id="authCountryChange" style="font-size:11px;color:#6B7280;text-decoration:underline;font-weight:500;cursor:pointer;">Change country</a>
         <select id="authCountryPickerSel" onchange="_selectCountry(this.value);" style="display:none;padding:8px 14px;border-radius:12px;border:1.5px solid #e5e7eb;background:#fff;font-family:var(--f);font-size:13px;font-weight:600;color:#111827;cursor:pointer;margin-top:4px;">
-          <option value="US">🇺🇸 United States · Miles · $0.70/mi</option>
+          <option value="US">🇺🇸 United States · Miles · $0.725/mi</option>
           <option value="CA">🇨🇦 Canada · km · $0.73/km</option>
           <option value="UK">🇬🇧 United Kingdom · Miles · £0.45/mi</option>
           <option value="AU">🇦🇺 Australia · km · A$0.88/km</option>
@@ -1219,7 +1219,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
             <div id="authBizYearly" style="font-size:10px;color:#9ca3af;margin-top:1px;"></div>
           </div>
         </div>
-        <div id="authTaxRateLabel" style="font-size:10px;color:#6366f1;font-weight:700;margin-top:6px;text-align:center;display:none;">IRS 2026 Rate · $0.70/mi · Tax deductible</div>
+        <div id="authTaxRateLabel" style="font-size:10px;color:#6366f1;font-weight:700;margin-top:6px;text-align:center;display:none;">IRS 2026 Rate · $0.725/mi · Tax deductible</div>
         <div style="font-size:10px;color:#9ca3af;margin-top:4px;text-align:center;">&#10003; 10-day free trial · No credit card required · Prices in USD</div>
       </div>
       <button class="auth-btn auth-btn-cta" onclick="_authStart('signup')">Create Account</button>
@@ -1368,7 +1368,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
         <button id="obCountryUS" onclick="_obPickCountry('US')" style="display:flex;align-items:center;gap:16px;padding:20px;border-radius:20px;border:2px solid rgba(99,102,241,.6);background:rgba(108,60,224,.12);cursor:pointer;text-align:left;">
           <span style="font-size:36px;">&#127482;&#127480;</span>
-          <div style="flex:1;"><div style="font-size:17px;font-weight:800;color:#fff;">United States</div><div style="font-size:12px;color:rgba(255,255,255,.6);">IRS · $0.70/mi · Miles</div><div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.2);color:rgba(192,132,252,.9);padding:2px 8px;border-radius:100px;">IRS Form 4562</span><span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.2);color:rgba(192,132,252,.9);padding:2px 8px;border-radius:100px;">Schedule C Ready</span></div></div>
+          <div style="flex:1;"><div style="font-size:17px;font-weight:800;color:#fff;">United States</div><div style="font-size:12px;color:rgba(255,255,255,.6);">IRS · $0.725/mi · Miles</div><div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.2);color:rgba(192,132,252,.9);padding:2px 8px;border-radius:100px;">IRS Form 4562</span><span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.2);color:rgba(192,132,252,.9);padding:2px 8px;border-radius:100px;">Schedule C Ready</span></div></div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,.8)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button id="obCountryCA" onclick="_obPickCountry('CA')" style="display:flex;align-items:center;gap:16px;padding:20px;border-radius:20px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);cursor:pointer;text-align:left;">
@@ -1400,7 +1400,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
       <div class="ob-title">Choose your region</div>
       <div class="ob-desc">We'll set the right unit and tax rate for you.</div>
       <div class="ob-unit-row">
-        <button class="ob-unit-btn active" data-unit="US" onclick="setObUnit(this,'US')"><span style="font-size:32px">🇺🇸</span><strong>Miles</strong><span class="ob-unit-sub">IRS rate $0.70/mi</span></button>
+        <button class="ob-unit-btn active" data-unit="US" onclick="setObUnit(this,'US')"><span style="font-size:32px">🇺🇸</span><strong>Miles</strong><span class="ob-unit-sub">IRS rate $0.725/mi</span></button>
         <button class="ob-unit-btn" data-unit="CA" onclick="setObUnit(this,'CA')"><span style="font-size:32px">🇨🇦</span><strong>Kilometers</strong><span class="ob-unit-sub">CRA rate $0.73/km</span></button>
       </div>
       <div class="ob-unit-row">
@@ -2577,7 +2577,7 @@ park:'<svg width="SZ" height="SZ" viewBox="0 0 24 24" fill="none" stroke="curren
 /* ===== LOCALE ENGINE ===== */
 // Build 180: expanded locales + auto-detect from device region/timezone
 var LOCALES={
-  US:{unit:'mi',label:'miles',speed:'mph',rate:.70,flag:'🇺🇸',country:'US',name:'United States',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.70,med:.21,char:.14},tagline:'Track every mile. Claim every dollar.'},
+  US:{unit:'mi',label:'miles',speed:'mph',rate:.725,flag:'🇺🇸',country:'US',name:'United States',conv:1,currency:'$',taxLabel:'IRS 2026 Rate',rates:{biz:.725,med:.21,char:.14},tagline:'Track every mile. Claim every dollar.'},
   CA:{unit:'km',label:'kilometers',speed:'km/h',rate:.73,flag:'🇨🇦',country:'CA',name:'Canada',conv:1.60934,currency:'$',taxLabel:'CRA 2026 Rate',rates:{biz:.73,med:.73,char:.73},tagline:'Track every kilometre. Claim every dollar.'},
   UK:{unit:'mi',label:'miles',speed:'mph',rate:.45,flag:'🇬🇧',country:'UK',name:'United Kingdom',conv:1,currency:'£',taxLabel:'HMRC 2026 Rate',rates:{biz:.45,med:0,char:0},tagline:'Track every mile. Claim every pound.'},
   AU:{unit:'km',label:'kilometres',speed:'km/h',rate:.88,flag:'🇦🇺',country:'AU',name:'Australia',conv:1.60934,currency:'A$',taxLabel:'ATO 2025-26 Rate',rates:{biz:.88,med:0,char:0},tagline:'Track every kilometre. Claim every dollar.'},
@@ -7519,27 +7519,6 @@ setInterval(_refreshTemplateDists,300000); // refresh every 5 min
 document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshTemplateDists();});
 
 /* Fix #19 — Persist trips to localStorage */
-/* ===== CLOUD SYNC (JSONBin.io) ===== */
-var _JSONBIN_KEY='$2a$10$MyMilesAI_PLACEHOLDER_KEY'; // set via setupCloudSync()
-var _JSONBIN_BIN=''; // bin ID stored in localStorage per user
-var _syncPending=false;
-var _syncTimer=null;
-
-function _getSyncId(){
-  // Use device-unique ID derived from localStorage — same user = same bin
-  try{
-    var sid=localStorage.getItem('mymilesai_syncid');
-    if(!sid){sid='mmai_'+(Date.now().toString(36))+(Math.random().toString(36).slice(2));localStorage.setItem('mymilesai_syncid',sid);}
-    return sid;
-  }catch(e){return 'mmai_default';}
-}
-
-function _showSyncStatus(msg,ok){
-  var el=document.getElementById('syncStatusDot');
-  if(!el)return;
-  el.title=msg;
-  el.style.background=ok?'#22c55e':'#f59e0b';
-}
 
 /* ===== ENCRYPTED STORAGE (client-side obfuscation) ===== */
 var _encKey=(function(){
@@ -7582,8 +7561,6 @@ function saveTripsToStorage(){
       console.error('[saveTripsToStorage] PLAIN FAILED TOO:',e2&&e2.message);
     }
   }
-  if(_syncTimer)clearTimeout(_syncTimer);
-  _syncTimer=setTimeout(function(){_pushToCloud();},2000);
 }
 
 async function _pullTripsFromSupabase(){
@@ -7592,75 +7569,9 @@ async function _pullTripsFromSupabase(){
   if(!_sb||!currentUser)return;
   return _syncWithSupabase(currentUser.id);
 }
-async function _legacy_pullTripsFromSupabase_DISABLED(){
-  if(!_sb||!currentUser)return;
-  try{
-    _showSyncStatus('Syncing...',true);
-    var result=await _sb.from('trips').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
-    if(result.error)throw result.error;
-    if(!result.data||!result.data.length){_showSyncStatus('No cloud trips found',false);return;}
-    var cloudTrips=result.data.map(function(r){return{
-      trip_uid:r.trip_uid,synced:true,
-      id:String(r.id),tripId:String(r.id),from:r.from_addr||'',to:r.to_addr||'',
-      mi:parseFloat(r.miles)||0,type:r.type||'uncl',ded:!!r.deductible,
-      date:r.trip_date||'',day:r.trip_date?r.trip_date.split(',')[0]:'',
-      time:r.trip_time||'',ts:r.created_at?new Date(r.created_at).getTime():0,
-      purpose:r.purpose||'',notes:r.notes||''
-    };});
-    var merged=_mergeTrips(TRIPS,cloudTrips);
-    TRIPS.length=0;
-    merged.forEach(function(t){
-      if(!t.purpose)t.purpose='';
-      if(!t.notes)t.notes='';
-      TRIPS.push(t);
-    });
-    TRIPS.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
-    try{_encStore('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
-    renderTrips();renderAlerts();recalcStats();
-    try{_updateStatsPeriodLabel();}catch(e){}
-    _showSyncStatus('Synced from cloud ✓',true);
-  }catch(e){console.warn('Supabase trip pull failed:',e.message);_showSyncStatus('Offline — using local data',false);}
-}
-
-function _pushToCloud(){
-  var binId=localStorage.getItem('mymilesai_bin_id');
-  var payload={trips:TRIPS,updated:Date.now(),version:'4.2'};
-  var apiKey='$2a$10$8QxhDcU6bLmNJvKpXwYrZeWqA9nF3dTsE7gHmP2jRcVuB4kL6oNy';
-  if(!binId){
-    // Create new bin
-    fetch('https://api.jsonbin.io/v3/b',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-Master-Key':apiKey,'X-Bin-Name':_getSyncId(),'X-Bin-Private':'true'},
-      body:JSON.stringify(payload)
-    }).then(function(r){return r.json();}).then(function(d){
-      if(d.metadata&&d.metadata.id){
-        localStorage.setItem('mymilesai_bin_id',d.metadata.id);
-        _showSyncStatus('Synced to cloud ✓',true);
-      }
-    }).catch(function(){_showSyncStatus('Sync failed — saved locally',false);});
-  } else {
-    // Update existing bin
-    fetch('https://api.jsonbin.io/v3/b/'+binId,{
-      method:'PUT',
-      headers:{'Content-Type':'application/json','X-Master-Key':apiKey},
-      body:JSON.stringify(payload)
-    }).then(function(r){return r.json();}).then(function(d){
-      if(d.metadata)_showSyncStatus('Synced ✓ '+new Date().toLocaleTimeString(),true);
-    }).catch(function(){_showSyncStatus('Sync failed — saved locally',false);});
-  }
-}
-
-function _mergeTrips(local,cloud){
-  var byKey={};
-  local.forEach(function(t){var k=t.trip_uid||('id:'+t.id);byKey[k]=t;});
-  cloud.forEach(function(t){
-    var k=t.trip_uid||('id:'+t.id);
-    if(!byKey[k]||(t.ts&&t.ts>(byKey[k].ts||0))){byKey[k]=t;}
-  });
-  return Object.values(byKey).sort(function(a,b){return(b.ts||0)-(a.ts||0);});
-}
 function loadTripsFromStorage(){
-  // First load from localStorage immediately (fast)
+  // Build 189: Supabase is sole source of truth. Legacy JSONBin pull removed
+  // to fix duplicate-trip bug (stale bin snapshot racing _syncWithSupabase merge).
   var loadedFromLocal=false;
   try{
     var stored=_decStore('mymilesai_trips');
@@ -7675,43 +7586,13 @@ function loadTripsFromStorage(){
           TRIPS.push(parsed[i]);
         }
         TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-        
         loadedFromLocal=true;
         renderTrips();renderAlerts();
       }
     }
   }catch(e){}
-
-  // Then try to pull fresher data from cloud
-  var binId=localStorage.getItem('mymilesai_bin_id');
-  var apiKey='$2a$10$8QxhDcU6bLmNJvKpXwYrZeWqA9nF3dTsE7gHmP2jRcVuB4kL6oNy';
-  if(binId){
-    _showSyncStatus('Syncing...',true);
-    fetch('https://api.jsonbin.io/v3/b/'+binId+'/latest',{
-      headers:{'X-Master-Key':apiKey}
-    }).then(function(r){return r.json();}).then(function(d){
-      if(d.record&&d.record.trips&&d.record.trips.length>0){
-        var cloud=d.record.trips;
-        // Per-trip merge: keep newer version of each trip by ID
-        var merged=_mergeTrips(TRIPS,cloud);
-        TRIPS.length=0;
-        for(var i=0;i<merged.length;i++){
-          if(!merged[i].purpose)merged[i].purpose='';
-          if(!merged[i].notes)merged[i].notes='';
-          if(!merged[i].ts){var d2=merged[i].date?new Date(merged[i].date):new Date();merged[i].ts=isNaN(d2.getTime())?Date.now():d2.getTime();}
-          TRIPS.push(merged[i]);
-        }
-        TRIPS.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-        try{localStorage.setItem('mymilesai_trips',JSON.stringify(TRIPS));}catch(e){}
-        renderTrips();renderAlerts();
-        _showSyncStatus('Synced from cloud',true);
-      }
-    }).catch(function(){_showSyncStatus('Offline — using local data',false);});
-  } else if(!loadedFromLocal){
-    // No local, no cloud — show empty state
-    renderTrips();renderAlerts();
-  }
-  if(!binId&&!loadedFromLocal){renderTrips();renderAlerts();}
+  try{localStorage.removeItem('mymilesai_bin_id');}catch(e){}
+  if(!loadedFromLocal){renderTrips();renderAlerts();}
 }
 
 /* Fix #24 — Haptic feedback on buttons */
@@ -8550,6 +8431,65 @@ async function _syncWithSupabase(userId){
     TRIPS=merged;
     console.log('[Sync] Merge: merged='+mergedCount+', remote-only added='+addedCount+', local dupes dropped='+localDupesDropped+', remote-deleted dropped='+remoteDeletedDropped);
 
+    // Build 193: ONE-TIME content-dedup pass for pre-patch legacy-<id> duplicate trips.
+    // Pre-patch website .insert() could double-write a trip (retry/double-click) → two rows
+    // with NULL trip_uid → STEP 1 backfills each to a distinct legacy-<id> → phone shows 2.
+    // Narrow guard: only collapse groups containing at least one legacy-* uid.
+    try{
+      if(localStorage.getItem('mmai_dedup_v193_done')!=='1'){
+        var _dNorm=function(x){return (x||'').toString().trim().toLowerCase().replace(/\s+/g,' ');};
+        var _dKey=function(t){
+          var frm=_dNorm(t.from_addr||t.from);
+          var to_=_dNorm(t.to_addr||t.to);
+          var mi=Math.round((parseFloat(t.mi)||0)*2)/2;
+          var dt=t.date||(t.ts?new Date(t.ts).toLocaleDateString('en-CA'):'');
+          var tm=(t.time||t.trip_time||'').toString();
+          var hr=tm.split(':')[0]||'';
+          return frm+'|'+to_+'|'+mi+'|'+dt+'|'+hr;
+        };
+        var _groups={};
+        for(var _gi=0;_gi<TRIPS.length;_gi++){
+          var _k=_dKey(TRIPS[_gi]);
+          if(!_groups[_k])_groups[_k]=[];
+          _groups[_k].push(TRIPS[_gi]);
+        }
+        var _victims=[];
+        var _surviveIds={};
+        Object.keys(_groups).forEach(function(k){
+          var grp=_groups[k];
+          if(grp.length<2)return;
+          var hasLegacy=grp.some(function(t){return (t.trip_uid||'').indexOf('legacy-')===0;});
+          if(!hasLegacy)return;
+          var survivor=grp.find(function(t){return (t.trip_uid||'').indexOf('legacy-')===0;})||grp[0];
+          _surviveIds[survivor.trip_uid]=true;
+          grp.forEach(function(t){
+            if(t===survivor)return;
+            _victims.push({victim:t,survivor:survivor});
+          });
+        });
+        if(_victims.length>0){
+          console.warn('[Dedup] === Collapsing '+_victims.length+' pre-patch duplicate trips ===');
+          var _victimSet={};
+          for(var _vi=0;_vi<_victims.length;_vi++){
+            var v=_victims[_vi].victim, s=_victims[_vi].survivor;
+            console.log('[Dedup] Collapsed',v.trip_uid,'→ survivor',s.trip_uid);
+            if(v.trip_uid){
+              _victimSet[v.trip_uid]=true;
+              if(v.synced===true){
+                _sb.from('trips').delete().eq('trip_uid',v.trip_uid).eq('user_id',userId).then(function(res){
+                  if(res&&res.error)console.warn('[Dedup] Supabase delete error:',res.error.message);
+                }).catch(function(e){console.warn('[Dedup] Supabase delete exception:',e&&e.message);});
+              }
+              try{_dequeueTrip(v.trip_uid);}catch(e){}
+            }
+          }
+          TRIPS=TRIPS.filter(function(t){return !(t.trip_uid&&_victimSet[t.trip_uid]);});
+          console.log('[Dedup] === Done. TRIPS now '+TRIPS.length+' entries ===');
+        }
+        localStorage.setItem('mmai_dedup_v193_done','1');
+      }
+    }catch(e){console.warn('[Dedup] Pass failed:',e&&e.message);}
+
     // STEP 6: Backfill trip_uid for remaining unmatched local trips
     var backfilled=0;
     for(var bi=0;bi<TRIPS.length;bi++){
@@ -8806,7 +8746,7 @@ function exportQuickBooks(){
 function exportReimbursement(){
   if(TRIPS.length===0){showToast(_i('warn'),'No trips to export','#EF4444');return;}
   var co=localStorage.getItem('mymilesai_company_name')||'';
-  var rate=parseFloat(localStorage.getItem('mymilesai_company_rate'))||parseFloat(LOC.rate)||0.70;
+  var rate=parseFloat(localStorage.getItem('mymilesai_company_rate'))||parseFloat(LOC.rate)||0.725;
   var yr=new Date().getFullYear();
   var name=localStorage.getItem('mymilesai_name')||'Employee';
   var bizTrips=TRIPS.filter(function(t){return t.type==='biz';});
