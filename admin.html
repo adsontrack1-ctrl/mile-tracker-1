@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyMilesAI — Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'SF Mono', 'Fira Code', monospace;
+  --dk:   #0f172a;
+  --white:#ffffff;
+  --g1:   #1e293b;
+  --g2:   #334155;
+  --g3:   #64748b;
+  --g4:   #94a3b8;
+  --g5:   #e2e8f0;
+  --g6:   #f1f5f9;
+  --g7:   #f8fafc;
+  --blue: #2563eb;
+  --blue-pale: #eff6ff;
+  --red:  #dc2626;
+  --red-pale: #fef2f2;
+  --green:#16a34a;
+  --green-pale:#f0fdf4;
+  --amber:#d97706;
+  --amber-pale:#fffbeb;
+  --purple:#7c3aed;
+  --purple-pale:#f5f3ff;
+  --sidebar-w: 220px;
+  --header-h: 56px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--g6); color: var(--dk); height: 100vh; overflow: hidden; }
+
+/* ── AUTH GATE ── */
+#auth-gate {
+  position: fixed; inset: 0;
+  background: var(--g1);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+}
+.auth-box {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 40px;
+  width: 380px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  text-align: center;
+}
+.auth-logo {
+  width: 48px; height: 48px;
+  background: var(--g1);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.auth-logo svg { width: 26px; height: 26px; stroke: white; fill: none; }
+.auth-box h1 { font-size: 20px; font-weight: 700; color: var(--dk); margin-bottom: 4px; }
+.auth-box p { font-size: 13px; color: var(--g3); margin-bottom: 24px; }
+.auth-box .badge {
+  display: inline-block;
+  background: var(--red-pale);
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 99px;
+  margin-bottom: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.auth-btn {
+  width: 100%;
+  padding: 11px;
+  background: var(--g1);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.auth-btn:hover { background: var(--g2); }
+.auth-err { font-size: 12px; color: var(--red); margin-top: 12px; min-height: 18px; }
+
+/* ── LAYOUT ── */
+#app { display: none; height: 100vh; flex-direction: column; }
+#app.show { display: flex; }
+
+.header {
+  height: var(--header-h);
+  background: var(--g1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-logo {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.header-logo svg { width: 18px; height: 18px; stroke: white; fill: none; }
+.header-title { font-size: 15px; font-weight: 700; color: white; }
+.header-badge {
+  background: var(--red);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-user { font-size: 12px; color: rgba(255,255,255,0.6); }
+.sign-out-btn {
+  font-size: 12px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 7px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.sign-out-btn:hover { background: rgba(255,255,255,0.14); }
+
+.body { display: flex; flex: 1; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--g1);
+  border-right: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+.sb-section { font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 10px 16px 4px; }
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 16px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.55);
+  font-size: 13px;
+  border-left: 2px solid transparent;
+  transition: all 0.1s;
+}
+.sb-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.sb-item.active { background: rgba(255,255,255,0.09); color: white; border-left-color: var(--blue); font-weight: 500; }
+.sb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── MAIN CONTENT ── */
+.main { flex: 1; overflow-y: auto; padding: 24px; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--dk); }
+.page-sub { font-size: 13px; color: var(--g3); margin-top: 3px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--g5);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.entry { border-bottom: 1px solid var(--g5); padding: 12px 16px; }
+.entry:last-child { border-bottom: none; }
+.entry-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.entry-name { font-size: 13px; font-weight: 600; color: var(--dk); }
+.badge {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 99px; white-space: nowrap;
+}
+.badge-red    { background: var(--red-pale);    color: var(--red);    }
+.badge-blue   { background: var(--blue-pale);   color: var(--blue);   }
+.badge-green  { background: var(--green-pale);  color: var(--green);  }
+.badge-amber  { background: var(--amber-pale);  color: var(--amber);  }
+.badge-gray   { background: var(--g6);          color: var(--g3);     }
+.badge-purple { background: var(--purple-pale); color: var(--purple); }
+
+.sql-block {
+  background: var(--g7);
+  border: 1px solid var(--g5);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--dk);
+  line-height: 1.6;
+  word-break: break-all;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+}
+.actions { display: flex; gap: 7px; flex-wrap: wrap; }
+.copy-btn {
+  font-size: 11px;
+  font-family: var(--mono);
+  background: transparent;
+  border: 1px solid var(--g5);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  color: var(--g3);
+  transition: all 0.1s;
+}
+.copy-btn:hover { background: var(--g6); color: var(--dk); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.link-btn {
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--g5);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  color: var(--blue);
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.1s;
+}
+.link-btn:hover { background: var(--blue-pale); }
+
+/* ── STAT GRID ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--g5);
+  border-radius: 12px;
+  padding: 16px;
+}
+.stat-label { font-size: 11px; color: var(--g3); margin-bottom: 6px; }
+.stat-val { font-size: 26px; font-weight: 700; color: var(--dk); }
+.stat-val.blue { color: var(--blue); }
+.stat-val.green { color: var(--green); }
+.stat-val.red { color: var(--red); }
+
+/* ── LINKS GRID ── */
+.links-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px; }
+
+/* ── SECTION LABEL ── */
+.sec-label { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--g3); margin-bottom: 8px; }
+
+/* ── USER TABLE ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tbl th { text-align: left; padding: 8px 12px; font-size: 10.5px; font-weight: 600; color: var(--g3); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--g5); background: var(--g6); }
+.tbl td { padding: 10px 12px; border-bottom: 1px solid var(--g5); color: var(--dk); }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--g7); }
+.tbl-empty { text-align: center; padding: 32px; color: var(--g3); font-size: 13px; }
+
+/* ── LOOKUP FORM ── */
+.lookup-form { display: flex; gap: 8px; margin-bottom: 16px; }
+.lookup-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--g5);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--dk);
+  background: var(--white);
+  outline: none;
+}
+.lookup-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.lookup-btn {
+  padding: 8px 16px;
+  background: var(--g1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.lookup-btn:hover { background: var(--g2); }
+
+/* ── RESULT CARD ── */
+.result-card {
+  background: var(--white);
+  border: 1px solid var(--g5);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: none;
+}
+.result-card.show { display: block; }
+.result-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--g5); font-size: 13px; }
+.result-row:last-child { border-bottom: none; }
+.result-key { color: var(--g3); font-size: 12px; }
+.result-val { color: var(--dk); font-weight: 500; font-family: var(--mono); font-size: 12px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--g1); color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 9999;
+}
+.toast.show { opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/></svg>
+    </div>
+    <div class="badge">Admin Access Only</div>
+    <h1>MyMilesAI Admin</h1>
+    <p>Sign in with your Harijas LLC admin account to continue. Access is restricted to authorized personnel only.</p>
+    <button class="auth-btn" onclick="signIn()">Sign In with Magic Link</button>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/></svg>
+      </div>
+      <span class="header-title">MyMilesAI</span>
+      <span class="header-badge">Admin</span>
+    </div>
+    <div class="header-right">
+      <span class="header-user" id="header-user"></span>
+      <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-section">Overview</div>
+      <div class="sb-item active" onclick="showPage('overview',this)">
+        <div class="sb-dot" style="background:#378add"></div>
+        Dashboard
+      </div>
+
+      <div class="sb-section">Users</div>
+      <div class="sb-item" onclick="showPage('userlookup',this)">
+        <div class="sb-dot" style="background:#7c3aed"></div>
+        User Lookup
+      </div>
+      <div class="sb-item" onclick="showPage('allusers',this)">
+        <div class="sb-dot" style="background:#7c3aed"></div>
+        All Users
+      </div>
+
+      <div class="sb-section">Audit</div>
+      <div class="sb-item" onclick="showPage('deletionlog',this)">
+        <div class="sb-dot" style="background:#dc2626"></div>
+        Deletion Log
+      </div>
+      <div class="sb-item" onclick="showPage('softdelete',this)">
+        <div class="sb-dot" style="background:#d97706"></div>
+        Soft Delete Queue
+      </div>
+
+      <div class="sb-section">Data</div>
+      <div class="sb-item" onclick="showPage('trips',this)">
+        <div class="sb-dot" style="background:#64748b"></div>
+        Trip Data
+      </div>
+      <div class="sb-item" onclick="showPage('billing',this)">
+        <div class="sb-dot" style="background:#16a34a"></div>
+        Billing / Licenses
+      </div>
+      <div class="sb-item" onclick="showPage('health',this)">
+        <div class="sb-dot" style="background:#d97706"></div>
+        Health Check
+      </div>
+
+      <div class="sb-section">Tools</div>
+      <div class="sb-item" onclick="showPage('sqlbook',this)">
+        <div class="sb-dot" style="background:#64748b"></div>
+        SQL Handbook
+      </div>
+      <div class="sb-item" onclick="showPage('links',this)">
+        <div class="sb-dot" style="background:#64748b"></div>
+        Quick Links
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- OVERVIEW -->
+      <div class="page active" id="page-overview">
+        <div class="page-header">
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">MyMilesAI — Harijas LLC production overview</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-val blue" id="stat-users">—</div></div>
+          <div class="stat-card"><div class="stat-label">Total Trips</div><div class="stat-val" id="stat-trips">—</div></div>
+          <div class="stat-card"><div class="stat-label">Active / Trialing</div><div class="stat-val green" id="stat-active">—</div></div>
+          <div class="stat-card"><div class="stat-label">Pending Deletion</div><div class="stat-val red" id="stat-pending">—</div></div>
+        </div>
+        <div class="sec-label">Recent deletion events</div>
+        <div class="card">
+          <table class="tbl">
+            <thead><tr><th>User</th><th>Trips lost</th><th>Platform</th><th>When</th></tr></thead>
+            <tbody id="overview-deletions"><tr><td colspan="4" class="tbl-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="sec-label">All users + trip counts</div>
+        <div class="card">
+          <table class="tbl">
+            <thead><tr><th>Email</th><th>Trips</th><th>Oldest</th><th>Newest</th></tr></thead>
+            <tbody id="overview-users"><tr><td colspan="4" class="tbl-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- USER LOOKUP -->
+      <div class="page" id="page-userlookup">
+        <div class="page-header">
+          <div class="page-title">User Lookup</div>
+          <div class="page-sub">Find any user by email — auth record, profile, trips, license</div>
+        </div>
+        <div class="lookup-form">
+          <input class="lookup-input" id="lookup-email" type="email" placeholder="user@example.com" onkeydown="if(event.key==='Enter')lookupUser()">
+          <button class="lookup-btn" onclick="lookupUser()">Look Up</button>
+        </div>
+        <div class="result-card" id="lookup-auth">
+          <div class="sec-label">Auth record</div>
+          <div id="lookup-auth-body"></div>
+        </div>
+        <div class="result-card" id="lookup-profile">
+          <div class="sec-label">Profile</div>
+          <div id="lookup-profile-body"></div>
+        </div>
+        <div class="result-card" id="lookup-trips-card">
+          <div class="sec-label">Trips</div>
+          <table class="tbl"><thead><tr><th>ID</th><th>From</th><th>To</th><th>Miles</th><th>Date</th></tr></thead>
+          <tbody id="lookup-trips-body"></tbody></table>
+        </div>
+        <div class="result-card" id="lookup-license-card">
+          <div class="sec-label">License</div>
+          <div id="lookup-license-body"></div>
+        </div>
+      </div>
+
+      <!-- ALL USERS -->
+      <div class="page" id="page-allusers">
+        <div class="page-header">
+          <div class="page-title">All Users</div>
+          <div class="page-sub">Every account in auth.users</div>
+        </div>
+        <div class="card">
+          <table class="tbl">
+            <thead><tr><th>Email</th><th>Signed up</th><th>Last sign in</th><th>Status</th></tr></thead>
+            <tbody id="all-users-body"><tr><td colspan="4" class="tbl-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DELETION LOG -->
+      <div class="page" id="page-deletionlog">
+        <div class="page-header">
+          <div class="page-title">Deletion Log</div>
+          <div class="page-sub">Every account deletion event — timestamped and auditable</div>
+        </div>
+        <div class="card">
+          <table class="tbl">
+            <thead><tr><th>User</th><th>Trips at deletion</th><th>Platform</th><th>Build</th><th>When</th></tr></thead>
+            <tbody id="deletion-log-body"><tr><td colspan="5" class="tbl-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SOFT DELETE QUEUE -->
+      <div class="page" id="page-softdelete">
+        <div class="page-header">
+          <div class="page-title">Soft Delete Queue</div>
+          <div class="page-sub">Accounts marked for deletion — within 30-day recovery window</div>
+        </div>
+        <div class="card">
+          <table class="tbl">
+            <thead><tr><th>Email</th><th>Deleted at</th><th>Purge at</th><th>Days left</th><th>Action</th></tr></thead>
+            <tbody id="softdelete-body"><tr><td colspan="5" class="tbl-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TRIP DATA -->
+      <div class="page" id="page-trips">
+        <div class="page-header">
+          <div class="page-title">Trip Data</div>
+          <div class="page-sub">Live trips across all users</div>
+        </div>
+        <div class="card">
+          <table class="tbl">
+            <thead><tr><th>User</th><th>Trips</th><th>Oldest</th><th>Newest</th></tr></thead>
+            <tbody id="trips-body"><tr><td colspan="4" class="tbl-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BILLING -->
+      <div class="page" id="page-billing">
+        <div class="page-header">
+          <div class="page-title">Billing &amp; Licenses</div>
+          <div class="page-sub">Active and trialing subscribers</div>
+        </div>
+        <div class="card">
+          <table class="tbl">
+            <thead><tr><th>Email</th><th>Status</th><th>Plan</th><th>Path</th><th>Trial ends</th></tr></thead>
+            <tbody id="billing-body"><tr><td colspan="5" class="tbl-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HEALTH CHECK -->
+      <div class="page" id="page-health">
+        <div class="page-header">
+          <div class="page-title">Health Check</div>
+          <div class="page-sub">Database row counts and ID ranges</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Live Trips</div><div class="stat-val blue" id="hc-live">—</div></div>
+          <div class="stat-card"><div class="stat-label">Soft Deleted</div><div class="stat-val red" id="hc-soft">—</div></div>
+          <div class="stat-card"><div class="stat-label">Min Trip ID</div><div class="stat-val" id="hc-min">—</div></div>
+          <div class="stat-card"><div class="stat-label">Max Trip ID</div><div class="stat-val" id="hc-max">—</div></div>
+        </div>
+        <div class="sec-label">First and last trip timestamps</div>
+        <div class="card">
+          <div class="entry">
+            <div class="entry-top"><span class="entry-name">First trip ever</span></div>
+            <div id="hc-first" style="font-family:var(--mono);font-size:12px;color:var(--g3)">—</div>
+          </div>
+          <div class="entry">
+            <div class="entry-top"><span class="entry-name">Most recent trip</span></div>
+            <div id="hc-last" style="font-family:var(--mono);font-size:12px;color:var(--g3)">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SQL HANDBOOK -->
+      <div class="page" id="page-sqlbook">
+        <div class="page-header">
+          <div class="page-title">SQL Handbook</div>
+          <div class="page-sub">One-click copy queries for every common operation</div>
+        </div>
+
+        <div class="sec-label">Deletion log</div>
+        <div class="card">
+          <div class="entry"><div class="entry-top"><span class="entry-name">All deletion events</span><span class="badge badge-red">deletion_log</span></div><div class="sql-block">SELECT * FROM deletion_log ORDER BY deleted_at DESC;</div><div class="actions"><button class="copy-btn" onclick="cp(this,'SELECT * FROM deletion_log ORDER BY deleted_at DESC;')">copy</button><a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/sql/new" target="_blank">SQL editor ↗</a></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">By user email</span><span class="badge badge-red">deletion_log</span></div><div class="sql-block">SELECT * FROM deletion_log WHERE user_email = 'EMAIL' ORDER BY deleted_at DESC;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT * FROM deletion_log WHERE user_email = 'EMAIL' ORDER BY deleted_at DESC;`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">Last 7 days</span><span class="badge badge-red">deletion_log</span></div><div class="sql-block">SELECT * FROM deletion_log WHERE deleted_at > now() - interval '7 days' ORDER BY deleted_at DESC;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT * FROM deletion_log WHERE deleted_at > now() - interval '7 days' ORDER BY deleted_at DESC;`)">copy</button></div></div>
+        </div>
+
+        <div class="sec-label">Soft delete — 30-day grace</div>
+        <div class="card">
+          <div class="entry"><div class="entry-top"><span class="entry-name">Accounts pending purge</span><span class="badge badge-amber">profiles</span></div><div class="sql-block">SELECT * FROM accounts_pending_purge;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT * FROM accounts_pending_purge;`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">Recover / undelete account</span><span class="badge badge-amber">profiles + trips</span></div><div class="sql-block">UPDATE profiles SET account_status='active', account_deleted_at=NULL, account_purge_at=NULL WHERE id='UUID';
+UPDATE trips SET deleted_at=NULL WHERE user_id='UUID';</div><div class="actions"><button class="copy-btn" onclick="cp(this,`UPDATE profiles SET account_status='active', account_deleted_at=NULL, account_purge_at=NULL WHERE id='UUID';\nUPDATE trips SET deleted_at=NULL WHERE user_id='UUID';`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">Days until purge</span><span class="badge badge-amber">profiles</span></div><div class="sql-block">SELECT email, account_deleted_at, account_purge_at, EXTRACT(DAY FROM account_purge_at - now()) as days_left FROM profiles WHERE account_status = 'pending_deletion' ORDER BY days_left ASC;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT email, account_deleted_at, account_purge_at, EXTRACT(DAY FROM account_purge_at - now()) as days_left FROM profiles WHERE account_status = 'pending_deletion' ORDER BY days_left ASC;`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">Run purge manually</span><span class="badge badge-red">destructive</span></div><div class="sql-block">SELECT purge_expired_accounts();</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT purge_expired_accounts();`)">copy</button></div></div>
+        </div>
+
+        <div class="sec-label">User lookup</div>
+        <div class="card">
+          <div class="entry"><div class="entry-top"><span class="entry-name">Find user by email</span><span class="badge badge-blue">auth.users</span></div><div class="sql-block">SELECT id, email, created_at, last_sign_in_at, deleted_at FROM auth.users WHERE email = 'EMAIL';</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT id, email, created_at, last_sign_in_at, deleted_at FROM auth.users WHERE email = 'EMAIL';`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">All users + signup date</span><span class="badge badge-blue">auth.users</span></div><div class="sql-block">SELECT email, created_at, last_sign_in_at FROM auth.users ORDER BY created_at DESC;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT email, created_at, last_sign_in_at FROM auth.users ORDER BY created_at DESC;`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">Profile + agreement + status</span><span class="badge badge-blue">profiles</span></div><div class="sql-block">SELECT id, email, agreement_signed, country, account_status, created_at FROM profiles WHERE email = 'EMAIL';</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT id, email, agreement_signed, country, account_status, created_at FROM profiles WHERE email = 'EMAIL';`)">copy</button></div></div>
+        </div>
+
+        <div class="sec-label">Trip data</div>
+        <div class="card">
+          <div class="entry"><div class="entry-top"><span class="entry-name">Trip count + date range for user</span><span class="badge badge-gray">trips</span></div><div class="sql-block">SELECT COUNT(*) as trip_count, MIN(trip_date) as oldest, MAX(trip_date) as newest FROM trips WHERE user_id = 'UUID' AND deleted_at IS NULL;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT COUNT(*) as trip_count, MIN(trip_date) as oldest, MAX(trip_date) as newest FROM trips WHERE user_id = 'UUID' AND deleted_at IS NULL;`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">All users + trip counts</span><span class="badge badge-gray">trips</span></div><div class="sql-block">SELECT u.email, COUNT(t.id) as trips, MIN(t.trip_date) as oldest, MAX(t.trip_date) as newest FROM auth.users u LEFT JOIN trips t ON t.user_id = u.id AND t.deleted_at IS NULL GROUP BY u.email ORDER BY trips DESC;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT u.email, COUNT(t.id) as trips, MIN(t.trip_date) as oldest, MAX(t.trip_date) as newest FROM auth.users u LEFT JOIN trips t ON t.user_id = u.id AND t.deleted_at IS NULL GROUP BY u.email ORDER BY trips DESC;`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">Last 10 trips for user</span><span class="badge badge-gray">trips</span></div><div class="sql-block">SELECT id, from_addr, to_addr, miles, trip_date, created_at FROM trips WHERE user_id = 'UUID' AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 10;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT id, from_addr, to_addr, miles, trip_date, created_at FROM trips WHERE user_id = 'UUID' AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 10;`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">Health check — totals + ID range</span><span class="badge badge-amber">health</span></div><div class="sql-block">SELECT MIN(id) as min_id, MAX(id) as max_id, COUNT(*) as total, MIN(created_at) as first_trip, MAX(created_at) as last_trip FROM trips WHERE deleted_at IS NULL;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT MIN(id) as min_id, MAX(id) as max_id, COUNT(*) as total, MIN(created_at) as first_trip, MAX(created_at) as last_trip FROM trips WHERE deleted_at IS NULL;`)">copy</button></div></div>
+        </div>
+
+        <div class="sec-label">Billing</div>
+        <div class="card">
+          <div class="entry"><div class="entry-top"><span class="entry-name">License status for user</span><span class="badge badge-green">licenses</span></div><div class="sql-block">SELECT status, plan, trial_start, trial_end, billing_path, device_model FROM licenses WHERE user_id = 'UUID';</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT status, plan, trial_start, trial_end, billing_path, device_model FROM licenses WHERE user_id = 'UUID';`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">All active subscribers</span><span class="badge badge-green">licenses</span></div><div class="sql-block">SELECT u.email, l.status, l.plan, l.billing_path, l.trial_end FROM licenses l JOIN auth.users u ON u.id = l.user_id WHERE l.status IN ('active','trialing') ORDER BY l.trial_end ASC;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT u.email, l.status, l.plan, l.billing_path, l.trial_end FROM licenses l JOIN auth.users u ON u.id = l.user_id WHERE l.status IN ('active','trialing') ORDER BY l.trial_end ASC;`)">copy</button></div></div>
+          <div class="entry"><div class="entry-top"><span class="entry-name">Trials expiring in 3 days</span><span class="badge badge-amber">billing alert</span></div><div class="sql-block">SELECT u.email, l.trial_end, l.plan FROM licenses l JOIN auth.users u ON u.id = l.user_id WHERE l.status = 'trialing' AND l.trial_end BETWEEN now() AND now() + interval '3 days' ORDER BY l.trial_end ASC;</div><div class="actions"><button class="copy-btn" onclick="cp(this,`SELECT u.email, l.trial_end, l.plan FROM licenses l JOIN auth.users u ON u.id = l.user_id WHERE l.status = 'trialing' AND l.trial_end BETWEEN now() AND now() + interval '3 days' ORDER BY l.trial_end ASC;`)">copy</button></div></div>
+        </div>
+      </div>
+
+      <!-- QUICK LINKS -->
+      <div class="page" id="page-links">
+        <div class="page-header">
+          <div class="page-title">Quick Links</div>
+          <div class="page-sub">One-click access to every Supabase dashboard panel</div>
+        </div>
+        <div class="card">
+          <div class="links-grid">
+            <a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/sql/new" target="_blank">SQL editor ↗</a>
+            <a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/editor" target="_blank">table editor ↗</a>
+            <a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/auth/users" target="_blank">auth users ↗</a>
+            <a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/logs/edge-logs" target="_blank">API gateway logs ↗</a>
+            <a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/logs/postgres-logs" target="_blank">postgres logs ↗</a>
+            <a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/settings/addons" target="_blank">PITR / backups ↗</a>
+            <a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/settings/api" target="_blank">API keys ↗</a>
+            <a class="link-btn" href="https://supabase.com/dashboard/project/dxpuuiqibtizewbbffjk/database/tables" target="_blank">database tables ↗</a>
+            <a class="link-btn" href="https://dashboard.stripe.com" target="_blank">Stripe dashboard ↗</a>
+            <a class="link-btn" href="https://app.revenuecat.com" target="_blank">RevenueCat ↗</a>
+            <a class="link-btn" href="https://console.cloud.google.com" target="_blank">Google Cloud Console ↗</a>
+            <a class="link-btn" href="https://appstoreconnect.apple.com/apps/6760873036" target="_blank">App Store Connect ↗</a>
+            <a class="link-btn" href="https://github.com/adsontrack1-ctrl/mile-tracker-1" target="_blank">PWA repo ↗</a>
+            <a class="link-btn" href="https://github.com/adsontrack1-ctrl/mymilesai-ios" target="_blank">iOS repo ↗</a>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /body -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = 'https://dxpuuiqibtizewbbffjk.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cHV1aXFpYnRpemV3YmJmZmprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTQ1MDAsImV4cCI6MjA5MDIzMDUwMH0.GSVgcjCxenp4uwahNBnQn5MZzuFKIfcf3gt1AlsVEuc';
+const ADMIN_EMAIL = 'aman.s38@outlook.com';
+
+const sb = supabase.createClient(SB_URL, SB_KEY);
+let adminUser = null;
+
+// ── AUTH ──────────────────────────────────────────────
+async function signIn() {
+  const err = document.getElementById('auth-err');
+  err.textContent = 'Sending magic link...';
+  const email = ADMIN_EMAIL;
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href }
+  });
+  if (error) { err.textContent = 'Error: ' + error.message; return; }
+  err.style.color = '#16a34a';
+  err.textContent = 'Magic link sent to ' + email + ' — check your inbox.';
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    checkAdmin(session.user);
+  }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) checkAdmin(session.user);
+    if (event === 'SIGNED_OUT') location.reload();
+  });
+}
+
+function checkAdmin(user) {
+  if (user.email !== ADMIN_EMAIL) {
+    document.getElementById('auth-err').textContent = 'Access denied. This page is restricted to admin only.';
+    sb.auth.signOut();
+    return;
+  }
+  adminUser = user;
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('app').classList.add('show');
+  document.getElementById('header-user').textContent = user.email;
+  loadAllData();
+}
+
+// ── NAVIGATION ────────────────────────────────────────
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// ── LOAD DATA ─────────────────────────────────────────
+async function loadAllData() {
+  loadOverview();
+  loadAllUsers();
+  loadDeletionLog();
+  loadSoftDelete();
+  loadTrips();
+  loadBilling();
+  loadHealth();
+}
+
+async function loadOverview() {
+  const { data: users } = await sb.from('profiles').select('id', { count: 'exact', head: true });
+  const { count: userCount } = await sb.from('profiles').select('*', { count: 'exact', head: true });
+  const { count: tripCount } = await sb.from('trips').select('*', { count: 'exact', head: true }).is('deleted_at', null);
+  const { count: activeCount } = await sb.from('licenses').select('*', { count: 'exact', head: true }).in('status', ['active','trialing']);
+  const { count: pendingCount } = await sb.from('profiles').select('*', { count: 'exact', head: true }).eq('account_status', 'pending_deletion');
+
+  document.getElementById('stat-users').textContent = userCount ?? '—';
+  document.getElementById('stat-trips').textContent = tripCount ?? '—';
+  document.getElementById('stat-active').textContent = activeCount ?? '—';
+  document.getElementById('stat-pending').textContent = pendingCount ?? '—';
+
+  const { data: deletions } = await sb.from('deletion_log').select('*').order('deleted_at', { ascending: false }).limit(5);
+  const tbody = document.getElementById('overview-deletions');
+  if (!deletions?.length) { tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">No deletion events yet</td></tr>'; }
+  else tbody.innerHTML = deletions.map(d => `<tr><td>${esc(d.user_email||'—')}</td><td>${d.trip_count_at_deletion??'—'}</td><td>${esc(d.platform||'—')}</td><td>${fmtDate(d.deleted_at)}</td></tr>`).join('');
+
+  const { data: tripUsers } = await sb.rpc ? null : null;
+  const { data: allU } = await sb.from('profiles').select('id, email');
+  const { data: allT } = await sb.from('trips').select('user_id, trip_date').is('deleted_at', null);
+  const tbody2 = document.getElementById('overview-users');
+  if (!allU?.length) { tbody2.innerHTML = '<tr><td colspan="4" class="tbl-empty">No users</td></tr>'; return; }
+  const map = {};
+  (allT||[]).forEach(t => {
+    if (!map[t.user_id]) map[t.user_id] = { count:0, min:t.trip_date, max:t.trip_date };
+    map[t.user_id].count++;
+    if (t.trip_date < map[t.user_id].min) map[t.user_id].min = t.trip_date;
+    if (t.trip_date > map[t.user_id].max) map[t.user_id].max = t.trip_date;
+  });
+  tbody2.innerHTML = allU.map(u => {
+    const m = map[u.id] || { count:0, min:'—', max:'—' };
+    return `<tr><td>${esc(u.email||'—')}</td><td>${m.count}</td><td>${m.min||'—'}</td><td>${m.max||'—'}</td></tr>`;
+  }).sort((a,b)=>0).join('');
+}
+
+async function loadAllUsers() {
+  const { data } = await sb.from('profiles').select('id, email, account_status, created_at');
+  const tbody = document.getElementById('all-users-body');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">No users</td></tr>'; return; }
+  tbody.innerHTML = data.map(u => `<tr><td>${esc(u.email||'—')}</td><td>${fmtDate(u.created_at)}</td><td>—</td><td><span class="badge ${u.account_status==='pending_deletion'?'badge-red':'badge-green'}">${u.account_status||'active'}</span></td></tr>`).join('');
+}
+
+async function loadDeletionLog() {
+  const { data } = await sb.from('deletion_log').select('*').order('deleted_at', { ascending: false });
+  const tbody = document.getElementById('deletion-log-body');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" class="tbl-empty">No deletion events yet — good sign!</td></tr>'; return; }
+  tbody.innerHTML = data.map(d => `<tr><td>${esc(d.user_email||'—')}</td><td>${d.trip_count_at_deletion??'—'}</td><td>${esc(d.platform||'—')}</td><td>${esc(d.app_version||'—')}</td><td>${fmtDate(d.deleted_at)}</td></tr>`).join('');
+}
+
+async function loadSoftDelete() {
+  const { data } = await sb.from('profiles').select('id, email, account_deleted_at, account_purge_at').eq('account_status','pending_deletion').order('account_purge_at', { ascending: true });
+  const tbody = document.getElementById('softdelete-body');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" class="tbl-empty">No accounts pending deletion</td></tr>'; return; }
+  tbody.innerHTML = data.map(u => {
+    const daysLeft = u.account_purge_at ? Math.max(0, Math.ceil((new Date(u.account_purge_at) - new Date()) / 86400000)) : '—';
+    return `<tr><td>${esc(u.email||'—')}</td><td>${fmtDate(u.account_deleted_at)}</td><td>${fmtDate(u.account_purge_at)}</td><td><span class="badge ${daysLeft<7?'badge-red':'badge-amber'}">${daysLeft}d</span></td><td><button class="copy-btn" onclick="recoverAccount('${u.id}')">Recover</button></td></tr>`;
+  }).join('');
+}
+
+async function recoverAccount(userId) {
+  if (!confirm('Recover this account? This will cancel the deletion and restore all data.')) return;
+  await sb.from('profiles').update({ account_status:'active', account_deleted_at:null, account_purge_at:null }).eq('id', userId);
+  await sb.from('trips').update({ deleted_at:null }).eq('user_id', userId);
+  toast('Account recovered!', 'success');
+  loadSoftDelete();
+}
+
+async function loadTrips() {
+  const { data: allU } = await sb.from('profiles').select('id, email');
+  const { data: allT } = await sb.from('trips').select('user_id, trip_date').is('deleted_at', null);
+  const tbody = document.getElementById('trips-body');
+  if (!allU?.length) { tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">No data</td></tr>'; return; }
+  const map = {};
+  (allT||[]).forEach(t => {
+    if (!map[t.user_id]) map[t.user_id] = { count:0, min:t.trip_date, max:t.trip_date };
+    map[t.user_id].count++;
+    if (t.trip_date < map[t.user_id].min) map[t.user_id].min = t.trip_date;
+    if (t.trip_date > map[t.user_id].max) map[t.user_id].max = t.trip_date;
+  });
+  tbody.innerHTML = allU.sort((a,b) => (map[b.id]?.count||0) - (map[a.id]?.count||0)).map(u => {
+    const m = map[u.id] || { count:0, min:'—', max:'—' };
+    return `<tr><td>${esc(u.email||'—')}</td><td>${m.count}</td><td>${m.min||'—'}</td><td>${m.max||'—'}</td></tr>`;
+  }).join('');
+}
+
+async function loadBilling() {
+  const { data } = await sb.from('licenses').select('user_id, status, plan, billing_path, trial_end').in('status',['active','trialing']).order('trial_end', { ascending: true });
+  const { data: users } = await sb.from('profiles').select('id, email');
+  const userMap = {};
+  (users||[]).forEach(u => userMap[u.id] = u.email);
+  const tbody = document.getElementById('billing-body');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" class="tbl-empty">No active licenses</td></tr>'; return; }
+  tbody.innerHTML = data.map(l => `<tr><td>${esc(userMap[l.user_id]||l.user_id)}</td><td><span class="badge ${l.status==='active'?'badge-green':'badge-amber'}">${l.status}</span></td><td>${esc(l.plan||'—')}</td><td>${esc(l.billing_path||'—')}</td><td>${fmtDate(l.trial_end)}</td></tr>`).join('');
+}
+
+async function loadHealth() {
+  const { count: live } = await sb.from('trips').select('*', { count:'exact', head:true }).is('deleted_at', null);
+  const { count: soft } = await sb.from('trips').select('*', { count:'exact', head:true }).not('deleted_at', 'is', null);
+  const { data: minmax } = await sb.from('trips').select('id, created_at').is('deleted_at', null).order('id', { ascending: true }).limit(1);
+  const { data: maxrow } = await sb.from('trips').select('id, created_at').is('deleted_at', null).order('id', { ascending: false }).limit(1);
+
+  document.getElementById('hc-live').textContent = live ?? '—';
+  document.getElementById('hc-soft').textContent = soft ?? '—';
+  document.getElementById('hc-min').textContent = minmax?.[0]?.id ?? '—';
+  document.getElementById('hc-max').textContent = maxrow?.[0]?.id ?? '—';
+  document.getElementById('hc-first').textContent = fmtDate(minmax?.[0]?.created_at) || '—';
+  document.getElementById('hc-last').textContent = fmtDate(maxrow?.[0]?.created_at) || '—';
+}
+
+// ── USER LOOKUP ───────────────────────────────────────
+async function lookupUser() {
+  const email = document.getElementById('lookup-email').value.trim();
+  if (!email) return;
+
+  ['lookup-auth','lookup-profile','lookup-trips-card','lookup-license-card'].forEach(id => document.getElementById(id).classList.remove('show'));
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('email', email).single();
+  if (!profile) { toast('User not found', 'error'); return; }
+
+  document.getElementById('lookup-auth').classList.add('show');
+  document.getElementById('lookup-auth-body').innerHTML = kvRows({ 'ID': profile.id, 'Email': profile.email, 'Country': profile.country||'—', 'Agreement signed': profile.agreement_signed?'Yes':'No', 'Account status': profile.account_status||'active', 'Created': fmtDate(profile.created_at) });
+
+  document.getElementById('lookup-profile').classList.add('show');
+  document.getElementById('lookup-profile-body').innerHTML = kvRows({ 'Agreement date': fmtDate(profile.agreement_date)||'—', 'Purge at': profile.account_purge_at ? fmtDate(profile.account_purge_at) : '—', 'Deleted at': profile.account_deleted_at ? fmtDate(profile.account_deleted_at) : 'Not deleted' });
+
+  const { data: trips } = await sb.from('trips').select('id, from_addr, to_addr, miles, trip_date').eq('user_id', profile.id).is('deleted_at', null).order('trip_date', { ascending: false }).limit(10);
+  document.getElementById('lookup-trips-card').classList.add('show');
+  const tbody = document.getElementById('lookup-trips-body');
+  tbody.innerHTML = trips?.length ? trips.map(t => `<tr><td>${t.id}</td><td>${esc((t.from_addr||'').substring(0,30))}</td><td>${esc((t.to_addr||'').substring(0,30))}</td><td>${t.miles}</td><td>${t.trip_date}</td></tr>`).join('') : '<tr><td colspan="5" class="tbl-empty">No trips</td></tr>';
+
+  const { data: license } = await sb.from('licenses').select('*').eq('user_id', profile.id).single();
+  if (license) {
+    document.getElementById('lookup-license-card').classList.add('show');
+    document.getElementById('lookup-license-body').innerHTML = kvRows({ 'Status': license.status, 'Plan': license.plan||'—', 'Billing path': license.billing_path||'—', 'Trial end': fmtDate(license.trial_end)||'—', 'Device model': license.device_model||'—', 'Install date': fmtDate(license.install_date)||'—' });
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+function fmtDate(s) { if (!s) return '—'; try { return new Date(s).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' }); } catch(e) { return s; } }
+function kvRows(obj) { return Object.entries(obj).map(([k,v]) => `<div class="result-row"><span class="result-key">${k}</span><span class="result-val">${esc(String(v))}</span></div>`).join(''); }
+function cp(btn, sql) {
+  navigator.clipboard.writeText(sql).catch(() => { const t=document.createElement('textarea'); t.value=sql; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); });
+  const orig = btn.textContent; btn.textContent = 'copied!'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1400);
+}
+function toast(msg, type='success') {
+  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+initAuth();
+</script>
+</body>
+</html>
