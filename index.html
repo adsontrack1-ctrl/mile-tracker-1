@@ -2432,8 +2432,22 @@ if(_sb){
         setTimeout(function(){_pullTripsFromSupabase();},500);
       });
     } else if(event==='SIGNED_OUT'){
+      // Build 186 (privacy): purge user-scoped state on sign-out. Mirrors signOut() at L8161
+      // but preserves theme/onboarding/device-id (no reload here — user may re-auth).
       currentUser=null;window.currentUser=null;
       window._supabaseSession=null;
+      TRIPS=[];
+      try{_pendingQueue=[];}catch(e){}
+      try{
+        localStorage.removeItem('mymilesai_trips');
+        localStorage.removeItem('mymilesai_pending_queue');
+        localStorage.removeItem('mymilesai_freq_routes');
+        localStorage.removeItem('mymilesai_freq_locations');
+        localStorage.removeItem('mymilesai_dismissed_alerts');
+        localStorage.removeItem('mymilesai_last_trip_end');
+      }catch(e){}
+      if(typeof renderTrips==='function')renderTrips();
+      if(typeof _updateYTD==='function')_updateYTD();
       var dl=document.getElementById('deviceLimitOverlay');if(dl)dl.remove();
       _authShowModal();_authShowPage('Landing');
     }
@@ -2817,10 +2831,9 @@ function renderTrips(){
     },{rootMargin:'200px'});
     window._tripObserver.observe(sentinel);
   }
-  recalcStats();
+  recalcStats(); // recalcStats() already calls _updateYTD() internally
   checkEmptyState();
   _updateStreak();
-  _updateYTD();
   bindSwipeCards();
   if(typeof _updateClassifyAllBtn==='function')_updateClassifyAllBtn();
   _updateFilterCounts();
@@ -4361,6 +4374,8 @@ async function _flushPendingQueue(){
     }catch(e){ console.error('[Queue] flush exception:', e && e.message, 'row:', JSON.stringify(row)); }
   }
   saveTripsToStorage();
+  if(typeof renderTrips==='function')renderTrips();
+  if(typeof _updateYTD==='function')_updateYTD();
 }
 function _buildTripRow(t, userId){
   // Safety net: GUARANTEE trip_uid is never null/undefined when sent to Supabase
@@ -4390,9 +4405,11 @@ function _buildTripRow(t, userId){
   return row;
 }
 window.addEventListener('online',function(){
-  console.log('[MMAI] Back online — triggering sync');
+  console.log('[MMAI] Back online — flushing queue then triggering sync');
   if(window._currentUser&&window._currentUser.id){
-    setTimeout(function(){_syncWithSupabase(window._currentUser.id);},2000);
+    setTimeout(function(){
+      _flushPendingQueue().then(function(){_syncWithSupabase(window._currentUser.id);}).catch(function(e){console.warn('[MMAI] flush error:',e&&e.message);_syncWithSupabase(window._currentUser.id);});
+    },2000);
   }
 });
 
@@ -5784,7 +5801,8 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     _updateFreqLoc(_startPos.lat,_startPos.lng,fromAddr);
   }
   renderTrips();renderAlerts();saveTripsToStorage();
-  /* Build 188: save-local-first — queue first, then attempt upsert. */
+  /* Build 186: save-local-first — queue first, then attempt upsert.
+     If sync is in progress, defer the upsert ~1.5s to avoid racing STEP 4 merge. */
   (function(){
     var _t=TRIPS[0];
     if(!_sb||!_sb.auth)return;
@@ -5794,20 +5812,24 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
       var row=_buildTripRow(_t,u.id);
       _queueTrip(row);
       console.log('[TripSave] queued trip_uid',row.trip_uid,'— attempting upsert');
-      _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
-        if(res.error){
-          console.error('[TripSave] upsert error:',JSON.stringify(res.error),'row:',JSON.stringify(row));
+      var _doUpsert=function(){
+        _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
+          if(res.error){
+            console.error('[TripSave] upsert error:',JSON.stringify(res.error),'row:',JSON.stringify(row));
+            if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
+          } else {
+            _dequeueTrip(row.trip_uid);
+            _t.synced=true;
+            saveTripsToStorage();
+            console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
+          }
+        }).catch(function(e){
+          console.error('[TripSave] upsert catch:',e&&e.message);
           if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
-        } else {
-          _dequeueTrip(row.trip_uid);
-          _t.synced=true;
-          saveTripsToStorage();
-          console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
-        }
-      }).catch(function(e){
-        console.error('[TripSave] upsert catch:',e&&e.message);
-        if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
-      });
+        });
+      };
+      if(window._syncInProgress){console.log('[TripSave] sync in progress — deferring upsert 1500ms');setTimeout(_doUpsert,1500);}
+      else{_doUpsert();}
     }).catch(function(e){console.error('[TripSave] auth catch:',e&&e.message);});
   })();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
@@ -6720,7 +6742,8 @@ function _doSaveManual(){
   showToast(_i('ccheck'),'Trip saved · '+dist+' '+LOC.unit);
   recordTripEnd();
   saveTripsToStorage();
-  /* Build 188: save-local-first — queue first, then attempt upsert. */
+  /* Build 186: save-local-first — queue first, then attempt upsert.
+     If sync is in progress, defer the upsert ~1.5s to avoid racing STEP 4 merge. */
   (function(){
     var _t=TRIPS[0];
     if(!_sb||!_sb.auth)return;
@@ -6730,17 +6753,21 @@ function _doSaveManual(){
       var row=_buildTripRow(_t,u.id);
       _queueTrip(row);
       console.log('[TripSave] queued trip_uid',row.trip_uid,'— attempting upsert');
-      _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
-        if(res.error){
-          console.error('[TripSave] upsert error:',JSON.stringify(res.error),'row:',JSON.stringify(row));
-          if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
-        } else {
-          _dequeueTrip(row.trip_uid);
-          _t.synced=true;
-          saveTripsToStorage();
-          console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
-        }
-      }).catch(function(e){console.error('[TripSave] upsert catch:',e&&e.message);});
+      var _doUpsert=function(){
+        _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
+          if(res.error){
+            console.error('[TripSave] upsert error:',JSON.stringify(res.error),'row:',JSON.stringify(row));
+            if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
+          } else {
+            _dequeueTrip(row.trip_uid);
+            _t.synced=true;
+            saveTripsToStorage();
+            console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
+          }
+        }).catch(function(e){console.error('[TripSave] upsert catch:',e&&e.message);});
+      };
+      if(window._syncInProgress){console.log('[TripSave] sync in progress — deferring upsert 1500ms');setTimeout(_doUpsert,1500);}
+      else{_doUpsert();}
     }).catch(function(e){console.error('[TripSave] auth catch:',e&&e.message);});
   })();
   closeAddTrip();
@@ -8393,8 +8420,9 @@ async function _syncWithSupabase(userId){
       console.log('[Sync] Page',from/pageSize,'→',res.data.length,'rows (total so far:',allRemote.length+')');
       if(res.data.length<pageSize){more=false;}
       from+=pageSize;
-      // Safety stop at 10K rows to avoid runaway
-      if(from>=10000){console.warn('[Sync] Hit 10K row safety limit');break;}
+      // Build 186: raised runaway cap from 10K → 100K. Pagination already
+      // terminates when data.length<pageSize; this is belt-and-suspenders only.
+      if(from>=100000){console.warn('[Sync] Hit 100K row safety limit');break;}
     }
     console.log('[Sync] === PULL COMPLETE:',allRemote.length,'remote trips');
 
