@@ -1,7 +1,7 @@
-/* MyMilesAI Service Worker v190
+/* MyMilesAI Service Worker v191
    Handles: offline caching, background sync, push notifications */
 
-var CACHE_NAME = 'mymilesai-v190';
+var CACHE_NAME = 'mymilesai-v191';
 var APP_SHELL = ['./', './index.html'];
 var CDN_ASSETS = [
   'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap'
