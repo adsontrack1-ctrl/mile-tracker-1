@@ -8067,15 +8067,14 @@ function exportMyData(){
   }
 }
 async function confirmDeleteAccount() {
-  const input = prompt('To permanently delete your account and ALL trip data, type DELETE exactly:');
+  const input = prompt('Your account and all data will be permanently deleted in 30 days.\nYou can contact support within 30 days to cancel.\nType DELETE to confirm:');
   if (input !== 'DELETE') { showToast('Account deletion cancelled.'); return; }
-  if (!confirm('FINAL WARNING: Every trip, every mile, all history permanently gone. Cannot be undone. Continue?')) return;
   await deleteMyAccount();
 }
 
 async function deleteMyAccount() {
   try {
-    showToast('Deleting account...');
+    showToast('Scheduling account deletion...');
     const { data: { user } } = await _sb.auth.getUser();
     if (!user) { showToast('Not signed in.'); return; }
 
@@ -8083,8 +8082,9 @@ async function deleteMyAccount() {
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id);
 
+    // Write audit log first
     await _sb.from('deletion_log').insert({
-      event_type: 'account_deletion',
+      event_type: 'account_deletion_requested',
       user_id: user.id,
       user_email: user.email,
       trip_count_at_deletion: count || 0,
@@ -8092,18 +8092,21 @@ async function deleteMyAccount() {
       platform: window.__MYMILESAI_NATIVE__ ? 'ios' : 'web',
       confirmation_text: 'DELETE',
       initiated_by: 'user',
-      notes: 'Double-confirmed via prompt + confirm dialog'
+      notes: '30-day grace period — purge scheduled'
     });
 
-    await _sb.from('trips').delete().eq('user_id', user.id);
-    await _sb.from('location_queue').delete().eq('user_id', user.id);
-    await _sb.from('profiles').delete().eq('id', user.id);
+    // Call soft-delete function — marks deleted, does NOT hard delete
+    const { error } = await _sb.rpc('soft_delete_account', { p_user_id: user.id });
+    if (error) throw error;
+
+    // Sign out and clear local state only
     await _sb.auth.signOut();
     localStorage.clear();
-    showToast('Account deleted. Goodbye!');
-    setTimeout(() => location.reload(), 2000);
+
+    showToast('Account scheduled for deletion in 30 days. You can contact support to cancel.');
+    setTimeout(() => location.reload(), 3000);
   } catch(e) {
-    showToast('Error deleting account: ' + e.message);
+    showToast('Error: ' + e.message);
   }
 }
 function signOut(){
