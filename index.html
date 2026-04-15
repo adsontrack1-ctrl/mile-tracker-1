@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 187 -->
+<!-- Build 188 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 187</title>
+<title>MyMilesAI — Build 188</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -880,7 +880,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 187</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 188</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.70/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4316,7 +4316,52 @@ function _genTripId(){
     });
   }
 }
-// Build 176: pending queue removed — replaced by trip_uid + synced flag + _syncWithSupabase
+// Build 188: save-local-first queue. Replaces the synced=false retry path from Build 176.
+// Trips are queued (encrypted) BEFORE the Supabase upsert; flushed on app open and
+// after every successful insert. The queue, not the synced flag, is the source of
+// truth for "needs to reach Supabase".
+var _pendingQueue = [];
+function _loadPendingQueue(){
+  try{
+    var raw = _decStore('mymilesai_pending_queue');
+    _pendingQueue = raw ? JSON.parse(raw) : [];
+  }catch(e){ _pendingQueue = []; console.error('[Queue] load failed:', e && e.message); }
+  console.log('[Queue] restored:', _pendingQueue.length, 'pending trips');
+  return _pendingQueue;
+}
+function _persistPendingQueue(){
+  try{ _encStore('mymilesai_pending_queue', JSON.stringify(_pendingQueue)); }
+  catch(e){ console.error('[Queue] persist failed:', e && e.message); }
+}
+function _queueTrip(row){
+  _pendingQueue = _pendingQueue.filter(function(r){ return r.trip_uid !== row.trip_uid; });
+  _pendingQueue.push(row);
+  _persistPendingQueue();
+}
+function _dequeueTrip(trip_uid){
+  _pendingQueue = _pendingQueue.filter(function(r){ return r.trip_uid !== trip_uid; });
+  _persistPendingQueue();
+}
+async function _flushPendingQueue(){
+  if(!_sb || !_pendingQueue || _pendingQueue.length === 0) return;
+  console.log('[Queue] flushing', _pendingQueue.length, 'trips');
+  var snapshot = _pendingQueue.slice();
+  for(var i = 0; i < snapshot.length; i++){
+    var row = snapshot[i];
+    try{
+      var res = await _sb.from('trips').upsert(row, { onConflict: 'trip_uid' });
+      if(res.error){
+        console.error('[Queue] FLUSH INSERT ERROR:', JSON.stringify(res.error), 'row:', JSON.stringify(row));
+      } else {
+        _dequeueTrip(row.trip_uid);
+        for(var fi = 0; fi < TRIPS.length; fi++){
+          if(TRIPS[fi].trip_uid === row.trip_uid){ TRIPS[fi].synced = true; break; }
+        }
+      }
+    }catch(e){ console.error('[Queue] flush exception:', e && e.message, 'row:', JSON.stringify(row)); }
+  }
+  saveTripsToStorage();
+}
 function _buildTripRow(t, userId){
   // Safety net: GUARANTEE trip_uid is never null/undefined when sent to Supabase
   if(!t.trip_uid){
@@ -5739,29 +5784,31 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     _updateFreqLoc(_startPos.lat,_startPos.lng,fromAddr);
   }
   renderTrips();renderAlerts();saveTripsToStorage();
-  /* Sync to Supabase — Build 176: upsert by trip_uid, sets synced flag */
+  /* Build 188: save-local-first — queue first, then attempt upsert. */
   (function(){
     var _t=TRIPS[0];
     if(!_sb||!_sb.auth)return;
     _sb.auth.getUser().then(function(r){
       var u=(r&&r.data&&r.data.user)||window._currentUser;
-      if(!u||!u.id){console.warn('[TripSave] no user — trip kept as unsynced for retry');return;}
+      if(!u||!u.id){console.warn('[TripSave] no user — kept in pending queue');return;}
       var row=_buildTripRow(_t,u.id);
-      console.log('[TripSave] upserting',row);
+      _queueTrip(row);
+      console.log('[TripSave] queued trip_uid',row.trip_uid,'— attempting upsert');
       _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
         if(res.error){
-          console.warn('[TripSave] upsert error',res.error);
+          console.error('[TripSave] upsert error:',JSON.stringify(res.error),'row:',JSON.stringify(row));
           if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
         } else {
+          _dequeueTrip(row.trip_uid);
           _t.synced=true;
           saveTripsToStorage();
-          console.log('[TripSave] ✓ synced trip_uid',_t.trip_uid);
+          console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
         }
       }).catch(function(e){
-        console.warn('[TripSave] upsert catch',e);
+        console.error('[TripSave] upsert catch:',e&&e.message);
         if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
       });
-    }).catch(function(e){console.warn('[TripSave] auth catch',e);});
+    }).catch(function(e){console.error('[TripSave] auth catch:',e&&e.message);});
   })();
   showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
   /* AI trip categorization (fire and forget) */
@@ -6673,26 +6720,28 @@ function _doSaveManual(){
   showToast(_i('ccheck'),'Trip saved · '+dist+' '+LOC.unit);
   recordTripEnd();
   saveTripsToStorage();
-  /* Sync to Supabase — Build 176: upsert by trip_uid */
+  /* Build 188: save-local-first — queue first, then attempt upsert. */
   (function(){
     var _t=TRIPS[0];
     if(!_sb||!_sb.auth)return;
     _sb.auth.getUser().then(function(r){
       var u=(r&&r.data&&r.data.user)||window._currentUser;
-      if(!u||!u.id){console.warn('[TripSave] no user — kept unsynced');return;}
+      if(!u||!u.id){console.warn('[TripSave] no user — kept in pending queue');return;}
       var row=_buildTripRow(_t,u.id);
-      console.log('[TripSave] upserting',row);
+      _queueTrip(row);
+      console.log('[TripSave] queued trip_uid',row.trip_uid,'— attempting upsert');
       _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
         if(res.error){
-          console.warn('[TripSave] upsert error',res.error);
+          console.error('[TripSave] upsert error:',JSON.stringify(res.error),'row:',JSON.stringify(row));
           if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
         } else {
+          _dequeueTrip(row.trip_uid);
           _t.synced=true;
           saveTripsToStorage();
-          console.log('[TripSave] ✓ synced trip_uid',_t.trip_uid);
+          console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
         }
-      }).catch(function(e){console.warn('[TripSave] upsert catch',e);});
-    }).catch(function(e){console.warn('[TripSave] auth catch',e);});
+      }).catch(function(e){console.error('[TripSave] upsert catch:',e&&e.message);});
+    }).catch(function(e){console.error('[TripSave] auth catch:',e&&e.message);});
   })();
   closeAddTrip();
   // Build 135: reset accumulators after manual save so next trip starts at 0
@@ -8468,32 +8517,9 @@ async function _syncWithSupabase(userId){
     var syncedCount=TRIPS.filter(function(t){return t.synced===true;}).length;
     console.log('[Sync] VERIFY: TRIPS total='+TRIPS.length+', with trip_uid='+withUid+', synced='+syncedCount);
 
-    // B) PUSH only unsynced trips
-    var unsynced=TRIPS.filter(function(t){return t.trip_uid&&t.synced!==true;});
-    console.log('[Sync] === PUSHING',unsynced.length,'unsynced trips ===');
-    var pushOk=0,pushFail=0;
-    for(var pi=0;pi<unsynced.length;pi++){
-      var ut=unsynced[pi];
-      var row=_buildTripRow(ut,userId);
-      try{
-        var up=await _sb.from('trips').upsert(row,{onConflict:'trip_uid'});
-        if(!up.error){
-          // CRITICAL: find the actual TRIPS[i] by trip_uid and mutate directly
-          for(var fi=0;fi<TRIPS.length;fi++){
-            if(TRIPS[fi].trip_uid===ut.trip_uid){
-              TRIPS[fi].synced=true;
-              break;
-            }
-          }
-          pushOk++;
-        } else {
-          pushFail++;
-          if(pushFail<5)console.warn('[Sync] Push fail trip_uid',ut.trip_uid,':',up.error.message);
-        }
-      }catch(e){pushFail++;}
-    }
-    console.log('[Sync] === PUSH DONE: ok='+pushOk+', fail='+pushFail+' ===');
-    saveTripsToStorage();
+    // Build 188: PUSH loop removed — _flushPendingQueue is now the single retry path
+    // (was: re-uploaded all synced!==true rows from TRIPS; created risk of duplicate
+    // writes when running alongside the queue flush).
 
     // C) RETRY estimated trips — call Routes API again for trips where it previously failed
     var estimated=TRIPS.filter(function(t){return t.estimated===true&&t.startLat&&t.endLat;});
@@ -8547,10 +8573,18 @@ async function _syncWithSupabase(userId){
 // Back-compat: old callers reference _syncTripsFromSupabase
 function _syncTripsFromSupabase(userId){return _syncWithSupabase(userId);}
 
-// Initial sync on load
-setTimeout(function(){
-  if(window._currentUser&&window._currentUser.id)_syncWithSupabase(window._currentUser.id);
-},3000);
+// Build 188: 5s startup — restore pending queue, flush local-only trips to DB,
+// then run the merge sync. Order matters: locals must reach DB BEFORE the
+// merge can reconcile, otherwise a slow flush would race the merge.
+setTimeout(async function(){
+  if(!window._currentUser || !window._currentUser.id) return;
+  _loadPendingQueue();
+  console.log('[Startup] FLUSH QUEUE: pending trips count =', (_pendingQueue||[]).length);
+  if(_pendingQueue.length > 0){
+    await _flushPendingQueue();
+  }
+  _syncWithSupabase(window._currentUser.id);
+}, 5000);
 
 // Build 178: visibilitychange — save on hidden, sync on visible (max once / 5 min)
 document.addEventListener('visibilitychange',function(){
