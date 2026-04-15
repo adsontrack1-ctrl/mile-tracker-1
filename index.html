@@ -8066,28 +8066,44 @@ function exportMyData(){
     showToast(_i('warn'),'Export failed: '+e.message,3000);
   }
 }
-function confirmDeleteAccount(){
-  if(confirm('Are you sure you want to permanently delete your account and all data? This cannot be undone.')){
-    if(confirm('FINAL WARNING: This will delete ALL your trips, settings, and account. Are you ABSOLUTELY sure?')){
-      deleteMyAccount();
-    }
-  }
+async function confirmDeleteAccount() {
+  const input = prompt('To permanently delete your account and ALL trip data, type DELETE exactly:');
+  if (input !== 'DELETE') { showToast('Account deletion cancelled.'); return; }
+  if (!confirm('FINAL WARNING: Every trip, every mile, all history permanently gone. Cannot be undone. Continue?')) return;
+  await deleteMyAccount();
 }
-async function deleteMyAccount(){
+
+async function deleteMyAccount() {
   try {
-    showToast(_i('clock'),'Deleting account...',2000);
-    if(_sb && currentUser && currentUser.id){
-      try { await _sb.from('trips').delete().eq('user_id', currentUser.id); } catch(e){}
-      try { await _sb.from('location_queue').delete().eq('user_id', currentUser.id); } catch(e){}
-      try { await _sb.from('user_sessions').delete().eq('user_id', currentUser.id); } catch(e){}
-      try { await _sb.from('profiles').delete().eq('id', currentUser.id); } catch(e){}
-      try { await _sb.auth.signOut(); } catch(e){}
-    }
-    try { localStorage.clear(); } catch(e){}
-    showToast(_i('ccheck'),'Account deleted. Goodbye!',3000);
-    setTimeout(function(){location.reload();},2500);
+    showToast('Deleting account...');
+    const { data: { user } } = await _sb.auth.getUser();
+    if (!user) { showToast('Not signed in.'); return; }
+
+    const { count } = await _sb.from('trips')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    await _sb.from('deletion_log').insert({
+      event_type: 'account_deletion',
+      user_id: user.id,
+      user_email: user.email,
+      trip_count_at_deletion: count || 0,
+      app_version: document.title.match(/Build (\d+)/)?.[1] || 'unknown',
+      platform: window.__MYMILESAI_NATIVE__ ? 'ios' : 'web',
+      confirmation_text: 'DELETE',
+      initiated_by: 'user',
+      notes: 'Double-confirmed via prompt + confirm dialog'
+    });
+
+    await _sb.from('trips').delete().eq('user_id', user.id);
+    await _sb.from('location_queue').delete().eq('user_id', user.id);
+    await _sb.from('profiles').delete().eq('id', user.id);
+    await _sb.auth.signOut();
+    localStorage.clear();
+    showToast('Account deleted. Goodbye!');
+    setTimeout(() => location.reload(), 2000);
   } catch(e) {
-    showToast(_i('warn'),'Error: '+e.message,3000);
+    showToast('Error deleting account: ' + e.message);
   }
 }
 function signOut(){
