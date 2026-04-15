@@ -4362,6 +4362,23 @@ async function _flushPendingQueue(){
   for(var i = 0; i < snapshot.length; i++){
     var row = snapshot[i];
     try{
+      // P2: resurrection guard. If this trip was previously confirmed synced
+      // (TRIPS entry has synced===true) but is now absent from Supabase, another
+      // device deleted it — do NOT re-insert. Brand-new trips (synced!==true)
+      // always proceed, since every queued row carries a trip_uid from _genTripId.
+      var _localTrip = null;
+      for(var _lti = 0; _lti < TRIPS.length; _lti++){
+        if(TRIPS[_lti].trip_uid === row.trip_uid){ _localTrip = TRIPS[_lti]; break; }
+      }
+      if(_localTrip && _localTrip.synced === true){
+        var _chk = await _sb.from('trips').select('id').eq('trip_uid', row.trip_uid).maybeSingle();
+        if(!_chk.error && _chk.data === null){
+          console.log('[Queue] Trip was deleted remotely — skipping upsert:', row.trip_uid);
+          _dequeueTrip(row.trip_uid);
+          TRIPS = TRIPS.filter(function(t){ return t.trip_uid !== row.trip_uid; });
+          continue;
+        }
+      }
       var res = await _sb.from('trips').upsert(row, { onConflict: 'trip_uid' });
       if(res.error){
         console.error('[Queue] FLUSH INSERT ERROR:', JSON.stringify(res.error), 'row:', JSON.stringify(row));
@@ -8479,12 +8496,21 @@ async function _syncWithSupabase(userId){
     // guarantees the same trip_uid cannot appear twice — fixes the "1 on Supabase, 2 on phone" bug.
     var merged=[];
     var seenUids={};
-    var mergedCount=0,addedCount=0,localDupesDropped=0;
+    var mergedCount=0,addedCount=0,localDupesDropped=0,remoteDeletedDropped=0;
 
     for(var mi=0;mi<TRIPS.length;mi++){
       var t2=TRIPS[mi];
       if(t2.trip_uid&&seenUids[t2.trip_uid]){localDupesDropped++;continue;}
       if(t2.trip_uid)seenUids[t2.trip_uid]=true;
+
+      // P1 FIX: if this trip was previously synced (synced===true) but is now
+      // absent from Supabase → it was deleted on another device. Drop locally.
+      // Unsynced trips (synced!==true) are always kept — they're pending upload.
+      if(t2.trip_uid&&t2.synced===true&&!remoteByUid[t2.trip_uid]){
+        console.log('[Sync] Remote deletion detected — dropping local trip:',t2.trip_uid);
+        remoteDeletedDropped++;
+        continue;
+      }
 
       if(t2.trip_uid&&remoteByUid[t2.trip_uid]){
         var r2=remoteByUid[t2.trip_uid];
@@ -8522,7 +8548,7 @@ async function _syncWithSupabase(userId){
     }
 
     TRIPS=merged;
-    console.log('[Sync] Merge: merged='+mergedCount+', remote-only added='+addedCount+', local dupes dropped='+localDupesDropped);
+    console.log('[Sync] Merge: merged='+mergedCount+', remote-only added='+addedCount+', local dupes dropped='+localDupesDropped+', remote-deleted dropped='+remoteDeletedDropped);
 
     // STEP 6: Backfill trip_uid for remaining unmatched local trips
     var backfilled=0;
