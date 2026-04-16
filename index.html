@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 200 -->
+<!-- Build 201 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 200</title>
+<title>MyMilesAI — Build 201</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -880,7 +880,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 200</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 201</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -2814,7 +2814,7 @@ function renderTrips(){
     swipeQ.innerHTML='';
   }
   window._tripsPage=1;
-  // Build 200: exclude unclassified trips from main list when swipe queue is visible
+  // Build 201: exclude unclassified trips from main list when swipe queue is visible
   // (they already render there — avoids visual double-display).
   window._tripsFiltered=uncl.length>0?TRIPS.filter(function(t){return t.type!=='uncl';}):TRIPS;
   var list=document.getElementById('tripList');
@@ -4522,11 +4522,11 @@ function openTripDB(){
 }
 function saveTripState(state){
   // Build 134: 3-layer persistence — IDB + localStorage + native AsyncStorage (source of truth)
-  // Build 200: also persist trip start/last coords so restore can call Routes API with real endpoints.
+  // Build 201: also persist trip start/last coords so restore can call Routes API with real endpoints.
   state.startLat = (window._tripStartLat!=null) ? window._tripStartLat : null;
   state.startLng = (window._tripStartLng!=null) ? window._tripStartLng : null;
-  state.lastLat  = (window._tripLastLat!=null)  ? window._tripLastLat  : null;
-  state.lastLng  = (window._tripLastLng!=null)  ? window._tripLastLng  : null;
+  state.lastLat  = (window._tripEndLat!=null)  ? window._tripEndLat  : null;
+  state.lastLng  = (window._tripEndLng!=null)  ? window._tripEndLng  : null;
   var savedAt = state.savedAt||Date.now();
   var payload = {key:'active',tracking:state.tracking,trackStart:state.trackStart,totalDist:state.totalDist,startLat:state.startLat,startLng:state.startLng,lastLat:state.lastLat,lastLng:state.lastLng,savedAt:savedAt};
   openTripDB().then(function(db){
@@ -4558,7 +4558,7 @@ function clearTripState(){
     tx.objectStore('state').delete('active');
   }).catch(function(){});
   try{localStorage.removeItem('mmai_trip_backup');}catch(e){}
-  window._tripStartLat=null;window._tripStartLng=null;window._tripEndLat=null;window._tripEndLng=null;window._tripLastLat=null;window._tripLastLng=null;
+  window._tripStartLat=null;window._tripStartLng=null;window._tripEndLat=null;window._tripEndLng=null;
   // Build 134: also clear native AsyncStorage
   if(window.ReactNativeWebView){
     try{window.ReactNativeWebView.postMessage(JSON.stringify({type:'CLEAR_TRIP_STATE'}));}catch(e){}
@@ -4848,7 +4848,7 @@ function startTracking(){
   positions=[];lastMoving=Date.now();
   // Build 168: reset all GPS engine state for new trip
   window.__spdEMA=0;window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
-  window._tripStartLat=null;window._tripStartLng=null;window._tripLastLat=null;window._tripLastLng=null;window._tripStartBuffer=null;
+  window._tripStartLat=null;window._tripStartLng=null;window._tripEndLat=null;window._tripEndLng=null;window._tripStartBuffer=null;
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -4890,14 +4890,12 @@ function startTracking(){
   // Realtime hero stat refresh every 2s during tracking
   window._liveStatInt=setInterval(function(){
     if(!tracking)return;
-    var _lm=_liveMiApprox();
-    var _dispMi=_useKm()?_lm*1.60934:_lm;
-    var _dispDed=_dispMi*catRate('biz');
+    // Build 201: no live distance — Routes API computes at trip end only.
     var hb=document.getElementById('hsBiz');
     var hd=document.getElementById('hsDed');
     var hp=document.getElementById('hsPer');
-    if(hb)hb.textContent=_dispMi.toFixed(1);
-    if(hd)hd.textContent=LOC.currency+_dispDed.toFixed(2);
+    if(hb)hb.textContent='—';
+    if(hd)hd.textContent='—';
     if(hp)hp.textContent=((Date.now()-trackStart-_totalPauseMs-(_paused?(Date.now()-_pauseStart):0))/60000).toFixed(0);
   },2000);
   updateDebugPanel();
@@ -4983,6 +4981,32 @@ window.__nativeGPS__ = function(coords) {
   }
   // Always update last known GPS coords for templates etc
   lastGpsLat=coords.lat;lastGpsLng=coords.lng;
+};
+
+/* ── Native Activity Bridge (Build 201) ──
+   App.js posts { type:'__ACTIVITY__', automotive, stationary, speed } every 5s.
+   automotive=true when speed ≥ 15 mph sustained 10s → auto-start if autoDetect on.
+   stationary=true when speed < 0.5 m/s sustained 8s → count toward 5-min auto-end. */
+window._stationaryCount = 0;
+window.__onNativeActivity = function(msg){
+  if(!msg||msg.type!=='__ACTIVITY__')return;
+  window._lastActivity = msg;
+  // Auto-start: sustained automotive + auto-detect enabled + no active trip
+  if(msg.automotive && autoDetect && !tracking){
+    console.log('[Activity] automotive detected — auto-starting trip');
+    try{ startTracking(); }catch(e){ console.warn('[Activity] startTracking failed:',e&&e.message); }
+  }
+  // Auto-end: 60 consecutive stationary messages (5 min at 5s cadence)
+  if(msg.stationary && tracking){
+    window._stationaryCount += 1;
+    if(window._stationaryCount >= 60){
+      console.log('[Activity] stationary 5min — auto-ending trip');
+      window._stationaryCount = 0;
+      try{ stopTracking(); }catch(e){ console.warn('[Activity] stopTracking failed:',e&&e.message); }
+    }
+  } else {
+    window._stationaryCount = 0;
+  }
 };
 
 /* ── Native Bridge: process background-batched locations from BackgroundFetch ── */
@@ -5177,19 +5201,8 @@ function onPos(p){
   var clSpeedAcc=(typeof p.coords.speedAccuracy==='number')?p.coords.speedAccuracy:-1;
   var _now=Date.now();
 
-  // ═══ BUILD 164: GPS ACCURACY GATE ═══
-  // Hard reject accuracy > 15m
-  if(accuracy>15){
-    // Exception: if speed is valid and accuracy <= 15m we keep it (handled by not being here)
-    // If speed is null/negative AND accuracy > 10m, also reject
-    if(clSpeed<0||clSpeed===null){
-      // no valid speed — reject anything > 10m
-      if(accuracy>10){ return; }
-    } else {
-      // has valid speed but accuracy > 15m — reject
-      return;
-    }
-  }
+  // ═══ Build 201: GPS accuracy gate — reject > 25m ═══
+  if(accuracy>25) return;
 
   var lat=rawLat;
   var lng=rawLng;
@@ -5199,8 +5212,8 @@ function onPos(p){
 
   // MileIQ model: no distance accumulation during tracking. Just update last-known coord;
   // final distance comes from Routes API (start→end) at trip end.
-  window._tripLastLat=lat;
-  window._tripLastLng=lng;
+  window._tripEndLat=lat;
+  window._tripEndLng=lng;
   // Periodic trip-state persistence so restoration after force-kill knows the trip is live
   if(clSpeed>=0.45&&!_paused&&(!window._lastTripPersist||_now-window._lastTripPersist>3000)){
     window._lastTripPersist=_now;
@@ -5374,31 +5387,17 @@ function onPos(p){
     }
   }
 
-  // ═══ LIVE DISPLAY UPDATE ═══
-  // Crow-flies × 1.15 road factor — display estimate only. Saved distance
-  // comes from Routes API at trip end, independent of this.
-  var _liveApprox=_liveMiApprox();
-  var dist=_useKm()?(_liveApprox*1.60934).toFixed(2):_liveApprox.toFixed(2);
-  document.getElementById('trackDist').textContent=dist;
-  var _dispMi=_useKm()?_liveApprox*1.60934:_liveApprox;
-  var _dispDed=_dispMi*catRate('biz');
-  document.getElementById('hsBiz').textContent=_dispMi.toFixed(1);
+  // ═══ LIVE DISPLAY (Build 201) ═══
+  // Distance is no longer computed mid-trip. Routes API at trip end is the
+  // sole source of saved miles. Show "Tracking..." as the distance placeholder;
+  // minutes continue to tick live.
+  document.getElementById('trackDist').textContent='Tracking...';
+  document.getElementById('hsBiz').textContent='—';
   document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
   document.getElementById('hsPer').textContent=((_now-trackStart-_totalPauseMs-(_paused?(_now-_pauseStart):0))/60000).toFixed(0);
   document.getElementById('hsPerL').textContent='Minutes';
-  document.getElementById('hsDed').textContent=LOC.currency+_dispDed.toFixed(2);
-  var milestones=[1,5,10,25,50,100];
-  for(var mi=0;mi<milestones.length;mi++){
-    var m=milestones[mi];
-    if(_dispMi>=m&&_dispMi<m+0.2&&!window['_ms'+m]){
-      window['_ms'+m]=true;
-      showToast(_i('ccheck'),m+' '+LOC.unit+' reached!',2000);
-    }
-  }
-  if(positions.length>1){
-    var elapsed=(_now-trackStart-_totalPauseMs)/3600000;
-    document.getElementById('trackAvg').textContent=elapsed>0?(_dispMi/elapsed).toFixed(0):'0';
-  }
+  document.getElementById('hsDed').textContent='—';
+  var _tAvgEl=document.getElementById('trackAvg');if(_tAvgEl)_tAvgEl.textContent='—';
   updateDebugPanel();
 }
 
@@ -5685,11 +5684,11 @@ function stopTracking(){
   // Reset milestone flags
   for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
   var _tMin=(Date.now()-trackStart)/60000;
-  // Gate on crow-flies approximation (liveDist no longer accumulated per Build 200)
+  // Gate on crow-flies approximation (liveDist no longer accumulated per Build 201)
   var _approxTripMi=_liveMiApprox();
   if(_approxTripMi>0.05&&_tMin>=5){var _kd=_matchKnownLocation(lastGpsLat,lastGpsLng);setTimeout(function(){_promptSmartSave(_kd);},1500);}
   if(_approxTripMi>0.01){
-    var _haversineMi=haversine(window._tripStartLat||0,window._tripStartLng||0,window._tripLastLat||window._tripEndLat||0,window._tripLastLng||window._tripEndLng||0)*1.15; // straight-line×road-factor fallback for Routes API catch
+    var _haversineMi=haversine(window._tripStartLat||0,window._tripStartLng||0,window._tripEndLat||0,window._tripEndLng||0)*1.15; // straight-line×road-factor fallback for Routes API catch
     var elapsed=Math.floor((Date.now()-trackStart)/60000);
     var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
     // Resolve BOTH start+end addresses in parallel with 5s total timeout
@@ -5738,12 +5737,15 @@ function stopTracking(){
         }
       });
     }
-    // SMART END: prefer stationary-window best reading; fall back to _tripLastLat/Lng
-    // (live-updated on every onPos fix); final fall back to last positions[] breadcrumb.
+    // SMART END: window._tripEndLat/Lng was updated on every fix in onPos.
+    // Overlay with stationary-window best reading if available (higher accuracy).
     var endPos=_getBestEndPosition();
-    var _tripEndLat=endPos?endPos.lat:(window._tripLastLat!=null?window._tripLastLat:(positions.length>0?positions[positions.length-1].lat:null));
-    var _tripEndLng=endPos?endPos.lng:(window._tripLastLng!=null?window._tripLastLng:(positions.length>0?positions[positions.length-1].lng:null));
-    window._tripEndLat=_tripEndLat;window._tripEndLng=_tripEndLng;
+    if(endPos){window._tripEndLat=endPos.lat;window._tripEndLng=endPos.lng;}
+    else if(window._tripEndLat==null&&positions.length>0){
+      window._tripEndLat=positions[positions.length-1].lat;
+      window._tripEndLng=positions[positions.length-1].lng;
+    }
+    var _tripEndLat=window._tripEndLat;var _tripEndLng=window._tripEndLng;
     // Build 177: store last known position for next trip start
     if(_tripEndLat&&_tripEndLng){
       try{localStorage.setItem('mmai_last_known_pos',JSON.stringify({
@@ -5765,7 +5767,7 @@ function stopTracking(){
     }
 
     // Build 176: Routes API (CORS-safe computeRoutes) + full debug logging
-    // Build 200 surgical rewrite: start→end only (no intermediates), 3× retry @ 2s delay,
+    // Build 201 surgical rewrite: start→end only (no intermediates), 3× retry @ 2s delay,
     // validity gates (min 0.1mi discard, max 500mi sanity), haversine×1.15 fallback.
     function _getDirectionsAndSave(fromA,toA){
       var startLat=window._tripStartLat;var startLng=window._tripStartLng;
@@ -5778,20 +5780,21 @@ function stopTracking(){
         if(startLat==null||startLng==null||eLat==null||eLng==null)return 0;
         return haversine(startLat,startLng,eLat,eLng)*1.15;
       }
-      function finalizeSave(mi,estimated){
+      function finalizeSave(mi,source){
         mi=parseFloat(mi.toFixed(2));
         if(mi<0.1){
           console.warn('[ROUTES] Trip too short ('+mi+'mi) — discarding');
           showToast(_i('warn'),'Trip too short — not saved',3000);
           return;
         }
-        window._tripEstimated=!!estimated;
+        window._tripEstimated=(source==='haversine_fallback');
+        window._tripSource=source;
         _doSave(mi,fromA,toA);
       }
 
       if(startLat==null||startLng==null||eLat==null||eLng==null){
         console.warn('[ROUTES] Missing coords — haversine×1.15 fallback');
-        finalizeSave(hvFallback(),true);
+        finalizeSave(hvFallback(),'haversine_fallback');
         return;
       }
 
@@ -5800,17 +5803,17 @@ function stopTracking(){
         attempt++;
         console.warn('[ROUTES] Attempt',attempt,'of',MAX_ATTEMPTS);
         if(attempt===1)showToast(_i('pin'),'Calculating road distance...',2000);
-        fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
+        fetch('https://routes.googleapis.com/directions/v2:computeRoutes?key='+_MAPS_KEY,{
           method:'POST',
           headers:{
             'Content-Type':'application/json',
-            'X-Goog-Api-Key':_MAPS_KEY,
             'X-Goog-FieldMask':'routes.distanceMeters,routes.duration'
           },
           body:JSON.stringify({
             origin:{location:{latLng:{latitude:startLat,longitude:startLng}}},
             destination:{location:{latLng:{latitude:eLat,longitude:eLng}}},
-            travelMode:'DRIVE'
+            travelMode:'DRIVE',
+            routingPreference:'TRAFFIC_AWARE'
           })
         })
           .then(function(r){
@@ -5828,10 +5831,10 @@ function stopTracking(){
             if(routesMi>500){
               var hvSanity=hvFallback();
               console.warn('[ROUTES] Sanity violation (>500mi) — using haversine×1.15:',hvSanity);
-              finalizeSave(hvSanity,true);
+              finalizeSave(hvSanity,'haversine_fallback');
               return;
             }
-            finalizeSave(routesMi,false);
+            finalizeSave(routesMi,'routes_api');
           })
           .catch(function(e){
             console.warn('[ROUTES] Attempt',attempt,'failed:',e&&e.message);
@@ -5841,7 +5844,7 @@ function stopTracking(){
             }
             var hvFinal=hvFallback();
             console.warn('[ROUTES] All',MAX_ATTEMPTS,'attempts failed — haversine×1.15 =',hvFinal);
-            finalizeSave(hvFinal,true);
+            finalizeSave(hvFinal,'haversine_fallback');
           });
       }
       tryRoutes();
@@ -5884,8 +5887,9 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
   })();
   var _elapsedPart=timeStr.indexOf('\u00b7')>=0?timeStr.substring(timeStr.indexOf('\u00b7')):(elapsed+' min');
   var _newUid=_genTripId();
-  TRIPS.unshift({trip_uid:_newUid,synced:false,estimated:!!window._tripEstimated,tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+_elapsedPart,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId,startLat:window._tripStartLat||null,startLng:window._tripStartLng||null,endLat:window._tripEndLat||null,endLng:window._tripEndLng||null});
+  TRIPS.unshift({trip_uid:_newUid,synced:false,estimated:!!window._tripEstimated,source:window._tripSource||'routes_api',tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+_elapsedPart,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId,startLat:window._tripStartLat||null,startLng:window._tripStartLng||null,endLat:window._tripEndLat||null,endLng:window._tripEndLng||null});
   window._tripEstimated=false;
+  window._tripSource=null;
   try{if(_gpsVehId)localStorage.setItem('mymilesai_last_vehicle',_gpsVehId);}catch(e){}
   if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
   // Update frequent location memory from GPS coordinates so Named Places populate automatically
@@ -6027,8 +6031,8 @@ function haversine(lat1,lon1,lat2,lon2){
 // Live crow-flies distance × 1.15 road factor. Display only — saved distance
 // is the Routes API result from trip end, not this.
 function _liveMiApprox(){
-  if(window._tripStartLat==null||window._tripLastLat==null)return 0;
-  return haversine(window._tripStartLat,window._tripStartLng,window._tripLastLat,window._tripLastLng)*1.15;
+  if(window._tripStartLat==null||window._tripEndLat==null)return 0;
+  return haversine(window._tripStartLat,window._tripStartLng,window._tripEndLat,window._tripEndLng)*1.15;
 }
 
 /* ===== MAP ===== */
@@ -7436,7 +7440,7 @@ loadTripsFromStorage(); // Load trips BEFORE locale so renderTrips has data
 function _doRestoreFromState(state){
   if(!state)return false;
   // Restore if tracking was active, OR (legacy) a distance was recorded.
-  // Build 200: no longer require totalDist>0 since we don't accumulate.
+  // Build 201: no longer require totalDist>0 since we don't accumulate.
   if(!state.tracking && (!state.totalDist||state.totalDist<=0))return false;
   if(state.savedAt&&Date.now()-state.savedAt>12*3600*1000){clearTripState();return false;}
   var savedDist=state.totalDist||0;
@@ -7447,18 +7451,18 @@ function _doRestoreFromState(state){
     window._restoringTrip=true;
     liveDist=savedDist;
     trackStart=savedStart;
-    // Build 200: restore trip coords so live display + Routes API at end work
+    // Build 201: restore trip coords so live display + Routes API at end work
     window._tripStartLat=state.startLat||null;
     window._tripStartLng=state.startLng||null;
-    window._tripLastLat=state.lastLat||state.startLat||null;
-    window._tripLastLng=state.lastLng||state.startLng||null;
+    window._tripEndLat=state.lastLat||state.startLat||null;
+    window._tripEndLng=state.lastLng||state.startLng||null;
     if(!tracking)startTracking();
     liveDist=savedDist;
     trackStart=savedStart;
     window._tripStartLat=state.startLat||window._tripStartLat;
     window._tripStartLng=state.startLng||window._tripStartLng;
-    window._tripLastLat=state.lastLat||state.startLat||window._tripLastLat;
-    window._tripLastLng=state.lastLng||state.startLng||window._tripLastLng;
+    window._tripEndLat=state.lastLat||state.startLat||window._tripEndLat;
+    window._tripEndLng=state.lastLng||state.startLng||window._tripEndLng;
     var approxMi=_liveMiApprox();
     var dispDist=_useKm()?(approxMi*1.60934).toFixed(2):approxMi.toFixed(2);
     var el=document.getElementById('trackDist');if(el)el.textContent=dispDist;
@@ -8690,17 +8694,17 @@ async function _syncWithSupabase(userId){
       for(var ei=0;ei<estimated.length;ei++){
         var et=estimated[ei];
         try{
-          var retryRes=await fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{
+          var retryRes=await fetch('https://routes.googleapis.com/directions/v2:computeRoutes?key='+_MAPS_KEY,{
             method:'POST',
             headers:{
               'Content-Type':'application/json',
-              'X-Goog-Api-Key':_MAPS_KEY,
               'X-Goog-FieldMask':'routes.distanceMeters'
             },
             body:JSON.stringify({
               origin:{location:{latLng:{latitude:parseFloat(et.startLat),longitude:parseFloat(et.startLng)}}},
               destination:{location:{latLng:{latitude:parseFloat(et.endLat),longitude:parseFloat(et.endLng)}}},
-              travelMode:'DRIVE'
+              travelMode:'DRIVE',
+              routingPreference:'TRAFFIC_AWARE'
             })
           });
           var retryData=await retryRes.json();
