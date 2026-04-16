@@ -4917,6 +4917,7 @@ function toggleTracking(){
 }
 
 function startTracking(){
+  console.log('[startTracking] called');
   if(!navigator.geolocation&&!window.__MYMILESAI_NATIVE__){showToast(_i('pin'),'GPS not available on this device');return;}
   if(autoWatchId&&autoWatchId!=='native'){navigator.geolocation.clearWatch(autoWatchId);}
   autoWatchId=null;
@@ -4934,7 +4935,15 @@ function startTracking(){
   positions=[];lastMoving=Date.now();
   // Build 168: reset all GPS engine state for new trip
   window.__spdEMA=0;window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
-  window._tripStartLat=null;window._tripStartLng=null;window._tripEndLat=null;window._tripEndLng=null;window._tripStartBuffer=null;
+  // Emergency fix: seed trip start from last-known GPS so save never misses coords,
+  // even if the first onPos fix arrives after stopTracking (edge case). Replaced by the
+  // start-coord buffer once 3 accurate readings arrive.
+  var _seedLat=(typeof window._lastKnownLat==='number')?window._lastKnownLat:(typeof lastGpsLat==='number'?lastGpsLat:null);
+  var _seedLng=(typeof window._lastKnownLng==='number')?window._lastKnownLng:(typeof lastGpsLng==='number'?lastGpsLng:null);
+  window._tripStartLat=_seedLat;window._tripStartLng=_seedLng;
+  window._tripEndLat=_seedLat;window._tripEndLng=_seedLng;
+  window._tripStartBuffer=null;
+  console.log('[startTracking] seeded start from lastKnown:',_seedLat,_seedLng);
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
@@ -5024,7 +5033,7 @@ window.__nativeGPS__ = function(coords) {
   var acc = coords.accuracy || 999;
   if(acc > 15){
     // Still update last-known for non-distance uses (templates, prefill)
-    lastGpsLat=coords.lat;lastGpsLng=coords.lng;
+    lastGpsLat=coords.lat;lastGpsLng=coords.lng;window._lastKnownLat=coords.lat;window._lastKnownLng=coords.lng;
     return;
   }
   // ── SPEED SANITY: reject implied speed > 150 mph between consecutive points ──
@@ -5042,7 +5051,7 @@ window.__nativeGPS__ = function(coords) {
       var impliedMph = (distMi / dtSec) * 3600;
       if(impliedMph > 150){
         // GPS jump — reject
-        lastGpsLat=coords.lat;lastGpsLng=coords.lng;
+        lastGpsLat=coords.lat;lastGpsLng=coords.lng;window._lastKnownLat=coords.lat;window._lastKnownLng=coords.lng;
         return;
       }
     }
@@ -5066,7 +5075,7 @@ window.__nativeGPS__ = function(coords) {
     onAutoPos(fakePos);
   }
   // Always update last known GPS coords for templates etc
-  lastGpsLat=coords.lat;lastGpsLng=coords.lng;
+  lastGpsLat=coords.lat;lastGpsLng=coords.lng;window._lastKnownLat=coords.lat;window._lastKnownLng=coords.lng;
 };
 
 /* ── Native Activity Bridge (Build 202) ──
@@ -5721,6 +5730,7 @@ function updateAutoBtn(){
   }
 }
 function stopTracking(){
+  console.log('[stopTracking] called — tracking=',tracking,'startLat=',window._tripStartLat,'endLat=',window._tripEndLat);
   // Build 151: idempotency guard — if tracking was already stopped, bail out.
   // Without this, a double-tap or button+auto-stop race wipes _savedTotalDist
   // to 0, makes the save gate fail, and shows "No distance recorded" even
@@ -5856,14 +5866,30 @@ function stopTracking(){
     }
 
     // Build 202: Thin async wrapper around _getFinalMiles utility.
-    // Discards trip if resulting miles < 0.1. Saves source flag on trip object.
+    // Emergency: if coords are missing, fall back to last-known before Routes call.
     async function _getDirectionsAndSave(fromA,toA){
       showToast(_i('pin'),'Calculating road distance...',2000);
+      // Coord guard BEFORE Routes API so fallback haversine has valid endpoints
+      if(!window._tripStartLat||!window._tripStartLng||!window._tripEndLat||!window._tripEndLng){
+        console.error('[Save] missing coords before Routes — filling from lastKnown');
+        window._tripStartLat = window._tripStartLat || window._lastKnownLat || lastGpsLat || null;
+        window._tripStartLng = window._tripStartLng || window._lastKnownLng || lastGpsLng || null;
+        window._tripEndLat   = window._tripEndLat   || window._lastKnownLat || lastGpsLat || null;
+        window._tripEndLng   = window._tripEndLng   || window._lastKnownLng || lastGpsLng || null;
+      }
       var dist = await _getFinalMiles(window._tripStartLat, window._tripStartLng, window._tripEndLat, window._tripEndLng);
+      // Emergency: never silently discard. If coords exist but distance < 0.1, save as 0.1.
+      // Only truly abandon if coords are null (can't reconstruct anything).
+      var hasCoords = (window._tripStartLat!=null && window._tripEndLat!=null);
       if(dist.miles < 0.1){
-        console.warn('[ROUTES] Trip too short ('+dist.miles+'mi) — discarding');
-        showToast(_i('warn'),'Trip too short — not saved',3000);
-        return;
+        if(hasCoords){
+          console.warn('[ROUTES] Distance < 0.1mi but coords valid — saving as 0.1 min');
+          dist.miles = 0.1;
+        } else {
+          console.error('[ROUTES] Distance < 0.1mi AND coords null — truly discarding');
+          showToast(_i('warn'),'Trip too short — not saved',3000);
+          return;
+        }
       }
       window._tripEstimated = (dist.source === 'haversine_fallback');
       window._tripSource = dist.source;
@@ -5885,6 +5911,17 @@ function stopTracking(){
 }
 var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
+  console.log('[finishSaveTrackedTrip] called — mi=',mi,'from=',fromAddr,'to=',toAddr,'startLat=',window._tripStartLat,'endLat=',window._tripEndLat);
+  // Emergency coord guard: if any trip coord is null, fall back to last-known GPS
+  // so downstream consumers (map polyline, Routes retry loop, _buildTripRow) never see null.
+  if(!window._tripStartLat||!window._tripStartLng||!window._tripEndLat||!window._tripEndLng){
+    console.error('[finishSaveTrackedTrip] missing coords — filling from lastKnown',
+      window._tripStartLat,window._tripStartLng,window._tripEndLat,window._tripEndLng);
+    window._tripStartLat = window._tripStartLat || window._lastKnownLat || lastGpsLat || null;
+    window._tripStartLng = window._tripStartLng || window._lastKnownLng || lastGpsLng || null;
+    window._tripEndLat   = window._tripEndLat   || window._lastKnownLat || lastGpsLat || null;
+    window._tripEndLng   = window._tripEndLng   || window._lastKnownLng || lastGpsLng || null;
+  }
   var _snapPos=[];
   var _ps=(window._savedPositions&&window._savedPositions.length>=1)?window._savedPositions:positions;
   if(_ps&&_ps.length>=2){var _st=Math.max(1,Math.floor(_ps.length/80));for(var _pi=0;_pi<_ps.length;_pi+=_st)_snapPos.push({lat:_ps[_pi].lat,lng:_ps[_pi].lng});if(_snapPos[_snapPos.length-1]!==_ps[_ps.length-1])_snapPos.push({lat:_ps[_ps.length-1].lat,lng:_ps[_ps.length-1].lng});}
@@ -7619,7 +7656,7 @@ function updateTemplateDists(){
   });
   _safeGetCurrentPosition(function(pos){
     var lat=pos.coords.latitude,lng=pos.coords.longitude;
-    lastGpsLat=lat;lastGpsLng=lng;
+    lastGpsLat=lat;lastGpsLng=lng;window._lastKnownLat=lat;window._lastKnownLng=lng;
     var u=LOC.unit;
     var useKm=(LOC.country==='CA'||LOC.country==='AU');
     var unitSys=useKm?'metric':'imperial';
