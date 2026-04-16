@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 207 -->
+<!-- Build 208 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 207</title>
+<title>MyMilesAI — Build 208</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -880,7 +880,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 207</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 208</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -1149,7 +1149,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .paywall-upgrade:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.3);}
 .paywall-restore{font-size:12px;color:#9CA3AF;margin-top:20px;cursor:pointer;}
 .paywall-restore:hover{color:#2563EB;}
-/* Build 207: AI trip suggestion banner */
+/* Build 208: AI trip suggestion banner */
 .ai-suggestion-banner{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(108,60,224,0.06);border-radius:8px;margin-top:8px;font-size:13px;flex-wrap:wrap;}
 .ai-sugg-icon{color:#7c3aed;font-size:15px;flex-shrink:0;}
 .ai-sugg-text{flex:1;min-width:0;}
@@ -2879,7 +2879,7 @@ function renderTrips(){
     swipeQ.innerHTML='';
   }
   window._tripsPage=1;
-  // Build 207: exclude unclassified trips from main list when swipe queue is visible
+  // Build 208: exclude unclassified trips from main list when swipe queue is visible
   // (they already render there — avoids visual double-display).
   window._tripsFiltered=uncl.length>0?TRIPS.filter(function(t){return t.type!=='uncl';}):TRIPS;
   var list=document.getElementById('tripList');
@@ -4571,7 +4571,7 @@ window.sbSaveTrip=function(nativePayload){
     }).catch(function(e){console.error('[sbSaveTrip] catch:',e&&e.message);return null;});
   }catch(e){console.error('[sbSaveTrip] exception:',e&&e.message);return Promise.resolve(null);}
 };
-// Build 207: AI trip-purpose prediction via Supabase Edge Function (predict-trip).
+// Build 208: AI trip-purpose prediction via Supabase Edge Function (predict-trip).
 // Key never touches the client — auth is via the user's Supabase access token.
 async function _predictTripPurpose(tripData){
   try {
@@ -4670,7 +4670,7 @@ function openTripDB(){
 }
 function saveTripState(state){
   // Build 134: 3-layer persistence — IDB + localStorage + native AsyncStorage (source of truth)
-  // Build 207: also persist trip start/last coords so restore can call Routes API with real endpoints.
+  // Build 208: also persist trip start/last coords so restore can call Routes API with real endpoints.
   state.startLat = (window._tripStartLat!=null) ? window._tripStartLat : null;
   state.startLng = (window._tripStartLng!=null) ? window._tripStartLng : null;
   state.lastLat  = (window._tripEndLat!=null)  ? window._tripEndLat  : null;
@@ -4996,7 +4996,7 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();liveDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
-  // Build 207: reset path-length accumulator at trip start (consulted by save gate in stopTracking)
+  // Build 208: reset path-length accumulator at trip start (consulted by save gate in stopTracking)
   window._pathMi=0;
   // Build 206: fresh low-accuracy warning flag + stable session UID.
   // _currentTripUid is reused by every finishSaveTrackedTrip call within
@@ -5005,14 +5005,26 @@ function startTracking(){
   window._currentTripUid = _genTripId();
   // Build 168: reset all GPS engine state for new trip
   window.__spdEMA=0;window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
-  // Emergency fix: seed trip start from last-known GPS so save never misses coords,
-  // even if the first onPos fix arrives after stopTracking (edge case). Replaced by the
-  // start-coord buffer once 3 accurate readings arrive.
+  // Build 208 (MileIQ architecture): snapshot trip start via one high-accuracy
+  // GPS read. We do NOT seed _tripEndLat here — end coord is captured separately
+  // at stopTracking time. Between start and stop, GPS is used ONLY for activity
+  // detection (is the phone moving?), never for distance accumulation.
   var _seedLat=(typeof window._lastKnownLat==='number')?window._lastKnownLat:(typeof lastGpsLat==='number'?lastGpsLat:null);
   var _seedLng=(typeof window._lastKnownLng==='number')?window._lastKnownLng:(typeof lastGpsLng==='number'?lastGpsLng:null);
-  window._tripStartLat=_seedLat;window._tripStartLng=_seedLng;
-  window._tripEndLat=_seedLat;window._tripEndLng=_seedLng;
+  window._tripStartLat = _seedLat;  // fallback if getCurrentPosition is slow
+  window._tripStartLng = _seedLng;
+  window._tripEndLat = null;        // will be set at stopTracking
+  window._tripEndLng = null;
   window._tripStartBuffer=null;
+  try {
+    navigator.geolocation.getCurrentPosition(function(pos){
+      window._tripStartLat = pos.coords.latitude;
+      window._tripStartLng = pos.coords.longitude;
+      console.log('[Trip START] coords captured:', pos.coords.latitude.toFixed(5), pos.coords.longitude.toFixed(5), 'acc=', pos.coords.accuracy);
+    }, function(err){
+      console.warn('[Trip START] getCurrentPosition failed, using seed:', err && err.message);
+    }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+  } catch(e){}
   console.log('[startTracking] seeded start from lastKnown:',_seedLat,_seedLng);
   _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
@@ -5055,7 +5067,7 @@ function startTracking(){
   // Realtime hero stat refresh every 2s during tracking
   window._liveStatInt=setInterval(function(){
     if(!tracking)return;
-    // Build 207: no live distance — Routes API computes at trip end only.
+    // Build 208: no live distance — Routes API computes at trip end only.
     var hb=document.getElementById('hsBiz');
     var hd=document.getElementById('hsDed');
     var hp=document.getElementById('hsPer');
@@ -5155,7 +5167,7 @@ window.__nativeGPS__ = function(coords) {
   lastGpsLat=coords.lat;lastGpsLng=coords.lng;window._lastKnownLat=coords.lat;window._lastKnownLng=coords.lng;
 };
 
-/* ── Native Activity Bridge (Build 207) ──
+/* ── Native Activity Bridge (Build 208) ──
    App.js dispatches a MessageEvent on every location update with
    { type:'__ACTIVITY__', automotive, stationary, avgSpeedMph }.
    Rolling 10-sample avg: automotive = avg > 15 mph; stationary = avg < 1 mph.
@@ -5376,7 +5388,7 @@ function onPos(p){
   var clSpeedAcc=(typeof p.coords.speedAccuracy==='number')?p.coords.speedAccuracy:-1;
   var _now=Date.now();
 
-  // ═══ Build 207: GPS accuracy gate — reject > 25m ═══
+  // ═══ Build 208: GPS accuracy gate — reject > 25m ═══
   if(accuracy>25) return;
 
   var lat=rawLat;
@@ -5422,7 +5434,7 @@ function onPos(p){
   var spdMps=isMoving?effectiveSpeed:0;
   if(!window.__spdEMA)window.__spdEMA=0;
   if(isMoving&&!_paused){
-    // Build 207 emergency: hard-cap at 150 mph / 241 km/h BEFORE EMA to kill GPS spikes
+    // Build 208 emergency: hard-cap at 150 mph / 241 km/h BEFORE EMA to kill GPS spikes
     var _capMax=_useKm()?241:150;
     var rawDisplay=_useKm()?(spdMps*3.6):(spdMps*2.237);
     rawDisplay=Math.min(Math.abs(rawDisplay),_capMax);
@@ -5561,7 +5573,7 @@ function onPos(p){
     // Record breadcrumb for map polyline / end-pos fallback — distance is accumulated via speed×time above
     if(distFromLast>=5||timeFromLast>=30000){
       positions.push({lat:lat,lng:lng,ts:_now,accuracy:accuracy,speed:effectiveSpeed});
-      // Build 207: lightweight path-length accumulator (miles). Used ONLY by the
+      // Build 208: lightweight path-length accumulator (miles). Used ONLY by the
       // stopTracking save gate — the saved distance still comes from Routes API.
       if(positions.length>=2){
         var _p0=positions[positions.length-2];
@@ -5575,7 +5587,7 @@ function onPos(p){
     }
   }
 
-  // ═══ LIVE DISPLAY (Build 207) ═══
+  // ═══ LIVE DISPLAY (Build 208) ═══
   // Gated on `tracking` so late-arriving native GPS fixes after stopTracking
   // can't re-overwrite the reset dashboard values (fixes "—" and "Tracking..." stuck).
   if(tracking){
@@ -5862,7 +5874,7 @@ function stopTracking(){
   document.getElementById('hsBizL').textContent='Business '+LOC.unit;
   document.getElementById('hsPerL').textContent='Personal '+LOC.unit;
   recalcStats();
-  // Build 207 backstop: re-run recalcStats on next frame so any onPos fix
+  // Build 208 backstop: re-run recalcStats on next frame so any onPos fix
   // queued in the same microtask gets flushed first.
   requestAnimationFrame(function(){ if(!tracking) recalcStats(); });
   updateDebugPanel();
@@ -5877,9 +5889,25 @@ function stopTracking(){
   // Reset milestone flags
   for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
   var _tMin=(Date.now()-trackStart)/60000;
-  // Build 207: Save gate — any of (crow-flies, path-accumulated, user-stopped >60s with fixes).
-  // Replaces Build 207 single-condition `_liveMiApprox() > 0.01` gate which returned 0 for
-  // loop trips / null start coord and silently bailed before finishSaveTrackedTrip.
+  // Build 208: snapshot trip END coord via one high-accuracy GPS read.
+  // This is THE authoritative end coord for Routes API.
+  var _endCoordPromise = new Promise(function(resolve){
+    try {
+      navigator.geolocation.getCurrentPosition(function(pos){
+        window._tripEndLat = pos.coords.latitude;
+        window._tripEndLng = pos.coords.longitude;
+        console.log('[Trip END] coords captured:', pos.coords.latitude.toFixed(5), pos.coords.longitude.toFixed(5), 'acc=', pos.coords.accuracy);
+        resolve();
+      }, function(err){
+        window._tripEndLat = window._lastKnownLat || window._tripStartLat;
+        window._tripEndLng = window._lastKnownLng || window._tripStartLng;
+        console.warn('[Trip END] getCurrentPosition failed, using lastKnown:', err && err.message);
+        resolve();
+      }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+    } catch(e){ resolve(); }
+  });
+  _endCoordPromise.then(function(){
+  // Build 208: Save gate — any of (crow-flies, path-accumulated, user-stopped >60s with fixes).
   var _approxTripMi=_liveMiApprox();           // crow-flies start→end × 1.15
   var _pathMi=window._pathMi||0;                // accumulated per-fix haversine sum
   var _tripDurSec=trackStart?Math.floor((Date.now()-trackStart)/1000):0;
@@ -5968,42 +5996,32 @@ function stopTracking(){
       finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
     }
 
-    // Build 207: Thin async wrapper around _getFinalMiles utility.
+    // Build 208: Thin async wrapper around _getFinalMiles utility.
     // Emergency: if coords are missing, fall back to last-known before Routes call.
+    // Build 208 (MileIQ architecture): Routes API is the only source of saved miles.
     async function _getDirectionsAndSave(fromA,toA){
       showToast(_i('pin'),'Calculating road distance...',2000);
-      // Coord guard BEFORE Routes API so fallback haversine has valid endpoints
-      if(!window._tripStartLat||!window._tripStartLng||!window._tripEndLat||!window._tripEndLng){
-        console.error('[Save] missing coords before Routes — filling from lastKnown');
-        window._tripStartLat = window._tripStartLat || window._lastKnownLat || lastGpsLat || null;
-        window._tripStartLng = window._tripStartLng || window._lastKnownLng || lastGpsLng || null;
-        window._tripEndLat   = window._tripEndLat   || window._lastKnownLat || lastGpsLat || null;
-        window._tripEndLng   = window._tripEndLng   || window._lastKnownLng || lastGpsLng || null;
-      }
       var dist = await _getFinalMiles(window._tripStartLat, window._tripStartLng, window._tripEndLat, window._tripEndLng);
-      // Build 207: Duration-aware discard gate.
-      // ≥30s = user intentionally kept the trip running → always save, floor to 0.1mi.
-      // <30s AND <0.1mi: save if coords exist (emergency guard), else truly discard.
-      var durationSec = Math.max(0, (Date.now() - trackStart) / 1000);
-      var hasCoords = (window._tripStartLat!=null && window._tripEndLat!=null);
-      if(durationSec >= 30){
-        if(dist.miles < 0.1){
-          console.warn('[ROUTES] <0.1mi but '+Math.round(durationSec)+'s duration — clamping to 0.1');
-          dist.miles = 0.1;
-        }
-      } else if(dist.miles < 0.1){
-        if(hasCoords){
-          console.warn('[ROUTES] <0.1mi + <30s but coords valid — saving 0.1 min');
-          dist.miles = 0.1;
-        } else {
-          console.error('[ROUTES] <0.1mi + <30s + null coords — truly discarding');
-          showToast(_i('warn'),'Trip too short — not saved',3000);
-          return;
-        }
+      // Handle error returns from _getFinalMiles (no_movement, missing_coords, routes_failed)
+      if(dist.error === 'no_movement' || dist.error === 'missing_coords'){
+        showToast(_i('warn'),'Trip too short — not saved',3000);
+        console.warn('[Save] discarded — ', dist.error);
+        return;
       }
-      window._tripEstimated = (dist.source === 'haversine_fallback');
-      window._tripSource = dist.source;
-      _doSave(dist.miles, fromA, toA);
+      // Routes API succeeded → save with real road miles
+      if(dist.miles != null){
+        window._tripEstimated = false;
+        window._tripSource = dist.source;
+        _doSave(dist.miles, fromA, toA);
+        return;
+      }
+      // Routes API failed 3× (routes_api_pending) — still save the trip with
+      // miles=0 so the row exists in Supabase with start/end coords. The
+      // existing retry loop in _syncWithSupabase will re-run Routes later.
+      console.warn('[Save] Routes API unavailable — saving with miles=0 for later retry');
+      window._tripEstimated = true;
+      window._tripSource = 'routes_api_pending';
+      _doSave(0, fromA, toA);
     }
 
     // Kick off: resolve BOTH addresses in parallel → Routes API → save
@@ -6018,6 +6036,7 @@ function stopTracking(){
   }
   // Build 150: reset accumulators AFTER save block has captured values into closures.
   liveDist=0; positions=[]; window._lastTripPersist=0;
+  }); // end _endCoordPromise.then (Build 208)
 }
 var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
@@ -6101,7 +6120,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
             renderTrips();
             if(window._currentUser&&window._currentUser.id){_syncWithSupabase(window._currentUser.id);}
             console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
-            // Build 207: fire-and-forget AI prediction (never blocks save)
+            // Build 208: fire-and-forget AI prediction (never blocks save)
             if(typeof _predictTripPurpose==='function'){
               _predictTripPurpose({
                 tripId:   _t.trip_uid,
@@ -6227,10 +6246,10 @@ function _liveMiApprox(){
   if(window._tripStartLat==null||window._tripEndLat==null)return 0;
   return haversine(window._tripStartLat,window._tripStartLng,window._tripEndLat,window._tripEndLng)*1.15;
 }
-// Build 207: standalone async Routes API utilities. Return {miles, source}.
+// Build 208: standalone async Routes API utilities. Return {miles, source}.
 // _getFinalMiles handles 3× retry @ 2s delay; falls back to haversine×1.15.
 async function _getRoutesAPIDistance(sLat, sLng, eLat, eLng){
-  // Build 207: 8s AbortController — prevents indefinite hangs on slow network / blocked key
+  // Build 208: 8s AbortController — prevents indefinite hangs on slow network / blocked key
   const controller = new AbortController();
   const _to = setTimeout(function(){ controller.abort(); }, 8000);
   try {
@@ -6262,24 +6281,34 @@ async function _getRoutesAPIDistance(sLat, sLng, eLat, eLng){
   }
 }
 async function _getFinalMiles(sLat, sLng, eLat, eLng){
-  if(sLat==null||sLng==null||eLat==null||eLng==null){
-    const sl = haversine(sLat||0, sLng||0, eLat||0, eLng||0) * 1.15;
-    return { miles: Math.round(sl*100)/100, source: 'haversine_fallback' };
+  // Build 208: MileIQ architecture. Routes API is the ONLY source of truth
+  // for mileage. No haversine. No Kalman. No GPS point accumulation.
+  if(sLat==null || sLng==null || eLat==null || eLng==null){
+    console.error('[Miles] missing coords — trip cannot be saved', sLat, sLng, eLat, eLng);
+    return { miles: null, source: 'missing_coords', error: 'missing_coords' };
   }
+  // Reject degenerate start==end (within ~50m). Not a trip.
+  var _d = haversine(sLat, sLng, eLat, eLng);
+  if(_d < 0.03){
+    console.warn('[Miles] start ≈ end (<50m straight-line). Not saving as trip.');
+    return { miles: null, source: 'no_movement', error: 'no_movement' };
+  }
+  // Routes API — up to 3 attempts with 2s backoff.
   for(let i=1; i<=3; i++){
     try {
       const m = await _getRoutesAPIDistance(sLat, sLng, eLat, eLng);
-      if(m && m > 0.05 && m <= 500){
+      if(m && m > 0.01 && m <= 500){
         console.log('[Routes] ok attempt', i, m.toFixed(2), 'mi');
         return { miles: Math.round(m*100)/100, source: 'routes_api' };
       }
-      if(m && m > 500) console.warn('[Routes] sanity violation (>500mi), using haversine');
+      if(m && m > 500) console.warn('[Routes] sanity violation >500mi, retry');
     } catch(e) { console.warn('[Routes] attempt', i, 'failed:', e && e.message); }
     if(i < 3) await new Promise(r => setTimeout(r, 2000));
   }
-  const sl = haversine(sLat, sLng, eLat, eLng) * 1.15;
-  console.warn('[Routes] 3 attempts failed — haversine×1.15 =', sl.toFixed(2));
-  return { miles: Math.round(sl*100)/100, source: 'haversine_fallback' };
+  // Routes API failed 3 times. DO NOT write a fake distance.
+  // Save with miles=null; _syncWithSupabase retry loop can re-compute later.
+  console.error('[Routes] all 3 attempts failed — saving with miles=null for later retry');
+  return { miles: null, source: 'routes_api_pending', error: 'routes_failed' };
 }
 
 /* ===== MAP ===== */
@@ -7687,7 +7716,7 @@ loadTripsFromStorage(); // Load trips BEFORE locale so renderTrips has data
 function _doRestoreFromState(state){
   if(!state)return false;
   // Restore if tracking was active, OR (legacy) a distance was recorded.
-  // Build 207: no longer require totalDist>0 since we don't accumulate.
+  // Build 208: no longer require totalDist>0 since we don't accumulate.
   if(!state.tracking && (!state.totalDist||state.totalDist<=0))return false;
   if(state.savedAt&&Date.now()-state.savedAt>12*3600*1000){clearTripState();return false;}
   var savedDist=state.totalDist||0;
@@ -7698,7 +7727,7 @@ function _doRestoreFromState(state){
     window._restoringTrip=true;
     liveDist=savedDist;
     trackStart=savedStart;
-    // Build 207: restore trip coords so live display + Routes API at end work
+    // Build 208: restore trip coords so live display + Routes API at end work
     window._tripStartLat=state.startLat||null;
     window._tripStartLng=state.startLng||null;
     window._tripEndLat=state.lastLat||state.startLat||null;
@@ -8975,6 +9004,50 @@ async function _syncWithSupabase(userId){
       console.log('[Sync] === RETRY DONE: ok='+retryOk+', still-estimated='+retryFail+' ===');
       if(retryOk>0)saveTripsToStorage();
     }
+
+    // D) Build 208: Routes API retry for trips that saved with miles=0 + source='routes_api_pending'.
+    // These are trips where Routes API failed at save time; the row exists in Supabase with
+    // start/end coords but miles=0. Re-run Routes now that network may be available.
+    try{
+      var pendingRows=TRIPS.filter(function(t){
+        return t && (t.source==='routes_api_pending' || (t.estimated===true && t.source!=='routes_api'))
+          && (!t.mi || t.mi===0 || t.mi<0.01)
+          && t.startLat && t.startLng && t.endLat && t.endLng
+          && Math.abs(parseFloat(t.startLat))>0.1 && Math.abs(parseFloat(t.endLat))>0.1;
+      }).slice(0,20);
+      if(pendingRows.length>0){
+        console.log('[RoutesRetry] attempting',pendingRows.length,'pending rows');
+        var _retryFixCount=0;
+        for(var _pri=0;_pri<pendingRows.length;_pri++){
+          var _prt=pendingRows[_pri];
+          try{
+            var _prm=await _getRoutesAPIDistance(
+              parseFloat(_prt.startLat),parseFloat(_prt.startLng),
+              parseFloat(_prt.endLat),parseFloat(_prt.endLng)
+            );
+            if(_prm && _prm>0.01 && _prm<=500){
+              var _fixedMi=Math.round(_prm*100)/100;
+              await _sb.from('trips').update({miles:_fixedMi,source:'routes_api'}).eq('trip_uid',_prt.trip_uid);
+              _prt.mi=_fixedMi;
+              _prt.source='routes_api';
+              _prt.estimated=false;
+              _retryFixCount++;
+              console.log('[RoutesRetry] fixed',(_prt.trip_uid||'').substring(0,8),'→',_fixedMi,'mi');
+            } else {
+              console.log('[RoutesRetry] still pending',(_prt.trip_uid||'').substring(0,8));
+            }
+          }catch(e){console.warn('[RoutesRetry] attempt failed:',e&&e.message);}
+          // 500ms spacing between requests (Routes API burst limits)
+          if(_pri<pendingRows.length-1){await new Promise(function(r){setTimeout(r,500);});}
+        }
+        if(_retryFixCount>0){
+          saveTripsToStorage();
+          if(typeof renderTrips==='function')renderTrips();
+        }
+        console.log('[RoutesRetry] done:',_retryFixCount,'fixed,',pendingRows.length-_retryFixCount,'still pending');
+      }
+    }catch(e){console.warn('[RoutesRetry] batch failed:',e&&e.message);}
+
   }catch(e){
     console.warn('[Sync] Exception:',e&&e.message);
   }finally{
