@@ -8624,6 +8624,74 @@ async function _syncWithSupabase(userId){
       }
     }catch(e){console.warn('[Dedup] Pass failed:',e&&e.message);}
 
+    // v200 dedup: collapse parallel-engine duplicates (WebView + native App.js trip engines
+    // both saving the same real trip before the _recentlySavedUids guard shipped).
+    // Coord+date key, 10-min window, best-data survivor.
+    try{
+      if(localStorage.getItem('mmai_dedup_v200_done')!=='1'){
+        var _coordKey=function(t){
+          var sLat=parseFloat(t.startLat);var eLat=parseFloat(t.endLat);
+          var dt=t.date||(t.ts?new Date(t.ts).toLocaleDateString('en-CA'):'');
+          if(isNaN(sLat)||isNaN(eLat)||!dt)return null;
+          return sLat.toFixed(3)+'_'+eLat.toFixed(3)+'_'+dt;
+        };
+        var _v200Groups={};
+        for(var _v200i=0;_v200i<TRIPS.length;_v200i++){
+          var _v200k=_coordKey(TRIPS[_v200i]);if(!_v200k)continue;
+          (_v200Groups[_v200k]=_v200Groups[_v200k]||[]).push(TRIPS[_v200i]);
+        }
+        var _v200Score=function(t){
+          var s=0;
+          if(t.type&&t.type!=='uncl')s+=1000;
+          var hasAddr=t.from&&!/^GPS \(/.test(t.from)&&t.from!=='Locating...';
+          if(hasAddr)s+=100;
+          s+=(parseFloat(t.mi)||0)*2;
+          if(t.synced===true)s+=10;
+          return s;
+        };
+        var _v200Victims=[];
+        Object.keys(_v200Groups).forEach(function(k){
+          var grp=_v200Groups[k];if(grp.length<2)return;
+          grp.sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+          var tight=[grp[0]];
+          for(var j=1;j<grp.length;j++){
+            if(Math.abs((grp[j].ts||0)-(tight[0].ts||0))<=10*60*1000)tight.push(grp[j]);
+          }
+          if(tight.length<2)return;
+          tight.sort(function(a,b){
+            var ds=_v200Score(b)-_v200Score(a);
+            if(ds!==0)return ds;
+            return (a.ts||0)-(b.ts||0);
+          });
+          var survivor=tight[0];
+          for(var v=1;v<tight.length;v++)_v200Victims.push({victim:tight[v],survivor:survivor});
+        });
+        if(_v200Victims.length>0){
+          console.warn('[Dedup v200] === Collapsing '+_v200Victims.length+' parallel-engine duplicates ===');
+          var _v200VictimSet={};
+          _v200Victims.forEach(function(pair){
+            var v=pair.victim,s=pair.survivor;
+            console.log('[Dedup v200]',v.trip_uid,'→ survivor',s.trip_uid,'(score',_v200Score(s),'vs',_v200Score(v),')');
+            if(v.trip_uid){
+              _v200VictimSet[v.trip_uid]=true;
+              if(v.synced===true){
+                _sb.from('trips').delete().eq('user_id',userId).eq('trip_uid',v.trip_uid).then(function(res){
+                  if(res&&res.error)console.warn('[Dedup v200] delete err:',res.error.message);
+                }).catch(function(e){console.warn('[Dedup v200] delete exc:',e&&e.message);});
+              }
+              try{_dequeueTrip(v.trip_uid);}catch(e){}
+            }
+          });
+          TRIPS=TRIPS.filter(function(t){return !(t.trip_uid&&_v200VictimSet[t.trip_uid]);});
+          saveTripsToStorage();
+          if(typeof renderTrips==='function')renderTrips();
+          try{showToast(_i('car'),'Cleaned up '+_v200Victims.length+' duplicate trips',3000);}catch(e){}
+          console.log('[Dedup v200] === Done. TRIPS now '+TRIPS.length+' entries ===');
+        }
+        localStorage.setItem('mmai_dedup_v200_done','1');
+      }
+    }catch(e){console.warn('[Dedup v200] Pass failed:',e&&e.message);}
+
     // STEP 6: Backfill trip_uid for remaining unmatched local trips
     var backfilled=0;
     for(var bi=0;bi<TRIPS.length;bi++){
