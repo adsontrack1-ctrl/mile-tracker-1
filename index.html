@@ -5345,8 +5345,12 @@ function onPos(p){
   var spdMps=isMoving?effectiveSpeed:0;
   if(!window.__spdEMA)window.__spdEMA=0;
   if(isMoving&&!_paused){
+    // Build 204 emergency: hard-cap at 150 mph / 241 km/h BEFORE EMA to kill GPS spikes
+    var _capMax=_useKm()?241:150;
     var rawDisplay=_useKm()?(spdMps*3.6):(spdMps*2.237);
-    window.__spdEMA=(window.__spdEMA===0)?rawDisplay:(window.__spdEMA*0.15+rawDisplay*0.85);
+    rawDisplay=Math.min(Math.abs(rawDisplay),_capMax);
+    // Smoother EMA (0.6 old / 0.4 new) — less reactive to single-sample noise
+    window.__spdEMA=(window.__spdEMA===0)?rawDisplay:(window.__spdEMA*0.6+rawDisplay*0.4);
   } else {
     window.__spdEMA=0;
   }
@@ -5485,17 +5489,18 @@ function onPos(p){
     }
   }
 
-  // ═══ LIVE DISPLAY (Build 203) ═══
-  // Distance is no longer computed mid-trip. Routes API at trip end is the
-  // sole source of saved miles. Show "Tracking..." as the distance placeholder;
-  // minutes continue to tick live.
-  document.getElementById('trackDist').textContent='Tracking...';
-  document.getElementById('hsBiz').textContent='—';
-  document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
-  document.getElementById('hsPer').textContent=((_now-trackStart-_totalPauseMs-(_paused?(_now-_pauseStart):0))/60000).toFixed(0);
-  document.getElementById('hsPerL').textContent='Minutes';
-  document.getElementById('hsDed').textContent='—';
-  var _tAvgEl=document.getElementById('trackAvg');if(_tAvgEl)_tAvgEl.textContent='—';
+  // ═══ LIVE DISPLAY (Build 204) ═══
+  // Gated on `tracking` so late-arriving native GPS fixes after stopTracking
+  // can't re-overwrite the reset dashboard values (fixes "—" and "Tracking..." stuck).
+  if(tracking){
+    document.getElementById('trackDist').textContent='Tracking...';
+    document.getElementById('hsBiz').textContent='—';
+    document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
+    document.getElementById('hsPer').textContent=((_now-trackStart-_totalPauseMs-(_paused?(_now-_pauseStart):0))/60000).toFixed(0);
+    document.getElementById('hsPerL').textContent='Minutes';
+    document.getElementById('hsDed').textContent='—';
+    var _tAvgEl=document.getElementById('trackAvg');if(_tAvgEl)_tAvgEl.textContent='—';
+  }
   updateDebugPanel();
 }
 
@@ -5771,6 +5776,9 @@ function stopTracking(){
   document.getElementById('hsBizL').textContent='Business '+LOC.unit;
   document.getElementById('hsPerL').textContent='Personal '+LOC.unit;
   recalcStats();
+  // Build 204 backstop: re-run recalcStats on next frame so any onPos fix
+  // queued in the same microtask gets flushed first.
+  requestAnimationFrame(function(){ if(!tracking) recalcStats(); });
   updateDebugPanel();
   // Resume auto-monitoring if enabled
   if(autoDetect){
@@ -5878,15 +5886,22 @@ function stopTracking(){
         window._tripEndLng   = window._tripEndLng   || window._lastKnownLng || lastGpsLng || null;
       }
       var dist = await _getFinalMiles(window._tripStartLat, window._tripStartLng, window._tripEndLat, window._tripEndLng);
-      // Emergency: never silently discard. If coords exist but distance < 0.1, save as 0.1.
-      // Only truly abandon if coords are null (can't reconstruct anything).
+      // Build 204: Duration-aware discard gate.
+      // ≥30s = user intentionally kept the trip running → always save, floor to 0.1mi.
+      // <30s AND <0.1mi: save if coords exist (emergency guard), else truly discard.
+      var durationSec = Math.max(0, (Date.now() - trackStart) / 1000);
       var hasCoords = (window._tripStartLat!=null && window._tripEndLat!=null);
-      if(dist.miles < 0.1){
+      if(durationSec >= 30){
+        if(dist.miles < 0.1){
+          console.warn('[ROUTES] <0.1mi but '+Math.round(durationSec)+'s duration — clamping to 0.1');
+          dist.miles = 0.1;
+        }
+      } else if(dist.miles < 0.1){
         if(hasCoords){
-          console.warn('[ROUTES] Distance < 0.1mi but coords valid — saving as 0.1 min');
+          console.warn('[ROUTES] <0.1mi + <30s but coords valid — saving 0.1 min');
           dist.miles = 0.1;
         } else {
-          console.error('[ROUTES] Distance < 0.1mi AND coords null — truly discarding');
+          console.error('[ROUTES] <0.1mi + <30s + null coords — truly discarding');
           showToast(_i('warn'),'Trip too short — not saved',3000);
           return;
         }
@@ -6108,25 +6123,36 @@ function _liveMiApprox(){
 // Build 203: standalone async Routes API utilities. Return {miles, source}.
 // _getFinalMiles handles 3× retry @ 2s delay; falls back to haversine×1.15.
 async function _getRoutesAPIDistance(sLat, sLng, eLat, eLng){
-  const body = {
-    origin:      { location: { latLng: { latitude: sLat, longitude: sLng } } },
-    destination: { location: { latLng: { latitude: eLat, longitude: eLng } } },
-    travelMode: 'DRIVE',
-    routingPreference: 'TRAFFIC_AWARE'
-  };
-  const r = await fetch(
-    'https://routes.googleapis.com/directions/v2:computeRoutes?key=' + _MAPS_KEY,
-    {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'X-Goog-FieldMask':'routes.distanceMeters' },
-      body: JSON.stringify(body)
-    }
-  );
-  if(!r.ok) throw new Error('HTTP_'+r.status);
-  const d = await r.json();
-  const dm = d && d.routes && d.routes[0] && d.routes[0].distanceMeters;
-  if(typeof dm !== 'number') return null;
-  return dm * 0.000621371;
+  // Build 204: 8s AbortController — prevents indefinite hangs on slow network / blocked key
+  const controller = new AbortController();
+  const _to = setTimeout(function(){ controller.abort(); }, 8000);
+  try {
+    const body = {
+      origin:      { location: { latLng: { latitude: sLat, longitude: sLng } } },
+      destination: { location: { latLng: { latitude: eLat, longitude: eLng } } },
+      travelMode: 'DRIVE',
+      routingPreference: 'TRAFFIC_AWARE'
+    };
+    const r = await fetch(
+      'https://routes.googleapis.com/directions/v2:computeRoutes?key=' + _MAPS_KEY,
+      {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'X-Goog-FieldMask':'routes.distanceMeters' },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      }
+    );
+    if(!r.ok) throw new Error('HTTP_'+r.status);
+    const d = await r.json();
+    const dm = d && d.routes && d.routes[0] && d.routes[0].distanceMeters;
+    if(typeof dm !== 'number') return null;
+    return dm * 0.000621371;
+  } catch(e) {
+    console.warn('[Routes] fetch aborted or failed:', e && e.message);
+    return null;
+  } finally {
+    clearTimeout(_to);
+  }
 }
 async function _getFinalMiles(sLat, sLng, eLat, eLng){
   if(sLat==null||sLng==null||eLat==null||eLng==null){
