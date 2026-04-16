@@ -4197,7 +4197,7 @@ function exportSummaryPDF(period){
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],liveDist=0,_lastFixTime=null;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
 let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
-var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||3;return Math.max(mins*60*1000,120000);}catch(e){return 180000;}})();
+var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||3;return Math.max(mins*60*1000,180000);}catch(e){return 180000;}})();
 var _stationaryStart=0; // timestamp when device became stationary
 var _startAddr=''; // captured start address via reverse geocode
 var _startAddrLocked=false; // true once we have a quality start address
@@ -5136,7 +5136,7 @@ function onPos(p){
   var effectiveSpeed=speedValid?clSpeed:-1;
   var isMoving=effectiveSpeed>=0.45; // 0.45 m/s ≈ 1 mph
 
-  // 8 consecutive seconds of !isMoving = stationary
+  // 120 consecutive seconds of !isMoving = stationary
   if(!isMoving){
     if(!window._stationaryStopStart)window._stationaryStopStart=_now;
   } else {
@@ -5227,14 +5227,14 @@ function onPos(p){
       window._tripStartLat=lastKnown.lat;window._tripStartLng=lastKnown.lng;
       window._tripStartAccuracy=lastKnown.accuracy||accuracy;
     } else {
-      window._tripStartLat=lat;window._tripStartLng=lng;
-      window._tripStartAccuracy=accuracy;
+      window._tripStartLat=null;window._tripStartLng=null;
+      window._tripStartAccuracy=999;
     }
     window._tripStartTime=_now;
     window._tripStart10sLocked=false;
     console.log('[TripStart] GPS coords:',window._tripStartLat,window._tripStartLng,'accuracy:',window._tripStartAccuracy);
     positions.push({lat:lat,lng:lng,ts:_now,accuracy:accuracy,speed:effectiveSpeed});
-    _tryLockStartAddress(window._tripStartLat,window._tripStartLng,window._tripStartAccuracy);
+    _tryLockStartAddress(lat,lng,accuracy);
     updateMapPos(lat,lng);
   } else {
     // Build 177: 10-second re-evaluation — if current position is more accurate AND within 500m,
@@ -5575,10 +5575,33 @@ function stopTracking(){
     var _haversineMi=liveDist; // keep live GPS-derived estimate as fallback
     var elapsed=Math.floor((Date.now()-trackStart)/60000);
     var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
-    // If geocode still pending, use coordinate fallback
-    var fromAddr=(_startAddr&&_startAddr!=='Locating...')?_startAddr:'';
-    if(!fromAddr&&positions.length>0){
-      fromAddr='GPS ('+positions[0].lat.toFixed(4)+', '+positions[0].lng.toFixed(4)+')';
+    // Resolve start address — geocode if not yet locked, with 5s timeout
+    function _resolveStartAddr(callback){
+      if(_startAddr&&_startAddr!=='Locating...'){callback(_startAddr);return;}
+      var sLat=window._tripStartLat||(positions.length>0?positions[0].lat:null);
+      var sLng=window._tripStartLng||(positions.length>0?positions[0].lng:null);
+      var gpsFallback=sLat?'GPS ('+sLat.toFixed(4)+', '+sLng.toFixed(4)+')':'';
+      if(!sLat||!sLng){callback(gpsFallback);return;}
+      var _done=false;
+      var _to=setTimeout(function(){if(!_done){_done=true;callback(gpsFallback);}},5000);
+      fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+sLat+','+sLng+'&key='+_MAPS_KEY)
+        .then(function(r){return r.json();})
+        .then(function(data){
+          if(_done)return;_done=true;clearTimeout(_to);
+          if(data.status==='OK'&&data.results&&data.results.length>0){
+            var types=['street_address','premise','route','intersection','neighborhood','sublocality','locality'];
+            var pick=null;
+            for(var ti=0;ti<types.length&&!pick;ti++){
+              for(var ri=0;ri<data.results.length;ri++){
+                if(data.results[ri].types.indexOf(types[ti])>-1){pick=data.results[ri];break;}
+              }
+            }
+            if(!pick)pick=data.results[0];
+            console.log('[GEOCODE start-resolve] Selected',pick.types.join(','),'—',pick.formatted_address);
+            callback(pick.formatted_address);
+          } else {callback(gpsFallback);}
+        })
+        .catch(function(){if(!_done){_done=true;clearTimeout(_to);callback(gpsFallback);}});
     }
     // SMART END: use best reading from stationary window
     var endPos=_getBestEndPosition();
@@ -5749,8 +5772,10 @@ function stopTracking(){
       }
     }
 
-    // Kick off: Directions API → geocode end → save
-    _getDirectionsAndSave(fromAddr,toAddr);
+    // Kick off: resolve start address → Directions API → geocode end → save
+    _resolveStartAddr(function(resolvedFrom){
+      _getDirectionsAndSave(resolvedFrom,toAddr);
+    });
 
   } else {
     showToast(_i('warn'),'No distance recorded — trip not saved',3000);
@@ -5818,6 +5843,8 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
             _dequeueTrip(row.trip_uid);
             _t.synced=true;
             saveTripsToStorage();
+            renderTrips();
+            if(window._currentUser&&window._currentUser.id){_syncWithSupabase(window._currentUser.id);}
             console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
           }
         }).catch(function(e){
