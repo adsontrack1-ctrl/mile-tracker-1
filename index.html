@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 204 -->
+<!-- Build 207 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 204</title>
+<title>MyMilesAI — Build 207</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -880,7 +880,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 204</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 207</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -1149,7 +1149,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .paywall-upgrade:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.3);}
 .paywall-restore{font-size:12px;color:#9CA3AF;margin-top:20px;cursor:pointer;}
 .paywall-restore:hover{color:#2563EB;}
-/* Build 204: AI trip suggestion banner */
+/* Build 207: AI trip suggestion banner */
 .ai-suggestion-banner{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(108,60,224,0.06);border-radius:8px;margin-top:8px;font-size:13px;flex-wrap:wrap;}
 .ai-sugg-icon{color:#7c3aed;font-size:15px;flex-shrink:0;}
 .ai-sugg-text{flex:1;min-width:0;}
@@ -2091,13 +2091,37 @@ async function ensureProfile(user){
     _authHideLoading();
     // Build 176: unified pull+push sync
     _syncWithSupabase(user.id);
-    // Build 183: Realtime listener — instant sync when trips change on any device/web
-    if(!window._realtimeChannel){
-      window._realtimeChannel=_sb.channel('trips-realtime')
-        .on('postgres_changes',{event:'*',schema:'public',table:'trips',filter:'user_id=eq.'+user.id},
-          function(){if(window._currentUser)_syncWithSupabase(window._currentUser.id);}
-        ).subscribe();
-    }
+    // Build 205: Realtime with status logging + foreground reconnect.
+    // Extracted into _wireRealtime() so visibilitychange can call it to
+    // rebuild the channel when iOS WKWebView has suspended the WebSocket.
+    window._wireRealtime = function(uid){
+      if(!_sb || !uid) return;
+      // Tear down any dead channel first — required because iOS suspends
+      // the socket on background and it never auto-reconnects.
+      if(window._realtimeChannel){
+        try{ _sb.removeChannel(window._realtimeChannel); }catch(e){}
+        window._realtimeChannel = null;
+      }
+      window._realtimeChannel = _sb.channel('trips-realtime-'+uid)
+        .on('postgres_changes',
+          {event:'*', schema:'public', table:'trips', filter:'user_id=eq.'+uid},
+          function(payload){
+            console.log('[Realtime] event', payload && payload.eventType);
+            // INSERT → fast path: just re-sync. _syncInProgress guards against
+            // thundering herd if several events arrive at once.
+            if(window._currentUser) _syncWithSupabase(window._currentUser.id);
+          }
+        )
+        .subscribe(function(status, err){
+          console.log('[Realtime] status=', status, err ? ('err='+err.message) : '');
+          if(status === 'SUBSCRIBED'){
+            window._realtimeConnectedAt = Date.now();
+          }
+          // CHANNEL_ERROR / TIMED_OUT / CLOSED: leave the channel object in
+          // place — visibilitychange will tear it down and re-wire on foreground.
+        });
+    };
+    window._wireRealtime(user.id);
     return profile;
   }catch(e){console.warn('ensureProfile error:',e);_authHideLoading();clearTimeout(window._startupFailsafe);return null;}
 }
@@ -2802,6 +2826,38 @@ function getAITaxInsight(){
   showToast(_i('user'),'Analyzing your mileage...',2000);
   fetch('https://mymilesai-ai.harijasllc.workers.dev/tax-insight',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({totalBusinessMiles:totalMi,totalTrips:bizTrips.length,irsRate:LOC.rate,totalDeduction:totalMi*LOC.rate,year:new Date().getFullYear()})}).then(function(r){return r.json();}).then(function(data){if(data.insight)openInfoModal('AI Tax Insight',data.insight);}).catch(function(){showToast(_i('warn'),'AI unavailable',2000);});
 }
+// Build 205: "Last synced Xm ago" indicator — tap to refresh.
+function _updateLastSyncedLabel(){
+  var host = document.getElementById('tripFilterRow') || document.getElementById('tab-trips');
+  if(!host) return;
+  var el = document.getElementById('lastSyncedLabel');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'lastSyncedLabel';
+    el.style.cssText = 'font-size:11px;color:#888;padding:6px 12px;text-align:right;cursor:pointer;user-select:none;';
+    el.addEventListener('click', function(){
+      if(window._currentUser && window._currentUser.id){
+        el.textContent = 'Syncing…';
+        _syncWithSupabase(window._currentUser.id);
+      }
+    });
+    host.insertBefore(el, host.firstChild);
+  }
+  var ts = parseInt(localStorage.getItem('mmai_last_supabase_sync') || '0');
+  if(!ts){ el.textContent = 'Not yet synced · tap to refresh'; return; }
+  var secs = Math.floor((Date.now() - ts) / 1000);
+  var txt;
+  if(secs < 5)         txt = 'Synced just now';
+  else if(secs < 60)   txt = 'Synced ' + secs + 's ago';
+  else if(secs < 3600) txt = 'Synced ' + Math.floor(secs/60) + 'm ago';
+  else                 txt = 'Synced ' + Math.floor(secs/3600) + 'h ago';
+  el.textContent = txt + ' · tap to refresh';
+}
+// Refresh the label once per minute so the displayed time stays current.
+setInterval(function(){
+  if(document.getElementById('lastSyncedLabel')) _updateLastSyncedLabel();
+}, 60000);
+
 function renderTrips(){
   var PAGE=40;
   if(TRIPS.length===0){
@@ -2823,7 +2879,7 @@ function renderTrips(){
     swipeQ.innerHTML='';
   }
   window._tripsPage=1;
-  // Build 204: exclude unclassified trips from main list when swipe queue is visible
+  // Build 207: exclude unclassified trips from main list when swipe queue is visible
   // (they already render there — avoids visual double-display).
   window._tripsFiltered=uncl.length>0?TRIPS.filter(function(t){return t.type!=='uncl';}):TRIPS;
   var list=document.getElementById('tripList');
@@ -2849,6 +2905,8 @@ function renderTrips(){
   if(typeof _updateClassifyAllBtn==='function')_updateClassifyAllBtn();
   _updateFilterCounts();
   if(_activeFilter!=='all')applyFilter();
+  // Build 205: ensure freshness label exists as soon as the trips UI first paints
+  if(typeof _updateLastSyncedLabel === 'function') _updateLastSyncedLabel();
 }
 
 function _renderTripBatch(trips,start,end){
@@ -4425,7 +4483,11 @@ function _buildTripRow(t, userId){
     start_lat: parseFloat(t.startLat)||0,
     start_lng: parseFloat(t.startLng)||0,
     end_lat: parseFloat(t.endLat)||0,
-    end_lng: parseFloat(t.endLng)||0
+    end_lng: parseFloat(t.endLng)||0,
+    // Build 206: carry the source flag through to Supabase so GPS trips stop
+    // getting stamped 'manual' by the DB default. Mirrors the `source` field on
+    // the local TRIPS[0] object built in finishSaveTrackedTrip.
+    source: t.source || 'gps'
     // Note: 'estimated' is a local-only flag, not a DB column. Retry loop in
     // _syncWithSupabase clears it when Routes API eventually succeeds.
   };
@@ -4509,7 +4571,7 @@ window.sbSaveTrip=function(nativePayload){
     }).catch(function(e){console.error('[sbSaveTrip] catch:',e&&e.message);return null;});
   }catch(e){console.error('[sbSaveTrip] exception:',e&&e.message);return Promise.resolve(null);}
 };
-// Build 204: AI trip-purpose prediction via Supabase Edge Function (predict-trip).
+// Build 207: AI trip-purpose prediction via Supabase Edge Function (predict-trip).
 // Key never touches the client — auth is via the user's Supabase access token.
 async function _predictTripPurpose(tripData){
   try {
@@ -4608,7 +4670,7 @@ function openTripDB(){
 }
 function saveTripState(state){
   // Build 134: 3-layer persistence — IDB + localStorage + native AsyncStorage (source of truth)
-  // Build 204: also persist trip start/last coords so restore can call Routes API with real endpoints.
+  // Build 207: also persist trip start/last coords so restore can call Routes API with real endpoints.
   state.startLat = (window._tripStartLat!=null) ? window._tripStartLat : null;
   state.startLng = (window._tripStartLng!=null) ? window._tripStartLng : null;
   state.lastLat  = (window._tripEndLat!=null)  ? window._tripEndLat  : null;
@@ -4645,6 +4707,7 @@ function clearTripState(){
   }).catch(function(){});
   try{localStorage.removeItem('mmai_trip_backup');}catch(e){}
   window._tripStartLat=null;window._tripStartLng=null;window._tripEndLat=null;window._tripEndLng=null;
+  window._currentTripUid=null; // Build 206: drop session UID on trip-state wipe
   // Build 134: also clear native AsyncStorage
   if(window.ReactNativeWebView){
     try{window.ReactNativeWebView.postMessage(JSON.stringify({type:'CLEAR_TRIP_STATE'}));}catch(e){}
@@ -4933,8 +4996,13 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();liveDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
-  // Build 204: reset path-length accumulator at trip start (consulted by save gate in stopTracking)
+  // Build 207: reset path-length accumulator at trip start (consulted by save gate in stopTracking)
   window._pathMi=0;
+  // Build 206: fresh low-accuracy warning flag + stable session UID.
+  // _currentTripUid is reused by every finishSaveTrackedTrip call within
+  // this trip session so parallel saves collapse via onConflict:'trip_uid'.
+  window._tripLowAccWarned = false;
+  window._currentTripUid = _genTripId();
   // Build 168: reset all GPS engine state for new trip
   window.__spdEMA=0;window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
   // Emergency fix: seed trip start from last-known GPS so save never misses coords,
@@ -4987,7 +5055,7 @@ function startTracking(){
   // Realtime hero stat refresh every 2s during tracking
   window._liveStatInt=setInterval(function(){
     if(!tracking)return;
-    // Build 204: no live distance — Routes API computes at trip end only.
+    // Build 207: no live distance — Routes API computes at trip end only.
     var hb=document.getElementById('hsBiz');
     var hd=document.getElementById('hsDed');
     var hp=document.getElementById('hsPer');
@@ -5031,12 +5099,19 @@ window.__nativeGPS__ = function(coords) {
     var old = window.__seenGpsTsList.shift();
     delete window.__seenGpsTs[old];
   }
-  // ── ACCURACY FILTER: reject GPS readings worse than 15m (Build 168) ──
+  // ── ACCURACY FILTER (Build 206): 15m was too strict for in-car GPS
+  // (roof/windshield routinely yield 20–40m). Raise ceiling to 35m and
+  // log once per trip when we enter the 15–35m degraded zone. >35m is
+  // multipath/urban-canyon garbage — skip onPos, just keep lastKnown. ──
   var acc = coords.accuracy || 999;
-  if(acc > 15){
-    // Still update last-known for non-distance uses (templates, prefill)
+  if(acc > 35){
     lastGpsLat=coords.lat;lastGpsLng=coords.lng;window._lastKnownLat=coords.lat;window._lastKnownLng=coords.lng;
     return;
+  }
+  // 15–35m: usable for distance but flagged once per trip so we know quality is poor.
+  if(acc > 15 && !window._tripLowAccWarned){
+    console.warn('[GPS] degraded accuracy accepted:', acc.toFixed(0)+'m (threshold 35m)');
+    window._tripLowAccWarned = true;
   }
   // ── SPEED SANITY: reject implied speed > 150 mph between consecutive points ──
   if(window.__lastNativeCoord){
@@ -5080,7 +5155,7 @@ window.__nativeGPS__ = function(coords) {
   lastGpsLat=coords.lat;lastGpsLng=coords.lng;window._lastKnownLat=coords.lat;window._lastKnownLng=coords.lng;
 };
 
-/* ── Native Activity Bridge (Build 204) ──
+/* ── Native Activity Bridge (Build 207) ──
    App.js dispatches a MessageEvent on every location update with
    { type:'__ACTIVITY__', automotive, stationary, avgSpeedMph }.
    Rolling 10-sample avg: automotive = avg > 15 mph; stationary = avg < 1 mph.
@@ -5301,7 +5376,7 @@ function onPos(p){
   var clSpeedAcc=(typeof p.coords.speedAccuracy==='number')?p.coords.speedAccuracy:-1;
   var _now=Date.now();
 
-  // ═══ Build 204: GPS accuracy gate — reject > 25m ═══
+  // ═══ Build 207: GPS accuracy gate — reject > 25m ═══
   if(accuracy>25) return;
 
   var lat=rawLat;
@@ -5347,7 +5422,7 @@ function onPos(p){
   var spdMps=isMoving?effectiveSpeed:0;
   if(!window.__spdEMA)window.__spdEMA=0;
   if(isMoving&&!_paused){
-    // Build 204 emergency: hard-cap at 150 mph / 241 km/h BEFORE EMA to kill GPS spikes
+    // Build 207 emergency: hard-cap at 150 mph / 241 km/h BEFORE EMA to kill GPS spikes
     var _capMax=_useKm()?241:150;
     var rawDisplay=_useKm()?(spdMps*3.6):(spdMps*2.237);
     rawDisplay=Math.min(Math.abs(rawDisplay),_capMax);
@@ -5486,7 +5561,7 @@ function onPos(p){
     // Record breadcrumb for map polyline / end-pos fallback — distance is accumulated via speed×time above
     if(distFromLast>=5||timeFromLast>=30000){
       positions.push({lat:lat,lng:lng,ts:_now,accuracy:accuracy,speed:effectiveSpeed});
-      // Build 204: lightweight path-length accumulator (miles). Used ONLY by the
+      // Build 207: lightweight path-length accumulator (miles). Used ONLY by the
       // stopTracking save gate — the saved distance still comes from Routes API.
       if(positions.length>=2){
         var _p0=positions[positions.length-2];
@@ -5500,7 +5575,7 @@ function onPos(p){
     }
   }
 
-  // ═══ LIVE DISPLAY (Build 204) ═══
+  // ═══ LIVE DISPLAY (Build 207) ═══
   // Gated on `tracking` so late-arriving native GPS fixes after stopTracking
   // can't re-overwrite the reset dashboard values (fixes "—" and "Tracking..." stuck).
   if(tracking){
@@ -5787,7 +5862,7 @@ function stopTracking(){
   document.getElementById('hsBizL').textContent='Business '+LOC.unit;
   document.getElementById('hsPerL').textContent='Personal '+LOC.unit;
   recalcStats();
-  // Build 204 backstop: re-run recalcStats on next frame so any onPos fix
+  // Build 207 backstop: re-run recalcStats on next frame so any onPos fix
   // queued in the same microtask gets flushed first.
   requestAnimationFrame(function(){ if(!tracking) recalcStats(); });
   updateDebugPanel();
@@ -5802,8 +5877,8 @@ function stopTracking(){
   // Reset milestone flags
   for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
   var _tMin=(Date.now()-trackStart)/60000;
-  // Build 204: Save gate — any of (crow-flies, path-accumulated, user-stopped >60s with fixes).
-  // Replaces Build 204 single-condition `_liveMiApprox() > 0.01` gate which returned 0 for
+  // Build 207: Save gate — any of (crow-flies, path-accumulated, user-stopped >60s with fixes).
+  // Replaces Build 207 single-condition `_liveMiApprox() > 0.01` gate which returned 0 for
   // loop trips / null start coord and silently bailed before finishSaveTrackedTrip.
   var _approxTripMi=_liveMiApprox();           // crow-flies start→end × 1.15
   var _pathMi=window._pathMi||0;                // accumulated per-fix haversine sum
@@ -5893,7 +5968,7 @@ function stopTracking(){
       finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
     }
 
-    // Build 204: Thin async wrapper around _getFinalMiles utility.
+    // Build 207: Thin async wrapper around _getFinalMiles utility.
     // Emergency: if coords are missing, fall back to last-known before Routes call.
     async function _getDirectionsAndSave(fromA,toA){
       showToast(_i('pin'),'Calculating road distance...',2000);
@@ -5906,7 +5981,7 @@ function stopTracking(){
         window._tripEndLng   = window._tripEndLng   || window._lastKnownLng || lastGpsLng || null;
       }
       var dist = await _getFinalMiles(window._tripStartLat, window._tripStartLng, window._tripEndLat, window._tripEndLng);
-      // Build 204: Duration-aware discard gate.
+      // Build 207: Duration-aware discard gate.
       // ≥30s = user intentionally kept the trip running → always save, floor to 0.1mi.
       // <30s AND <0.1mi: save if coords exist (emergency guard), else truly discard.
       var durationSec = Math.max(0, (Date.now() - trackStart) / 1000);
@@ -5980,7 +6055,10 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
     return _getDefaultVehicleId();
   })();
   var _elapsedPart=timeStr.indexOf('\u00b7')>=0?timeStr.substring(timeStr.indexOf('\u00b7')):(elapsed+' min');
-  var _newUid=_genTripId();
+  // Build 206: reuse the session UID so parallel finishSaveTrackedTrip calls
+  // (e.g. auto-stop race + user tap) upsert to the same row via
+  // onConflict:'trip_uid' instead of minting distinct rows.
+  var _newUid = window._currentTripUid || _genTripId();
   TRIPS.unshift({trip_uid:_newUid,synced:false,estimated:!!window._tripEstimated,source:window._tripSource||'routes_api',tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+_elapsedPart,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId,startLat:window._tripStartLat||null,startLng:window._tripStartLng||null,endLat:window._tripEndLat||null,endLng:window._tripEndLng||null});
   window._tripEstimated=false;
   window._tripSource=null;
@@ -6015,11 +6093,15 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
           } else {
             _dequeueTrip(row.trip_uid);
             _t.synced=true;
+            // Build 206: clear session UID only on confirmed success so a
+            // failed first upsert doesn't orphan the UID; retries still
+            // share it and collapse via onConflict.
+            window._currentTripUid = null;
             saveTripsToStorage();
             renderTrips();
             if(window._currentUser&&window._currentUser.id){_syncWithSupabase(window._currentUser.id);}
             console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
-            // Build 204: fire-and-forget AI prediction (never blocks save)
+            // Build 207: fire-and-forget AI prediction (never blocks save)
             if(typeof _predictTripPurpose==='function'){
               _predictTripPurpose({
                 tripId:   _t.trip_uid,
@@ -6145,10 +6227,10 @@ function _liveMiApprox(){
   if(window._tripStartLat==null||window._tripEndLat==null)return 0;
   return haversine(window._tripStartLat,window._tripStartLng,window._tripEndLat,window._tripEndLng)*1.15;
 }
-// Build 204: standalone async Routes API utilities. Return {miles, source}.
+// Build 207: standalone async Routes API utilities. Return {miles, source}.
 // _getFinalMiles handles 3× retry @ 2s delay; falls back to haversine×1.15.
 async function _getRoutesAPIDistance(sLat, sLng, eLat, eLng){
-  // Build 204: 8s AbortController — prevents indefinite hangs on slow network / blocked key
+  // Build 207: 8s AbortController — prevents indefinite hangs on slow network / blocked key
   const controller = new AbortController();
   const _to = setTimeout(function(){ controller.abort(); }, 8000);
   try {
@@ -7605,7 +7687,7 @@ loadTripsFromStorage(); // Load trips BEFORE locale so renderTrips has data
 function _doRestoreFromState(state){
   if(!state)return false;
   // Restore if tracking was active, OR (legacy) a distance was recorded.
-  // Build 204: no longer require totalDist>0 since we don't accumulate.
+  // Build 207: no longer require totalDist>0 since we don't accumulate.
   if(!state.tracking && (!state.totalDist||state.totalDist<=0))return false;
   if(state.savedAt&&Date.now()-state.savedAt>12*3600*1000){clearTripState();return false;}
   var savedDist=state.totalDist||0;
@@ -7616,7 +7698,7 @@ function _doRestoreFromState(state){
     window._restoringTrip=true;
     liveDist=savedDist;
     trackStart=savedStart;
-    // Build 204: restore trip coords so live display + Routes API at end work
+    // Build 207: restore trip coords so live display + Routes API at end work
     window._tripStartLat=state.startLat||null;
     window._tripStartLng=state.startLng||null;
     window._tripEndLat=state.lastLat||state.startLat||null;
@@ -8898,6 +8980,9 @@ async function _syncWithSupabase(userId){
   }finally{
     clearTimeout(window._startupFailsafe);
     _syncInProgress=false;
+    // Build 205: stamp sync time + refresh "Synced Xm ago" label
+    localStorage.setItem('mmai_last_supabase_sync', Date.now().toString());
+    if(typeof _updateLastSyncedLabel === 'function') _updateLastSyncedLabel();
   }
 }
 // Back-compat: old callers reference _syncTripsFromSupabase
@@ -8916,19 +9001,77 @@ setTimeout(async function(){
   _syncWithSupabase(window._currentUser.id);
 }, 5000);
 
-// Build 178: visibilitychange — save on hidden, sync on visible (max once / 5 min)
-document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='hidden'){
-    try{saveTripsToStorage();console.warn('[SYNC] App backgrounded — state saved');}catch(e){}
+// Build 205: Pull-to-refresh on the trips tab.
+(function installPullToRefresh(){
+  var tab = document.getElementById('tab-trips');
+  if(!tab) return;
+  var THRESHOLD = 70;        // px pull distance to trigger
+  var MAX_PULL  = 120;       // px max visual pull
+  var startY = 0, pullY = 0, pulling = false;
+  var spinner = document.createElement('div');
+  spinner.id = 'ptrSpinner';
+  spinner.style.cssText = 'position:absolute;top:0;left:50%;transform:translate(-50%,-100%);padding:8px 14px;background:rgba(0,0,0,0.7);color:#fff;border-radius:0 0 12px 12px;font-size:12px;transition:transform 0.2s;z-index:9999;pointer-events:none;';
+  spinner.textContent = '↓ Pull to refresh';
+  tab.style.position = tab.style.position || 'relative';
+  tab.appendChild(spinner);
+
+  tab.addEventListener('touchstart', function(e){
+    if(tab.scrollTop > 0) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }, {passive:true});
+
+  tab.addEventListener('touchmove', function(e){
+    if(!pulling) return;
+    pullY = e.touches[0].clientY - startY;
+    if(pullY <= 0){ pulling = false; spinner.style.transform = 'translate(-50%,-100%)'; return; }
+    var visual = Math.min(pullY, MAX_PULL);
+    spinner.style.transform = 'translate(-50%,' + (visual - 40) + 'px)';
+    spinner.textContent = pullY >= THRESHOLD ? '↑ Release to refresh' : '↓ Pull to refresh';
+  }, {passive:true});
+
+  tab.addEventListener('touchend', function(){
+    if(!pulling){ return; }
+    pulling = false;
+    if(pullY >= THRESHOLD && window._currentUser && window._currentUser.id){
+      spinner.textContent = 'Syncing…';
+      spinner.style.transform = 'translate(-50%,40px)';
+      var p = _syncWithSupabase(window._currentUser.id);
+      // _syncWithSupabase returns undefined in the early-return paths; guard .finally
+      if(p && typeof p.finally === 'function'){
+        p.finally(function(){
+          setTimeout(function(){ spinner.style.transform = 'translate(-50%,-100%)'; }, 600);
+        });
+      } else {
+        setTimeout(function(){ spinner.style.transform = 'translate(-50%,-100%)'; }, 1500);
+      }
+    } else {
+      spinner.style.transform = 'translate(-50%,-100%)';
+    }
+    pullY = 0;
+  }, {passive:true});
+})();
+
+// Build 205: visibilitychange — on hidden save state; on visible ALWAYS sync
+// (no throttle) and rebuild the Realtime channel because iOS WKWebView
+// suspends WebSockets on background with no auto-reconnect.
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'hidden'){
+    try{ saveTripsToStorage(); console.warn('[SYNC] App backgrounded — state saved'); }catch(e){}
     return;
   }
-  if(document.visibilityState!=='visible')return;
-  var lastSync=parseInt(localStorage.getItem('mmai_last_supabase_sync')||'0');
-  if(Date.now()-lastSync>5*60*1000){
-    localStorage.setItem('mmai_last_supabase_sync',Date.now().toString());
-    if(window._currentUser&&window._currentUser.id)_syncWithSupabase(window._currentUser.id);
-    else clearTimeout(window._startupFailsafe);
+  if(document.visibilityState !== 'visible') return;
+  if(!window._currentUser || !window._currentUser.id){
+    clearTimeout(window._startupFailsafe);
+    return;
   }
+  // Rewire Realtime (WebSocket was likely suspended while backgrounded).
+  if(typeof window._wireRealtime === 'function'){
+    window._wireRealtime(window._currentUser.id);
+  }
+  // Sync now — _syncInProgress handles any redundant concurrent fire.
+  _syncWithSupabase(window._currentUser.id);
+  localStorage.setItem('mmai_last_supabase_sync', Date.now().toString());
 });
 
 // Build 178: offline event listener — informational log only
