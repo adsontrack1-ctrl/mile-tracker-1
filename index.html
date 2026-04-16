@@ -4423,6 +4423,47 @@ function _buildTripRow(t, userId){
   console.log('[_buildTripRow] trip_uid in payload:',row.trip_uid);
   return row;
 }
+// Native trip save endpoint — called by App.js after geocoding completes.
+// Performs Supabase upsert and re-fetches from DB (FIX 4: loadTrips after save).
+window.sbSaveTrip=function(nativePayload){
+  if(!_sb||!window._currentUser||!window._currentUser.id){
+    console.warn('[sbSaveTrip] Supabase/user not ready — ignoring');
+    return;
+  }
+  try{
+    var startLat=parseFloat(nativePayload.start_lat);
+    var startLng=parseFloat(nativePayload.start_lng);
+    var endLat=parseFloat(nativePayload.end_lat);
+    var endLng=parseFloat(nativePayload.end_lng);
+    var startTs=nativePayload.start_ts||Date.now();
+    var haversineMi=haversine(startLat,startLng,endLat,endLng);
+    var estMi=parseFloat((haversineMi*1.3).toFixed(1));
+    var startDate=new Date(startTs);
+    var tripObj={
+      trip_uid:_genTripId(),
+      from:nativePayload.from_addr||'',to:nativePayload.to_addr||'',
+      from_addr:nativePayload.from_addr||'',to_addr:nativePayload.to_addr||'',
+      startLat:startLat,startLng:startLng,endLat:endLat,endLng:endLng,
+      mi:estMi,type:'uncl',
+      ts:startTs,
+      time:startDate.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+      date:startDate.toLocaleDateString('en-CA'),
+      purpose:'',notes:'',estimated:true,synced:false
+    };
+    if(typeof TRIPS!=='undefined')TRIPS.unshift(tripObj);
+    if(typeof renderTrips==='function')renderTrips();
+    if(typeof saveTripsToStorage==='function')saveTripsToStorage();
+    var row=_buildTripRow(tripObj,window._currentUser.id);
+    _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
+      if(res.error){console.error('[sbSaveTrip] upsert error:',JSON.stringify(res.error));return;}
+      tripObj.synced=true;
+      if(typeof saveTripsToStorage==='function')saveTripsToStorage();
+      // FIX 4: always re-fetch from DB after save (never trust local array alone)
+      _syncWithSupabase(window._currentUser.id);
+      console.log('[sbSaveTrip] ✓ saved trip_uid',row.trip_uid,'— re-fetching from DB');
+    }).catch(function(e){console.error('[sbSaveTrip] catch:',e&&e.message);});
+  }catch(e){console.error('[sbSaveTrip] exception:',e&&e.message);}
+};
 window.addEventListener('online',function(){
   console.log('[MMAI] Back online — flushing queue then triggering sync');
   if(window._currentUser&&window._currentUser.id){
