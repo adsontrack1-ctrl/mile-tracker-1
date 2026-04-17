@@ -5913,10 +5913,15 @@ function stopTracking(){
   // Build 209: Save gate — any of (crow-flies, path-accumulated, user-stopped >60s with fixes).
   var _approxTripMi=_liveMiApprox();           // crow-flies start→end × 1.15
   var _pathMi=window._pathMi||0;                // accumulated per-fix haversine sum
-  var _tripDurSec=trackStart?Math.floor((Date.now()-trackStart)/1000):0;
+  var _tripDurationMs=Date.now()-trackStart-(_totalPauseMs||0);
+  var _tripDurSec=Math.floor(_tripDurationMs/1000);
+  var _hasPositions=(typeof positions!=='undefined'&&positions&&positions.length>2);
   if(_approxTripMi>0.05&&_tMin>=5){var _kd=_matchKnownLocation(lastGpsLat,lastGpsLng);setTimeout(function(){_promptSmartSave(_kd);},1500);}
-  var _shouldSave=(_approxTripMi>0.01)||(_pathMi>0.01)||(_tripDurSec>60&&positions.length>=2);
-  console.log('[stopTracking gate]','approxMi=',_approxTripMi,'pathMi=',_pathMi,'durSec=',_tripDurSec,'positions=',positions.length,'shouldSave=',_shouldSave);
+  // Build 209: time-based fallback — if trip ran >60s with recorded positions, MUST save
+  // even if _pathMi is 0 (fixes the 2-hour-drive-saves-nothing bug when breadcrumb gate
+  // never fires due to accuracy rejection or slow native GPS bridge).
+  var _shouldSave=(_approxTripMi>0.01)||(_pathMi>0.01)||(_tripDurationMs>60000&&_hasPositions);
+  console.log('[B209] save gate:',{pathMi:_pathMi,durationSec:_tripDurSec,positions:positions?positions.length:0,approxMi:_approxTripMi,shouldSave:_shouldSave});
   if(_shouldSave){
     // Seed distance = best-available local estimate. Routes API overwrites this downstream
     // in _getFinalMiles → finishSaveTrackedTrip. Haversine fallback still uses crow-flies.
