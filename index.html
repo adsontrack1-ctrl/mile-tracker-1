@@ -5860,6 +5860,14 @@ function stopTracking(){
     window.__stopLock = false;
     return;
   }
+  // Build 210.5: capture start coords BEFORE clearTripState() nulls them.
+  // _resolveBothAddrs (called later in the async save chain) used to read
+  // window._tripStartLat — but it was null by then because clearTripState()
+  // runs earlier in stopTracking(). That's why every trip saved as
+  // 'missing_coords' and was discarded. This captures the real coords.
+  var _savedStartLat = window._tripStartLat;
+  var _savedStartLng = window._tripStartLng;
+  console.log('[stopTracking] 210.5 CAPTURED start coords:', _savedStartLat, _savedStartLng);
   if(watchId&&watchId!=='native'){navigator.geolocation.clearWatch(watchId);}
   watchId=null;
   clearInterval(timerInt);clearTimeout(_pauseTimeout);
@@ -5972,8 +5980,9 @@ function stopTracking(){
         .catch(function(){return fallback;});
     }
     function _resolveBothAddrs(callback){
-      var sLat=window._tripStartLat||(positions.length>0?positions[0].lat:null);
-      var sLng=window._tripStartLng||(positions.length>0?positions[0].lng:null);
+      // Build 210.5: use locals captured BEFORE clearTripState nulled globals.
+      var sLat=_savedStartLat||window._tripStartLat||(positions.length>0?positions[0].lat:null);
+      var sLng=_savedStartLng||window._tripStartLng||(positions.length>0?positions[0].lng:null);
       var eLat=window._tripEndLat;
       var eLng=window._tripEndLng;
       var sFallback=sLat?'GPS ('+sLat.toFixed(4)+', '+sLng.toFixed(4)+')':'';
@@ -6024,7 +6033,8 @@ function stopTracking(){
     // Build 210 (MileIQ architecture): Routes API is the only source of saved miles.
     async function _getDirectionsAndSave(fromA,toA){
       showToast(_i('pin'),'Calculating road distance...',2000);
-      var dist = await _getFinalMiles(window._tripStartLat, window._tripStartLng, window._tripEndLat, window._tripEndLng);
+      // Build 210.5: use captured locals — window globals were nulled by clearTripState earlier
+      var dist = await _getFinalMiles(_savedStartLat||window._tripStartLat, _savedStartLng||window._tripStartLng, window._tripEndLat, window._tripEndLng);
       // Handle error returns from _getFinalMiles (no_movement, missing_coords, routes_failed)
       if(dist.error === 'no_movement' || dist.error === 'missing_coords'){
         showToast(_i('warn'),'Trip too short — not saved',3000);
