@@ -4493,7 +4493,15 @@ function _buildTripRow(t, userId){
     start_lat: sL, start_lng: sLn, end_lat: eL, end_lng: eLn,
     // Build 206: carry the source flag through to Supabase so GPS trips stop
     // getting stamped 'manual' by the DB default.
-    source: t.source || 'gps'
+    source: t.source || 'gps',
+    // Build 215: persist GPS breadcrumbs. _buildLocalTripObj has already
+    // downsampled to ≤80 points; this column was defined in Supabase but
+    // never populated. Defensive: Array.isArray handles manual-entry trips
+    // that may not populate t.positions; they become NULL in DB (matches
+    // pre-fix behavior for those paths). Dead sbSaveTrip path at L4509
+    // is unaffected — it's unreachable and will be addressed when App.js
+    // SDK wiring designs the native trip-save contract.
+    positions: Array.isArray(t.positions) ? t.positions : null
   };
   console.log('[_buildTripRow] trip_uid in payload:',row.trip_uid);
   return row;
