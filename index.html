@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 211 -->
+<!-- Build 212 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 211</title>
+<title>MyMilesAI — Build 212</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -880,7 +880,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 211</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 212</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -1149,7 +1149,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .paywall-upgrade:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.3);}
 .paywall-restore{font-size:12px;color:#9CA3AF;margin-top:20px;cursor:pointer;}
 .paywall-restore:hover{color:#2563EB;}
-/* Build 211: AI trip suggestion banner */
+/* Build 212: AI trip suggestion banner */
 .ai-suggestion-banner{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(108,60,224,0.06);border-radius:8px;margin-top:8px;font-size:13px;flex-wrap:wrap;}
 .ai-sugg-icon{color:#7c3aed;font-size:15px;flex-shrink:0;}
 .ai-sugg-text{flex:1;min-width:0;}
@@ -2879,7 +2879,7 @@ function renderTrips(){
     swipeQ.innerHTML='';
   }
   window._tripsPage=1;
-  // Build 211: exclude unclassified trips from main list when swipe queue is visible
+  // Build 212: exclude unclassified trips from main list when swipe queue is visible
   // (they already render there — avoids visual double-display).
   window._tripsFiltered=uncl.length>0?TRIPS.filter(function(t){return t.type!=='uncl';}):TRIPS;
   var list=document.getElementById('tripList');
@@ -4571,7 +4571,7 @@ window.sbSaveTrip=function(nativePayload){
     }).catch(function(e){console.error('[sbSaveTrip] catch:',e&&e.message);return null;});
   }catch(e){console.error('[sbSaveTrip] exception:',e&&e.message);return Promise.resolve(null);}
 };
-// Build 211: AI trip-purpose prediction via Supabase Edge Function (predict-trip).
+// Build 212: AI trip-purpose prediction via Supabase Edge Function (predict-trip).
 // Key never touches the client — auth is via the user's Supabase access token.
 async function _predictTripPurpose(tripData){
   try {
@@ -4670,7 +4670,7 @@ function openTripDB(){
 }
 function saveTripState(state){
   // Build 134: 3-layer persistence — IDB + localStorage + native AsyncStorage (source of truth)
-  // Build 211: also persist trip start/last coords so restore can call Routes API with real endpoints.
+  // Build 212: also persist trip start/last coords so restore can call Routes API with real endpoints.
   state.startLat = (window._tripStartLat!=null) ? window._tripStartLat : null;
   state.startLng = (window._tripStartLng!=null) ? window._tripStartLng : null;
   state.lastLat  = (window._tripEndLat!=null)  ? window._tripEndLat  : null;
@@ -4996,9 +4996,9 @@ function startTracking(){
   if(!window._restoringTrip){trackStart=Date.now();liveDist=0;}
   window._restoringTrip=false;
   positions=[];lastMoving=Date.now();
-  // Build 211: reset path-length accumulator at trip start (consulted by save gate in stopTracking)
+  // Build 212: reset path-length accumulator at trip start (consulted by save gate in stopTracking)
   window._pathMi=0;
-  // Build 211: zero live tiles at trip start
+  // Build 212: zero live tiles at trip start
   var _z1=document.getElementById('hsBiz');if(_z1)_z1.textContent='0.00';
   var _z2=document.getElementById('hsPer');if(_z2)_z2.textContent='0';
   var _z3=document.getElementById('hsDed');if(_z3)_z3.textContent='$0.00';
@@ -5010,7 +5010,7 @@ function startTracking(){
   window._currentTripUid = _genTripId();
   // Build 168: reset all GPS engine state for new trip
   window.__spdEMA=0;window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
-  // Build 211 (MileIQ architecture): snapshot trip start via one high-accuracy
+  // Build 212 (MileIQ architecture): snapshot trip start via one high-accuracy
   // GPS read. We do NOT seed _tripEndLat here — end coord is captured separately
   // at stopTracking time. Between start and stop, GPS is used ONLY for activity
   // detection (is the phone moving?), never for distance accumulation.
@@ -5072,7 +5072,7 @@ function startTracking(){
   // Realtime hero stat refresh every 2s during tracking
   window._liveStatInt=setInterval(function(){
     if(!tracking)return;
-    // Build 211: no live distance — Routes API computes at trip end only.
+    // Build 212: no live distance — Routes API computes at trip end only.
     var hb=document.getElementById('hsBiz');
     var hd=document.getElementById('hsDed');
     var hp=document.getElementById('hsPer');
@@ -5172,7 +5172,7 @@ window.__nativeGPS__ = function(coords) {
   lastGpsLat=coords.lat;lastGpsLng=coords.lng;window._lastKnownLat=coords.lat;window._lastKnownLng=coords.lng;
 };
 
-/* ── Native Activity Bridge (Build 211) ──
+/* ── Native Activity Bridge (Build 212) ──
    App.js dispatches a MessageEvent on every location update with
    { type:'__ACTIVITY__', automotive, stationary, avgSpeedMph }.
    Rolling 10-sample avg: automotive = avg > 15 mph; stationary = avg < 1 mph.
@@ -5393,7 +5393,7 @@ function onPos(p){
   var clSpeedAcc=(typeof p.coords.speedAccuracy==='number')?p.coords.speedAccuracy:-1;
   var _now=Date.now();
 
-  // ═══ Build 211: GPS accuracy gate — reject > 25m ═══
+  // ═══ Build 212: GPS accuracy gate — reject > 25m ═══
   if(accuracy>25) return;
 
   var lat=rawLat;
@@ -5439,11 +5439,11 @@ function onPos(p){
   var spdMps=isMoving?effectiveSpeed:0;
   if(!window.__spdEMA)window.__spdEMA=0;
   if(isMoving&&!_paused){
-    // Build 211 emergency: hard-cap at 150 mph / 241 km/h BEFORE EMA to kill GPS spikes
+    // Build 212 emergency: hard-cap at 150 mph / 241 km/h BEFORE EMA to kill GPS spikes
     var _capMax=_useKm()?241:150;
     var rawDisplay=_useKm()?(spdMps*3.6):(spdMps*2.237);
     rawDisplay=Math.min(Math.abs(rawDisplay),_capMax);
-    // Build 211: adaptive EMA — fast response on real acceleration,
+    // Build 212: adaptive EMA — fast response on real acceleration,
     // smooth on steady-state cruising. Alpha scales with delta.
     var _prevEma = window.__spdEMA || rawDisplay;
     var _spdDelta = Math.abs(rawDisplay - _prevEma);
@@ -5584,7 +5584,7 @@ function onPos(p){
     // Record breadcrumb for map polyline / end-pos fallback — distance is accumulated via speed×time above
     if(distFromLast>=5||timeFromLast>=30000){
       positions.push({lat:lat,lng:lng,ts:_now,accuracy:accuracy,speed:effectiveSpeed});
-      // Build 211: lightweight path-length accumulator (miles). Used ONLY by the
+      // Build 212: lightweight path-length accumulator (miles). Used ONLY by the
       // stopTracking save gate — the saved distance still comes from Routes API.
       if(positions.length>=2){
         var _p0=positions[positions.length-2];
@@ -5598,11 +5598,11 @@ function onPos(p){
     }
   }
 
-  // ═══ LIVE DISPLAY (Build 211) ═══
+  // ═══ LIVE DISPLAY (Build 212) ═══
   // Gated on `tracking` so late-arriving native GPS fixes after stopTracking
   // can't re-overwrite the reset dashboard values (fixes "—" and "Tracking..." stuck).
   if(tracking){
-    // Build 211: trackDist + hsBiz + hsDed now fed by updateTimer() every 1s.
+    // Build 212: trackDist + hsBiz + hsDed now fed by updateTimer() every 1s.
     // Only set labels here (not values) so onPos doesn't overwrite updateTimer's writes.
     document.getElementById('hsBizL').textContent='Trip '+LOC.unit;
     document.getElementById('hsPerL').textContent='Minutes';
@@ -5842,7 +5842,7 @@ function updateAutoBtn(){
   }
 }
 function stopTracking(){
-  // Build 211: atomic stop lock — prevents race between manual Stop tap
+  // Build 212: atomic stop lock — prevents race between manual Stop tap
   // and SDK onMotionChange(stopped) firing simultaneously. Must be set
   // BEFORE any other state mutation, BEFORE any console.log (which could
   // yield). First caller proceeds, any concurrent caller bails cleanly.
@@ -5860,14 +5860,14 @@ function stopTracking(){
     window.__stopLock = false;
     return;
   }
-  // Build 211.5: capture start coords BEFORE clearTripState() nulls them.
+  // Build 212.5: capture start coords BEFORE clearTripState() nulls them.
   // _resolveBothAddrs (called later in the async save chain) used to read
   // window._tripStartLat — but it was null by then because clearTripState()
   // runs earlier in stopTracking(). That's why every trip saved as
   // 'missing_coords' and was discarded. This captures the real coords.
   var _savedStartLat = window._tripStartLat;
   var _savedStartLng = window._tripStartLng;
-  console.log('[stopTracking] 211.0 CAPTURED start coords:', _savedStartLat, _savedStartLng);
+  console.log('[stopTracking] 212.0 CAPTURED start coords:', _savedStartLat, _savedStartLng);
   if(watchId&&watchId!=='native'){navigator.geolocation.clearWatch(watchId);}
   watchId=null;
   clearInterval(timerInt);clearTimeout(_pauseTimeout);
@@ -5900,7 +5900,7 @@ function stopTracking(){
   document.getElementById('hsBizL').textContent='Business '+LOC.unit;
   document.getElementById('hsPerL').textContent='Personal '+LOC.unit;
   recalcStats();
-  // Build 211 backstop: re-run recalcStats on next frame so any onPos fix
+  // Build 212 backstop: re-run recalcStats on next frame so any onPos fix
   // queued in the same microtask gets flushed first.
   requestAnimationFrame(function(){ if(!tracking) recalcStats(); });
   updateDebugPanel();
@@ -5915,7 +5915,7 @@ function stopTracking(){
   // Reset milestone flags
   for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
   var _tMin=(Date.now()-trackStart)/60000;
-  // Build 211: snapshot trip END coord via one high-accuracy GPS read.
+  // Build 212: snapshot trip END coord via one high-accuracy GPS read.
   // This is THE authoritative end coord for Routes API.
   var _endCoordPromise = new Promise(function(resolve){
     try {
@@ -5933,14 +5933,14 @@ function stopTracking(){
     } catch(e){ resolve(); }
   });
   _endCoordPromise.then(function(){
-  // Build 211: Save gate — any of (crow-flies, path-accumulated, user-stopped >60s with fixes).
+  // Build 212: Save gate — any of (crow-flies, path-accumulated, user-stopped >60s with fixes).
   var _approxTripMi=_liveMiApprox();           // crow-flies start→end × 1.15
   var _pathMi=window._pathMi||0;                // accumulated per-fix haversine sum
   var _tripDurationMs=Date.now()-trackStart-(_totalPauseMs||0);
   var _tripDurSec=Math.floor(_tripDurationMs/1000);
   var _hasPositions=(typeof positions!=='undefined'&&positions&&positions.length>2);
   if(_approxTripMi>0.05&&_tMin>=5){var _kd=_matchKnownLocation(lastGpsLat,lastGpsLng);setTimeout(function(){_promptSmartSave(_kd);},1500);}
-  // Build 211: time-based fallback — if trip ran >60s with recorded positions, MUST save
+  // Build 212: time-based fallback — if trip ran >60s with recorded positions, MUST save
   // even if _pathMi is 0 (fixes the 2-hour-drive-saves-nothing bug when breadcrumb gate
   // never fires due to accuracy rejection or slow native GPS bridge).
   var _shouldSave=(_approxTripMi>0.01)||(_pathMi>0.01)||(_tripDurationMs>60000&&_hasPositions);
@@ -5980,7 +5980,7 @@ function stopTracking(){
         .catch(function(){return fallback;});
     }
     function _resolveBothAddrs(callback){
-      // Build 211.5: use locals captured BEFORE clearTripState nulled globals.
+      // Build 212.5: use locals captured BEFORE clearTripState nulled globals.
       var sLat=_savedStartLat||window._tripStartLat||(positions.length>0?positions[0].lat:null);
       var sLng=_savedStartLng||window._tripStartLng||(positions.length>0?positions[0].lng:null);
       var eLat=window._tripEndLat;
@@ -6028,12 +6028,12 @@ function stopTracking(){
       finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
     }
 
-    // Build 211: Thin async wrapper around _getFinalMiles utility.
+    // Build 212: Thin async wrapper around _getFinalMiles utility.
     // Emergency: if coords are missing, fall back to last-known before Routes call.
-    // Build 211 (MileIQ architecture): Routes API is the only source of saved miles.
+    // Build 212 (MileIQ architecture): Routes API is the only source of saved miles.
     async function _getDirectionsAndSave(fromA,toA){
       showToast(_i('pin'),'Calculating road distance...',2000);
-      // Build 211.5: use captured locals — window globals were nulled by clearTripState earlier
+      // Build 212.5: use captured locals — window globals were nulled by clearTripState earlier
       var dist = await _getFinalMiles(_savedStartLat||window._tripStartLat, _savedStartLng||window._tripStartLng, window._tripEndLat, window._tripEndLng);
       // Handle error returns from _getFinalMiles (no_movement, missing_coords, routes_failed)
       if(dist.error === 'no_movement' || dist.error === 'missing_coords'){
@@ -6069,7 +6069,7 @@ function stopTracking(){
   }
   // Build 150: reset accumulators AFTER save block has captured values into closures.
   liveDist=0; positions=[]; window._lastTripPersist=0;
-  }); // end _endCoordPromise.then (Build 211)
+  }); // end _endCoordPromise.then (Build 212)
   } catch(e) {
     console.error('[stopTracking] error:', e);
   } finally {
@@ -6158,7 +6158,7 @@ function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
             renderTrips();
             if(window._currentUser&&window._currentUser.id){_syncWithSupabase(window._currentUser.id);}
             console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
-            // Build 211: fire-and-forget AI prediction (never blocks save)
+            // Build 212: fire-and-forget AI prediction (never blocks save)
             if(typeof _predictTripPurpose==='function'){
               _predictTripPurpose({
                 tripId:   _t.trip_uid,
@@ -6272,7 +6272,7 @@ function updateTimer(){
   var pauseMs=_totalPauseMs+(_paused?(Date.now()-_pauseStart):0);
   const s=Math.floor((Date.now()-trackStart-pauseMs)/1000),m=Math.floor(s/60),sec=s%60;
   document.getElementById('trackTimer').textContent=String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
-  // --- Build 211: live hero tiles during tracking ---
+  // --- Build 212: live hero tiles during tracking ---
   try {
     if (typeof tracking !== 'undefined' && tracking && !_paused) {
       var _liveMi = (window._pathMi || 0);
@@ -6306,10 +6306,10 @@ function _liveMiApprox(){
   if(window._tripStartLat==null||window._tripEndLat==null)return 0;
   return haversine(window._tripStartLat,window._tripStartLng,window._tripEndLat,window._tripEndLng)*1.15;
 }
-// Build 211: standalone async Routes API utilities. Return {miles, source}.
+// Build 212: standalone async Routes API utilities. Return {miles, source}.
 // _getFinalMiles handles 3× retry @ 2s delay; falls back to haversine×1.15.
 async function _getRoutesAPIDistance(sLat, sLng, eLat, eLng){
-  // Build 211: 8s AbortController — prevents indefinite hangs on slow network / blocked key
+  // Build 212: 8s AbortController — prevents indefinite hangs on slow network / blocked key
   const controller = new AbortController();
   const _to = setTimeout(function(){ controller.abort(); }, 8000);
   try {
@@ -6341,7 +6341,7 @@ async function _getRoutesAPIDistance(sLat, sLng, eLat, eLng){
   }
 }
 async function _getFinalMiles(sLat, sLng, eLat, eLng){
-  // Build 211: MileIQ architecture. Routes API is the ONLY source of truth
+  // Build 212: MileIQ architecture. Routes API is the ONLY source of truth
   // for mileage. No haversine. No Kalman. No GPS point accumulation.
   if(sLat==null || sLng==null || eLat==null || eLng==null){
     console.error('[Miles] missing coords — trip cannot be saved', sLat, sLng, eLat, eLng);
@@ -7774,7 +7774,7 @@ loadTripsFromStorage(); // Load trips BEFORE locale so renderTrips has data
 // relaxed guard (restore even if tracking flag false, as long as totalDist>0),
 // sets _restoringTrip=true BEFORE startTracking so reset is skipped.
 function _doRestoreFromState(state){
-  // Build 211.3: circuit breaker — prevent infinite recursion with _restoreActiveTripIfNeeded
+  // Build 212.3: circuit breaker — prevent infinite recursion with _restoreActiveTripIfNeeded
   if(window.__restoreDepth&&window.__restoreDepth>2){
     console.warn('[Restore] CIRCUIT BREAKER tripped — depth exceeded, clearing stuck state');
     try{
@@ -7795,7 +7795,7 @@ function _doRestoreFromState(state){
 
   if(!state)return false;
   // Restore if tracking was active, OR (legacy) a distance was recorded.
-  // Build 211: no longer require totalDist>0 since we don't accumulate.
+  // Build 212: no longer require totalDist>0 since we don't accumulate.
   if(!state.tracking && (!state.totalDist||state.totalDist<=0))return false;
   if(state.savedAt&&Date.now()-state.savedAt>12*3600*1000){clearTripState();return false;}
   var savedDist=state.totalDist||0;
@@ -7806,7 +7806,7 @@ function _doRestoreFromState(state){
     window._restoringTrip=true;
     liveDist=savedDist;
     trackStart=savedStart;
-    // Build 211: restore trip coords so live display + Routes API at end work
+    // Build 212: restore trip coords so live display + Routes API at end work
     window._tripStartLat=state.startLat||null;
     window._tripStartLng=state.startLng||null;
     window._tripEndLat=state.lastLat||state.startLat||null;
@@ -7831,7 +7831,7 @@ function _isStaleTrip(st){
   return !!(st && st.trackStart && (Date.now() - st.trackStart) > 4*60*60*1000);
 }
 function _restoreActiveTripIfNeeded(){
-  // Build 211.3: same circuit breaker
+  // Build 212.3: same circuit breaker
   if(window.__restoreDepth&&window.__restoreDepth>2){
     console.warn('[Restore] CIRCUIT BREAKER tripped in _restoreActiveTripIfNeeded — clearing');
     try{
@@ -7889,7 +7889,7 @@ function _restoreActiveTripIfNeeded(){
 }
 setTimeout(function(){try{_restoreActiveTripIfNeeded();}catch(e){}},500);
 // Build 134 + 210.4: delayed single-shot startup restore, error-wrapped
-// Build 211.4: DEBOUNCED native-trip-state listener.
+// Build 212.4: DEBOUNCED native-trip-state listener.
 // Previous version spawned setTimeout per event, causing event storm when
 // Transistorsoft SDK fires location updates at 1-10Hz. Solution: coalesce
 // rapid fires into a single delayed call, and drop events entirely if a
@@ -9118,7 +9118,7 @@ async function _syncWithSupabase(userId){
       if(retryOk>0)saveTripsToStorage();
     }
 
-    // D) Build 211: Routes API retry for trips that saved with miles=0 + source='routes_api_pending'.
+    // D) Build 212: Routes API retry for trips that saved with miles=0 + source='routes_api_pending'.
     // These are trips where Routes API failed at save time; the row exists in Supabase with
     // start/end coords but miles=0. Re-run Routes now that network may be available.
     try{
