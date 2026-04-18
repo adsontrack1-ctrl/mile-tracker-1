@@ -5842,13 +5842,22 @@ function updateAutoBtn(){
   }
 }
 function stopTracking(){
+  // Build 210: atomic stop lock — prevents race between manual Stop tap
+  // and SDK onMotionChange(stopped) firing simultaneously. Must be set
+  // BEFORE any other state mutation, BEFORE any console.log (which could
+  // yield). First caller proceeds, any concurrent caller bails cleanly.
+  if (window.__stopLock) {
+    console.log('[stopTracking] Re-entry blocked by __stopLock');
+    return;
+  }
+  window.__stopLock = true;
+  try {
   console.log('[stopTracking] called — tracking=',tracking,'startLat=',window._tripStartLat,'endLat=',window._tripEndLat);
-  // Build 151: idempotency guard — if tracking was already stopped, bail out.
-  // Without this, a double-tap or button+auto-stop race wipes _savedTotalDist
-  // to 0, makes the save gate fail, and shows "No distance recorded" even
-  // though the *first* call saved the trip correctly.
+  // Build 151 idempotency guard preserved — but now race-free because
+  // __stopLock is set atomically above.
   if(!tracking){
     console.log('[StopTracking] Ignored — already stopped');
+    window.__stopLock = false;
     return;
   }
   if(watchId&&watchId!=='native'){navigator.geolocation.clearWatch(watchId);}
@@ -6051,6 +6060,11 @@ function stopTracking(){
   // Build 150: reset accumulators AFTER save block has captured values into closures.
   liveDist=0; positions=[]; window._lastTripPersist=0;
   }); // end _endCoordPromise.then (Build 210)
+  } catch(e) {
+    console.error('[stopTracking] error:', e);
+  } finally {
+    window.__stopLock = false;
+  }
 }
 var _gpsTrioSaved=false;
 function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
