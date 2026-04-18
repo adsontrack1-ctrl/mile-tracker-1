@@ -7764,6 +7764,25 @@ loadTripsFromStorage(); // Load trips BEFORE locale so renderTrips has data
 // relaxed guard (restore even if tracking flag false, as long as totalDist>0),
 // sets _restoringTrip=true BEFORE startTracking so reset is skipped.
 function _doRestoreFromState(state){
+  // Build 210.3: circuit breaker — prevent infinite recursion with _restoreActiveTripIfNeeded
+  if(window.__restoreDepth&&window.__restoreDepth>2){
+    console.warn('[Restore] CIRCUIT BREAKER tripped — depth exceeded, clearing stuck state');
+    try{
+      localStorage.removeItem('mymilesai_active_trip');
+      localStorage.removeItem('mymilesai_trip_snapshot');
+      localStorage.removeItem('mymilesai_restore_state');
+      Object.keys(localStorage).forEach(function(k){
+        if(k.includes('active_trip')||k.includes('restore_')||k.includes('trip_snap')){
+          localStorage.removeItem(k);
+        }
+      });
+    }catch(e){}
+    window.__restoreDepth=0;
+    return false;
+  }
+  window.__restoreDepth=(window.__restoreDepth||0)+1;
+  setTimeout(function(){window.__restoreDepth=0;},2000);
+
   if(!state)return false;
   // Restore if tracking was active, OR (legacy) a distance was recorded.
   // Build 210: no longer require totalDist>0 since we don't accumulate.
@@ -7802,6 +7821,20 @@ function _isStaleTrip(st){
   return !!(st && st.trackStart && (Date.now() - st.trackStart) > 4*60*60*1000);
 }
 function _restoreActiveTripIfNeeded(){
+  // Build 210.3: same circuit breaker
+  if(window.__restoreDepth&&window.__restoreDepth>2){
+    console.warn('[Restore] CIRCUIT BREAKER tripped in _restoreActiveTripIfNeeded — clearing');
+    try{
+      localStorage.removeItem('mymilesai_active_trip');
+      localStorage.removeItem('mymilesai_trip_snapshot');
+      localStorage.removeItem('mymilesai_restore_state');
+    }catch(e){}
+    window.__restoreDepth=0;
+    return;
+  }
+  window.__restoreDepth=(window.__restoreDepth||0)+1;
+  setTimeout(function(){window.__restoreDepth=0;},2000);
+
   // Build 134: priority order — native AsyncStorage > localStorage > IDB
   // PRIORITY 1: native AsyncStorage state injected by INJECTED_JS before page load
   if(window.__NATIVE_SAVED_TRIP__){
