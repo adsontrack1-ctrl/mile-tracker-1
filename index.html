@@ -1471,6 +1471,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script src="./TripStateMachine.js"></script>
 <script nonce="mmai2026">
 /* ── Global Error Handler v109b ── */
 (function(){
@@ -5874,6 +5875,118 @@ function updateAutoBtn(){
     text.textContent='Auto Start';
   }
 }
+// ══════════════════════════════════════════════════════════════════════════
+// ── Trip State Machine (Build 214) — synthetic-only, pre-SDK-wiring ──
+// ══════════════════════════════════════════════════════════════════════════
+// Instantiates TripStateMachine as a singleton at window.__tsm.
+// Tonight (Milestone 2b): synthetic events ONLY via window.__tsmInject*.
+// Tomorrow (Phase 2 day 2): App.js SDK events replace the synthetic
+// injectors. index.html-side code stays unchanged.
+//
+// Emitted events are console.log'd for now. Milestone 3 adds a
+// trip_completed → _savePath(snap) wiring step.
+(function initTripStateMachine() {
+  if (typeof TripStateMachine !== 'function') {
+    console.error('[TSM] TripStateMachine class not loaded — check <script src="./TripStateMachine.js">');
+    return;
+  }
+  if (window.__tsm) {
+    console.warn('[TSM] already initialized — skipping re-init');
+    return;
+  }
+  const sm = new TripStateMachine({
+    emit: function (eventName, payload) {
+      console.log('[TSM:' + eventName + ']', payload);
+      if (eventName !== 'trip_completed') return;
+      // Build Build-213-contract-compliant {snap, snapExt} from TSM payload.
+      var translated;
+      try {
+        translated = _buildSnapFromTsmTrip(payload);
+      } catch (e) {
+        console.error('[TSM→save] translation failed:', e && e.message);
+        return;
+      }
+      if (!translated || !translated.snap) return;
+      var snap = translated.snap;
+      var snapExt = translated.snapExt;
+      if (!snap.userId) {
+        // User logged out while driving; don't crash, just log.
+        // A future milestone may park these in a recovery queue.
+        console.warn('[TSM→save] no user — trip not saved. trip_uid=' + snap.tripUid);
+        return;
+      }
+      // Call Phase 1's save path. All gates (MISSING_COORDS, TOO_SHORT,
+      // NO_MOVEMENT, etc.) fire inside _savePath. Any failure is logged
+      // via _recordSaveOutcome and does NOT throw.
+      try {
+        var result = _savePath(snap, snapExt);
+        if (result && typeof result.catch === 'function') {
+          result.catch(function(e){
+            console.error('[TSM→save] _savePath rejected:', e && e.message);
+          });
+        }
+      } catch (e) {
+        console.error('[TSM→save] _savePath threw synchronously:', e && e.message);
+      }
+    },
+    log: function () {
+      if (window.__tsmVerbose) console.log.apply(console, arguments);
+    },
+  });
+  window.__tsm = sm;
+
+  // Synthetic injectors for browser-based testing. DevTools-only;
+  // safe to leave in production (no-op unless explicitly called).
+  window.__tsmInjectLocation = function (loc) {
+    sm.ingestLocation(loc);
+  };
+  window.__tsmInjectMotion = function (isMoving, ts) {
+    sm.ingestMotion(!!isMoving, ts);
+  };
+  window.__tsmInjectActivity = function (type, confidence, ts) {
+    sm.ingestActivity(type, confidence, ts);
+  };
+
+  console.log('[TSM] initialized. state=' + sm.getState() + '. Call window.__tsmInject* to simulate events.');
+})();
+
+// ─── TSM → _savePath translation helper (Build 214 Milestone 3) ──────────
+// Converts a TSM trip_completed payload into {snap, snapExt} matching the
+// Build 213 _savePath contract. Both objects are Object.freeze'd per R1.
+//
+// Mapping decisions:
+//   - totalPauseMs: 0 — TSM has no pause concept; _savePath uses this only
+//     in the TOO_SHORT gate which won't fire for any real trip ≥ 0.3 mi
+//   - startAddr: null — let _resolveAddrs geocode both ends
+//   - userId: pulled fresh from window._currentUser at translation time
+//   - pathMi / liveDist: populated from TSM distance_mi (ornamental; not
+//     read by _savePath which recomputes via Routes API)
+function _buildSnapFromTsmTrip(p) {
+  if (!p || p.start_lat == null || p.end_lat == null) {
+    throw new Error('trip_completed payload missing required coords');
+  }
+  var uid  = (window._currentUser && window._currentUser.id) || null;
+  var dMi  = (typeof p.distance_mi === 'number' && isFinite(p.distance_mi)) ? p.distance_mi : 0;
+  var snap = Object.freeze({
+    tripUid:      p.trip_uid,
+    userId:       uid,
+    startLat:     p.start_lat,
+    startLng:     p.start_lng,
+    startTs:      p.start_ts,
+    endTs:        p.end_ts,
+    positions:    Array.isArray(p.positions) ? p.positions.slice() : [],
+    pathMi:       dMi,
+    totalPauseMs: 0,
+    startAddr:    null,
+    liveDist:     dMi
+  });
+  var snapExt = Object.freeze({
+    endLat: p.end_lat,
+    endLng: p.end_lng
+  });
+  return { snap: snap, snapExt: snapExt };
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // ── Save Path (Build 213 architecture) ──
 // Snapshot-first · Clear-late · Single entry point · Typed failures.
