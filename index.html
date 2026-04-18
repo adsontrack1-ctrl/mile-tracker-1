@@ -7877,9 +7877,29 @@ function _restoreActiveTripIfNeeded(){
     });
   }catch(e){console.warn('[Restore] failed',e);}
 }
-setTimeout(_restoreActiveTripIfNeeded,0);
-// Build 134: also re-attempt restore when native pushes state via event
-window.addEventListener('native-trip-state',function(){setTimeout(_restoreActiveTripIfNeeded,0);});
+setTimeout(function(){try{_restoreActiveTripIfNeeded();}catch(e){}},500);
+// Build 134 + 210.4: delayed single-shot startup restore, error-wrapped
+// Build 210.4: DEBOUNCED native-trip-state listener.
+// Previous version spawned setTimeout per event, causing event storm when
+// Transistorsoft SDK fires location updates at 1-10Hz. Solution: coalesce
+// rapid fires into a single delayed call, and drop events entirely if a
+// restore ran recently.
+(function(){
+  var lastRestoreAt=0;
+  var pendingTimer=null;
+  var MIN_INTERVAL_MS=5000;
+  var DEBOUNCE_MS=500;
+  window.addEventListener('native-trip-state',function(){
+    var now=Date.now();
+    if(now-lastRestoreAt<MIN_INTERVAL_MS)return;
+    if(pendingTimer)clearTimeout(pendingTimer);
+    pendingTimer=setTimeout(function(){
+      pendingTimer=null;
+      lastRestoreAt=Date.now();
+      try{_restoreActiveTripIfNeeded();}catch(e){console.warn('[Restore] error:',e);}
+    },DEBOUNCE_MS);
+  });
+})();
 // Build 141: 8s startup failsafe — show whatever we have if Supabase takes too long
 setLocale(detected,false); // temporary auto-detect; Supabase profile will override
 window._startupFailsafe=setTimeout(function(){
