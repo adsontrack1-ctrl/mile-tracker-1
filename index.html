@@ -4464,10 +4464,19 @@ async function _flushPendingQueue(){
   if(typeof _updateYTD==='function')_updateYTD();
 }
 function _buildTripRow(t, userId){
-  // Safety net: GUARANTEE trip_uid is never null/undefined when sent to Supabase
+  // Build 213: strict null-coord reject. Any missing or NaN coord → return null.
+  // Caller (_savePath) routes a null return to SAVE_FAIL.MISSING_COORDS.
+  // No silent (0,0) writes to Supabase ever.
   if(!t.trip_uid){
     t.trip_uid=_genTripId();
     console.warn('[_buildTripRow] Generated missing trip_uid:',t.trip_uid);
+  }
+  var sL = parseFloat(t.startLat), sLn = parseFloat(t.startLng);
+  var eL = parseFloat(t.endLat),   eLn = parseFloat(t.endLng);
+  if(isNaN(sL) || isNaN(sLn) || isNaN(eL) || isNaN(eLn)){
+    console.error('[_buildTripRow] null/NaN coord — REJECTING row build:',
+      t.startLat, t.startLng, t.endLat, t.endLng);
+    return null;
   }
   var row={
     trip_uid: t.trip_uid,
@@ -4480,16 +4489,10 @@ function _buildTripRow(t, userId){
       : (t.ts ? new Date(t.ts) : new Date()).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
     deductible: t.type==='biz',
     purpose: t.purpose||'', notes: t.notes||'',
-    start_lat: parseFloat(t.startLat)||0,
-    start_lng: parseFloat(t.startLng)||0,
-    end_lat: parseFloat(t.endLat)||0,
-    end_lng: parseFloat(t.endLng)||0,
+    start_lat: sL, start_lng: sLn, end_lat: eL, end_lng: eLn,
     // Build 206: carry the source flag through to Supabase so GPS trips stop
-    // getting stamped 'manual' by the DB default. Mirrors the `source` field on
-    // the local TRIPS[0] object built in finishSaveTrackedTrip.
+    // getting stamped 'manual' by the DB default.
     source: t.source || 'gps'
-    // Note: 'estimated' is a local-only flag, not a DB column. Retry loop in
-    // _syncWithSupabase clears it when Routes API eventually succeeds.
   };
   console.log('[_buildTripRow] trip_uid in payload:',row.trip_uid);
   return row;
@@ -4553,6 +4556,11 @@ window.sbSaveTrip=function(nativePayload){
     if(typeof renderTrips==='function')renderTrips();
     if(typeof saveTripsToStorage==='function')saveTripsToStorage();
     var row=_buildTripRow(tripObj,window._currentUser.id);
+    // Build 213: _buildTripRow now returns null if any coord is NaN/missing.
+    if(!row){
+      console.warn('[sbSaveTrip] _buildTripRow rejected — null/NaN coord in native payload; skipping Supabase insert');
+      return Promise.resolve(null);
+    }
     return _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
       if(res.error){console.error('[sbSaveTrip] upsert error:',JSON.stringify(res.error));return null;}
       tripObj.synced=true;
@@ -4669,21 +4677,43 @@ function openTripDB(){
   });
 }
 function saveTripState(state){
-  // Build 134: 3-layer persistence — IDB + localStorage + native AsyncStorage (source of truth)
-  // Build 212: also persist trip start/last coords so restore can call Routes API with real endpoints.
+  // Build 134: 3-layer persistence — IDB + localStorage + native AsyncStorage (source of truth).
+  // Build 212: persist trip start/last coords so restore can call Routes API with real endpoints.
+  // Build 213: also persist tripUid, pathMi, totalPauseMs, and downsampled positions.
+  //   - Mid-trip calls: positions auto-downsampled to ~80 points (reuses _snapPos algorithm).
+  //   - stopTracking-entry opt-in full snapshot: pass state._fullPositions = positions.slice().
   state.startLat = (window._tripStartLat!=null) ? window._tripStartLat : null;
   state.startLng = (window._tripStartLng!=null) ? window._tripStartLng : null;
   state.lastLat  = (window._tripEndLat!=null)  ? window._tripEndLat  : null;
   state.lastLng  = (window._tripEndLng!=null)  ? window._tripEndLng  : null;
+  state.tripUid      = window._currentTripUid || null;
+  state.pathMi       = window._pathMi || 0;
+  state.totalPauseMs = (typeof _totalPauseMs!=='undefined' && _totalPauseMs) ? _totalPauseMs : 0;
+  if(state._fullPositions && Array.isArray(state._fullPositions)){
+    state.positions = state._fullPositions;
+  } else if(typeof positions!=='undefined' && positions && positions.length>=2){
+    var _sp=[];
+    var _st=Math.max(1,Math.floor(positions.length/80));
+    for(var _pi=0;_pi<positions.length;_pi+=_st) _sp.push({lat:positions[_pi].lat,lng:positions[_pi].lng});
+    var _last=positions[positions.length-1];
+    if(_sp[_sp.length-1]!==_last) _sp.push({lat:_last.lat,lng:_last.lng});
+    state.positions = _sp;
+  } else {
+    state.positions = [];
+  }
   var savedAt = state.savedAt||Date.now();
-  var payload = {key:'active',tracking:state.tracking,trackStart:state.trackStart,totalDist:state.totalDist,startLat:state.startLat,startLng:state.startLng,lastLat:state.lastLat,lastLng:state.lastLng,savedAt:savedAt};
+  var payload = {
+    key:'active', tracking:state.tracking, trackStart:state.trackStart, totalDist:state.totalDist,
+    startLat:state.startLat, startLng:state.startLng, lastLat:state.lastLat, lastLng:state.lastLng,
+    tripUid:state.tripUid, pathMi:state.pathMi, totalPauseMs:state.totalPauseMs,
+    positions:state.positions, savedAt:savedAt
+  };
   openTripDB().then(function(db){
     var tx=db.transaction('state','readwrite');
     tx.objectStore('state').put(payload);
   }).catch(function(e){console.warn('[MMAI] IDB save fail',e);});
   try{localStorage.setItem('mmai_trip_backup',JSON.stringify(payload));}catch(e){}
-  // Native AsyncStorage — survives iOS force-kill. Gate on tracking flag
-  // (not totalDist) since we no longer accumulate distance mid-trip.
+  // Native AsyncStorage — survives iOS force-kill.
   if(window.ReactNativeWebView&&state.tracking){
     try{
       window.ReactNativeWebView.postMessage(JSON.stringify(Object.assign({type:'SAVE_TRIP_STATE'},payload)));
@@ -5004,10 +5034,13 @@ function startTracking(){
   var _z3=document.getElementById('hsDed');if(_z3)_z3.textContent='$0.00';
   var _z4=document.getElementById('trackDist');if(_z4)_z4.textContent='0.00';
   // Build 206: fresh low-accuracy warning flag + stable session UID.
-  // _currentTripUid is reused by every finishSaveTrackedTrip call within
-  // this trip session so parallel saves collapse via onConflict:'trip_uid'.
+  // _currentTripUid is reused by every save call within this trip session
+  // so parallel saves collapse via onConflict:'trip_uid'.
+  // Build 213: preserve any restored UID — do NOT mint fresh if restore
+  // path (_doRestoreFromState) already assigned one. Prevents
+  // double-insert when a crashed trip resumes.
   window._tripLowAccWarned = false;
-  window._currentTripUid = _genTripId();
+  window._currentTripUid = window._currentTripUid || _genTripId();
   // Build 168: reset all GPS engine state for new trip
   window.__spdEMA=0;window.__spdSmoothed=0;window._lastPositionTime=null;window._stationaryStopStart=null;
   // Build 212 (MileIQ architecture): snapshot trip start via one high-accuracy
@@ -5031,7 +5064,7 @@ function startTracking(){
     }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
   } catch(e){}
   console.log('[startTracking] seeded start from lastKnown:',_seedLat,_seedLng);
-  _paused=false;_pauseStart=0;_totalPauseMs=0;_gpsTrioSaved=false;
+  _paused=false;_pauseStart=0;_totalPauseMs=0;
   _stationaryStart=0;_startAddr='';_startAddrLocked=false;_startReadings=[];
   _endReadings=[];_endCollectStart=0;
   _lastGoodPos=null;_lastPosTime=0;_signalLost=false;
@@ -5334,8 +5367,8 @@ function _matchKnownLocation(lat,lng){
 var _pendingAutoSave=null,_autoSaveShown=false;
 function _promptSmartSave(kd){
   if(_autoSaveShown)return;_autoSaveShown=true;
-  // Use final saved distance if available (post-Routes), else crow-flies live estimate.
-  var _pMi=(window._savedTotalDist&&window._savedTotalDist>0)?window._savedTotalDist:_liveMiApprox();
+  // Build 213: use live crow-flies estimate (window._savedTotalDist retired with save-path refactor).
+  var _pMi=_liveMiApprox();
   var dist=_useKm()?(_pMi*1.60934).toFixed(2):_pMi.toFixed(2);
   var ded=(parseFloat(dist)*LOC.rate).toFixed(2);
   var dl=kd?kd.label:'',dc=kd?kd.category:'Unclassified',rep=kd&&kd.visits>1;
@@ -5841,362 +5874,439 @@ function updateAutoBtn(){
     text.textContent='Auto Start';
   }
 }
-function stopTracking(){
-  // Build 212: atomic stop lock — prevents race between manual Stop tap
-  // and SDK onMotionChange(stopped) firing simultaneously. Must be set
-  // BEFORE any other state mutation, BEFORE any console.log (which could
-  // yield). First caller proceeds, any concurrent caller bails cleanly.
-  if (window.__stopLock) {
+// ══════════════════════════════════════════════════════════════════════════
+// ── Save Path (Build 213 architecture) ──
+// Snapshot-first · Clear-late · Single entry point · Typed failures.
+// ══════════════════════════════════════════════════════════════════════════
+
+var SAVE_FAIL = Object.freeze({
+  MISSING_COORDS:   'MISSING_COORDS',    // drop — no queue, no row (coords unrecoverable)
+  MISSING_DISTANCE: 'MISSING_DISTANCE',  // enqueue w/ haversine fallback; Routes retry overlays later
+  MISSING_USER:     'MISSING_USER',      // drop (auth missing — user must re-authenticate)
+  NETWORK:          'NETWORK',           // enqueue — queue flush will retry
+  DB_ERROR:         'DB_ERROR',          // enqueue w/ backoff
+  TOO_SHORT:        'TOO_SHORT'          // drop — not a trip by design
+});
+
+// LAST read of window._trip* in the save path. Everything downstream takes snap.
+function _buildTripSnapshot(){
+  // M1 assertion: tracking active but no start coord AND no positions → empty snapshot.
+  if(tracking && !window._tripStartLat && (typeof positions==='undefined' || positions.length===0)){
+    console.error('[SNAP] empty snapshot — no start coord, no positions');
+    return null;
+  }
+  var snap = {
+    tripUid:      window._currentTripUid || _genTripId(),
+    userId:       (window._currentUser && window._currentUser.id) || null,
+    startLat:     window._tripStartLat,
+    startLng:     window._tripStartLng,
+    startTs:      trackStart,
+    endTs:        Date.now(),
+    positions:    (typeof positions!=='undefined' && positions) ? positions.slice() : [],
+    pathMi:       window._pathMi || 0,
+    totalPauseMs: _totalPauseMs || 0,
+    startAddr:    (_startAddr && _startAddr !== 'Locating...') ? _startAddr : null,
+    liveDist:     liveDist || 0
+  };
+  return Object.freeze(snap); // R1
+}
+
+// Captures end coord into a SEPARATE frozen object (R1). snap stays immutable.
+function _captureEndCoord(snap){
+  return new Promise(function(resolve){
+    var snapExt = { endLat: null, endLng: null, endAccuracy: null };
+    function _fallback(){
+      var lastPos = snap.positions.length>0 ? snap.positions[snap.positions.length-1] : null;
+      snapExt.endLat = (lastPos && lastPos.lat) || window._lastKnownLat || null;
+      snapExt.endLng = (lastPos && lastPos.lng) || window._lastKnownLng || null;
+    }
+    try {
+      navigator.geolocation.getCurrentPosition(function(pos){
+        snapExt.endLat      = pos.coords.latitude;
+        snapExt.endLng      = pos.coords.longitude;
+        snapExt.endAccuracy = pos.coords.accuracy;
+        console.log('[Trip END] getCurrentPosition:', pos.coords.latitude.toFixed(5), pos.coords.longitude.toFixed(5), 'acc=', pos.coords.accuracy);
+        _finishCapture();
+      }, function(err){
+        console.warn('[Trip END] getCurrentPosition failed — fallback used:', err && err.message);
+        _fallback();
+        _finishCapture();
+      }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+    } catch(e){ _fallback(); _finishCapture(); }
+
+    function _finishCapture(){
+      // Overlay with stationary-window best reading if it has higher accuracy
+      // (preserves _getBestEndPosition behavior from old flow).
+      try {
+        if(typeof _getBestEndPosition==='function'){
+          var best = _getBestEndPosition();
+          if(best && best.lat!=null && best.lng!=null){
+            if(snapExt.endAccuracy==null || (best.accuracy!=null && best.accuracy < snapExt.endAccuracy)){
+              snapExt.endLat = best.lat;
+              snapExt.endLng = best.lng;
+              snapExt.endAccuracy = best.accuracy || snapExt.endAccuracy;
+              console.log('[Trip END] overlay from _getBestEndPosition — higher accuracy');
+            }
+          }
+        }
+      } catch(e){}
+      // Preserve last-known-pos write for next trip (from old flow).
+      try {
+        if(snapExt.endLat!=null && snapExt.endLng!=null){
+          localStorage.setItem('mmai_last_known_pos', JSON.stringify({
+            lat: snapExt.endLat, lng: snapExt.endLng,
+            accuracy: snapExt.endAccuracy || 20, ts: Date.now()
+          }));
+        }
+      } catch(e){}
+      resolve(Object.freeze(snapExt)); // R1
+    }
+  });
+}
+
+// R4(a): positions.length<2 → haversine(start,end)×1.15 (same as _liveMiApprox).
+// Otherwise haversine across positions[0]↔positions[last]×1.15.
+function _computeHaversineFallbackMi(snap, snapExt){
+  if(snap.positions.length < 2){
+    if(snap.startLat==null || snapExt.endLat==null) return 0;
+    return haversine(snap.startLat, snap.startLng, snapExt.endLat, snapExt.endLng) * 1.15;
+  }
+  var p0 = snap.positions[0];
+  var pN = snap.positions[snap.positions.length-1];
+  return haversine(p0.lat, p0.lng, pN.lat, pN.lng) * 1.15;
+}
+
+// Module-level geocode helper (extracted from old inline _geocodeOne).
+function _geocodeOne(lat, lng, label, fallback){
+  if(!lat || !lng) return Promise.resolve(fallback);
+  return fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&key='+_MAPS_KEY)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.status==='OK' && data.results && data.results.length>0){
+        var types=['street_address','premise','route','intersection','neighborhood','sublocality','locality'];
+        var pick=null;
+        for(var ti=0; ti<types.length && !pick; ti++){
+          for(var ri=0; ri<data.results.length; ri++){
+            if(data.results[ri].types.indexOf(types[ti]) > -1){ pick = data.results[ri]; break; }
+          }
+        }
+        if(!pick) pick = data.results[0];
+        console.log('[GEOCODE '+label+']', pick.types.join(','), '—', pick.formatted_address);
+        return pick.formatted_address;
+      }
+      if(data.results && data.results.length>0){
+        var loc = data.results.find(function(r){ return r.types.indexOf('locality') > -1; });
+        if(loc) return loc.formatted_address;
+      }
+      return fallback;
+    })
+    .catch(function(){ return fallback; });
+}
+
+function _resolveAddrs(snap, snapExt){
+  var sLat = snap.startLat, sLng = snap.startLng;
+  var eLat = snapExt.endLat, eLng = snapExt.endLng;
+  var sFallback = sLat ? 'GPS ('+sLat.toFixed(4)+', '+sLng.toFixed(4)+')' : 'Unknown';
+  var eFallback = eLat ? 'GPS ('+eLat.toFixed(4)+', '+eLng.toFixed(4)+')' : 'Unknown';
+  var startP = snap.startAddr ? Promise.resolve(snap.startAddr) : _geocodeOne(sLat, sLng, 'start', sFallback);
+  var endP   = _geocodeOne(eLat, eLng, 'end', eFallback);
+  var timeout = new Promise(function(res){ setTimeout(function(){ res('__timeout__'); }, 5000); });
+  return Promise.race([Promise.all([startP, endP]), timeout]).then(function(result){
+    if(result === '__timeout__'){
+      console.warn('[GEOCODE] Timeout 5s — using fallbacks');
+      return { from: sFallback, to: eFallback };
+    }
+    return { from: result[0] || sFallback, to: result[1] || eFallback };
+  });
+}
+
+function _recordSaveOutcome(snap, code){
+  console.warn('[Save] outcome:', code, 'trip_uid:', snap.tripUid);
+  switch(code){
+    case SAVE_FAIL.TOO_SHORT:       showToast(_i('warn'), 'Trip too short — not saved', 3000); return;
+    case SAVE_FAIL.MISSING_COORDS:  showToast(_i('warn'), 'Trip lost — GPS unavailable', 3000); return;
+    case SAVE_FAIL.MISSING_USER:    showToast(_i('warn'), 'Sign in to save trips', 3000); return;
+    case SAVE_FAIL.NETWORK:         showToast(_i('warn'), 'Saved — will sync when connected', 3000); return;
+    case SAVE_FAIL.DB_ERROR:        showToast(_i('warn'), 'Saved locally — server rejected', 3000); return;
+  }
+}
+
+function _buildLocalTripObj(snap, snapExt, miles, source, from, to){
+  // Reuses _snapPos downsample algorithm (every ~80th point + last).
+  var _snapPos = [];
+  var _ps = snap.positions;
+  if(_ps.length >= 2){
+    var _st = Math.max(1, Math.floor(_ps.length / 80));
+    for(var _pi=0; _pi<_ps.length; _pi+=_st) _snapPos.push({ lat: _ps[_pi].lat, lng: _ps[_pi].lng });
+    var _last = _ps[_ps.length-1];
+    if(_snapPos[_snapPos.length-1] !== _last) _snapPos.push({ lat: _last.lat, lng: _last.lng });
+  }
+  var newId = TRIPS.length ? Math.max.apply(null, TRIPS.map(function(x){ return x.id; })) + 1 : 1;
+  var type = getFreqRouteType(from, to) || (isWorkHours() ? 'biz' : 'uncl');
+  var vehId = (function(){
+    try {
+      var lu = localStorage.getItem('mymilesai_last_vehicle');
+      if(lu && _vehicles.find(function(v){ return v.id === lu; })) return lu;
+    } catch(e){}
+    return _getDefaultVehicleId();
+  })();
+  var elapsedMin = Math.floor((snap.endTs - snap.startTs - snap.totalPauseMs) / 60000);
+  var timeLabel  = new Date(snap.endTs).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                 + ' · ' + elapsedMin + ' min';
+  return {
+    trip_uid: snap.tripUid, synced: false,
+    estimated: source !== 'routes_api',
+    source: source,
+    tripId: _genTripId(), id: newId,
+    positions: _snapPos,
+    from: from, to: to, from_addr: from, to_addr: to,
+    mi: miles, type: type,
+    time: timeLabel, day: 'Today', date: _fmt(new Date(snap.endTs)), ts: snap.endTs,
+    ded: !!CAT_DEDUCTIBLE[type],
+    purpose: '', notes: '', path: randomPath(),
+    vehicleId: vehId,
+    startLat: snap.startLat, startLng: snap.startLng,
+    endLat: snapExt.endLat, endLng: snapExt.endLng
+  };
+}
+
+// R6: every setTimeout handler captures snap.tripUid in closure and looks up
+// the trip by uid — never trusts TRIPS[0] identity across time.
+function _finalizeSavedTrip(snap, snapExt, miles, source, from, to, tripObj){
+  TRIPS.unshift(tripObj);
+  try { if(tripObj.vehicleId) localStorage.setItem('mymilesai_last_vehicle', tripObj.vehicleId); } catch(e){}
+  if(tripObj.type !== 'uncl') checkFrequentRoute(TRIPS[0]);
+  if(_lastGoodPos) _updateFreqLoc(_lastGoodPos.lat, _lastGoodPos.lng, to);
+  if(snap.positions.length > 0) _updateFreqLoc(snap.positions[0].lat, snap.positions[0].lng, from);
+  renderTrips(); renderAlerts(); saveTripsToStorage();
+
+  var finalDist = _useKm() ? (miles * 1.60934) : miles;
+  showToast(_i('ccheck'), 'Trip saved! ' + finalDist.toFixed(1) + ' ' + LOC.label + ' recorded.');
+
+  var _uid = snap.tripUid;
+
+  // Classify prompt — R6 uid-bound lookup
+  setTimeout(function(){
+    var trip = TRIPS.find(function(t){ return t.trip_uid === _uid; });
+    if(!trip) return;
+    showClassifyPrompt(trip.id, from, to, finalDist, trip.type);
+  }, 800);
+
+  // AI categorize fire-and-forget — R6 uid-bound lookup
+  (function(){
+    var trip = TRIPS.find(function(t){ return t.trip_uid === _uid; });
+    if(!trip || !trip.from || !trip.to || trip.type !== 'uncl') return;
+    fetch('https://mymilesai-ai.harijasllc.workers.dev/categorize', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: trip.from, to: trip.to, time: trip.time,
+        day: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
+        history: TRIPS.slice(1, 6).map(function(t){ return { from: t.from, to: t.to, type: t.type }; })
+      })
+    }).then(function(r){ return r.json(); }).then(function(data){
+      var t2 = TRIPS.find(function(x){ return x.trip_uid === _uid; });
+      if(!t2) return;
+      if(data.type && data.confidence > 0.8 && t2.type === 'uncl'){
+        t2.type = data.type;
+        t2.ded = !!CAT_DEDUCTIBLE[data.type];
+        saveTripsToStorage(); renderTrips();
+        showToast(_i('user'), 'AI: ' + CAT_LABELS[data.type] + ' (' + Math.round(data.confidence * 100) + '%)', 3000);
+      }
+    }).catch(function(){});
+  })();
+
+  // Push permission ask (unchanged semantics from old flow)
+  if(!window.__MYMILESAI_NATIVE__ && 'Notification' in window
+     && Notification.permission === 'default' && TRIPS.length === 1){
+    setTimeout(function(){Notification.requestPermission().then(function(perm){if(perm==='granted'){console.log('[MMAI] Push permission granted');try{localStorage.setItem('mmai_push_granted','1');}catch(e){}if('serviceWorker' in navigator){navigator.serviceWorker.ready.then(function(reg){fetch('https://mymilesai-ai.harijasllc.workers.dev/vapid-public-key').then(function(r){return r.json();}).then(function(data){if(!data.publicKey)return;var rawKey=atob(data.publicKey.replace(/-/g,'+').replace(/_/g,'/'));var keyArray=new Uint8Array(rawKey.length);for(var i=0;i<rawKey.length;i++)keyArray[i]=rawKey.charCodeAt(i);return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:keyArray});}).then(function(sub){if(!sub)return;return fetch('https://mymilesai-ai.harijasllc.workers.dev/push-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub})});}).then(function(){try{localStorage.setItem('mmai_push_subscribed','1');}catch(e){}}).catch(function(e){console.warn('[MMAI] Push subscribe error:',e.message);});});}}}).catch(function(){});},3000);
+  }
+
+  recordTripEnd();
+}
+
+// Single save entry point. All persistence (queue + upsert) flows through here.
+async function _savePath(snap, snapExt){
+  // R5: DB uniqueness (trip_uid) is the only dedup.
+  console.log('[DEDUP] trip_uid=' + snap.tripUid + ' — DB uniqueness is the only dedup now');
+
+  // Idempotency — recently saved this session → no-op.
+  if(_recentlySavedUids.has(snap.tripUid)){
+    console.warn('[savePath] duplicate trip_uid — skipping', snap.tripUid);
+    return;
+  }
+  if(!snap.userId) return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_USER);
+  if(snap.startLat==null || snap.startLng==null || snapExt.endLat==null || snapExt.endLng==null){
+    return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_COORDS);
+  }
+
+  // Too-short gate — start ≈ end within ~50m, <60s, no meaningful breadcrumb.
+  var _crowMi = haversine(snap.startLat, snap.startLng, snapExt.endLat, snapExt.endLng);
+  var _durMs  = snap.endTs - snap.startTs - snap.totalPauseMs;
+  if(_crowMi < 0.03 && _durMs < 60000 && snap.positions.length < 3){
+    return _recordSaveOutcome(snap, SAVE_FAIL.TOO_SHORT);
+  }
+
+  // R4: haversine fallback miles at snapshot time — never enqueue miles=null.
+  var fallbackMi = _computeHaversineFallbackMi(snap, snapExt);
+
+  // Resolve addresses (5s race vs timeout).
+  var addrs = await _resolveAddrs(snap, snapExt);
+  var from = addrs.from, to = addrs.to;
+
+  // Routes API attempt. On failure, we still save with fallbackMi + routes_api_pending.
+  showToast(_i('pin'), 'Calculating road distance...', 2000);
+  var miles = fallbackMi, source = 'haversine';
+  try {
+    var dist = await _getFinalMiles(snap.startLat, snap.startLng, snapExt.endLat, snapExt.endLng);
+    if(dist && dist.miles != null && dist.miles > 0){ miles = dist.miles; source = dist.source; }
+    else { source = 'routes_api_pending'; }
+  } catch(e){
+    console.warn('[Routes] exception — using haversine fallback:', e && e.message);
+    source = 'routes_api_pending';
+  }
+  miles = parseFloat(miles.toFixed(2));
+
+  // Build local trip obj + DB row. Null row → MISSING_COORDS (tightening).
+  var tripObj = _buildLocalTripObj(snap, snapExt, miles, source, from, to);
+  var row = _buildTripRow(tripObj, snap.userId);
+  if(!row){ return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_COORDS); }
+
+  // Durability boundary — queue row BEFORE upsert attempt.
+  _queueTrip(row);
+  _recentlySavedUids.add(snap.tripUid);
+  _recentlySavedUidsOrder.push(snap.tripUid);
+  while(_recentlySavedUidsOrder.length > 50){
+    _recentlySavedUids.delete(_recentlySavedUidsOrder.shift());
+  }
+
+  // UI side — TRIPS.unshift, render, classify prompt, AI categorize, push ask.
+  _finalizeSavedTrip(snap, snapExt, miles, source, from, to, tripObj);
+
+  // Upsert (fire-and-forget from stopTracking's perspective).
+  function _doUpsert(){
+    if(!_sb || !_sb.auth){ return; }
+    _sb.from('trips').upsert(row, { onConflict: 'trip_uid' }).then(function(res){
+      if(res.error){
+        console.error('[TripSave] upsert error:', JSON.stringify(res.error));
+        if(!navigator.onLine) showToast(_i('warn'), 'Trip saved locally — will sync when connected');
+        return;
+      }
+      _dequeueTrip(row.trip_uid);
+      var t = TRIPS.find(function(x){ return x.trip_uid === row.trip_uid; });
+      if(t){ t.synced = true; t.source = source; }
+      window._currentTripUid = null;
+      saveTripsToStorage();
+      renderTrips();
+      if(window._currentUser && window._currentUser.id) _syncWithSupabase(window._currentUser.id);
+      console.log('[TripSave] ✓ synced trip_uid', row.trip_uid);
+      if(typeof _predictTripPurpose === 'function'){
+        _predictTripPurpose({
+          tripId: snap.tripUid, miles: miles,
+          fromAddr: from, toAddr: to,
+          endLat: snapExt.endLat, endLng: snapExt.endLng,
+          tripDate: new Date(snap.endTs).toISOString()
+        }).catch(function(e){ console.warn('[predict-trip] fire-forget err:', e && e.message); });
+      }
+    }).catch(function(e){
+      console.error('[TripSave] upsert catch:', e && e.message);
+      if(!navigator.onLine) showToast(_i('warn'), 'Trip saved locally — will sync when connected');
+    });
+  }
+  if(window._syncInProgress){
+    console.log('[TripSave] sync in progress — deferring upsert 1500ms');
+    setTimeout(_doUpsert, 1500);
+  } else {
+    _doUpsert();
+  }
+}
+
+// Lean stopTracking — snapshot first, clear late.
+async function stopTracking(){
+  // Atomic re-entry guard.
+  if(window.__stopLock){
     console.log('[stopTracking] Re-entry blocked by __stopLock');
     return;
   }
   window.__stopLock = true;
   try {
-  console.log('[stopTracking] called — tracking=',tracking,'startLat=',window._tripStartLat,'endLat=',window._tripEndLat);
-  // Build 151 idempotency guard preserved — but now race-free because
-  // __stopLock is set atomically above.
-  if(!tracking){
-    console.log('[StopTracking] Ignored — already stopped');
-    window.__stopLock = false;
-    return;
-  }
-  // Build 212.5: capture start coords BEFORE clearTripState() nulls them.
-  // _resolveBothAddrs (called later in the async save chain) used to read
-  // window._tripStartLat — but it was null by then because clearTripState()
-  // runs earlier in stopTracking(). That's why every trip saved as
-  // 'missing_coords' and was discarded. This captures the real coords.
-  var _savedStartLat = window._tripStartLat;
-  var _savedStartLng = window._tripStartLng;
-  console.log('[stopTracking] 212.0 CAPTURED start coords:', _savedStartLat, _savedStartLng);
-  if(watchId&&watchId!=='native'){navigator.geolocation.clearWatch(watchId);}
-  watchId=null;
-  clearInterval(timerInt);clearTimeout(_pauseTimeout);
-  tracking=false;_paused=false;_autoState='IDLE';_stationaryStart=0;
-  // Build 150: clear dedicated auto-stop timer so next trip starts fresh
-  window._pauseStoppedStart=null;
-  if(window._liveStatInt){clearInterval(window._liveStatInt);window._liveStatInt=null;}
-  releaseWakeLock();
-  clearTripState(); /* Remove from IDB — trip is done */
-  // Build 150: preserve for async save callbacks that may fire after reset;
-  // reset moved to AFTER the save block (see end of stopTracking).
-  window._savedEndPos = positions.length>0 ? {lat:positions[positions.length-1].lat,lng:positions[positions.length-1].lng} : null;
-  window._savedPositions = positions.slice();
-  window._savedTotalDist = liveDist;
-  var _td=document.getElementById('trackDist');if(_td)_td.textContent='0.00';
-  var _vPill=document.getElementById('trackVehiclePill');if(_vPill)_vPill.style.display='none';
-  // Notify native app
-  if(window.__MYMILESAI_NATIVE__&&window.ReactNativeWebView){
-    window.ReactNativeWebView.postMessage(JSON.stringify({type:'gpsState',state:'IDLE'}));
-  }
-  document.getElementById('trackLive').classList.remove('show');
-  document.getElementById('heroStatus').classList.remove('rec');
-  document.getElementById('autoBtn').classList.remove('recording');
-  document.getElementById('speedNum').textContent='0';
-  document.getElementById('spFill').style.strokeDashoffset=267;
-  document.getElementById('spGlow').style.strokeDashoffset=267;
-  document.getElementById('mapLiveBadge').classList.remove('show');
-  updateMapTrackBtn();
-  // Restore hero stats to lifetime totals
-  document.getElementById('hsBizL').textContent='Business '+LOC.unit;
-  document.getElementById('hsPerL').textContent='Personal '+LOC.unit;
-  recalcStats();
-  // Build 212 backstop: re-run recalcStats on next frame so any onPos fix
-  // queued in the same microtask gets flushed first.
-  requestAnimationFrame(function(){ if(!tracking) recalcStats(); });
-  updateDebugPanel();
-  // Resume auto-monitoring if enabled
-  if(autoDetect){
-    setTimeout(function(){startAutoMonitoring();},2000);
-  } else {
-    document.getElementById('heroStatus').classList.remove('mon');
-    document.getElementById('statusText').textContent='';document.getElementById('heroStatus').style.opacity='0';
-    updateAutoBtn();
-  }
-  // Reset milestone flags
-  for(var mk=0;mk<200;mk++){delete window['_ms'+mk];}
-  var _tMin=(Date.now()-trackStart)/60000;
-  // Build 212: snapshot trip END coord via one high-accuracy GPS read.
-  // This is THE authoritative end coord for Routes API.
-  var _endCoordPromise = new Promise(function(resolve){
+    console.log('[stopTracking] called — tracking=', tracking);
+    if(!tracking){
+      console.log('[StopTracking] Ignored — already stopped');
+      return;
+    }
+
+    // Step 1: snapshot FIRST — last read of window._trip* in the save path.
+    var snap = _buildTripSnapshot();
+    if(!snap){
+      showToast(_i('warn'), 'Trip lost — no GPS data', 3000);
+      tracking = false;
+      clearTripState();
+      return;
+    }
+
+    // Step 2: stop GPS + UI chrome.
+    if(watchId && watchId !== 'native') navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    clearInterval(timerInt); clearTimeout(_pauseTimeout);
+    tracking = false; _paused = false; _autoState = 'IDLE'; _stationaryStart = 0;
+    window._pauseStoppedStart = null;
+    if(window._liveStatInt){ clearInterval(window._liveStatInt); window._liveStatInt = null; }
+    releaseWakeLock();
+    var _td = document.getElementById('trackDist'); if(_td) _td.textContent = '0.00';
+    var _vPill = document.getElementById('trackVehiclePill'); if(_vPill) _vPill.style.display = 'none';
+    if(window.__MYMILESAI_NATIVE__ && window.ReactNativeWebView){
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'gpsState', state: 'IDLE' }));
+    }
+    document.getElementById('trackLive').classList.remove('show');
+    document.getElementById('heroStatus').classList.remove('rec');
+    document.getElementById('autoBtn').classList.remove('recording');
+    document.getElementById('speedNum').textContent = '0';
+    document.getElementById('spFill').style.strokeDashoffset = 267;
+    document.getElementById('spGlow').style.strokeDashoffset = 267;
+    document.getElementById('mapLiveBadge').classList.remove('show');
+    updateMapTrackBtn();
+    document.getElementById('hsBizL').textContent = 'Business ' + LOC.unit;
+    document.getElementById('hsPerL').textContent = 'Personal ' + LOC.unit;
+    recalcStats();
+    requestAnimationFrame(function(){ if(!tracking) recalcStats(); });
+    updateDebugPanel();
+    if(autoDetect) setTimeout(function(){ startAutoMonitoring(); }, 2000);
+    else {
+      document.getElementById('heroStatus').classList.remove('mon');
+      document.getElementById('statusText').textContent = '';
+      document.getElementById('heroStatus').style.opacity = '0';
+      updateAutoBtn();
+    }
+    for(var mk=0; mk<200; mk++){ delete window['_ms'+mk]; }
+
+    // Smart-save prompt for substantive trips (preserved from old flow).
+    // Uses snap.positions[last] as end fallback — no window._trip* reads here (R2).
     try {
-      navigator.geolocation.getCurrentPosition(function(pos){
-        window._tripEndLat = pos.coords.latitude;
-        window._tripEndLng = pos.coords.longitude;
-        console.log('[Trip END] coords captured:', pos.coords.latitude.toFixed(5), pos.coords.longitude.toFixed(5), 'acc=', pos.coords.accuracy);
-        resolve();
-      }, function(err){
-        window._tripEndLat = window._lastKnownLat || window._tripStartLat;
-        window._tripEndLng = window._lastKnownLng || window._tripStartLng;
-        console.warn('[Trip END] getCurrentPosition failed, using lastKnown:', err && err.message);
-        resolve();
-      }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
-    } catch(e){ resolve(); }
-  });
-  _endCoordPromise.then(function(){
-  // Build 212: Save gate — any of (crow-flies, path-accumulated, user-stopped >60s with fixes).
-  var _approxTripMi=_liveMiApprox();           // crow-flies start→end × 1.15
-  var _pathMi=window._pathMi||0;                // accumulated per-fix haversine sum
-  var _tripDurationMs=Date.now()-trackStart-(_totalPauseMs||0);
-  var _tripDurSec=Math.floor(_tripDurationMs/1000);
-  var _hasPositions=(typeof positions!=='undefined'&&positions&&positions.length>2);
-  if(_approxTripMi>0.05&&_tMin>=5){var _kd=_matchKnownLocation(lastGpsLat,lastGpsLng);setTimeout(function(){_promptSmartSave(_kd);},1500);}
-  // Build 212: time-based fallback — if trip ran >60s with recorded positions, MUST save
-  // even if _pathMi is 0 (fixes the 2-hour-drive-saves-nothing bug when breadcrumb gate
-  // never fires due to accuracy rejection or slow native GPS bridge).
-  var _shouldSave=(_approxTripMi>0.01)||(_pathMi>0.01)||(_tripDurationMs>60000&&_hasPositions);
-  console.log('[B209] save gate:',{pathMi:_pathMi,durationSec:_tripDurSec,positions:positions?positions.length:0,approxMi:_approxTripMi,shouldSave:_shouldSave});
-  if(_shouldSave){
-    // Seed distance = best-available local estimate. Routes API overwrites this downstream
-    // in _getFinalMiles → finishSaveTrackedTrip. Haversine fallback still uses crow-flies.
-    var _seedMi=Math.max(_approxTripMi,_pathMi);
-    var _haversineMi=_seedMi;
-    var elapsed=Math.floor((Date.now()-trackStart)/60000);
-    var timeStr=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · '+elapsed+' min';
-    // Resolve BOTH start+end addresses in parallel with 5s total timeout
-    function _geocodeOne(lat,lng,label,fallback){
-      if(!lat||!lng)return Promise.resolve(fallback);
-      return fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&key='+_MAPS_KEY)
-        .then(function(r){return r.json();})
-        .then(function(data){
-          if(data.status==='OK'&&data.results&&data.results.length>0){
-            var types=['street_address','premise','route','intersection','neighborhood','sublocality','locality'];
-            var pick=null;
-            for(var ti=0;ti<types.length&&!pick;ti++){
-              for(var ri=0;ri<data.results.length;ri++){
-                if(data.results[ri].types.indexOf(types[ti])>-1){pick=data.results[ri];break;}
-              }
-            }
-            if(!pick)pick=data.results[0];
-            console.log('[GEOCODE '+label+']',pick.types.join(','),'—',pick.formatted_address);
-            return pick.formatted_address;
-          }
-          // Fallback: city+state from locality result if any
-          if(data.results&&data.results.length>0){
-            var loc=data.results.find(function(r){return r.types.indexOf('locality')>-1;});
-            if(loc)return loc.formatted_address;
-          }
-          return fallback;
-        })
-        .catch(function(){return fallback;});
-    }
-    function _resolveBothAddrs(callback){
-      // Build 212.5: use locals captured BEFORE clearTripState nulled globals.
-      var sLat=_savedStartLat||window._tripStartLat||(positions.length>0?positions[0].lat:null);
-      var sLng=_savedStartLng||window._tripStartLng||(positions.length>0?positions[0].lng:null);
-      var eLat=window._tripEndLat;
-      var eLng=window._tripEndLng;
-      var sFallback=sLat?'GPS ('+sLat.toFixed(4)+', '+sLng.toFixed(4)+')':'';
-      var eFallback=eLat?'GPS ('+eLat.toFixed(4)+', '+eLng.toFixed(4)+')':'';
-      var startP=(_startAddr&&_startAddr!=='Locating...')?Promise.resolve(_startAddr):_geocodeOne(sLat,sLng,'start',sFallback);
-      var endP=_geocodeOne(eLat,eLng,'end',eFallback);
-      var timeout=new Promise(function(res){setTimeout(function(){res('__timeout__');},5000);});
-      Promise.race([Promise.all([startP,endP]),timeout]).then(function(result){
-        if(result==='__timeout__'){
-          console.warn('[GEOCODE] Timeout 5s — using fallbacks');
-          callback(sFallback||'Unknown',eFallback||'Unknown');
-        } else {
-          callback(result[0]||sFallback,result[1]||eFallback);
-        }
-      });
-    }
-    // SMART END: window._tripEndLat/Lng was updated on every fix in onPos.
-    // Overlay with stationary-window best reading if available (higher accuracy).
-    var endPos=_getBestEndPosition();
-    if(endPos){window._tripEndLat=endPos.lat;window._tripEndLng=endPos.lng;}
-    else if(window._tripEndLat==null&&positions.length>0){
-      window._tripEndLat=positions[positions.length-1].lat;
-      window._tripEndLng=positions[positions.length-1].lng;
-    }
-    var _tripEndLat=window._tripEndLat;var _tripEndLng=window._tripEndLng;
-    // Build 177: store last known position for next trip start
-    if(_tripEndLat&&_tripEndLng){
-      try{localStorage.setItem('mmai_last_known_pos',JSON.stringify({
-        lat:_tripEndLat,lng:_tripEndLng,
-        accuracy:endPos?endPos.accuracy:20,ts:Date.now()
-      }));}catch(e){}
-    }
-    var toAddr='';
-    if(endPos){toAddr='GPS ('+endPos.lat.toFixed(4)+', '+endPos.lng.toFixed(4)+')';}
-
-    // Core save function — called after both road distance and geocoding resolve
-    function _doSave(finalMi,finalFromAddr,finalToAddr){
-      finalMi=parseFloat(finalMi.toFixed(2)); // round to 2 decimals
-      var finalDist=_useKm()?(finalMi*1.60934):finalMi;
-      _updateFreqLoc(endPos?endPos.lat:lastGpsLat,endPos?endPos.lng:lastGpsLng,finalToAddr);
-      var _sp=window._savedPositions||[];
-      if(_sp.length>0)_updateFreqLoc(_sp[0].lat,_sp[0].lng,_startAddr);
-      finishSaveTrackedTrip(finalFromAddr,finalToAddr,finalMi,timeStr,finalDist);
-    }
-
-    // Build 212: Thin async wrapper around _getFinalMiles utility.
-    // Emergency: if coords are missing, fall back to last-known before Routes call.
-    // Build 212 (MileIQ architecture): Routes API is the only source of saved miles.
-    async function _getDirectionsAndSave(fromA,toA){
-      showToast(_i('pin'),'Calculating road distance...',2000);
-      // Build 212.5: use captured locals — window globals were nulled by clearTripState earlier
-      var dist = await _getFinalMiles(_savedStartLat||window._tripStartLat, _savedStartLng||window._tripStartLng, window._tripEndLat, window._tripEndLng);
-      // Handle error returns from _getFinalMiles (no_movement, missing_coords, routes_failed)
-      if(dist.error === 'no_movement' || dist.error === 'missing_coords'){
-        showToast(_i('warn'),'Trip too short — not saved',3000);
-        console.warn('[Save] discarded — ', dist.error);
-        return;
+      var _lastP = snap.positions.length>0 ? snap.positions[snap.positions.length-1] : null;
+      var _approxMi = (snap.startLat!=null && _lastP)
+        ? haversine(snap.startLat, snap.startLng, _lastP.lat, _lastP.lng) * 1.15
+        : 0;
+      var _tMin = (snap.endTs - snap.startTs) / 60000;
+      if(_approxMi > 0.05 && _tMin >= 5 && typeof _promptSmartSave === 'function'){
+        var _kd = (typeof _matchKnownLocation === 'function') ? _matchKnownLocation(lastGpsLat, lastGpsLng) : null;
+        setTimeout(function(){ _promptSmartSave(_kd); }, 1500);
       }
-      // Routes API succeeded → save with real road miles
-      if(dist.miles != null){
-        window._tripEstimated = false;
-        window._tripSource = dist.source;
-        _doSave(dist.miles, fromA, toA);
-        return;
-      }
-      // Routes API failed 3× (routes_api_pending) — still save the trip with
-      // miles=0 so the row exists in Supabase with start/end coords. The
-      // existing retry loop in _syncWithSupabase will re-run Routes later.
-      console.warn('[Save] Routes API unavailable — saving with miles=0 for later retry');
-      window._tripEstimated = true;
-      window._tripSource = 'routes_api_pending';
-      _doSave(0, fromA, toA);
-    }
+    } catch(e){}
 
-    // Kick off: resolve BOTH addresses in parallel → Routes API → save
-    _resolveBothAddrs(function(resolvedFrom,resolvedTo){
-      _getDirectionsAndSave(resolvedFrom,resolvedTo).catch(function(e){
-        console.error('[Save] _getDirectionsAndSave error:', e && e.message);
-      });
-    });
+    // Step 3: capture end coord into frozen snapExt.
+    var snapExt = await _captureEndCoord(snap);
 
-  } else {
-    showToast(_i('warn'),'No distance recorded — trip not saved',3000);
-  }
-  // Build 150: reset accumulators AFTER save block has captured values into closures.
-  liveDist=0; positions=[]; window._lastTripPersist=0;
-  }); // end _endCoordPromise.then (Build 212)
-  } catch(e) {
+    // Step 4: durable save — queue-first, upsert best-effort.
+    await _savePath(snap, snapExt);
+
+    // Step 5: clear-late — queue is durable, safe to nuke state now.
+    clearTripState();
+    liveDist = 0; positions = []; window._lastTripPersist = 0;
+  } catch(e){
     console.error('[stopTracking] error:', e);
   } finally {
     window.__stopLock = false;
   }
-}
-var _gpsTrioSaved=false;
-function finishSaveTrackedTrip(fromAddr,toAddr,mi,timeStr,dist){
-  console.log('[finishSaveTrackedTrip] called — mi=',mi,'from=',fromAddr,'to=',toAddr,'startLat=',window._tripStartLat,'endLat=',window._tripEndLat);
-  // Emergency coord guard: if any trip coord is null, fall back to last-known GPS
-  // so downstream consumers (map polyline, Routes retry loop, _buildTripRow) never see null.
-  if(!window._tripStartLat||!window._tripStartLng||!window._tripEndLat||!window._tripEndLng){
-    console.error('[finishSaveTrackedTrip] missing coords — filling from lastKnown',
-      window._tripStartLat,window._tripStartLng,window._tripEndLat,window._tripEndLng);
-    window._tripStartLat = window._tripStartLat || window._lastKnownLat || lastGpsLat || null;
-    window._tripStartLng = window._tripStartLng || window._lastKnownLng || lastGpsLng || null;
-    window._tripEndLat   = window._tripEndLat   || window._lastKnownLat || lastGpsLat || null;
-    window._tripEndLng   = window._tripEndLng   || window._lastKnownLng || lastGpsLng || null;
-  }
-  var _snapPos=[];
-  var _ps=(window._savedPositions&&window._savedPositions.length>=1)?window._savedPositions:positions;
-  if(_ps&&_ps.length>=2){var _st=Math.max(1,Math.floor(_ps.length/80));for(var _pi=0;_pi<_ps.length;_pi+=_st)_snapPos.push({lat:_ps[_pi].lat,lng:_ps[_pi].lng});if(_snapPos[_snapPos.length-1]!==_ps[_ps.length-1])_snapPos.push({lat:_ps[_ps.length-1].lat,lng:_ps[_ps.length-1].lng});}
-  if(_gpsTrioSaved)return;
-  _gpsTrioSaved=true;
-  // Duplicate prevention: reject if a trip with same from/to was saved in last 60s
-  var now=Date.now();
-  for(var dp=0;dp<Math.min(TRIPS.length,3);dp++){
-    if(TRIPS[dp].from===fromAddr&&TRIPS[dp].to===toAddr&&(now-TRIPS[dp].ts)<60000){
-      _gpsTrioSaved=false;return;
-    }
-  }
-  var newId=TRIPS.length?Math.max.apply(null,TRIPS.map(function(x){return x.id;}))+1:1;
-  var newTripId=_genTripId();
-  var type='uncl';
-  var freq=getFreqRouteType(fromAddr,toAddr);
-  if(freq)type=freq;
-  else if(isWorkHours())type='biz';
-  var _gpsVehId=(function(){
-    try{var lu=localStorage.getItem('mymilesai_last_vehicle');if(lu&&_vehicles.find(function(v){return v.id===lu;}))return lu;}catch(e){}
-    return _getDefaultVehicleId();
-  })();
-  var _elapsedPart=timeStr.indexOf('\u00b7')>=0?timeStr.substring(timeStr.indexOf('\u00b7')):(elapsed+' min');
-  // Build 206: reuse the session UID so parallel finishSaveTrackedTrip calls
-  // (e.g. auto-stop race + user tap) upsert to the same row via
-  // onConflict:'trip_uid' instead of minting distinct rows.
-  var _newUid = window._currentTripUid || _genTripId();
-  TRIPS.unshift({trip_uid:_newUid,synced:false,estimated:!!window._tripEstimated,source:window._tripSource||'routes_api',tripId:newTripId,id:newId,positions:_snapPos,from:fromAddr,to:toAddr,mi:mi,type:type,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+_elapsedPart,day:'Today',date:_fmt(new Date()),ts:Date.now(),ded:!!CAT_DEDUCTIBLE[type],purpose:'',notes:'',path:randomPath(),vehicleId:_gpsVehId,startLat:window._tripStartLat||null,startLng:window._tripStartLng||null,endLat:window._tripEndLat||null,endLng:window._tripEndLng||null});
-  window._tripEstimated=false;
-  window._tripSource=null;
-  try{if(_gpsVehId)localStorage.setItem('mymilesai_last_vehicle',_gpsVehId);}catch(e){}
-  if(type!=='uncl')checkFrequentRoute(TRIPS[0]);
-  // Update frequent location memory from GPS coordinates so Named Places populate automatically
-  if(_lastGoodPos){
-    _updateFreqLoc(_lastGoodPos.lat,_lastGoodPos.lng,toAddr);
-  }
-  // Build 150: use preserved snapshot (positions[] is cleared at end of stopTracking)
-  if(_ps&&_ps.length>0){
-    var _startPos=_ps[0];
-    _updateFreqLoc(_startPos.lat,_startPos.lng,fromAddr);
-  }
-  renderTrips();renderAlerts();saveTripsToStorage();
-  /* Build 186: save-local-first — queue first, then attempt upsert.
-     If sync is in progress, defer the upsert ~1.5s to avoid racing STEP 4 merge. */
-  (function(){
-    var _t=TRIPS[0];
-    if(!_sb||!_sb.auth)return;
-    _sb.auth.getUser().then(function(r){
-      var u=(r&&r.data&&r.data.user)||window._currentUser;
-      if(!u||!u.id){console.warn('[TripSave] no user — kept in pending queue');return;}
-      var row=_buildTripRow(_t,u.id);
-      _queueTrip(row);
-      console.log('[TripSave] queued trip_uid',row.trip_uid,'— attempting upsert');
-      var _doUpsert=function(){
-        _sb.from('trips').upsert(row,{onConflict:'trip_uid'}).then(function(res){
-          if(res.error){
-            console.error('[TripSave] upsert error:',JSON.stringify(res.error),'row:',JSON.stringify(row));
-            if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
-          } else {
-            _dequeueTrip(row.trip_uid);
-            _t.synced=true;
-            // Build 206: clear session UID only on confirmed success so a
-            // failed first upsert doesn't orphan the UID; retries still
-            // share it and collapse via onConflict.
-            window._currentTripUid = null;
-            saveTripsToStorage();
-            renderTrips();
-            if(window._currentUser&&window._currentUser.id){_syncWithSupabase(window._currentUser.id);}
-            console.log('[TripSave] ✓ synced trip_uid',row.trip_uid);
-            // Build 212: fire-and-forget AI prediction (never blocks save)
-            if(typeof _predictTripPurpose==='function'){
-              _predictTripPurpose({
-                tripId:   _t.trip_uid,
-                miles:    _t.mi,
-                fromAddr: _t.from_addr||_t.from||'',
-                toAddr:   _t.to_addr||_t.to||'',
-                endLat:   _t.endLat,
-                endLng:   _t.endLng,
-                tripDate: new Date(_t.ts||Date.now()).toISOString()
-              }).catch(function(e){console.warn('[predict-trip] fire-forget err:',e&&e.message);});
-            }
-          }
-        }).catch(function(e){
-          console.error('[TripSave] upsert catch:',e&&e.message);
-          if(!navigator.onLine)showToast(_i('warn'),'Trip saved locally — will sync when connected');
-        });
-      };
-      if(window._syncInProgress){console.log('[TripSave] sync in progress — deferring upsert 1500ms');setTimeout(_doUpsert,1500);}
-      else{_doUpsert();}
-    }).catch(function(e){console.error('[TripSave] auth catch:',e&&e.message);});
-  })();
-  showToast(_i('ccheck'),'Trip saved! '+dist.toFixed(1)+' '+LOC.label+' recorded.');
-  /* AI trip categorization (fire and forget) */
-  (function(){var _t=TRIPS[0];if(!_t||!_t.from||!_t.to||_t.type!=='uncl')return;fetch('https://mymilesai-ai.harijasllc.workers.dev/categorize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:_t.from,to:_t.to,time:_t.time,day:new Date().toLocaleDateString('en-US',{weekday:'long'}),history:TRIPS.slice(1,6).map(function(t){return{from:t.from,to:t.to,type:t.type};})})}).then(function(r){return r.json();}).then(function(data){if(data.type&&data.confidence>0.8&&_t.type==='uncl'){_t.type=data.type;_t.ded=!!CAT_DEDUCTIBLE[data.type];saveTripsToStorage();renderTrips();showToast(_i('user'),'AI: '+CAT_LABELS[data.type]+' ('+Math.round(data.confidence*100)+'%)',3000);}}).catch(function(){});})();
-  /* Ask for push permission after first trip — once only */
-  if(!window.__MYMILESAI_NATIVE__&&'Notification' in window&&Notification.permission==='default'&&TRIPS.length===1){
-    setTimeout(function(){Notification.requestPermission().then(function(perm){if(perm==='granted'){console.log('[MMAI] Push permission granted');try{localStorage.setItem('mmai_push_granted','1');}catch(e){}/* VAPID push subscription */if('serviceWorker' in navigator){navigator.serviceWorker.ready.then(function(reg){fetch('https://mymilesai-ai.harijasllc.workers.dev/vapid-public-key').then(function(r){return r.json();}).then(function(data){if(!data.publicKey)return;var rawKey=atob(data.publicKey.replace(/-/g,'+').replace(/_/g,'/'));var keyArray=new Uint8Array(rawKey.length);for(var i=0;i<rawKey.length;i++)keyArray[i]=rawKey.charCodeAt(i);return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:keyArray});}).then(function(sub){if(!sub)return;return fetch('https://mymilesai-ai.harijasllc.workers.dev/push-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub})});}).then(function(){try{localStorage.setItem('mmai_push_subscribed','1');}catch(e){}}).catch(function(e){console.warn('[MMAI] Push subscribe error:',e.message);});});}}}).catch(function(){});},3000);
-  }
-  recordTripEnd();
-  // Always ask user to confirm trip type after every trip
-  setTimeout(function(){showClassifyPrompt(newId,fromAddr,toAddr,dist,type);},800);
-  _gpsTrioSaved=false;
-  // TEMP DIAGNOSTIC (remove after regression triaged):
-  console.log('[finishSaveTrackedTrip END] positions.length=',positions.length,
-    'liveDist=',liveDist,'(was totalDist in B186)',
-    '_tripStartLat=',window._tripStartLat,'_tripStartLng=',window._tripStartLng,
-    '_tripEndLat=',window._tripEndLat,'_tripEndLng=',window._tripEndLng);
-  // Build 176: unsynced trips retried via _syncWithSupabase on next foreground
 }
 var _classifyCountdown=null;
 function showClassifyPrompt(tripId,from,to,dist,autoType){
@@ -7806,11 +7916,21 @@ function _doRestoreFromState(state){
     window._restoringTrip=true;
     liveDist=savedDist;
     trackStart=savedStart;
-    // Build 212: restore trip coords so live display + Routes API at end work
+    // Build 212: restore trip coords so live display + Routes API at end work.
+    // Build 213: also restore tripUid, pathMi, totalPauseMs, positions.
+    //   Preserves pre-crash session UID so resumed trip upserts to the same row,
+    //   preventing double-insert. startTracking's UID guard (window._currentTripUid ||
+    //   _genTripId()) keeps this assignment intact.
     window._tripStartLat=state.startLat||null;
     window._tripStartLng=state.startLng||null;
     window._tripEndLat=state.lastLat||state.startLat||null;
     window._tripEndLng=state.lastLng||state.startLng||null;
+    window._currentTripUid = state.tripUid || _genTripId();
+    window._pathMi = state.pathMi || 0;
+    _totalPauseMs = state.totalPauseMs || 0;
+    if(state.positions && Array.isArray(state.positions) && state.positions.length>0){
+      positions = state.positions.slice();
+    }
     if(!tracking)startTracking();
     liveDist=savedDist;
     trackStart=savedStart;
