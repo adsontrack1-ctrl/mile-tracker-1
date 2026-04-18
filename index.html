@@ -5882,6 +5882,7 @@ function updateAutoBtn(){
 var SAVE_FAIL = Object.freeze({
   MISSING_COORDS:   'MISSING_COORDS',    // drop — no queue, no row (coords unrecoverable)
   MISSING_DISTANCE: 'MISSING_DISTANCE',  // enqueue w/ haversine fallback; Routes retry overlays later
+  NO_MOVEMENT:      'NO_MOVEMENT',       // drop — phantom trip (stale coords used as both start and end)
   MISSING_USER:     'MISSING_USER',      // drop (auth missing — user must re-authenticate)
   NETWORK:          'NETWORK',           // enqueue — queue flush will retry
   DB_ERROR:         'DB_ERROR',          // enqueue w/ backoff
@@ -6025,6 +6026,7 @@ function _recordSaveOutcome(snap, code){
   switch(code){
     case SAVE_FAIL.TOO_SHORT:       showToast(_i('warn'), 'Trip too short — not saved', 3000); return;
     case SAVE_FAIL.MISSING_COORDS:  showToast(_i('warn'), 'Trip lost — GPS unavailable', 3000); return;
+    case SAVE_FAIL.NO_MOVEMENT:     showToast(_i('warn'), 'Trip not saved — no movement detected', 3000); return;
     case SAVE_FAIL.MISSING_USER:    showToast(_i('warn'), 'Sign in to save trips', 3000); return;
     case SAVE_FAIL.NETWORK:         showToast(_i('warn'), 'Saved — will sync when connected', 3000); return;
     case SAVE_FAIL.DB_ERROR:        showToast(_i('warn'), 'Saved locally — server rejected', 3000); return;
@@ -6170,6 +6172,29 @@ async function _savePath(snap, snapExt){
   var tripObj = _buildLocalTripObj(snap, snapExt, miles, source, from, to);
   var row = _buildTripRow(tripObj, snap.userId);
   if(!row){ return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_COORDS); }
+
+  /*
+   * NO_MOVEMENT gate tradeoff:
+   * Rejects trips where start/end coords are identical to float
+   * precision (phantom trips caused by stale cache coords).
+   * Phantom false-positive = common in production (observed 2026-04-18).
+   * Legitimate identical-coord-lock = rare; GPS noise makes back-to-back
+   * identical fresh fixes near-impossible on real devices.
+   * Accept rare false-rejects to block frequent false-accepts.
+   * If a user reports "my real trip didn't save," check console for
+   * [SAVE] NO_MOVEMENT. Loosening the gate to coord delta > 5m is
+   * the escape hatch.
+   */
+  if(snap.startLat === snapExt.endLat && snap.startLng === snapExt.endLng){
+    console.warn('[SAVE] NO_MOVEMENT — start == end coords; rejecting');
+    return _recordSaveOutcome(snap, SAVE_FAIL.NO_MOVEMENT);
+  }
+  // Haversine returns miles (R=3958.8); × 1609.34 → meters.
+  var _crowM = haversine(snap.startLat, snap.startLng, snapExt.endLat, snapExt.endLng) * 1609.34;
+  if(_crowM < 10 && miles > 0.1){
+    console.warn('[SAVE] NO_MOVEMENT contradiction — coords ' + _crowM.toFixed(1) + 'm apart but miles=' + miles + '; rejecting');
+    return _recordSaveOutcome(snap, SAVE_FAIL.NO_MOVEMENT);
+  }
 
   // Durability boundary — queue row BEFORE upsert attempt.
   _queueTrip(row);
