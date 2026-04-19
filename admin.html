@@ -390,6 +390,10 @@ body { font-family: var(--font); background: var(--g6); color: var(--dk); height
         <div class="sb-dot" style="background:#64748b"></div>
         Trip Data
       </div>
+      <div class="sb-item" onclick="showPage('drivediag',this)">
+        <div class="sb-dot" style="background:#7c3aed"></div>
+        Drive Diagnostics
+      </div>
       <div class="sb-item" onclick="showPage('billing',this)">
         <div class="sb-dot" style="background:#16a34a"></div>
         Billing / Licenses
@@ -637,6 +641,56 @@ UPDATE trips SET deleted_at=NULL WHERE user_id='UUID';</div><div class="actions"
         </div>
       </div>
 
+      <!-- DRIVE DIAGNOSTICS -->
+      <div class="page" id="page-drivediag">
+        <div class="page-header">
+          <div class="page-title">Drive Diagnostics</div>
+          <div class="page-sub">Build 218 telemetry — cache-confirmation gate decisions per trip</div>
+        </div>
+
+        <!-- Date filter -->
+        <div class="lookup-form">
+          <input class="lookup-input" id="diag-date" type="date" onchange="loadDriveDiag()">
+          <button class="lookup-btn" onclick="loadDriveDiag()">Reload</button>
+        </div>
+
+        <!-- Summary stats -->
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Total Trips</div><div class="stat-val" id="dd-total">—</div></div>
+          <div class="stat-card"><div class="stat-label">Cache Confirmed</div><div class="stat-val green" id="dd-confirmed">—</div></div>
+          <div class="stat-card"><div class="stat-label">Cache Rejected</div><div class="stat-val blue" id="dd-rejected">—</div></div>
+          <div class="stat-card"><div class="stat-label">Cache Absent</div><div class="stat-val" id="dd-absent">—</div></div>
+        </div>
+
+        <!-- Trip table -->
+        <div class="sec-label">Trips with telemetry</div>
+        <div class="card">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>From → To</th>
+                <th>Miles</th>
+                <th>Cache State</th>
+                <th>Cache Dist</th>
+                <th>Cache Age</th>
+                <th>Fix Acc</th>
+                <th>Dist from 28000 CA-120</th>
+              </tr>
+            </thead>
+            <tbody id="drivediag-body">
+              <tr><td colspan="8" class="tbl-empty">Select a date and click Reload</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Detail drawer -->
+        <div class="result-card" id="diag-detail">
+          <div class="sec-label">Selected trip telemetry</div>
+          <div id="diag-detail-body"></div>
+        </div>
+      </div>
+
     </div><!-- /main -->
   </div><!-- /body -->
 </div><!-- /app -->
@@ -711,6 +765,8 @@ async function loadAllData() {
   loadTrips();
   loadBilling();
   loadHealth();
+  // Build 218: default the Drive Diagnostics date filter to today
+  document.getElementById('diag-date').value = new Date().toISOString().slice(0,10);
 }
 
 async function loadOverview() {
@@ -848,6 +904,122 @@ async function lookupUser() {
     document.getElementById('lookup-license-card').classList.add('show');
     document.getElementById('lookup-license-body').innerHTML = kvRows({ 'Status': license.status, 'Plan': license.plan||'—', 'Billing path': license.billing_path||'—', 'Trial end': fmtDate(license.trial_end)||'—', 'Device model': license.device_model||'—', 'Install date': fmtDate(license.install_date)||'—' });
   }
+}
+
+// ── DRIVE DIAGNOSTICS ──────────────────────────────────────
+// Reads trips.diag_start jsonb (populated by Build 218 at onPos first-fix).
+// Renders per-trip cacheState decisions + telemetry so validation drives can
+// be triaged visually instead of via raw SQL.
+
+// Reference points for distance calculation (known addresses)
+const DD_REFERENCE_POINTS = {
+  'Escalon firm (28000 CA-120)': { lat: 37.7949, lng: -120.9312 },
+  'Home (1348 Tannehill Dr)':    { lat: 37.7688, lng: -121.1941 },
+  'Office (2050 W Woodward Ave)': { lat: 37.7756, lng: -121.2498 }
+};
+
+function haversineMiles(lat1, lng1, lat2, lng2) {
+  if (lat1 == null || lat2 == null) return null;
+  const R = 3958.8;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+            Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+async function loadDriveDiag() {
+  const dateInput = document.getElementById('diag-date');
+  const date = dateInput.value || new Date().toISOString().slice(0,10);
+  dateInput.value = date;
+
+  const { data, error } = await sb.from('trips')
+    .select('trip_uid, miles, from_addr, to_addr, trip_time, start_lat, start_lng, diag_start, created_at')
+    .eq('trip_date', date)
+    .order('created_at', { ascending: true });
+
+  if (error) { toast('Load failed: ' + error.message, 'error'); return; }
+
+  // Summary counts
+  const total = data?.length ?? 0;
+  let confirmed = 0, rejected = 0, absent = 0, noTelemetry = 0;
+  data?.forEach(t => {
+    const cs = t.diag_start?.cacheState;
+    if (cs === 'confirmed') confirmed++;
+    else if (cs === 'rejected') rejected++;
+    else if (cs === 'absent') absent++;
+    else noTelemetry++;
+  });
+  document.getElementById('dd-total').textContent = total;
+  document.getElementById('dd-confirmed').textContent = confirmed;
+  document.getElementById('dd-rejected').textContent = rejected;
+  document.getElementById('dd-absent').textContent = absent;
+
+  // Render table
+  const tbody = document.getElementById('drivediag-body');
+  if (!total) {
+    tbody.innerHTML = '<tr><td colspan="8" class="tbl-empty">No trips for this date</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(t => {
+    const ds = t.diag_start;
+    const cs = ds?.cacheState;
+    const badgeClass = cs === 'confirmed' ? 'badge-green' :
+                       cs === 'rejected'  ? 'badge-blue'  :
+                       cs === 'absent'    ? 'badge-gray'  : 'badge-gray';
+    const badge = cs ? `<span class="badge ${badgeClass}">${cs}</span>` : '<span class="badge badge-gray">none</span>';
+
+    // Suspicious: confirmed but distance is large (>100m likely means cache was stale)
+    const suspicious = (cs === 'confirmed' && ds?.cacheDistM > 100);
+    const rowStyle = suspicious ? ' style="background:var(--red-pale)"' : '';
+
+    const distToEscalon = haversineMiles(
+      t.start_lat, t.start_lng,
+      DD_REFERENCE_POINTS['Escalon firm (28000 CA-120)'].lat,
+      DD_REFERENCE_POINTS['Escalon firm (28000 CA-120)'].lng
+    );
+
+    const fromShort = (t.from_addr || '').split(',')[0];
+    const toShort   = (t.to_addr   || '').split(',')[0];
+
+    return `<tr${rowStyle} onclick='showDiagDetail(${JSON.stringify(t).replace(/'/g,"&#39;")})' style="cursor:pointer">
+      <td>${esc(t.trip_time || '—')}</td>
+      <td>${esc(fromShort)} → ${esc(toShort)}</td>
+      <td>${t.miles}</td>
+      <td>${badge}</td>
+      <td>${ds?.cacheDistM != null ? ds.cacheDistM.toFixed(1) + 'm' : '—'}</td>
+      <td>${ds?.cacheAgeMin != null ? ds.cacheAgeMin.toFixed(1) + 'min' : '—'}</td>
+      <td>${ds?.firstFixAccuracy != null ? ds.firstFixAccuracy.toFixed(1) + 'm' : '—'}</td>
+      <td>${distToEscalon != null ? distToEscalon.toFixed(2) + ' mi' : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function showDiagDetail(trip) {
+  const card = document.getElementById('diag-detail');
+  const body = document.getElementById('diag-detail-body');
+  card.classList.add('show');
+
+  const ds = trip.diag_start || {};
+  const rows = {
+    'Trip UID': trip.trip_uid,
+    'Cache State': ds.cacheState || '(no telemetry)',
+    'Build Version': ds.buildVer || '—',
+    'Cache Distance': ds.cacheDistM != null ? ds.cacheDistM.toFixed(2) + 'm' : '—',
+    'Cache Age': ds.cacheAgeMin != null ? ds.cacheAgeMin.toFixed(2) + 'min' : '—',
+    'First Fix Accuracy': ds.firstFixAccuracy != null ? ds.firstFixAccuracy.toFixed(2) + 'm' : '—',
+    'Seed Lat/Lng': ds.seedLat != null ? `${ds.seedLat.toFixed(6)}, ${ds.seedLng.toFixed(6)}` : '—',
+    'Cache Lat/Lng': ds.cacheLat != null ? `${ds.cacheLat.toFixed(6)}, ${ds.cacheLng.toFixed(6)}` : '—',
+    'First Fix Lat/Lng': ds.firstFixLat != null ? `${ds.firstFixLat.toFixed(6)}, ${ds.firstFixLng.toFixed(6)}` : '—',
+    'Final Start (saved)': `${trip.start_lat}, ${trip.start_lng}`,
+    'From Address': trip.from_addr,
+    'To Address': trip.to_addr,
+    'Miles': trip.miles
+  };
+
+  body.innerHTML = kvRows(rows);
 }
 
 // ── HELPERS ───────────────────────────────────────────
