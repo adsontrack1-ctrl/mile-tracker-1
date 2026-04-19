@@ -6303,17 +6303,27 @@ async function _savePath(snap, snapExt){
    * identical fresh fixes near-impossible on real devices.
    * Accept rare false-rejects to block frequent false-accepts.
    * If a user reports "my real trip didn't save," check console for
-   * [SAVE] NO_MOVEMENT. Loosening the gate to coord delta > 5m is
-   * the escape hatch.
+   * [SAVE] NO_MOVEMENT. Build 216: tightened both gates. Gate 1 uses
+   * haversine<1m instead of bit-exact ===. Gate 2 drops miles conjunct
+   * (reject on crow<10m alone). Loosening escape hatch: raise Gate 1
+   * to 5m if legitimate start==end trips are rejected in production.
    */
-  if(snap.startLat === snapExt.endLat && snap.startLng === snapExt.endLng){
-    console.warn('[SAVE] NO_MOVEMENT — start == end coords; rejecting');
+  // Gate 1 (Build 216 hardening): sub-meter distance instead of bit-exact ===.
+  // Closes cache-vs-fresh-GPS float divergence hole documented in phantom
+  // post-mortem for trip f935cf9c (2026-04-18). start from localStorage
+  // cache and end from fresh GPS differ in low-order bits even at the same
+  // physical location.
+  var _gate1M = haversine(snap.startLat, snap.startLng, snapExt.endLat, snapExt.endLng) * 1609.34;
+  if(_gate1M < 1.0){
+    console.warn('[SAVE] NO_MOVEMENT — start/end ' + _gate1M.toFixed(3) + 'm apart; rejecting');
     return _recordSaveOutcome(snap, SAVE_FAIL.NO_MOVEMENT);
   }
-  // Haversine returns miles (R=3958.8); × 1609.34 → meters.
+  // Gate 2 (Build 216 hardening): reject when crow distance < 10m regardless
+  // of miles value. Prior `miles > 0.1` conjunct made gate useless when
+  // Routes API returned pending + haversine fallback rounded to 0.
   var _crowM = haversine(snap.startLat, snap.startLng, snapExt.endLat, snapExt.endLng) * 1609.34;
-  if(_crowM < 10 && miles > 0.1){
-    console.warn('[SAVE] NO_MOVEMENT contradiction — coords ' + _crowM.toFixed(1) + 'm apart but miles=' + miles + '; rejecting');
+  if(_crowM < 10){
+    console.warn('[SAVE] NO_MOVEMENT — ' + _crowM.toFixed(1) + 'm crow distance; miles=' + miles + '; rejecting');
     return _recordSaveOutcome(snap, SAVE_FAIL.NO_MOVEMENT);
   }
 
