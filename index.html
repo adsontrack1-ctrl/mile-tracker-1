@@ -4501,7 +4501,11 @@ function _buildTripRow(t, userId){
     // pre-fix behavior for those paths). Dead sbSaveTrip path at L4509
     // is unaffected — it's unreachable and will be addressed when App.js
     // SDK wiring designs the native trip-save contract.
-    positions: Array.isArray(t.positions) ? t.positions : null
+    positions: Array.isArray(t.positions) ? t.positions : null,
+    // Build 218: diagnostic telemetry for post-drive analysis of start-coord
+    // capture. Written at onPos first-fix branch (cache confirmed/rejected/
+    // absent). jsonb column in Supabase trips table.
+    diag_start: window._diagStart || null
   };
   console.log('[_buildTripRow] trip_uid in payload:',row.trip_uid);
   return row;
@@ -5574,18 +5578,69 @@ function onPos(p){
     // intermediate point during a long stationary period with GPS drift).
     // Gate: fresh fix must be ≤10m from cache AND accuracy ≤30m. Otherwise
     // fall through to buffer path (commit fresh GPS when ≤20m available).
+    // Build 218: local flag for cacheState telemetry in the absent path below.
+    var _diagStartWritten = false;
     if(lastKnown && distM < 10 && accuracy <= 30){
       window._tripStartLat=lastKnown.lat;
       window._tripStartLng=lastKnown.lng;
       window._tripStartAccuracy=lastKnown.accuracy||accuracy;
       window._tripStartBuffer=null;
       console.log('[TripStart] Cache confirmed by fresh fix (' + distM.toFixed(1) + 'm, acc=' + accuracy.toFixed(1) + 'm)');
+      // Build 218: telemetry
+      window._diagStart = {
+        buildVer: 218,
+        cacheState: 'confirmed',
+        cacheDistM: +distM.toFixed(1),
+        cacheAgeMin: +ageMin.toFixed(1),
+        firstFixAccuracy: +accuracy.toFixed(1),
+        seedLat: window._lastKnownLat,
+        seedLng: window._lastKnownLng,
+        cacheLat: lastKnown.lat,
+        cacheLng: lastKnown.lng,
+        firstFixLat: lat,
+        firstFixLng: lng,
+        ts: Date.now()
+      };
+      _diagStartWritten = true;
     } else if(lastKnown){
       // Cache existed but fresh fix disagreed — log for diagnosis
       console.log('[TripStart] Cache REJECTED — distM=' + distM.toFixed(1) + 'm, acc=' + accuracy.toFixed(1) + 'm; falling through to buffer');
+      // Build 218: telemetry — capture cache coords BEFORE nulling lastKnown
+      window._diagStart = {
+        buildVer: 218,
+        cacheState: 'rejected',
+        cacheDistM: +distM.toFixed(1),
+        cacheAgeMin: +ageMin.toFixed(1),
+        firstFixAccuracy: +accuracy.toFixed(1),
+        seedLat: window._lastKnownLat,
+        seedLng: window._lastKnownLng,
+        cacheLat: lastKnown.lat,
+        cacheLng: lastKnown.lng,
+        firstFixLat: lat,
+        firstFixLng: lng,
+        ts: Date.now()
+      };
+      _diagStartWritten = true;
       lastKnown = null; // fall through to buffer path below
     }
     if(!lastKnown){
+      // Build 218: telemetry for cache-absent case (only if no prior branch wrote _diagStart)
+      if(!_diagStartWritten){
+        window._diagStart = {
+          buildVer: 218,
+          cacheState: 'absent',
+          cacheDistM: null,
+          cacheAgeMin: null,
+          firstFixAccuracy: +accuracy.toFixed(1),
+          seedLat: window._lastKnownLat,
+          seedLng: window._lastKnownLng,
+          cacheLat: null,
+          cacheLng: null,
+          firstFixLat: lat,
+          firstFixLng: lng,
+          ts: Date.now()
+        };
+      }
       // Start-coord buffer: commit first ≤20m reading, else best of 10 positions / 30s
       window._tripStartLat=null;window._tripStartLng=null;
       window._tripStartAccuracy=999;
@@ -6366,6 +6421,7 @@ async function _savePath(snap, snapExt){
       var t = TRIPS.find(function(x){ return x.trip_uid === row.trip_uid; });
       if(t){ t.synced = true; t.source = source; }
       window._currentTripUid = null;
+      window._diagStart = null; // Build 218: clear telemetry after successful upsert
       saveTripsToStorage();
       renderTrips();
       if(window._currentUser && window._currentUser.id) _syncWithSupabase(window._currentUser.id);
