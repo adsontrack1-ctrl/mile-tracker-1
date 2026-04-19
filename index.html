@@ -5566,11 +5566,26 @@ function onPos(p){
         }
       }
     }catch(e){}
-    if(lastKnown){
-      window._tripStartLat=lastKnown.lat;window._tripStartLng=lastKnown.lng;
+    // Build 217: confirmation gate — only trust cache if fresh fix agrees.
+    // Prior logic blindly trusted mmai_last_known_pos when <30min/<200m,
+    // which caused phantom trips (start bit-exact == prior trip's end)
+    // and wrong-start-coord bugs (trip 4ece6dc4 Escalon: start captured
+    // 3mi from actual parked location because cached coord was from an
+    // intermediate point during a long stationary period with GPS drift).
+    // Gate: fresh fix must be ≤10m from cache AND accuracy ≤30m. Otherwise
+    // fall through to buffer path (commit fresh GPS when ≤20m available).
+    if(lastKnown && distM < 10 && accuracy <= 30){
+      window._tripStartLat=lastKnown.lat;
+      window._tripStartLng=lastKnown.lng;
       window._tripStartAccuracy=lastKnown.accuracy||accuracy;
       window._tripStartBuffer=null;
-    } else {
+      console.log('[TripStart] Cache confirmed by fresh fix (' + distM.toFixed(1) + 'm, acc=' + accuracy.toFixed(1) + 'm)');
+    } else if(lastKnown){
+      // Cache existed but fresh fix disagreed — log for diagnosis
+      console.log('[TripStart] Cache REJECTED — distM=' + distM.toFixed(1) + 'm, acc=' + accuracy.toFixed(1) + 'm; falling through to buffer');
+      lastKnown = null; // fall through to buffer path below
+    }
+    if(!lastKnown){
       // Start-coord buffer: commit first ≤20m reading, else best of 10 positions / 30s
       window._tripStartLat=null;window._tripStartLng=null;
       window._tripStartAccuracy=999;
