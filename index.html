@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 222 -->
+<!-- Build 223 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 222</title>
+<title>MyMilesAI — Build 223</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -891,6 +891,11 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     <div class="set-hdr">My Vehicles</div>
     <div class="set" id="vehiclesList"></div>
     <button onclick="_openAddVehicle()" style="margin:0 0 16px 0;width:100%;padding:12px;border-radius:12px;background:var(--vi-s);color:var(--vi);font-weight:700;font-size:14px;border:1.5px dashed var(--vi);cursor:pointer;">+ Add Vehicle</button>
+    <div class="set-hdr">My Locations</div>
+    <div class="set" id="myLocationsList"></div>
+    <button onclick="_saveCurrentLocAs('Home')" style="margin:6px 0 0 0;width:100%;padding:12px;border-radius:12px;background:var(--vi-s);color:var(--vi);font-weight:700;font-size:14px;border:1.5px dashed var(--vi);cursor:pointer;">🏠 Save Current Location as Home</button>
+    <button onclick="_saveCurrentLocAs('Work')" style="margin:6px 0 0 0;width:100%;padding:12px;border-radius:12px;background:var(--vi-s);color:var(--vi);font-weight:700;font-size:14px;border:1.5px dashed var(--vi);cursor:pointer;">💼 Save Current Location as Work</button>
+    <button onclick="_addCustomLoc()" style="margin:6px 0 16px 0;width:100%;padding:12px;border-radius:12px;background:var(--vi-s);color:var(--vi);font-weight:700;font-size:14px;border:1.5px dashed var(--vi);cursor:pointer;">+ Add Custom Label</button>
     <div class="set-hdr">Tracking</div>
     <div class="set">
       <div class="sr"><div><h4>Auto-detect trips</h4><p id="autoDetectDesc">Start recording when driving</p></div><div class="tgl on" id="autoDetectTgl" onclick="toggleAutoDetect(this)"></div></div>
@@ -947,7 +952,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 222</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 223</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -2146,6 +2151,23 @@ async function ensureProfile(user){
           .catch(function(){});
       }
     }catch(e){}
+    // Build 223 Commit 1: merge profiles.named_locations → _freqLocs.
+    // Rule: local label wins (user may have edited on this device);
+    //       unlabeled local cluster adopts Supabase label; no local match → push.
+    //       No write-back (avoids sync loops — writes go through _saveNamedLocation).
+    try {
+      if (profile && Array.isArray(profile.named_locations)) {
+        profile.named_locations.forEach(function(nl){
+          if (!nl || !nl.label || nl.lat == null || nl.lng == null) return;
+          var local = _findFreqLoc(nl.lat, nl.lng);
+          if (local && !local.label) local.label = nl.label;
+          else if (!local) _freqLocs.push({ lat: nl.lat, lng: nl.lng, address: nl.address || '', label: nl.label, count: nl.count || 1, lastUsed: nl.lastUsed || Date.now() });
+        });
+        _saveFreqLocs();
+        if (typeof renderFreqLocChips === 'function') renderFreqLocChips();
+        if (typeof _renderMyLocations === 'function') _renderMyLocations();
+      }
+    } catch(e) { console.warn('[NamedLoc] Merge failed', e && e.message); }
     if(profile&&profile.name){
       try{localStorage.setItem('mymilesai_name',profile.name);}catch(e){}
       // Update header with real name and avatar initial
@@ -5040,6 +5062,7 @@ function _saveNamedLocation(){
     }catch(e){}
   }
   if(typeof renderFreqLocChips==='function')renderFreqLocChips();
+  if(typeof _renderMyLocations==='function')_renderMyLocations();
   showToast(_i('pin'),'Location saved as "'+n+'"',2500);
   var ov2=document.querySelector('.modal-overlay.show');
   if(ov2&&ov2.querySelector('#freqLocName'))ov2.remove();
@@ -5048,6 +5071,97 @@ function _skipNamedLocation(){
   var ov=document.querySelector('.modal-overlay.show');
   if(ov&&ov.querySelector('#freqLocName'))ov.remove();
 }
+
+/* Build 223 Commit 2: My Locations UI — one-tap Home/Work save */
+function _saveCurrentLocAs(label) {
+  if (!label) return;
+  _safeGetCurrentPosition(function(pos){
+    var acc = pos.coords.accuracy || 999;
+    var lat = pos.coords.latitude;
+    var lng = pos.coords.longitude;
+    if (acc > 50) {
+      if (!confirm('GPS signal is weak (' + Math.round(acc) + 'm accuracy). Move outdoors for better accuracy. Save anyway?')) return;
+    }
+    _freqLocs = _freqLocs.filter(function(fl){ return fl.label !== label; });
+    _freqLocs.push({ lat: lat, lng: lng, address: '', label: label, count: 999, lastUsed: Date.now() });
+    _saveFreqLocs();
+    try {
+      if (window._sb && window.currentUser && currentUser.id) {
+        _sb.from('profiles').update({ named_locations: _freqLocs.filter(function(x){ return x.label; }) }).eq('id', currentUser.id).then(function(){}, function(e){ console.warn('[MyLoc] sync failed', e); });
+      }
+    } catch(e) { console.warn('[MyLoc] sync exception', e); }
+    _renderMyLocations();
+    if (typeof renderFreqLocChips === 'function') renderFreqLocChips();
+    try { showToast('📍', 'Saved "' + label + '" location', 2500); } catch(e) {}
+    if (typeof _geocodeOne === 'function') {
+      _geocodeOne(lat, lng, label, 'GPS (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')').then(function(addr){
+        var entry = _freqLocs.find(function(x){ return x.label === label; });
+        if (entry && addr) { entry.address = addr; _saveFreqLocs(); _renderMyLocations(); }
+      }).catch(function(){});
+    }
+  }, function(err){
+    alert('Could not get current location: ' + (err && err.message || 'unknown error'));
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+}
+
+/* Build 223 Commit 2: My Locations UI — prompt for a custom label */
+function _addCustomLoc() {
+  _safeGetCurrentPosition(function(pos){
+    var acc = pos.coords.accuracy || 999;
+    if (acc > 50) {
+      if (!confirm('GPS signal is weak (' + Math.round(acc) + 'm accuracy). Move outdoors for better accuracy. Save anyway?')) return;
+    }
+    var synthetic = { lat: pos.coords.latitude, lng: pos.coords.longitude, count: 0, label: '' };
+    _promptNameLocation(synthetic, 'GPS (' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + ')');
+  }, function(err){
+    alert('Could not get current location: ' + (err && err.message || 'unknown error'));
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+}
+
+/* Build 223 Commit 2: My Locations UI — render the labeled-entries list */
+function _renderMyLocations() {
+  var el = document.getElementById('myLocationsList');
+  if (!el) return;
+  var labeled = _freqLocs.filter(function(x){ return x.label; });
+  if (!labeled.length) {
+    el.innerHTML = '<div class="sr" style="color:var(--ink3);font-style:italic;justify-content:center;">No saved locations yet — tap a button below to add one</div>';
+    return;
+  }
+  el.innerHTML = labeled.map(function(loc){
+    var labelEsc = (typeof _esc === 'function') ? _esc(loc.label) : loc.label;
+    var addrEsc = (typeof _esc === 'function') ? _esc(loc.address || 'GPS only') : (loc.address || 'GPS only');
+    var visits = (loc.count >= 3) ? (' · visited ' + loc.count + '×') : '';
+    var labelAttr = String(loc.label || '').replace(/"/g, '&quot;');
+    return '<div class="sr">'
+      + '<div><h4>' + labelEsc + '</h4><p>' + addrEsc + visits + '</p></div>'
+      + '<button class="btn-rd" onclick="_deleteMyLoc(&quot;' + labelAttr + '&quot;)">Delete</button>'
+      + '</div>';
+  }).join('');
+}
+
+/* Build 223 Commit 2: My Locations UI — delete a labeled entry */
+function _deleteMyLoc(label) {
+  var entry = _freqLocs.find(function(x){ return x.label === label; });
+  if (!entry) return;
+  var doDelete = function(){
+    _freqLocs = _freqLocs.filter(function(x){ return x.label !== label; });
+    _saveFreqLocs();
+    try {
+      if (window._sb && window.currentUser && currentUser.id) {
+        _sb.from('profiles').update({ named_locations: _freqLocs.filter(function(x){ return x.label; }) }).eq('id', currentUser.id).then(function(){}, function(e){ console.warn('[MyLoc] sync failed', e); });
+      }
+    } catch(e) {}
+    _renderMyLocations();
+    if (typeof renderFreqLocChips === 'function') renderFreqLocChips();
+    try { showToast('🗑', 'Deleted "' + label + '"', 2000); } catch(e) {}
+  };
+  if (typeof _showConfirm === 'function') {
+    _showConfirm('Delete "' + label + '"?', 'This cannot be undone.', 'Delete', 'var(--coral)', doDelete);
+  } else {
+    if (confirm('Delete "' + label + '"? This cannot be undone.')) doDelete();
+  }
+}
+
 function _promptNameLocation(loc,address){
   var short=address?address.split(',')[0]:'this location';
   window._pendingNameLocLat=loc.lat;
@@ -5058,7 +5172,7 @@ function _promptNameLocation(loc,address){
   overlay.style.cssText='display:flex;align-items:flex-end;justify-content:center';
   var current=loc.label||'';
   overlay.innerHTML='<div class="modal"><div class="modal-handle"></div><div class="modal-title">Name this location?</div>'
-    +'<p style="font-size:13px;color:var(--ink2);margin-bottom:16px">You\'ve visited <b>'+_esc(short)+'</b> '+loc.count+' times. Give it a name for quick access.</p>'
+    +(loc.count >= 3 ? '<p style="font-size:13px;color:var(--ink2);margin-bottom:16px">You\'ve visited <b>'+_esc(short)+'</b> '+loc.count+' times. Give it a name for quick access.</p>' : '')
     +'<div class="iw" style="padding:0;margin-bottom:12px"><input class="inp" id="freqLocName" placeholder="e.g. Home, Office, Client Site" value="'+current.replace(/"/g,'&quot;')+'" style="border-radius:var(--r)" onkeydown="if(event.key===\'Enter\')_saveNamedLocation()"></div>'
     +'<div class="modal-row"><button class="modal-cancel" onclick="_skipNamedLocation()">Skip</button>'
     +'<button class="cta" style="flex:1" onclick="_saveNamedLocation()">Save</button></div></div>';
@@ -5107,34 +5221,18 @@ function _tryLockStartAddress(lat,lng,accuracy){
   var freqLabel=_getFreqLocLabel(best.lat,best.lng);
   if(freqLabel){_startAddr=freqLabel;return;}
   _startAddr='Locating...';
-  // Build 176: Geocoding with type priority + coord validation
   if(!best.lat||!best.lng||best.lat===0||best.lng===0){
     console.warn('[GEOCODE] Bad start coords:',best.lat,best.lng);
     _startAddr='GPS ('+(best.lat||0).toFixed(4)+', '+(best.lng||0).toFixed(4)+')';
     return;
   }
-  fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+best.lat+','+best.lng+'&key='+_MAPS_KEY)
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(data.status==='OK'&&data.results&&data.results.length>0){
-        var types=['street_address','premise','route','intersection','neighborhood','sublocality','locality'];
-        var pick=null;
-        for(var ti=0;ti<types.length&&!pick;ti++){
-          for(var ri=0;ri<data.results.length;ri++){
-            if(data.results[ri].types.indexOf(types[ti])>-1){pick=data.results[ri];break;}
-          }
-        }
-        if(!pick)pick=data.results[0];
-        console.log('[GEOCODE start] Selected',pick.types.join(','),'—',pick.formatted_address);
-        _startAddr=pick.formatted_address;
-      } else {
-        console.warn('[GEOCODE start] Status:',data.status);
-        _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
-      }
-    })
+  // Build 223 Commit 3: delegate to hardened _geocodeOne (single source of truth)
+  var _startFallback = 'GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
+  _geocodeOne(best.lat, best.lng, 'start', _startFallback)
+    .then(function(addr){ _startAddr = addr; })
     .catch(function(e){
-      console.warn('[GEOCODE start] Failed:',e.message);
-      _startAddr='GPS ('+best.lat.toFixed(4)+', '+best.lng.toFixed(4)+')';
+      console.warn('[GEOCODE start] Failed:', e && e.message);
+      _startAddr = _startFallback;
     });
 }
 
@@ -6373,8 +6471,19 @@ function _computeHaversineFallbackMi(snap, snapExt){
 // Module-level geocode helper (extracted from old inline _geocodeOne).
 function _geocodeOne(lat, lng, label, fallback){
   if(!lat || !lng) return Promise.resolve(fallback);
-  return fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&key='+_MAPS_KEY)
+  // Build 223 Commit 3: server-side hardening — prefer address-level results
+  // with rooftop-or-interpolated precision; retry without filters on
+  // ZERO_RESULTS so rural/remote coords still resolve.
+  var baseUrl = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&key='+_MAPS_KEY;
+  var filteredUrl = baseUrl + '&result_type=street_address|premise|subpremise&location_type=ROOFTOP|RANGE_INTERPOLATED';
+  return fetch(filteredUrl)
     .then(function(r){return r.json();})
+    .then(function(data){
+      if(data && data.status === 'ZERO_RESULTS'){
+        return fetch(baseUrl).then(function(r2){return r2.json();});
+      }
+      return data;
+    })
     .then(function(data){
       if(data.status==='OK' && data.results && data.results.length>0){
         var types=['street_address','premise','route','intersection','neighborhood','sublocality','locality'];
@@ -8978,7 +9087,7 @@ function _setDefaultVehicle(id){
 }
 
 // Init on load
-try{_renderVehiclesList();_populateVehicleSel();_initQuickVehicleBtn();}catch(e){}
+try{_renderVehiclesList();_populateVehicleSel();_initQuickVehicleBtn();_renderMyLocations();}catch(e){}
 
 /* ===== CUSTOM CONFIRM DIALOG (replaces native confirm()) ===== */
 function _showConfirm(title,message,confirmLabel,confirmColor,onConfirm){
