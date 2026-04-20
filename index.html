@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 221 -->
+<!-- Build 222 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 221</title>
+<title>MyMilesAI — Build 222</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -947,10 +947,14 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 221</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 222</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
+      <div class="sr" onclick="exportTsmDiag()">
+        <div><h4>Export TSM Diagnostics</h4><p>Dev: event log for drive diagnosis</p></div>
+        <span class="sr-link">Export →</span>
+      </div>
       <div class="sr" onclick="confirmDeleteAccount()"><div><h4 style="color:var(--coral)">Delete My Account</h4><p>Permanently delete all data</p></div><span class="sr-link" style="color:var(--coral)">Delete →</span></div>
     </div>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
@@ -6148,9 +6152,31 @@ function updateAutoBtn(){
     console.warn('[TSM] already initialized — skipping re-init');
     return;
   }
+
+  /* ─── TSM DIAGNOSTIC BUFFER (Build 222-diag) ─────────────────────
+     Receives entries from native App.js ring buffer + local TSM events.
+     Max 2000 entries, FIFO eviction. Exported via Settings → About. */
+  (function(){
+    var DIAG_MAX = 2000;
+    var buf = [];
+    window.__tsmDiag = {
+      push: function(entry){
+        try {
+          if(!entry) return;
+          buf.push(entry);
+          if(buf.length > DIAG_MAX) buf.shift();
+        } catch(e){}
+      },
+      dump: function(){ return buf.slice(); },
+      clear: function(){ buf.length = 0; },
+      size: function(){ return buf.length; }
+    };
+  })();
+
   const sm = new TripStateMachine({
     emit: function (eventName, payload) {
       console.log('[TSM:' + eventName + ']', payload);
+      try { if (window.__tsmDiag) window.__tsmDiag.push({ t: Date.now(), k: 'tsm_'+eventName, p: payload }); } catch(e) {}
       if (eventName !== 'trip_completed') return;
       // Build Build-213-contract-compliant {snap, snapExt} from TSM payload.
       var translated;
@@ -9053,6 +9079,36 @@ function exportMyData(){
     showToast(_i('ccheck'),'Data exported successfully',3000);
   } catch(e) {
     showToast(_i('warn'),'Export failed: '+e.message,3000);
+  }
+}
+
+/* Build 222-diag: Export TSM diagnostic buffer as JSON */
+function exportTsmDiag() {
+  try {
+    if (!window.__tsmDiag || typeof window.__tsmDiag.dump !== 'function') {
+      alert('TSM diagnostics not initialized. Force-close and reopen the app.');
+      return;
+    }
+    var entries = window.__tsmDiag.dump();
+    var payload = {
+      exported_at: new Date().toISOString(),
+      build: 'build-222-tsm-wire',
+      entry_count: entries.length,
+      entries: entries
+    };
+    var json = JSON.stringify(payload, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'tsm-diag-' + Date.now() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  } catch(e) {
+    console.error('[TSM-DIAG] export failed', e);
+    alert('Export failed: ' + e.message);
   }
 }
 async function confirmDeleteAccount() {
