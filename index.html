@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 220 -->
+<!-- Build 221 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 220</title>
+<title>MyMilesAI — Build 221</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -304,6 +304,73 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
 .trips{display:flex;gap:14px;padding:0 16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;}.trips::-webkit-scrollbar{display:none;}
 .trip{min-width:310px;max-width:100%;flex-shrink:0;scroll-snap-align:start;background:var(--white);border:1px solid var(--ink6);border-radius:var(--r2);overflow:hidden;transition:all .35s;cursor:pointer;box-shadow:var(--s2);}
 .trip:hover{border-color:var(--ink5);box-shadow:var(--s3);transform:translateY(-4px);}
+
+/* BUILD 221: Recent Trips hero variant — single card fills viewport, no horizontal scroll */
+.trips:has(.trip.hero) { display:block; padding:0; overflow-x:visible; scroll-snap-type:none; }
+.trips .trip.hero {
+  margin:0 16px;
+  width:auto;
+  min-width:0;
+  flex-shrink:1;
+  position:relative;
+  box-shadow: 0 4px 14px rgba(108,60,224,0.08), 0 1px 3px rgba(0,0,0,0.04);
+  border-top:2px solid transparent;
+  background-image: linear-gradient(var(--bg1,#fff), var(--bg1,#fff)), linear-gradient(90deg, #6C3CE0, #D6006E);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Relative date badge — top-right corner of hero card */
+.trip-rel-date {
+  position:absolute;
+  top:10px;
+  right:12px;
+  font-size:10.5px;
+  font-weight:600;
+  letter-spacing:0.02em;
+  padding:3px 9px;
+  border-radius:99px;
+  background:var(--bg2, rgba(108,60,224,0.06));
+  color:var(--vi, #6C3CE0);
+  z-index:2;
+  pointer-events:none;
+}
+
+/* Today's stat strip */
+.today-strip {
+  margin:10px 16px 0;
+  padding:11px 14px;
+  background:var(--bg2, rgba(108,60,224,0.04));
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink2, #3a3a3a);
+}
+.today-strip-left {
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.today-strip-label {
+  color:var(--vi, #6C3CE0);
+}
+.today-strip-sep {
+  color:var(--ink3, #888);
+}
+.today-strip-right {
+  color:var(--vi, #6C3CE0);
+  font-weight:700;
+}
+.today-strip-empty {
+  justify-content:center;
+  color:var(--ink3, #888);
+  font-weight:500;
+  font-size:12px;
+}
+
 .trip-list{padding:0 16px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box;}
 .trip-list .swipe-wrap{width:100%;box-sizing:border-box;}
 .trip-list .swipe-card{width:100%;box-sizing:border-box;}
@@ -880,7 +947,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 220</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 221</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -2773,7 +2840,14 @@ function _encodePolyline(pos){
 function _tripStaticMap(t,wide){
   return '';
 }
-function tripCard(t,wide){
+function tripCard(t,wide,opts){
+  // BUILD 221: backwards-compatible opts parameter. Existing call sites (no opts) → flags default false → render path unchanged.
+  opts = opts || {};
+  var _isHero = !!opts.variant && opts.variant === 'hero';
+  var _showRelDate = !!opts.showRelativeDate;
+  var _heroCls = _isHero ? ' hero' : '';
+  var _relDate = _showRelDate ? formatRelativeDate(t) : '';
+  var _relBadge = _relDate ? '<div class="trip-rel-date">' + _relDate + '</div>' : '';
   const d=tripDist(t.mi),ded=t.ded?`<span class="trip-ded">+${LOC.currency}${(parseFloat(d)*catRate(t.type)).toFixed(2)}</span>`:'';
   const clr={biz:'vi',pers:'mag',uncl:'amber'}[t.type]||'amber';
   const badge={biz:'Business',pers:'Personal',uncl:'Classify'}[t.type]||'Classify';
@@ -2812,7 +2886,7 @@ function tripCard(t,wide){
   const bigVal=t.ded?LOC.currency+dedAmt.toFixed(2):d;
   const bigUnit=t.ded?'saved':LOC.label;
   const subDist=t.ded?`<div class="trip-mi-sub">${d} ${LOC.label}</div>`:'';
-  var card = `<div class="trip" data-id="${t.id}">${_mapDiv}<div class="trip-body"><div class="trip-route" style="display:flex;flex-direction:row;align-items:center;width:100%;box-sizing:border-box;gap:10px;"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs" style="flex:1 1 0%;min-width:0;overflow:hidden;"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi ${t.type}-bg" style="flex:0 0 auto;text-align:center;"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${vehTag}${purposeTag}${expTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button>${t.type==='uncl'?`<button class="ta-btn" onclick="askAIAboutTrip(${t.id})" style="flex-basis:100%;font-size:12px;padding:8px 12px;background:linear-gradient(135deg,#6C3CE0,#a855f7);color:#fff;border:none;border-radius:var(--rpill);font-weight:700">🤖 AI Classify</button>`:''}</div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
+  var card = `<div class="trip${_heroCls}" data-id="${t.id}">${_relBadge}${_mapDiv}<div class="trip-body"><div class="trip-route" style="display:flex;flex-direction:row;align-items:center;width:100%;box-sizing:border-box;gap:10px;"><div class="trip-dots"><div class="td s"></div><div class="tl-line ${t.type}"></div><div class="td ${dotCls}"></div></div><div class="trip-addrs" style="flex:1 1 0%;min-width:0;overflow:hidden;"><div><div class="ta-lbl">From</div><div class="ta-name">${safeFrom}</div></div><div><div class="ta-lbl">To</div><div class="ta-name">${safeTo}</div></div></div><div class="trip-mi ${t.type}-bg" style="flex:0 0 auto;text-align:center;"><div class="trip-mi-v ${t.type}">${bigVal}</div><div class="trip-mi-u">${bigUnit}</div>${subDist}</div></div></div><div class="trip-foot"><div class="trip-foot-l"><span>${safeDay}</span>${vehTag}${purposeTag}${expTag}${ded}</div></div>${t.notes?`<div class="trip-notes">📝 ${_esc(t.notes)}</div>`:''}<div class="trip-actions"><button class="ta-btn" onclick="returnTrip(${t.id})" title="Log return trip">${_i("undo",14)} Return</button><button class="ta-btn" onclick="_shareTrip(${t.id})" title="Share trip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button><button class="ta-btn edit" onclick="openEdit(${t.id})">${_i("edit",14)} Edit</button><button class="ta-btn del" onclick="openDel(${t.id})">${_i("trash",14)}</button>${t.type==='uncl'?`<button class="ta-btn" onclick="askAIAboutTrip(${t.id})" style="flex-basis:100%;font-size:12px;padding:8px 12px;background:linear-gradient(135deg,#6C3CE0,#a855f7);color:#fff;border:none;border-radius:var(--rpill);font-weight:700">🤖 AI Classify</button>`:''}</div><div class="trip-cls"><button class="cls${t.type==='biz'?' ob':''}" onclick="clsTrip(${t.id},'biz')"><span class="cls-d"></span>Business</button><button class="cls${t.type==='pers'?' op':''}" onclick="clsTrip(${t.id},'pers')"><span class="cls-d"></span>Personal</button></div></div>`;
   /* Wrap EVERY card in swipe-wrap so any trip can be reclassified by swiping */
   return `<div class="swipe-wrap" style="width:100%;display:block;box-sizing:border-box;"><div class="swipe-overlay business">💼 BUSINESS ✓</div><div class="swipe-overlay personal">PERSONAL ✓ 👤</div><div class="swipe-card" style="width:100%;display:block;box-sizing:border-box;" data-swipe-id="${t.id}" data-swipe-type="${t.type}">${card}</div></div>`;
 }
@@ -2859,14 +2933,116 @@ setInterval(function(){
   if(document.getElementById('lastSyncedLabel')) _updateLastSyncedLabel();
 }, 60000);
 
+// BUILD 221: relative date formatter for hero card date badge.
+// Input: trip object with .ts (timestamp ms) or .date (YYYY-MM-DD string).
+// Output: human-readable relative date like "Just now", "23m ago", "2h ago", "Yesterday", "Apr 14".
+function formatRelativeDate(t) {
+  try {
+    var ts;
+    if (t && t.ts) {
+      ts = Number(t.ts);
+    } else if (t && t.date) {
+      ts = new Date(t.date + 'T12:00:00').getTime();
+    } else {
+      return '';
+    }
+    if (!ts || isNaN(ts)) return '';
+
+    var now = Date.now();
+    var diffMs = now - ts;
+    var diffMin = Math.floor(diffMs / 60000);
+    var diffHr = Math.floor(diffMs / 3600000);
+    var diffDay = Math.floor(diffMs / 86400000);
+
+    if (diffMs < 0) return 'Just now'; // future timestamps treated as just-now
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return diffMin + 'm ago';
+    if (diffHr < 24) return diffHr + 'h ago';
+    if (diffDay === 1) return 'Yesterday';
+    if (diffDay < 7) return diffDay + ' days ago';
+
+    // Older than a week — show MMM DD
+    var d = new Date(ts);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate();
+  } catch (e) {
+    return '';
+  }
+}
+
 function renderTrips(){
   var PAGE=40;
   if(TRIPS.length===0){
     document.getElementById('recentTrips').innerHTML='<div style="text-align:center;padding:40px 20px">'+_i('car',48,'var(--vi)')+'<div style="margin-top:16px;font-size:17px;font-weight:700;color:var(--ink1)">Start tracking your miles</div><div style="font-size:13px;margin-top:8px;color:var(--ink3);line-height:1.6">Drive anywhere for work and MyMilesAI will auto-detect and record your trip.</div><div style="margin-top:12px;font-size:13px;background:var(--vi-s);color:var(--vi);font-weight:600;padding:8px 16px;border-radius:var(--rpill);display:inline-block">'+LOC.currency+LOC.rates.biz+'/'+LOC.unit+' tax rate — up to '+LOC.currency+'8,400/yr saved</div></div>';
   } else {
-    var _today=_fmt(new Date());
-    var _todayTrips=TRIPS.filter(function(t){return t.date===_today||t.day==='Today';});
-    document.getElementById('recentTrips').innerHTML=(_todayTrips.length>0?_todayTrips:TRIPS.slice(0,1)).map(t=>tripCard(t,false)).join('');
+    // BUILD 221: Recent Trips redesign — single hero card + today's stat strip.
+    // Fixes: (1) horizontal overflow at 50+ trips, (2) trips "disappearing" at midnight
+    // when t.date no longer matches _today. Now always shows newest trip with
+    // relative date badge, and a separate stat strip summarizes today's driving.
+    var _today = _fmt(new Date());
+    // BUILD 221 fix: TRIPS may contain t.date in two formats:
+    //   - "Apr 19, 2026" (from _fmt() — set when trips are saved manually in this session)
+    //   - "2026-04-19"   (ISO — from Supabase trip_date column on sync/reopen)
+    // The old filter only matched the first format, so Supabase-synced trips appeared
+    // as "not today" even when they were. Fix: match both formats + fall back to
+    // timestamp comparison against local-day boundaries.
+    var _todayDateStr = _fmt(new Date());                          // "Apr 19, 2026"
+    var _todayISO = new Date().toISOString().slice(0, 10);         // "2026-04-19"
+    var _nowRef = new Date();
+    var _todayTrips = TRIPS.filter(function(t){
+      if (t.day === 'Today') return true;                          // in-session label
+      if (t.date === _todayDateStr) return true;                   // manual-save format
+      if (t.date === _todayISO) return true;                       // Supabase sync format
+      if (t.ts) {                                                  // ts fallback
+        var d = new Date(Number(t.ts));
+        return d.getFullYear() === _nowRef.getFullYear()
+            && d.getMonth() === _nowRef.getMonth()
+            && d.getDate() === _nowRef.getDate();
+      }
+      return false;
+    });
+
+    var _todayCount = _todayTrips.length;
+    var _todayMi = _todayTrips.reduce(function(s, t){ return s + (Number(t.mi) || 0); }, 0);
+    var _todayDed = _todayTrips.reduce(function(s, t){
+      var rate = (t.type && CAT_DEDUCTIBLE[t.type]) ? (LOC.rates[t.type] || LOC.rates.biz) : 0;
+      return s + ((Number(t.mi) || 0) * rate);
+    }, 0);
+
+    // Hero card: always the single newest trip, any date, with relative date badge.
+    // Wrapped in try/catch so one bad trip can't blank the whole section.
+    var _heroHtml = '';
+    try {
+      if (TRIPS.length > 0) {
+        _heroHtml = tripCard(TRIPS[0], false, { variant: 'hero', showRelativeDate: true });
+      }
+    } catch (e) {
+      console.warn('[B221:hero] tripCard failed for TRIPS[0]:', e && e.message);
+      _heroHtml = '<div class="trip" style="padding:20px;text-align:center;color:var(--ink3);font-size:13px;">Could not load recent trip. Check Trips tab.</div>';
+    }
+
+    // Today's stat strip: shows count, miles, dollar amount. Empty state if 0 today.
+    var _statStripHtml = '';
+    if (_todayCount > 0) {
+      _statStripHtml =
+        '<div class="today-strip">' +
+          '<div class="today-strip-left">' +
+            '<span class="today-strip-label">Today</span>' +
+            '<span class="today-strip-sep">·</span>' +
+            '<span>' + _todayCount + ' trip' + (_todayCount !== 1 ? 's' : '') + '</span>' +
+            '<span class="today-strip-sep">·</span>' +
+            '<span>' + _todayMi.toFixed(1) + ' ' + LOC.label + '</span>' +
+          '</div>' +
+          '<div class="today-strip-right">' + LOC.currency + _todayDed.toFixed(2) + ' saved</div>' +
+        '</div>';
+    } else {
+      _statStripHtml =
+        '<div class="today-strip today-strip-empty">' +
+          'No trips today yet — start driving to log deductible miles' +
+        '</div>';
+    }
+
+    document.getElementById('recentTrips').innerHTML = _heroHtml + _statStripHtml;
   }
   var uncl=TRIPS.filter(function(t){return t.type==='uncl';});
   var swipeSec=document.getElementById('swipeSection');
