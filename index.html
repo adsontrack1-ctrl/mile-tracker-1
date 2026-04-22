@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 231 -->
+<!-- Build 232 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 231</title>
+<title>MyMilesAI — Build 232</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -952,7 +952,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 231</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 232</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4707,7 +4707,10 @@ function _buildTripRow(t, userId){
     // Build 218: diagnostic telemetry for post-drive analysis of start-coord
     // capture. Written at onPos first-fix branch (cache confirmed/rejected/
     // absent). jsonb column in Supabase trips table.
-    diag_start: window._diagStart || null
+    diag_start: window._diagStart || null,
+    // Build 232: rich end-of-trip diagnostic snapshot (jsonb column).
+    // Populated via _buildSnapFromTsmTrip → _buildLocalTripObj → here.
+    diag_end: t.diag_end || null
   };
   console.log('[_buildTripRow] trip_uid in payload:',row.trip_uid);
   return row;
@@ -6345,6 +6348,39 @@ function _buildSnapFromTsmTrip(p) {
   }
   var uid  = (window._currentUser && window._currentUser.id) || null;
   var dMi  = (typeof p.distance_mi === 'number' && isFinite(p.distance_mi)) ? p.distance_mi : 0;
+
+  // Build 232: capture diag_end payload for Supabase diag_end column.
+  // Rich end-of-trip snapshot for post-drive diagnosis of missed drives,
+  // fragmentation, and end-coord drift.
+  var diag_end = {
+    build: '232',
+    ts: Date.now(),
+    tsm_transition_log: Array.isArray(p.transition_log) ? p.transition_log : [],
+    tsm_params: p.tsm_params || null,
+    final_30_positions: Array.isArray(p.positions) ? p.positions.slice(-30) : [],
+    sdk_event_buffer: null,            // populated below via native fetch
+    app_state_at_finalize: (window.__lastAppState || null),
+    trip_finalize_source: 'tsm_complete'
+  };
+  // Request fresh SDK buffer snapshot from native. Response arrives
+  // asynchronously via injectJavaScript → window.__lastSdkBufferSnapshot.
+  // On the FIRST trip after install the buffer will be empty; on subsequent
+  // trips it contains whatever native pushed in response to prior requests.
+  // Acceptable for diagnostic — stale snapshot better than none.
+  try {
+    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'GET_SDK_BUFFER',
+        request_id: p.trip_uid
+      }));
+      if (window.__lastSdkBufferSnapshot) {
+        diag_end.sdk_event_buffer = window.__lastSdkBufferSnapshot;
+      }
+    }
+  } catch(e) {
+    diag_end.sdk_event_buffer_error = String(e && e.message || e);
+  }
+
   var snap = Object.freeze({
     tripUid:      p.trip_uid,
     userId:       uid,
@@ -6356,7 +6392,8 @@ function _buildSnapFromTsmTrip(p) {
     pathMi:       dMi,
     totalPauseMs: 0,
     startAddr:    null,
-    liveDist:     dMi
+    liveDist:     dMi,
+    diag_end:     diag_end   // Build 232
   });
   var snapExt = Object.freeze({
     endLat: p.end_lat,
@@ -6537,13 +6574,35 @@ function _recordSaveOutcome(snap, code){
 
 function _buildLocalTripObj(snap, snapExt, miles, source, from, to){
   // Reuses _snapPos downsample algorithm (every ~80th point + last).
+  // Build 232: preserve accuracy/ts/speed_mph on downsampled positions for
+  // diagnostic use (diag_end final_30_positions). ALSO fix duplicate-position
+  // bug at final push: previous !== reference-identity check always fired
+  // because _snapPos.push(...) creates NEW objects that can never === _ps[i].
+  // Replaced with coord-equality guard so the final position is pushed once
+  // at most.
   var _snapPos = [];
   var _ps = snap.positions;
   if(_ps.length >= 2){
     var _st = Math.max(1, Math.floor(_ps.length / 80));
-    for(var _pi=0; _pi<_ps.length; _pi+=_st) _snapPos.push({ lat: _ps[_pi].lat, lng: _ps[_pi].lng });
+    for(var _pi=0; _pi<_ps.length; _pi+=_st){
+      var _p = _ps[_pi];
+      _snapPos.push({
+        lat: _p.lat, lng: _p.lng,
+        accuracy: _p.accuracy != null ? _p.accuracy : null,
+        speed_mph: _p.speed_mph != null ? _p.speed_mph : null,
+        ts: _p.ts != null ? _p.ts : null
+      });
+    }
     var _last = _ps[_ps.length-1];
-    if(_snapPos[_snapPos.length-1] !== _last) _snapPos.push({ lat: _last.lat, lng: _last.lng });
+    var _lastSnap = _snapPos[_snapPos.length-1];
+    if (!_lastSnap || _lastSnap.lat !== _last.lat || _lastSnap.lng !== _last.lng) {
+      _snapPos.push({
+        lat: _last.lat, lng: _last.lng,
+        accuracy: _last.accuracy != null ? _last.accuracy : null,
+        speed_mph: _last.speed_mph != null ? _last.speed_mph : null,
+        ts: _last.ts != null ? _last.ts : null
+      });
+    }
   }
   var newId = TRIPS.length ? Math.max.apply(null, TRIPS.map(function(x){ return x.id; })) + 1 : 1;
   var type = getFreqRouteType(from, to) || (isWorkHours() ? 'biz' : 'uncl');
@@ -6570,7 +6629,9 @@ function _buildLocalTripObj(snap, snapExt, miles, source, from, to){
     purpose: '', notes: '', path: randomPath(),
     vehicleId: vehId,
     startLat: snap.startLat, startLng: snap.startLng,
-    endLat: snapExt.endLat, endLng: snapExt.endLng
+    endLat: snapExt.endLat, endLng: snapExt.endLng,
+    // Build 232: pass diag_end payload through to the Supabase row
+    diag_end: snap.diag_end || null
   };
 }
 
@@ -6629,6 +6690,38 @@ function _finalizeSavedTrip(snap, snapExt, miles, source, from, to, tripObj){
 }
 
 // Single save entry point. All persistence (queue + upsert) flows through here.
+// Build 232: log trip-rejection outcomes to Supabase app_errors for
+// diagnostic analysis. Fire-and-forget — must never block the rejection
+// path. Uses the existing _sb client with current session (RLS passes
+// via auth.uid() = user_id branch of the insert policy).
+function _logRejection(reason, snap, snapExt, extra){
+  try {
+    if (!window._sb || !window._currentUser || !window._currentUser.id) return;
+    var diag = {
+      reason: reason,
+      trip_uid: snap && snap.tripUid,
+      positions_len: (snap && snap.positions) ? snap.positions.length : 0,
+      start_lat: snap && snap.startLat,
+      start_lng: snap && snap.startLng,
+      end_lat: snapExt && snapExt.endLat,
+      end_lng: snapExt && snapExt.endLng,
+      path_mi: snap && snap.pathMi,
+      tsm_state: (window.__tsm && window.__tsm.state) || null,
+      ts: Date.now()
+    };
+    if (extra) {
+      for (var _k in extra) { if (Object.prototype.hasOwnProperty.call(extra, _k)) diag[_k] = extra[_k]; }
+    }
+    _sb.from('app_errors').insert({
+      user_id: window._currentUser.id,
+      type: 'trip_rejected',
+      message: 'Trip rejected: ' + reason,
+      build: '232',
+      context: diag
+    }).then(function(){}, function(){});
+  } catch(e) { /* swallow — diagnostic only */ }
+}
+
 async function _savePath(snap, snapExt){
   // R5: DB uniqueness (trip_uid) is the only dedup.
   console.log('[DEDUP] trip_uid=' + snap.tripUid + ' — DB uniqueness is the only dedup now');
@@ -6638,8 +6731,9 @@ async function _savePath(snap, snapExt){
     console.warn('[savePath] duplicate trip_uid — skipping', snap.tripUid);
     return;
   }
-  if(!snap.userId) return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_USER);
+  if(!snap.userId){ _logRejection('MISSING_USER', snap, snapExt, {}); return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_USER); }
   if(snap.startLat==null || snap.startLng==null || snapExt.endLat==null || snapExt.endLng==null){
+    _logRejection('MISSING_COORDS_pre_route', snap, snapExt, {});
     return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_COORDS);
   }
 
@@ -6656,12 +6750,14 @@ async function _savePath(snap, snapExt){
   // Gate 1 — Distance sanity. <0.09mi (~145m) crow-flies rejects alone.
   // No legitimate business drive is under 145m. MileIQ accepts these.
   if(_crowMi < 0.09){
+    _logRejection('TOO_SHORT_crow_under_0.09mi', snap, snapExt, { crow_mi: _crowMi, dur_ms: _durMs });
     return _recordSaveOutcome(snap, SAVE_FAIL.TOO_SHORT);
   }
 
   // Gate 2 — Duration sanity. <30s = GPS teleport, not a real drive.
   // Even short valid trips (driveway-to-curb) take longer than 30s.
   if(_durMs < 30000){
+    _logRejection('TOO_SHORT_duration_under_30s', snap, snapExt, { crow_mi: _crowMi, dur_ms: _durMs });
     return _recordSaveOutcome(snap, SAVE_FAIL.TOO_SHORT);
   }
 
@@ -6669,6 +6765,7 @@ async function _savePath(snap, snapExt){
   // likely failed. Refuse with toast so user knows — don't save garbage.
   // Permissive threshold: legit short trips with decent GPS pass easily.
   if(snap.positions.length < 3 && _durMs < 120000){
+    _logRejection('TOO_SHORT_low_breadcrumbs', snap, snapExt, { crow_mi: _crowMi, dur_ms: _durMs });
     return _recordSaveOutcome(snap, SAVE_FAIL.TOO_SHORT);
   }
 
@@ -6695,7 +6792,7 @@ async function _savePath(snap, snapExt){
   // Build local trip obj + DB row. Null row → MISSING_COORDS (tightening).
   var tripObj = _buildLocalTripObj(snap, snapExt, miles, source, from, to);
   var row = _buildTripRow(tripObj, snap.userId);
-  if(!row){ return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_COORDS); }
+  if(!row){ _logRejection('MISSING_COORDS_post_route', snap, snapExt, { crow_mi: _crowMi, dur_ms: _durMs }); return _recordSaveOutcome(snap, SAVE_FAIL.MISSING_COORDS); }
 
   /*
    * NO_MOVEMENT gate tradeoff:
@@ -6719,6 +6816,7 @@ async function _savePath(snap, snapExt){
   var _gate1M = haversine(snap.startLat, snap.startLng, snapExt.endLat, snapExt.endLng) * 1609.34;
   if(_gate1M < 1.0){
     console.warn('[SAVE] NO_MOVEMENT — start/end ' + _gate1M.toFixed(3) + 'm apart; rejecting');
+    _logRejection('NO_MOVEMENT_under_1m', snap, snapExt, { gate1_m: _gate1M, crow_mi: _crowMi, dur_ms: _durMs });
     return _recordSaveOutcome(snap, SAVE_FAIL.NO_MOVEMENT);
   }
   // Gate 2 (Build 216 hardening): reject when crow distance < 10m regardless
@@ -6727,6 +6825,7 @@ async function _savePath(snap, snapExt){
   var _crowM = haversine(snap.startLat, snap.startLng, snapExt.endLat, snapExt.endLng) * 1609.34;
   if(_crowM < 10){
     console.warn('[SAVE] NO_MOVEMENT — ' + _crowM.toFixed(1) + 'm crow distance; miles=' + miles + '; rejecting');
+    _logRejection('NO_MOVEMENT_under_10m', snap, snapExt, { crow_m: _crowM, miles: miles, dur_ms: _durMs });
     return _recordSaveOutcome(snap, SAVE_FAIL.NO_MOVEMENT);
   }
 
