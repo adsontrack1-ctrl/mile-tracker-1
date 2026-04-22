@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><!-- v1773361460 -->
 <head>
-<!-- Build 232 -->
+<!-- Build 233 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0C0C1D">
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyMilesAI">
-<title>MyMilesAI — Build 232</title>
+<title>MyMilesAI — Build 233</title>
 <script nonce="mmai2026">
 function _initGoogleMaps(){
   window._googleMapsReady=true;
@@ -952,7 +952,7 @@ body{font-family:var(--f);background:var(--bg);margin:0;padding:0;margin:0;paddi
     </div>
     <div class="set-hdr">About</div>
     <div class="set">
-      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 232</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
+      <div class="sr"><div><h4>App version</h4><p>MyMilesAI Rel 5.6 · Build 233</p></div><span style="font-size:12px;color:var(--ink4);font-weight:600">5.6</span></div>
       <div class="sr" onclick="openInfoModal('Rate MyMilesAI','<b>⭐⭐⭐⭐⭐</b><br><br>Enjoying MyMilesAI? We\'d love your feedback!<br><br>Your review helps us improve and helps other drivers discover the app.<br><br><i>Rating feature coming soon when the app launches on the App Store and Google Play.</i>')"><div><h4>Rate us</h4><p>Love the app? Leave a review</p></div><span class="sr-link">⭐ Rate →</span></div>
       <div class="sr" onclick="openInfoModal('Help & Support','<b>Frequently Asked Questions</b><br><br><b>How does auto-tracking work?</b><br>MyMilesAI detects driving via GPS speed. When you exceed the threshold (default 8 mph sustained), recording starts. Smart Pause keeps your trip alive through red lights and traffic stops — trips only end after 5 continuous minutes of no movement.<br><br><b>What about short trips?</b><br>The 8 mph sustained threshold reliably detects driving while filtering out walking and GPS noise. If a trip is missed, add it manually with the date picker.<br><br><b>How accurate is the distance?</b><br>GPS-based tracking is typically accurate within 2-5%. For manual trips, distances are estimated from addresses.<br><br><b>What tax rate is used?</b><br>US: IRS standard mileage rate ($0.725/mile, medical $0.21/mile for 2026)<br>Canada: CRA rate ($0.73/km for 2026)<br><br><b>Can I edit a trip?</b><br>Yes! Tap any trip card and use the Edit button to change addresses, distance, or category.<br><br><b>Need more help?</b><br>Email us at support@mymilesai.com')"><div><h4>Help & support</h4><p>FAQs and contact</p></div><span class="sr-link">Help →</span></div>
       <div class="sr" onclick="exportMyData()"><div><h4>Export My Data</h4><p>Download all your trips (GDPR)</p></div><span class="sr-link">Export →</span></div>
@@ -4467,7 +4467,9 @@ function exportSummaryPDF(period){
 let tracking=false,watchId=null,trackStart=0,timerInt=null,positions=[],liveDist=0;
 let autoDetect=true,autoWatchId=null,autoStopTimer=null,lastMoving=0;
 let _paused=false,_pauseStart=0,_pauseTimeout=null,_totalPauseMs=0;
-var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||3;return Math.max(mins*60*1000,180000);}catch(e){return 180000;}})();
+// Build 233: align with MileIQ 15-min stop-detection heuristic.
+// Was: default 3min, floor 180000 ms. Now: default 15min, floor 900000 ms.
+var SMART_STOP_MS=(function(){try{var s=JSON.parse(localStorage.getItem('mymilesai_settings')||'{}');var mins=parseInt(s.smartStopMins)||15;return Math.max(mins*60*1000,900000);}catch(e){return 900000;}})();
 var _stationaryStart=0; // timestamp when device became stationary
 var _startAddr=''; // captured start address via reverse geocode
 var _startAddrLocked=false; // true once we have a quality start address
@@ -5518,7 +5520,9 @@ window.addEventListener('message', function(event){
   // Auto-end: 60 consecutive stationary messages
   if(msg.stationary && tracking){
     window._stationaryCount += 1;
-    if(window._stationaryCount >= 60){
+    // Build 233: raised from 60 (~5min) to 180 (~15min) to match
+    // MileIQ stop-detection heuristic.
+    if(window._stationaryCount >= 180){
       console.log('[Activity] stationary sustained — auto-ending trip');
       window._stationaryCount = 0;
       try{ stopTracking(); }catch(e){ console.warn('[Activity] stopTracking failed:',e&&e.message); }
@@ -5871,6 +5875,35 @@ function onPos(p){
       window._diagStart = {
         buildVer: 218,
         cacheState: 'confirmed',
+        cacheDistM: +distM.toFixed(1),
+        cacheAgeMin: +ageMin.toFixed(1),
+        firstFixAccuracy: +accuracy.toFixed(1),
+        seedLat: window._lastKnownLat,
+        seedLng: window._lastKnownLng,
+        cacheLat: lastKnown.lat,
+        cacheLng: lastKnown.lng,
+        firstFixLat: lat,
+        firstFixLng: lng,
+        ts: Date.now()
+      };
+      _diagStartWritten = true;
+    } else if(lastKnown && ageMin < 15 && distM < 75){
+      // Build 233: Tier 2 cache-trust. When cache is fresh (<15 min)
+      // AND close (<75m), trust it over noisy fresh GPS. Preserves
+      // Build 217 defenses: candidacy gate at line 5845 (ageMin<30)
+      // and line 5847 (distM<200) still apply upstream. 75m chosen
+      // below _getFreqLocLabel's 100m snap radius so both subsystems
+      // agree on 'same place' definition.
+      window._tripStartLat = lastKnown.lat;
+      window._tripStartLng = lastKnown.lng;
+      window._tripStartAccuracy = lastKnown.accuracy || accuracy;
+      window._tripStartBuffer = null;
+      console.log('[TripStart] Cache trusted (75m/15min window): '
+        + distM.toFixed(1) + 'm, age=' + ageMin.toFixed(1) + 'min, acc='
+        + accuracy.toFixed(1) + 'm');
+      window._diagStart = {
+        buildVer: 233,
+        cacheState: 'trusted_close_fresh_cache',
         cacheDistM: +distM.toFixed(1),
         cacheAgeMin: +ageMin.toFixed(1),
         firstFixAccuracy: +accuracy.toFixed(1),
@@ -6353,7 +6386,7 @@ function _buildSnapFromTsmTrip(p) {
   // Rich end-of-trip snapshot for post-drive diagnosis of missed drives,
   // fragmentation, and end-coord drift.
   var diag_end = {
-    build: '232',
+    build: '233',
     ts: Date.now(),
     tsm_transition_log: Array.isArray(p.transition_log) ? p.transition_log : [],
     tsm_params: p.tsm_params || null,
@@ -6548,8 +6581,28 @@ function _resolveAddrs(snap, snapExt){
   var eLat = snapExt.endLat, eLng = snapExt.endLng;
   var sFallback = sLat ? 'GPS ('+sLat.toFixed(4)+', '+sLng.toFixed(4)+')' : 'Unknown';
   var eFallback = eLat ? 'GPS ('+eLat.toFixed(4)+', '+eLng.toFixed(4)+')' : 'Unknown';
-  var startP = snap.startAddr ? Promise.resolve(snap.startAddr) : _geocodeOne(sLat, sLng, 'start', sFallback);
-  var endP   = _geocodeOne(eLat, eLng, 'end', eFallback);
+  // Build 233: if _tryLockStartAddress never locked, try
+  // named_locations snap before falling to geocode. Accuracy guard
+  // uses _tripStartAccuracy from window if available.
+  var _startAcc = (typeof window._tripStartAccuracy === 'number')
+                  ? window._tripStartAccuracy : null;
+  var sLabel = (!snap.startAddr && typeof _getFreqLocLabel === 'function'
+                && sLat && sLng
+                && (_startAcc === null || _startAcc <= 50))
+                ? _getFreqLocLabel(sLat, sLng) : null;
+  var startP = snap.startAddr ? Promise.resolve(snap.startAddr)
+             : sLabel         ? Promise.resolve(sLabel)
+             : _geocodeOne(sLat, sLng, 'start', sFallback);
+  // Build 233: snap to named_locations (100m radius) before geocoding.
+  // Accuracy guard: skip snap when endAccuracy > 50m to avoid zombie
+  // trips mis-labeling with Wi-Fi-only fixes (audit Surprise #3).
+  var _endAcc = (snapExt && typeof snapExt.endAccuracy === 'number')
+                ? snapExt.endAccuracy : null;
+  var eLabel = (typeof _getFreqLocLabel === 'function' && eLat && eLng
+                && (_endAcc === null || _endAcc <= 50))
+                ? _getFreqLocLabel(eLat, eLng) : null;
+  var endP = eLabel ? Promise.resolve(eLabel)
+                    : _geocodeOne(eLat, eLng, 'end', eFallback);
   var timeout = new Promise(function(res){ setTimeout(function(){ res('__timeout__'); }, 5000); });
   return Promise.race([Promise.all([startP, endP]), timeout]).then(function(result){
     if(result === '__timeout__'){
@@ -6650,12 +6703,11 @@ function _finalizeSavedTrip(snap, snapExt, miles, source, from, to, tripObj){
 
   var _uid = snap.tripUid;
 
-  // Classify prompt — R6 uid-bound lookup
-  setTimeout(function(){
-    var trip = TRIPS.find(function(t){ return t.trip_uid === _uid; });
-    if(!trip) return;
-    showClassifyPrompt(trip.id, from, to, finalDist, trip.type);
-  }, 800);
+  // Build 233: classification deferred to Trips list. Trips save as
+  // type='uncl' (from _buildLocalTripObj:6608), AI categorizer at
+  // 6660-6681 auto-upgrades high-confidence. User classifies
+  // remaining uncl trips at leisure from Trips view. No mid-drive
+  // modals. Matches MileIQ silent-mode UX.
 
   // AI categorize fire-and-forget — R6 uid-bound lookup
   (function(){
@@ -6716,7 +6768,7 @@ function _logRejection(reason, snap, snapExt, extra){
       user_id: window._currentUser.id,
       type: 'trip_rejected',
       message: 'Trip rejected: ' + reason,
-      build: '232',
+      build: '233',
       context: diag
     }).then(function(){}, function(){});
   } catch(e) { /* swallow — diagnostic only */ }
@@ -6764,7 +6816,10 @@ async function _savePath(snap, snapExt){
   // Gate 3 — Breadcrumb density sanity. <3 points AND <2min means GPS
   // likely failed. Refuse with toast so user knows — don't save garbage.
   // Permissive threshold: legit short trips with decent GPS pass easily.
-  if(snap.positions.length < 3 && _durMs < 120000){
+  // Build 233: removed 2-min grace. Any save with <3 positions is a
+  // zombie trip (indoor Wi-Fi filtered all GPS fixes). Reject
+  // regardless of duration.
+  if(snap.positions.length < 3){
     _logRejection('TOO_SHORT_low_breadcrumbs', snap, snapExt, { crow_mi: _crowMi, dur_ms: _durMs });
     return _recordSaveOutcome(snap, SAVE_FAIL.TOO_SHORT);
   }
@@ -6946,10 +7001,9 @@ async function stopTracking(){
         ? haversine(snap.startLat, snap.startLng, _lastP.lat, _lastP.lng) * 1.15
         : 0;
       var _tMin = (snap.endTs - snap.startTs) / 60000;
-      if(_approxMi > 0.05 && _tMin >= 5 && typeof _promptSmartSave === 'function'){
-        var _kd = (typeof _matchKnownLocation === 'function') ? _matchKnownLocation(lastGpsLat, lastGpsLng) : null;
-        setTimeout(function(){ _promptSmartSave(_kd); }, 1500);
-      }
+      // Build 233: _promptSmartSave call removed. Modal was broken
+      // (openInfoModal drops callbacks at line 3654, buttons never worked).
+      // Dead code. Classification now deferred to Trips list.
     } catch(e){}
 
     // Step 3: capture end coord into frozen snapExt.
@@ -8601,7 +8655,11 @@ function _doRestoreFromState(state){
     var dispDist=_useKm()?(approxMi*1.60934).toFixed(2):approxMi.toFixed(2);
     var el=document.getElementById('trackDist');if(el)el.textContent=dispDist;
     console.log('[Restore] Active trip restored — approx',approxMi.toFixed(2),'mi (crow-flies×1.15)');
-    try{showToast('🔄','Trip restored: ~'+(_useKm()?(approxMi*1.60934):approxMi).toFixed(1)+' '+LOC.label,3000);}catch(e){}
+    // Build 233: suppress 0.0mi phantom toast when lastLat fallback to
+    // startLat produces zero distance (audit C1).
+    if(approxMi >= 0.1){
+      try{showToast('🔄','Trip restored: ~'+(_useKm()?(approxMi*1.60934):approxMi).toFixed(1)+' '+LOC.label,3000);}catch(e){}
+    }
     return true;
   }catch(e){console.warn('[Restore] rebind fail',e);return false;}
 }
